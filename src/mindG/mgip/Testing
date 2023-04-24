@@ -1,0 +1,60 @@
+Channel matchChannel1 = new MatchChannel();
+Channel channel2 = new AntecedentToRuleChannel();
+Channel channel3Channel = new RuleToConsequentChannel();
+Channel matchChannel2 = new MatchChannel();
+Channel matchChannel3 = new MatchChannel();
+Channel channelAnt = new AntecedentToRuleChannel();
+Channel matchChannel4 = new MatchChannel();
+Channel ruletocons = new RuleToConsequentChannel();
+// System.out.println(matchChannel1.getChannelType(matchChannel1));
+// System.out.println(channel2.getChannelType(channel2));
+// System.out.println(channel3Channel.getChannelType(channel3Channel));
+// System.out.println(matchChannel2.getChannelType(matchChannel2));
+
+ChannelPair match1 = new ChannelPair(matchChannel1);
+// System.out.println(match1.getPair().getKey().getChannelType(match1.getPair().getKey()));
+ChannelPair ant = new ChannelPair(channel2);
+// System.out.println(ant.getPair().getKey().getChannelType(ant.getPair().getKey()));
+
+ChannelPair rule = new ChannelPair(channel3Channel);
+// System.out.println(rule.getPair().getKey().getChannelType(rule.getPair().getKey()));
+
+ChannelPair match2 = new ChannelPair(matchChannel2);
+// System.out.println(match2.getPair().getKey().getChannelType(match2.getPair().getKey()));
+ChannelPair ruleToCons = new ChannelPair(ruletocons);
+ChannelPair match3 = new ChannelPair(matchChannel4);
+ChannelPair ant2 = new ChannelPair(channelAnt);
+ChannelPair match4 = new ChannelPair(matchChannel3);
+ChannelSet channelSet = new ChannelSet();
+
+// Set<ChannelPair> channelSetMatch =
+// channelPairs.getOrDefault(ChannelType.MATCHED, new HashSet<>());
+// Set<ChannelPair> channelSetAnt =
+// channelPairs.getOrDefault(ChannelType.AntRule, new HashSet<>());
+// Set<ChannelPair> channelSetRule =
+// channelPairs.getOrDefault(ChannelType.RuleCons, new HashSet<>());
+channelSet.addChannelPair(match1);
+channelSet.addChannelPair(ant);
+channelSet.addChannelPair(rule);
+channelSet.addChannelPair(match2);
+// channelSetMatch.add(match1);
+// channelSetMatch.add(match2);
+// channelSetAnt.add(ant);
+// channelSetRule.add(rule);
+// channelPairs.put(ChannelType.MATCHED, channelSetMatch);
+// channelPairs.put(ChannelType.RuleCons, channelSetRule);
+// printContents();
+
+// System.out.println("yayyyyyyyyy");
+
+channelSet.addChannelPair(ruleToCons);
+channelSet.addChannelPair(ant2);
+channelSet.addChannelPair(match3);
+channelSet.addChannelPair(match4);
+
+printContents();
+
+
+
+
+
