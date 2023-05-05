@@ -2,7 +2,6 @@ package relations;
 
 import caseFrames.Adjustability;
 import network.Network;
-import nodes.Node;
 import paths.*;
 public class Relation {
 	

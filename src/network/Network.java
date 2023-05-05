@@ -23,10 +23,10 @@ import nodes.Node;
 import nodes.PropositionNode;
 
 public class Network {
-	private HashMap<Integer, Node> nodes;
-	private HashMap<String, Node> molecularNodes;
-	private  HashMap<String, Node> baseNodes;
-	private MyClassCreator classCreator;
+	private static HashMap<Integer, Node> nodes;
+	private static HashMap<String, Node> molecularNodes;
+	private static HashMap<String, Node> baseNodes;
+	private static MyClassCreator classCreator;
 	public static HashMap<String, String> quantifiers = new HashMap<String, String>();
 
 	public Network() {
@@ -37,7 +37,7 @@ public class Network {
 	}
 	
 	// first constructor for molecular nodes
-	public Node createNode(String SemanticType,DownCableSet downCableSet) {
+	public static Node createNode(String SemanticType,DownCableSet downCableSet) {
 		if(downCableSet.size()==0){
 			return null;
 		}
@@ -48,13 +48,13 @@ public class Network {
 			
 			switch (SemanticType.toLowerCase()) {
 			case "propositionnode":
-				node = new PropositionNode(downCableSet,this);
+				node = new PropositionNode(downCableSet);
 				break;
 			case "actnode":
-				node = new ActNode(downCableSet,this);
+				node = new ActNode(downCableSet);
 				break;
 			case "individualnode":
-				node = new IndividualNode(downCableSet,this);
+				node = new IndividualNode(downCableSet);
 				break;
 			default:
 				System.out.println("Invalid node type.");
@@ -80,17 +80,17 @@ public class Network {
 
 	}
 	// second constructor for base nodes
-	public Node createNode(String name, String SemanticType) {
+	public static Node createNode(String name, String SemanticType) {
 		Node node;
 		switch (SemanticType.toLowerCase()) {
 		case "propositionnode":
-			node = new PropositionNode(name, false,this);
+			node = new PropositionNode(name, false);
 			break;
 		case "actnode":
-			node = new ActNode(name, false,this);
+			node = new ActNode(name, false);
 			break;
 		case "individualnode":
-			node = new IndividualNode(name, false,this);
+			node = new IndividualNode(name, false);
 			break;
 		default:
 			System.out.println("Invalid node type.");
@@ -108,17 +108,17 @@ public class Network {
 		return node;
 	}
 	// third constructor for base nodes
-		public Node createVariableNode(String name, String SemanticType) {
+		public static Node createVariableNode(String name, String SemanticType) {
 			Node node;
 			switch (SemanticType.toLowerCase()) {
 			case "propositionnode":
-				node = new PropositionNode(name, true,this);
+				node = new PropositionNode(name, true);
 				break;
 			case "actnode":
-				node = new ActNode(name, true,this);
+				node = new ActNode(name, true);
 				break;
 			case "individualnode":
-				node = new IndividualNode(name, true,this);
+				node = new IndividualNode(name, true);
 				break;
 			default:
 				System.out.println("Invalid node type.");
@@ -132,7 +132,7 @@ public class Network {
 			
 			return node;
 		}
-	public Node getNodeById(int id) {
+	public static Node getNodeById(int id) {
 		return nodes.get(id);
 	}
 
@@ -142,7 +142,7 @@ public class Network {
 		return false;
 
 	}
-	public HashMap<Integer, Node> getNodes() {
+	public static HashMap<Integer, Node> getNodes() {
 		return nodes;
 	}
 
@@ -150,19 +150,19 @@ public class Network {
 		nodes = Nodes;
 	}
 
-	public HashMap<String, Node> getMolecularNodes() {
+	public static HashMap<String, Node> getMolecularNodes() {
 		return molecularNodes;
 	}
 
-	public void setMolecularNodes(HashMap<String, Node> MolecularNodes) {
+	public static void setMolecularNodes(HashMap<String, Node> MolecularNodes) {
 		molecularNodes = MolecularNodes;
 	}
 
-	public HashMap<String, Node> getBaseNodes() {
+	public static HashMap<String, Node> getBaseNodes() {
 		return baseNodes;
 	}
 
-	public void setBaseNodes(HashMap<String, Node> BaseNodes) {
+	public static void setBaseNodes(HashMap<String, Node> BaseNodes) {
 		baseNodes = BaseNodes;
 	}
 
@@ -187,10 +187,10 @@ public class Network {
 
 	public static void main(String[] args) throws ClassCastException {
 		Network Net = new Network();
-//		Node Z = Net.createVariableNode("Z", "propositionnode");
-//		Node Y = Net.createVariableNode("Y", "propositionnode");
-//		Node X = Net.createVariableNode("X", "propositionnode");
-//		Node Base = Net.createNode("base", "propositionnode");
+//		Node Z = createvariableNode("Z", "propositionnode");
+//		Node Y = createvariableNode("Y", "propositionnode");
+//		Node X = createvariableNode("X", "propositionnode");
+//		Node Base = createNode("base", "propositionnode");
 //		quantifiers.put("forall","forall");
 //		
 //		Relation relation = new Relation ("forall", "", Adjustability.EXPAND, 2);
@@ -212,7 +212,7 @@ public class Network {
 //		HashMap<String, DownCable> Cables = new HashMap<>();
 //		Cables.put(d2.getRelation().getName(), d2);
 //		DownCableSet downCableSet = new DownCableSet(Cables);
-//		Node M0 = Net.createNode("propositionnode", downCableSet);
+//		Node M0 = createNode("propositionnode", downCableSet);
 //
 //		//M1 
 //		NodeSet nodeSetM0 = new NodeSet();
@@ -223,7 +223,7 @@ public class Network {
 //			Cables2.put(d3.getRelation().getName(), d3);
 //			Cables2.put(d.getRelation().getName(), d);
 //		DownCableSet downCableSet2 = new DownCableSet(Cables2);		
-//		Node M1 = Net.createNode("propositionnode", downCableSet2);
+//		Node M1 = createNode("propositionnode", downCableSet2);
 //		
 //		NodeSet nodeSetM1 = new NodeSet();
 //		nodeSetM1.add(M1);
@@ -233,7 +233,7 @@ public class Network {
 //			HashMap<String, DownCable> CablesM2 = new HashMap<>();
 //				CablesM2.put(dM2.getRelation().getName(), dM2);
 //			DownCableSet downCableSetM2 = new DownCableSet(CablesM2);		
-//			Node M2 = Net.createNode("propositionnode", downCableSetM2);
+//			Node M2 = createNode("propositionnode", downCableSetM2);
 //	
 //			//M3 
 //			DownCable dM3 = new DownCable(relation2, nodeSetX.union(nodeSetZ.union(nodeSetY)));
@@ -242,7 +242,7 @@ public class Network {
 //					CablesM3.put(dM3.getRelation().getName(), dM3);
 //					
 //				DownCableSet downCableSetM3 = new DownCableSet(CablesM3);		
-//				Node M3 = Net.createNode("propositionnode", downCableSetM3);
+//				Node M3 = createNode("propositionnode", downCableSetM3);
 //		
 //				//M4 
 //				NodeSet nodeSetM3 = new NodeSet();
@@ -263,7 +263,7 @@ public class Network {
 //						CablesM4.put(dM4_2.getRelation().getName()+1, dM4_2);
 //						
 //					DownCableSet downCableSetM4 = new DownCableSet(CablesM4);		
-//					Node M4 = Net.createNode("propositionnode", downCableSetM4);
+//					Node M4 = createNode("propositionnode", downCableSetM4);
 //					
 //		System.out.println("-----------------------------------------------------");
 //		System.out.println("free vars" + M4.getFreeVariables());
@@ -280,10 +280,10 @@ public class Network {
 		
 // ======================================================================================================================
 		
-//		Node X = Net.createVariableNode("X", "propositionnode");
-//		Node Y = Net.createVariableNode("Y", "propositionnode");
-//		Node Base = Net.createNode("base", "propositionnode", false);
-//		Node Bob = Net.createNode("bob", "propositionnode", false);
+//		Node X = createvariableNode("X", "propositionnode");
+//		Node Y = createvariableNode("Y", "propositionnode");
+//		Node Base = createNode("base", "propositionnode", false);
+//		Node Bob = createNode("bob", "propositionnode", false);
 //		
 //		quantifiers.put("forall","forall");
 //		
@@ -301,7 +301,7 @@ public class Network {
 //		HashMap<String, DownCable> Cables = new HashMap<>();
 //		Cables.put(d2.getRelation().getName(), d2);
 //		DownCableSet downCableSet = new DownCableSet(Cables);
-//		Node M0 = Net.createNode("propositionnode", downCableSet);
+//		Node M0 = createNode("propositionnode", downCableSet);
 //
 //		//M1 
 //		NodeSet nodeSetM0 = new NodeSet();
@@ -310,7 +310,7 @@ public class Network {
 //		HashMap<String, DownCable> Cables2 = new HashMap<>();
 //			Cables2.put(d.getRelation().getName(), d);
 //		DownCableSet downCableSet2 = new DownCableSet(Cables2);		
-//		Node M1 = Net.createNode("propositionnode", downCableSet2);
+//		Node M1 = createNode("propositionnode", downCableSet2);
 //		
 //		NodeSet nodeSetM1 = new NodeSet();
 //		nodeSetM1.add(M1);
@@ -321,7 +321,7 @@ public class Network {
 //			HashMap<String, DownCable> CablesM2 = new HashMap<>();
 //				CablesM2.put(dM2.getRelation().getName(), dM2);
 //			DownCableSet downCableSetM2 = new DownCableSet(CablesM2);		
-//			Node M2 = Net.createNode("propositionnode", downCableSetM2);
+//			Node M2 = createNode("propositionnode", downCableSetM2);
 //			
 //			//M3 
 //			NodeSet NodeSetM2 = new NodeSet(); NodeSetM2.add(M2);
@@ -333,7 +333,7 @@ public class Network {
 //					CablesM3.put(dM3_2.getRelation().getName(), dM3_2);
 //					
 //				DownCableSet downCableSetM3 = new DownCableSet(CablesM3);		
-//				Node M3 = Net.createNode("propositionnode", downCableSetM3);
+//				Node M3 = createNode("propositionnode", downCableSetM3);
 //		
 //				//M4 
 //				NodeSet nodeSetM3 = new NodeSet();
@@ -350,7 +350,7 @@ public class Network {
 //						CablesM4.put(dM4_2.getRelation().getName()+1, dM4_2);
 //						
 //					DownCableSet downCableSetM4 = new DownCableSet(CablesM4);		
-//					Node M4 = Net.createNode("propositionnode", downCableSetM4);
+//					Node M4 = createNode("propositionnode", downCableSetM4);
 //					
 //		System.out.println("-----------------------------------------------------");
 //		System.out.println("free vars" + M4.getFreeVariables());
@@ -365,12 +365,12 @@ public class Network {
 //		System.out.println(M4.substitute(substitutionArr));
 //		printNodes();
 // =============================================================================================================
-		Node cs = Net.createNode("cs", "propositionnode");
-		Node fun = Net.createNode("fun", "propositionnode");
-		Node mary = Net.createNode("mary", "propositionnode");
-		Node believe = Net.createNode("believe", "propositionnode");
-		Node bob = Net.createNode("bob", "propositionnode");
-		Node know = Net.createNode("know", "propositionnode");
+		Node cs = createNode("cs", "propositionnode");
+		Node fun = createNode("fun", "propositionnode");
+		Node mary = createNode("mary", "propositionnode");
+		Node believe = createNode("believe", "propositionnode");
+		Node bob = createNode("bob", "propositionnode");
+		Node know = createNode("know", "propositionnode");
 			
 		Relation agent = new Relation ("agent", "", Adjustability.EXPAND, 2);
 		Relation act = new Relation ("act", "", Adjustability.EXPAND, 2);
@@ -383,20 +383,20 @@ public class Network {
 
 		
 		
-		Node M1 = Net.createNode("propositionnode", new DownCableSet(d1,d2));
+		Node M1 = createNode("propositionnode", new DownCableSet(d1,d2));
 				
 		DownCable d3 = new DownCable(obj,new NodeSet(M1));
 		DownCable d4 = new DownCable(act,new NodeSet(believe));
 		DownCable d5 = new DownCable(agent,new NodeSet(mary));
 		
-		Node M2 = Net.createNode("propositionnode", new DownCableSet(d3,d4,d5));
+		Node M2 = createNode("propositionnode", new DownCableSet(d3,d4,d5));
 		
 		
 		DownCable d6 = new DownCable(obj,new NodeSet(M2));
 		DownCable d7 = new DownCable(act,new NodeSet(know));
 		DownCable d8 = new DownCable(agent,new NodeSet(bob));
 		
-		Node M3 = Net.createNode("propositionnode", new DownCableSet(d6,d7,d8));
+		Node M3 = createNode("propositionnode", new DownCableSet(d6,d7,d8));
 		
 		FUnitPath p1 = new FUnitPath(agent);
 		FUnitPath p2 = new FUnitPath(act);

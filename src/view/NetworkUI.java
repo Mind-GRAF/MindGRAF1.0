@@ -19,11 +19,9 @@ import relations.Relation;
 import set.NodeSet;
 
 public class NetworkUI extends JFrame {
-    private Network network;
     private JPanel networkPanel;
     private HashMap<String,String> createdNodes; 
-    public NetworkUI(Network network) {
-        this.network = network;
+    public NetworkUI() {
         createdNodes=new HashMap<String,String>();
         // Set up the UI
         setTitle("Network UI");
@@ -42,7 +40,7 @@ public class NetworkUI extends JFrame {
         int levelHeight = 100; // Vertical spacing between levels of nodes
 
         ArrayList<Integer> MolIds = new ArrayList<Integer>();
-        for (Node node : network.getNodes().values()) {
+        for (Node node : Network.getNodes().values()) {
             if (node.isMolecular()) {
                 MolIds.add(node.getId());
             }
@@ -52,7 +50,7 @@ public class NetworkUI extends JFrame {
         Collections.sort(MolIds);
          		
 
-        		createNodeUI(network.getNodes().get(MolIds.get( network.getMolecularNodes().size()-1)), networkPanel, initialX, initialY,1, levelHeight,0);
+        		createNodeUI(Network.getNodes().get(MolIds.get( Network.getMolecularNodes().size()-1)), networkPanel, initialX, initialY,1, levelHeight,0);
 
         add(networkPanel, BorderLayout.CENTER);
 
@@ -155,12 +153,12 @@ public class NetworkUI extends JFrame {
             public static void main(String[] args) {
                 SwingUtilities.invokeLater(() -> {
                     Network network = new Network();
-//                    Node cs = network.createNode("cs", "propositionnode");
-//                    Node fun = network.createNode("fun", "propositionnode");
-//                    Node mary = network.createNode("mary", "propositionnode");
-//                    Node believe = network.createNode("believe", "propositionnode");
-//                    Node bob = network.createNode("bob", "propositionnode");
-//                    Node know = network.createNode("know", "propositionnode");
+//                    Node cs = Network.createNode("cs", "propositionnode");
+//                    Node fun = Network.createNode("fun", "propositionnode");
+//                    Node mary = Network.createNode("mary", "propositionnode");
+//                    Node believe = Network.createNode("believe", "propositionnode");
+//                    Node bob = Network.createNode("bob", "propositionnode");
+//                    Node know = Network.createNode("know", "propositionnode");
 //
 //                    Relation agent = new Relation("agent", "", Adjustability.EXPAND, 2);
 //                    Relation act = new Relation("act", "", Adjustability.EXPAND, 2);
@@ -170,25 +168,25 @@ public class NetworkUI extends JFrame {
 //                    DownCable d1 = new DownCable(obj, new NodeSet(cs));
 //                    DownCable d2 = new DownCable(prop, new NodeSet(fun));
 //
-//                    Node M1 = network.createNode("propositionnode", new DownCableSet(d1, d2));
+//                    Node M1 = Network.createNode("propositionnode", new DownCableSet(d1, d2));
 //
 //                    DownCable d3 = new DownCable(obj, new NodeSet(M1));
 //                    DownCable d4 = new DownCable(act, new NodeSet(believe));
 //                    DownCable d5 = new DownCable(agent, new NodeSet(mary));
 //
-//                    Node M2 = network.createNode("propositionnode", new DownCableSet(d3, d4, d5));
+//                    Node M2 = Network.createNode("propositionnode", new DownCableSet(d3, d4, d5));
 //
 //                    DownCable d6 = new DownCable(obj, new NodeSet(M2));
 //                    DownCable d7 = new DownCable(act, new NodeSet(know));
 //                    DownCable d8 = new DownCable(agent, new NodeSet(bob));
 //
-//                    Node M3 = network.createNode("propositionnode", new DownCableSet(d6, d7, d8));
+//                    Node M3 = Network.createNode("propositionnode", new DownCableSet(d6, d7, d8));
                 	
-            		Node Z = network.createVariableNode("Z", "propositionnode");
-            		Node Y = network.createVariableNode("Y", "propositionnode");
-            		Node X = network.createVariableNode("X", "propositionnode");
-            		Node Base = network.createNode("base", "propositionnode");
-            		network.quantifiers.put("forall","forall");
+            		Node Z = Network.createVariableNode("Z", "propositionnode");
+            		Node Y = Network.createVariableNode("Y", "propositionnode");
+            		Node X = Network.createVariableNode("X", "propositionnode");
+            		Node Base = Network.createNode("base", "propositionnode");
+            		Network.quantifiers.put("forall","forall");
             		
             		Relation relation = new Relation ("forall", "", Adjustability.EXPAND, 2);
             		Relation relation2 = new Relation("b", "", Adjustability.EXPAND, 2);
@@ -209,7 +207,7 @@ public class NetworkUI extends JFrame {
             		HashMap<String, DownCable> Cables = new HashMap<>();
             		Cables.put(d2.getRelation().getName(), d2);
             		DownCableSet downCableSet = new DownCableSet(Cables);
-            		Node M0 = network.createNode("propositionnode", downCableSet);
+            		Node M0 = Network.createNode("propositionnode", downCableSet);
             
             		//M1 
             		NodeSet nodeSetM0 = new NodeSet();
@@ -220,7 +218,7 @@ public class NetworkUI extends JFrame {
             			Cables2.put(d3.getRelation().getName(), d3);
             			Cables2.put(d.getRelation().getName(), d);
             		DownCableSet downCableSet2 = new DownCableSet(Cables2);		
-            		Node M1 = network.createNode("propositionnode", downCableSet2);
+            		Node M1 = Network.createNode("propositionnode", downCableSet2);
             		
             		NodeSet nodeSetM1 = new NodeSet();
             		nodeSetM1.add(M1);
@@ -230,7 +228,7 @@ public class NetworkUI extends JFrame {
             			HashMap<String, DownCable> CablesM2 = new HashMap<>();
             				CablesM2.put(dM2.getRelation().getName(), dM2);
             			DownCableSet downCableSetM2 = new DownCableSet(CablesM2);		
-            			Node M2 = network.createNode("propositionnode", downCableSetM2);
+            			Node M2 = Network.createNode("propositionnode", downCableSetM2);
             	
             			//M3 
             			DownCable dM3 = new DownCable(relation2, nodeSetX.union(nodeSetZ.union(nodeSetY)));
@@ -239,7 +237,7 @@ public class NetworkUI extends JFrame {
             					CablesM3.put(dM3.getRelation().getName(), dM3);
             					
             				DownCableSet downCableSetM3 = new DownCableSet(CablesM3);		
-            				Node M3 = network.createNode("propositionnode", downCableSetM3);
+            				Node M3 = Network.createNode("propositionnode", downCableSetM3);
             		
             				//M4 
             				NodeSet nodeSetM3 = new NodeSet();
@@ -260,7 +258,7 @@ public class NetworkUI extends JFrame {
             						CablesM4.put(dM4_2.getRelation().getName()+1, dM4_2);
             						
             					DownCableSet downCableSetM4 = new DownCableSet(CablesM4);		
-            					Node M4 = network.createNode("propositionnode", downCableSetM4);
+            					Node M4 = Network.createNode("propositionnode", downCableSetM4);
             					
             		System.out.println("-----------------------------------------------------");
             		System.out.println("free vars" + M4.getFreeVariables());
@@ -275,7 +273,7 @@ public class NetworkUI extends JFrame {
 //            		System.out.println(M4.substitute(substitutionArr));
 //            		network.printNodes();
 
-                    new NetworkUI(network);
+                    new NetworkUI();
                 });
             }
         }

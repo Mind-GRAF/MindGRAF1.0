@@ -24,9 +24,9 @@ public abstract class Node {
 	private DownCableSet downCableSet;
 	private NodeSet freeVariableSet;
 	private static int count = 0;
-	private Network network;
-	public Node(String name, Boolean isVariable,Network network) { // constructor for base and variable nodes
-		this.network=network;
+	
+	public Node(String name, Boolean isVariable) { // constructor for base and variable nodes
+		
 		this.id = count;
 		this.name = name;
 		this.upCableSet = new UpCableSet();
@@ -39,11 +39,11 @@ public abstract class Node {
 		count++;
 	}
 
-	public Node(DownCableSet downCables,Network network) { // constructor for molecular nodes
-		this.network=network;
+	public Node(DownCableSet downCables) { // constructor for molecular nodes
+		
 		
 		this.id = count;
-		this.name = "M" + network.getMolecularNodes().size();
+		this.name = "M" + Network.getMolecularNodes().size();
 
 		syntacticType = Syntactic.MOLECULAR;
 		if (downCables == null || downCables.size() == 0)
@@ -188,9 +188,9 @@ public abstract class Node {
 			}
 			Node n ;
 			if(isVariable())
-				n = network.createVariableNode(this.getName() + "temp", Semantic);
+				n = Network.createVariableNode(this.getName() + "temp", Semantic);
 			else 
-				n = network.createNode(this.getName() + "temp", Semantic);
+				n = Network.createNode(this.getName() + "temp", Semantic);
 			builtNodes.put(n.getName(), n);
 			return n;
 		} else {
@@ -211,7 +211,7 @@ public abstract class Node {
 			if (builtNodes.containsKey(dcKey)) {
 				return builtNodes.get(dcKey);
 			}
-			Node n = network.createNode(Semantic, dc);
+			Node n = Network.createNode(Semantic, dc);
 			builtNodes.put(dcKey, n);
 			return n;
 		}
@@ -254,9 +254,9 @@ public abstract class Node {
 			}
 			Node n ;
 			if(isVariable())
-				n = network.createVariableNode(this.getName() + "temp", Semantic);
+				n = Network.createVariableNode(this.getName() + "temp", Semantic);
 			else 
-				n = network.createNode(this.getName() + "temp", Semantic);
+				n = Network.createNode(this.getName() + "temp", Semantic);
 			
 			builtNodes.put(n.getName(), n);
 			pathTrace.removeLast();
@@ -281,7 +281,7 @@ public abstract class Node {
 				pathTrace.removeLast();
 				return builtNodes.get(dcKey);
 			}
-			Node n = network.createNode(Semantic, dc);
+			Node n = Network.createNode(Semantic, dc);
 			builtNodes.put(dcKey, n);
 			pathTrace.removeLast();
 			return n;
