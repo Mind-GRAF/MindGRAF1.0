@@ -25,6 +25,7 @@ public class Relation {
 			isQuantifier = true;
 		
 		}
+//		Network.getRelations().put(name, this);
 	}
 	public Path getPath() {
 		return path;

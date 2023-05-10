@@ -32,25 +32,29 @@ public class NetworkUI extends JFrame {
         // Create and add UI components
         networkPanel = new JPanel();
         networkPanel.setLayout(null); // Use absolute layout for custom node positioning
-
+        networkPanel.setOpaque(false);
         // Display nodes and cables recursively
-        int initialX = 400; // Initial X position for the root node
+        int initialX = 100; // Initial X position for the root node
         int initialY = 50; // Initial Y position for the root node
 
         int levelHeight = 100; // Vertical spacing between levels of nodes
 
-        ArrayList<Integer> MolIds = new ArrayList<Integer>();
-        for (Node node : Network.getNodes().values()) {
-            if (node.isMolecular()) {
-                MolIds.add(node.getId());
-            }
-        }
-
-        // Sort the MolIds ArrayList in ascending order
-        Collections.sort(MolIds);
+//        ArrayList<Integer> MolIds = new ArrayList<Integer>();
+//        for (Node node : Network.getNodes().values()) {
+//            if (node.isMolecular()) {
+//                MolIds.add(node.getId());
+//            }
+//        }
+//
+//        // Sort the MolIds ArrayList in ascending order
+//        Collections.sort(MolIds);
          		
-
-        		createNodeUI(Network.getNodes().get(MolIds.get( Network.getMolecularNodes().size()-1)), networkPanel, initialX, initialY,1, levelHeight,0);
+        for (Node node : Network.getMolecularNodes().values()) {
+			if(node.getUpCableSet().isEmpty())
+       createNodeUI(node, networkPanel, initialX, initialY,1, levelHeight,0);
+			initialX+=200;
+			
+        }
 
         add(networkPanel, BorderLayout.CENTER);
 
@@ -260,6 +264,9 @@ public class NetworkUI extends JFrame {
             					DownCableSet downCableSetM4 = new DownCableSet(CablesM4);		
             					Node M4 = Network.createNode("propositionnode", downCableSetM4);
             					
+                				DownCableSet downCableSetM5 = new DownCableSet(dM4);		
+                				Node M5 = Network.createNode("propositionnode", downCableSetM5);
+
             		System.out.println("-----------------------------------------------------");
             		System.out.println("free vars" + M4.getFreeVariables());
             		

@@ -7,11 +7,10 @@ import nodes.Node;
 
 
 
-public class DownCableSet extends CableSet{
+public class DownCableSet {
 	private final HashMap<String,DownCable> downCables ;
 
 	public DownCableSet(HashMap<String,DownCable> cables) {
-		super();
 			this.downCables=cables;
 	}
 	
@@ -19,7 +18,7 @@ public class DownCableSet extends CableSet{
 		super();
 		HashMap<String,DownCable> cablesTemp = new HashMap<String,DownCable>();
 		for (DownCable cable : cables) {
-			cablesTemp.put(cable.getName(),cable);
+			cablesTemp.put(cable.getRelation().getName(),cable);
 			
 		}
 		

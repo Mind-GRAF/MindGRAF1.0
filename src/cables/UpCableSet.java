@@ -4,13 +4,14 @@ import java.util.Collection;
 import java.util.HashMap;
 
 import relations.Relation;
+import set.NodeSet;
 import nodes.Node;
 
-public class UpCableSet extends CableSet {
+public class UpCableSet {
 	private HashMap<String, UpCable> upCables;
 
 	public UpCableSet(HashMap<String, UpCable> cables) {
-		super();
+		
 		this.upCables = cables;
 	}
 
@@ -24,8 +25,8 @@ public class UpCableSet extends CableSet {
 		try {
 			((UpCable) this.get(r.getName())).addNode(Molecular);
 		} catch (Exception e) {
-			UpCable c = new UpCable(r);
-			c.addNode(Molecular);
+			UpCable c = new UpCable(r,new NodeSet(Molecular));
+
 			this.addCable(c);
 		}
 	}
@@ -49,7 +50,7 @@ public class UpCableSet extends CableSet {
 			((UpCable) this.get(relationName)).addNode(n);
 			;
 		} else {
-			UpCable upCable = new UpCable(r);
+			UpCable upCable = new UpCable(r,new NodeSet(n));
 			this.addCable(upCable);
 		}
 	}
@@ -59,11 +60,11 @@ public class UpCableSet extends CableSet {
 	}
 
 	public void addCable(UpCable c) {
-		upCables.put(c.getName(), c);
+		upCables.put(c.getRelation().getName(), c);
 	}
 
 	public Cable removeCable(UpCable c) {
-		return upCables.remove(c.getName());
+		return upCables.remove(c.getRelation().getName());
 	}
 
 	public Cable removeCable(String key) {

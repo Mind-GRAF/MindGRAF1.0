@@ -7,25 +7,25 @@ import java.util.Map;
 
 import nodes.Node;
 
-public class NodeSet{
-	private HashMap<String,Node>nodes;	
+public class PropositionNodeSet{
+	private HashMap<Integer,Node>nodes;	
 	private boolean isFinal;
-	public NodeSet(){
-		nodes = new HashMap<String,Node>();		
+	public PropositionNodeSet(){
+		nodes = new HashMap<Integer,Node>();		
 	}
-	public NodeSet(HashMap<String,Node> nodes){
+	public PropositionNodeSet(HashMap<Integer,Node> nodes){
 		this.nodes = nodes;		
 	}
 	
-	public NodeSet(Node...nodes){
-		this.nodes = new HashMap<String,Node>();
+	public PropositionNodeSet(Node...nodes){
+		this.nodes = new HashMap<Integer,Node>();
 		for (Node n : nodes) 
-			this.nodes.put(n.getName(), n);
+			this.nodes.put(n.getId(), n);
 	}
-	public NodeSet(HashMap<String,Node> list,Node...nodes){
+	public PropositionNodeSet(HashMap<Integer,Node> list,Node...nodes){
 		this.nodes = list;
 		for (Node n : nodes) 
-			this.nodes.put(n.getName(), n);
+			this.nodes.put(n.getId(), n);
 	
 	}
 	public boolean isFinal(){
@@ -35,17 +35,17 @@ public class NodeSet{
 		this.isFinal = isFinal;
 	}
 	
-	   public NodeSet union(NodeSet otherSet) {
+	   public PropositionNodeSet union(PropositionNodeSet otherSet) {
 			   
-		   NodeSet result = new NodeSet();
+		   PropositionNodeSet result = new PropositionNodeSet();
 	        result.putAll(this.nodes);
 	        if(!isFinal){
 	        otherSet.addAllTo(result);
 		   }
 	        return result;
 	   }
-	    public NodeSet intersection(NodeSet otherSet) {
-	        NodeSet result = new NodeSet();
+	    public PropositionNodeSet intersection(NodeSet otherSet) {
+	    	PropositionNodeSet result = new PropositionNodeSet();
 	        for (Node entry : this.nodes.values()) {
 	        	if(otherSet.contains(entry)){
 	        		result.add(entry);
@@ -56,12 +56,12 @@ public class NodeSet{
 	        else return this;
 	    }
 
-	  public void putAll(HashMap<String,Node> Set){
+	  public void putAll(HashMap<Integer,Node> Set){
 		  if(!isFinal)
 			  this.nodes.putAll(Set);
 		  
 	  }
-	  public void addAllTo (NodeSet nodeSet){
+	  public void addAllTo (PropositionNodeSet nodeSet){
 		  nodeSet.putAll(this.nodes);
 	  }
 	public String toString (){
@@ -77,7 +77,7 @@ public class NodeSet{
 	}
 	public void add(Node n){
 		if(!isFinal)
-		nodes.put(n.getName(),n);
+		nodes.put(n.getId(),n);
 	}
 	public int size(){
 		return nodes.size();

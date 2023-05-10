@@ -1,31 +1,30 @@
 package cables;
 
+import nodes.Node;
 import relations.Relation;
 import set.NodeSet;
 
  abstract public class Cable {
-	 private String Name;
 	 private Relation relation;
-	 
-	public Cable(Relation relation) {
+	 private NodeSet nodeSet ; 
+	public Cable(Relation relation,NodeSet nodeSet) {
 		super();
 		this.relation = relation;
-		Name = relation.getName();
+		this.nodeSet = nodeSet;
 	}
 	
-	public String getName() {
-		return Name;
-	}
-
 	public Relation getRelation() {
 		return relation;
 	}
-	public void setRelation(Relation relation) {
-		this.relation = relation;
-	}
 
-	abstract public NodeSet getNodeSet();
-	
+	public NodeSet getNodeSet() {
+		// TODO Auto-generated method stub
+		return this.nodeSet;
+	}
+	protected void setNodeSet(NodeSet nodeSet) {
+		// TODO Auto-generated method stub
+		this.nodeSet=nodeSet;
+	}
 	abstract public String toString();
 	
 	

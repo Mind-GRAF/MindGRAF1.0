@@ -204,7 +204,7 @@ public abstract class Node {
 				}
 
 				DownCable d = new DownCable(downCable.getRelation(), n);
-				downCables.put(d.getName(), d);
+				downCables.put(d.getRelation().getName(), d);
 			}
 			DownCableSet dc = new DownCableSet(downCables);
 			String dcKey = dc.getMolecularNodeKey();
@@ -273,7 +273,7 @@ public abstract class Node {
 				}
 
 				DownCable d = new DownCable(downCable.getRelation(), n);
-				downCables.put(d.getName(), d);
+				downCables.put(d.getRelation().getName(), d);
 			}
 			DownCableSet dc = new DownCableSet(downCables);
 			String dcKey = dc.getMolecularNodeKey();

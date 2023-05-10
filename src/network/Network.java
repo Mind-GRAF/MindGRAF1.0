@@ -26,6 +26,7 @@ public class Network {
 	private static HashMap<Integer, Node> nodes;
 	private static HashMap<String, Node> molecularNodes;
 	private static HashMap<String, Node> baseNodes;
+	private static HashMap<String,Relation> relations; 
 	private static MyClassCreator classCreator;
 	public static HashMap<String, String> quantifiers = new HashMap<String, String>();
 
@@ -132,6 +133,15 @@ public class Network {
 			
 			return node;
 		}
+		
+	public static HashMap<String, Relation> getRelations() {
+			return relations;
+		}
+
+		public static void setRelations(HashMap<String, Relation> relations) {
+			Network.relations = relations;
+		}
+
 	public static Node getNodeById(int id) {
 		return nodes.get(id);
 	}
