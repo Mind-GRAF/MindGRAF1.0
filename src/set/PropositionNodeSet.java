@@ -1,31 +1,29 @@
 package set;
+import java.util.HashSet;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
+import network.Network;
 import nodes.Node;
 
 public class PropositionNodeSet{
-	private HashMap<Integer,Node>nodes;	
+	private HashSet<Integer>nodes;	
 	private boolean isFinal;
 	public PropositionNodeSet(){
-		nodes = new HashMap<Integer,Node>();		
+		nodes = new HashSet<Integer>();		
 	}
-	public PropositionNodeSet(HashMap<Integer,Node> nodes){
+	public PropositionNodeSet(HashSet<Integer> nodes){
 		this.nodes = nodes;		
 	}
 	
-	public PropositionNodeSet(Node...nodes){
-		this.nodes = new HashMap<Integer,Node>();
-		for (Node n : nodes) 
-			this.nodes.put(n.getId(), n);
+	public PropositionNodeSet(Integer...nodeIDs){
+		this.nodes = new HashSet<Integer>();
+		for (Integer id : nodeIDs) 
+			this.nodes.add(id);
 	}
-	public PropositionNodeSet(HashMap<Integer,Node> list,Node...nodes){
+	public PropositionNodeSet(HashSet<Integer> list,Integer...nodeIDs){
 		this.nodes = list;
-		for (Node n : nodes) 
-			this.nodes.put(n.getId(), n);
+		for (Integer id : nodeIDs) 
+		this.nodes.add(id);
 	
 	}
 	public boolean isFinal(){
@@ -46,7 +44,7 @@ public class PropositionNodeSet{
 	   }
 	    public PropositionNodeSet intersection(NodeSet otherSet) {
 	    	PropositionNodeSet result = new PropositionNodeSet();
-	        for (Node entry : this.nodes.values()) {
+	        for (Integer entry : this.nodes) {
 	        	if(otherSet.contains(entry)){
 	        		result.add(entry);
 	        	}
@@ -56,9 +54,9 @@ public class PropositionNodeSet{
 	        else return this;
 	    }
 
-	  public void putAll(HashMap<Integer,Node> Set){
+	  public void putAll(HashSet<Integer> Set){
 		  if(!isFinal)
-			  this.nodes.putAll(Set);
+			  this.nodes.addAll(Set);
 		  
 	  }
 	  public void addAllTo (PropositionNodeSet nodeSet){
@@ -67,51 +65,45 @@ public class PropositionNodeSet{
 	public String toString (){
 		String s = "[";
 		int i = 1 ;
-		for (Node n : nodes.values()) {
-			s+=n.getName()+ (i==nodes.values().size() ?"":",");
+		for (int n : nodes) {
+			s+=n+ (i==nodes.size() ?"":",");
 			i++;
 		} 
 		s+="]";
 		return s;
 		
 	}
-	public void add(Node n){
+	public void add(int id){
 		if(!isFinal)
-		nodes.put(n.getId(),n);
+		nodes.add(id);
 	}
 	public int size(){
 		return nodes.size();
 	}
-	public Node remove(Node n){
+	public boolean remove(int i){
 		if(!isFinal)
-			return nodes.remove(n.getName());
+			return nodes.remove(i);
 		else
-			return null;
+			return false;
 	}
 	public void removeAll(){
 		if(!isFinal)
 		nodes.clear();
 	}
-	public Collection<Node> getValues(){
-		return this.nodes.values();
+	public HashSet<Integer> getValues(){
+		return this.nodes;
 	}
 	public boolean isEmpty(){
 		return this.nodes.size()==0;
 	}
-	public Node get(String name){
-		return nodes.get(name);
+	public Node get(int id){
+		return Network.getNodeById(id);
 	}
 	public boolean contains(Object s){
-		return this.nodes.containsKey(s) || this.nodes.containsValue(s);
+		return this.nodes.contains(s);
 	}
-	public ArrayList<String> getNames(){
-		ArrayList<String> result = new ArrayList<String>(); 
-		for (Node node : this.nodes.values()) {
-			result.add(node.getName());
-		}
-		return result;
-	}
-	public boolean equals(NodeSet n){
-		return this.getNames().equals(n.getNames());
+
+	public boolean equals(PropositionNodeSet n){ 
+		return this.getValues().equals(n.getValues());
 	}
 }
