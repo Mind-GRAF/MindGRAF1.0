@@ -1,7 +1,5 @@
 package mindG.network;
 
-import mindG.mgip.requests.Channel;
-
 public class Node {
     private int id;
     private String name;
@@ -28,6 +26,16 @@ public class Node {
 
     public String getName() {
         return name;
+    }
+
+    public void processReports() {
+        // TODO Auto-generated method stub
+
+    }
+
+    public void processRequests() {
+        // TODO Auto-generated method stub
+
     }
 
 }

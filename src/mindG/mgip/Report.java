@@ -1,7 +1,11 @@
 package mindG.mgip;
 
 import mindG.mgip.matching.Substitutions;
+import mindG.mgip.requests.ChannelType;
+import mindG.mgip.ReportType;
 import mindG.network.Node;
+import mindG.network.PropositionNode;
+import mindG.network.PropositionSet;
 
 public class Report {
     private Substitutions substitutions;
@@ -10,6 +14,8 @@ public class Report {
     private InferenceTypes inferenceType;
     private Node requesterNode;
     private int attitude;
+    private String contextName;
+    private ReportType reportType;
 
     public Report(Substitutions substitution, PropositionSet suppt, int attitudeid,
             boolean sign, InferenceTypes inference, Node requesterNode) {
@@ -21,32 +27,22 @@ public class Report {
         this.inferenceType = inference;
     }
 
-    // This method checks if any of the Report’s support is asserted in
-    // reportContext.
-
-    public boolean anySupportAssertedInAttitudeContext(String reportContextName, int reportAttitudeID) {
-        return sign;
-
-    }
-
     /***
-     * Handling checks done in processing single report, evaluating differences to
-     * know what
-     * This method is used through attemptAddingReportToKnownInstances(channel,
-     * report) in 3.2.1 to create the report we needed to broadcast while trying to
-     * add report
-     * to the node’s knownInstances.
+     * this method checks if the nodes that helped in creating the report are
+     * supported in the attitude in the context belonging to the report
      * 
-     * @param report
-     * @return
+     * @param reportContextName
+     * @param reportAttitudeID
      */
-    public Report computeReportFromDifferencesToSend(Report report) {
-        return report;
+    // @TODO Ahmed is responsible for supports
+    public boolean anySupportAssertedInAttitudeContext(String reportContextName, int reportAttitudeID) {
+        for (PropositionNode propositionNode : support) {
+            if (!(propositionNode.asserted(reportContextName, reportAttitudeID)))
+                return false;
 
-    }
+        }
+        return true;
 
-    public InferenceTypes getInferenceType() {
-        return null;
     }
 
     public Substitutions getSubstitutions() {
@@ -73,10 +69,6 @@ public class Report {
         this.sign = sign;
     }
 
-    public void setInferenceType(InferenceTypes inferenceType) {
-        this.inferenceType = inferenceType;
-    }
-
     public int getAttitude() {
         return attitude;
     }
@@ -91,6 +83,47 @@ public class Report {
 
     public void setRequesterNode(Node requesterNode) {
         this.requesterNode = requesterNode;
+    }
+
+    public String getContextName() {
+        return contextName;
+    }
+
+    public void setContextName(String contextName) {
+        this.contextName = contextName;
+    }
+
+    public ReportType getReportType() {
+        return reportType;
+    }
+
+    public void setReportType(ReportType reportType) {
+        this.reportType = reportType;
+    }
+
+    public void setReportType(ChannelType channelType) {
+        switch (channelType) {
+            case MATCHED:
+                this.setReportType(ReportType.MATCHED);
+                break;
+            case AntRule:
+                this.setReportType(ReportType.AntRule);
+                break;
+            case RuleCons:
+                this.setReportType(ReportType.RuleCons);
+                break;
+            default:
+                // handle error or do nothing
+                break;
+        }
+    }
+
+    public InferenceTypes getInferenceType() {
+        return inferenceType;
+    }
+
+    public void setInferenceType(InferenceTypes inferenceType) {
+        this.inferenceType = inferenceType;
     }
 
 }

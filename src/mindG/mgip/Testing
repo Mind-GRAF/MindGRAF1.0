@@ -58,3 +58,54 @@ printContents();
 
 
 
+public static void main(String[] args) {
+    Channel matchChannel1 = new MatchChannel(null, null, "reality", 2, 0, null);
+    Channel channel2 = new AntecedentToRuleChannel(null, null, "fiction", 2, null);
+    Channel channel3Channel = new RuleToConsequentChannel(null, null, "myth", 3, null);
+    Channel matchChannel2 = new MatchChannel(null, null, "dcbjdsv", 2, 1, null);
+    Channel matchChannel3 = new MatchChannel(null, null, "dcbjdsv", 3, 1, null);
+    Channel channelAnt = new AntecedentToRuleChannel(null, null, "bfdbfdb", 2, null);
+    Channel matchChannel4 = new MatchChannel(null, null, "hfghgfh", 3, 1, null);
+    Channel ruletocons = new RuleToConsequentChannel(null, null, "mythology", 3, null);
+    Channel fdegfdg = new RuleToConsequentChannel(null, null, "fdgdfgdfgdf", 5, null);
+
+    // System.out.println(matchChannel1.getChannelType(matchChannel1));
+    // System.out.println(channel2.getChannelType(channel2));
+    // System.out.println(channel3Channel.getChannelType(channel3Channel));
+    // System.out.println(matchChannel2.getChannelType(matchChannel2));
+
+    String match1 = matchChannel1.stringifyChannelID();
+    // System.out.println(match1.getPair().getKey().getChannelType(match1.getPair().getKey()));
+    String ant = channel2.stringifyChannelID();
+    // System.out.println(ant.getPair().getKey().getChannelType(ant.getPair().getKey()));
+
+    String rule = channel3Channel.stringifyChannelID();
+    // System.out.println(rule.getPair().getKey().getChannelType(rule.getPair().getKey()));
+
+    String match2 = matchChannel2.stringifyChannelID();
+    // System.out.println(match2.getPair().getKey().getChannelType(match2.getPair().getKey()));
+    String ruleToCons = matchChannel3.stringifyChannelID();
+    String match3 = channelAnt.stringifyChannelID();
+    String ant2 = matchChannel4.stringifyChannelID();
+    String match4 = ruletocons.stringifyChannelID();
+    StringSet stringSet = new StringSet();
+
+    stringSet.addChannel(matchChannel1);
+    stringSet.addChannel(channel2);
+    stringSet.addChannel(channel3Channel);
+    stringSet.addChannel(matchChannel2);
+
+    stringSet.addChannel(matchChannel3);
+    stringSet.addChannel(channelAnt);
+    stringSet.addChannel(matchChannel4);
+    stringSet.addChannel(ruletocons);
+    printHashtableContents(channelsIDs);
+
+    System.out.println(getChannelsIDS());
+    System.out.println(stringSet.getChannelID(fdegfdg));
+}
+
+
+
+
+

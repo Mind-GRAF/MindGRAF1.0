@@ -1,6 +1,5 @@
 package mindG.mgip.matching;
 
-import mindG.mgip.Report;
 import mindG.network.Node;
 
 public class Substitutions {
@@ -24,7 +23,7 @@ public class Substitutions {
     }
 
     // method for the filter substitutions
-    public static boolean canPass(Substitutions reportSubstitutions, Substitutions filterSubstitutions) {
+    public static boolean filtertest(Substitutions reportSubstitutions, Substitutions filterSubstitutions) {
         if (Substitutions.isSubSet(reportSubstitutions, filterSubstitutions))
             return true;
         return false;

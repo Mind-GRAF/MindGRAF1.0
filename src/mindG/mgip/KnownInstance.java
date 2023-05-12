@@ -1,14 +1,14 @@
 package mindG.mgip;
 
 import mindG.mgip.matching.Substitutions;
-import mindG.network.Support;
+import mindG.network.PropositionSet;
 
-public class AlmostReports {
+public class KnownInstance {
     private Substitutions substitutions;
     private PropositionSet supports;
     private int attitudeID;
 
-    public AlmostReports(Substitutions substitutions, PropositionSet supports, int attitudeID) {
+    public KnownInstance(Substitutions substitutions, PropositionSet supports, int attitudeID) {
         this.substitutions = substitutions;
         this.supports = supports;
         this.attitudeID = attitudeID;
@@ -40,6 +40,10 @@ public class AlmostReports {
 
     public void setAttitudeID(int attitudeID) {
         this.attitudeID = attitudeID;
+    }
+
+    public Report computeReportFromDifferencesToSend(Report report) {
+        return null;
     }
 
 }

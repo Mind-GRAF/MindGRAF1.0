@@ -5,8 +5,6 @@ import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
 
-import mindG.mgip.matching.Substitutions;
-
 public class ChannelSet implements Iterable<Channel> {
     private Hashtable<ChannelType, Hashtable<String, Channel>> channels;
 
@@ -18,7 +16,7 @@ public class ChannelSet implements Iterable<Channel> {
     }
 
     public Channel addChannel(Channel channel) {
-        ChannelType channelType = channel.getChannelType(channel);
+        ChannelType channelType = channel.getChannelType();
         Hashtable<String, Channel> targetSet = channels.remove(channelType);
         String channelId = channel.stringifyChannelID();
         Channel added = targetSet.put(channelId, channel);
@@ -28,7 +26,7 @@ public class ChannelSet implements Iterable<Channel> {
 
     public Channel removeChannel(Channel channel) {
 
-        ChannelType channelType = channel.getChannelType(channel);
+        ChannelType channelType = channel.getChannelType();
         Hashtable<String, Channel> targetSet = channels.remove(channelType);
         String channelId = channel.stringifyChannelID();
         Channel removed = targetSet.remove(channelId);
@@ -61,27 +59,6 @@ public class ChannelSet implements Iterable<Channel> {
         return allMergedChannels.iterator();
     }
 
-    /***
-     * Method acting as a filter for quick HashSet filtering applied on channels
-     * based on request processing status.
-     * 
-     * @param processedRequest boolean expressing filter criteria
-     * @return newly created ChannelSet
-     */
-    public ChannelSet getFilteredRequestChannels(boolean processedRequest) {
-        return null;
-        // ChannelSet processedRequestsChannels = new ChannelSet();
-        // Collection<Channel> allMergedChannels = new ArrayList<Channel>();
-        // Collection<Hashtable<String, Channel>> collectionOfSets = channels.values();
-        // for (Hashtable<String, Channel> set : collectionOfSets)
-        // allMergedChannels.addAll(set.values());
-        // for (Channel channel : allMergedChannels) {
-        // if (channel.isRequestProcessed() == processedRequest)
-        // processedRequestsChannels.addChannel(channel);
-        // }
-        // return processedRequestsChannels;
-    }
-
     public Collection<Channel> getChannels() {
         Collection<Channel> allMergedChannels = new ArrayList<Channel>();
         Collection<Hashtable<String, Channel>> collectionOfSets = channels.values();
@@ -110,11 +87,20 @@ public class ChannelSet implements Iterable<Channel> {
     }
 
     public Channel getChannel(Channel newChannel) {
-
-        ChannelType channelType = newChannel.getChannelType(newChannel);
+        ChannelType channelType = newChannel.getChannelType();
         String channelId = newChannel.stringifyChannelID();
         Hashtable<String, Channel> set = channels.get(channelType);
         return set.get(channelId);
+    }
+
+    public Channel getChannel(String newChannel) {
+        Collection<Channel> mergedChannels = getChannels();
+        for (Channel channel : mergedChannels) {
+            if (newChannel.equals(channel.stringifyChannelID())) {
+                return channel;
+            }
+        }
+        return null;
     }
 
 }
