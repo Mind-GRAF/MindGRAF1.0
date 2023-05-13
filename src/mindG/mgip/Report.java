@@ -11,14 +11,14 @@ public class Report {
     private Substitutions substitutions;
     private PropositionSet support;
     private boolean sign;
-    private InferenceTypes inferenceType;
+    private InferenceType inferenceType;
     private Node requesterNode;
     private int attitude;
     private String contextName;
     private ReportType reportType;
 
     public Report(Substitutions substitution, PropositionSet suppt, int attitudeid,
-            boolean sign, InferenceTypes inference, Node requesterNode) {
+            boolean sign, InferenceType inference, Node requesterNode) {
         this.substitutions = substitution;
         this.attitude = attitudeid;
         this.support = suppt;
@@ -34,7 +34,6 @@ public class Report {
      * @param reportContextName
      * @param reportAttitudeID
      */
-    // @TODO Ahmed is responsible for supports
     public boolean anySupportAssertedInAttitudeContext(String reportContextName, int reportAttitudeID) {
         for (PropositionNode propositionNode : support) {
             if (!(propositionNode.asserted(reportContextName, reportAttitudeID)))
@@ -118,11 +117,11 @@ public class Report {
         }
     }
 
-    public InferenceTypes getInferenceType() {
+    public InferenceType getInferenceType() {
         return inferenceType;
     }
 
-    public void setInferenceType(InferenceTypes inferenceType) {
+    public void setInferenceType(InferenceType inferenceType) {
         this.inferenceType = inferenceType;
     }
 

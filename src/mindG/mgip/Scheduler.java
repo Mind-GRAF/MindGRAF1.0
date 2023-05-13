@@ -136,7 +136,7 @@ public class Scheduler {
                 return request;
             }
         }
-        return null; // request not found
+        return null;
     }
 
     public static Queue<Report> getHighQueue() {

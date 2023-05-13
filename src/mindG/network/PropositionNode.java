@@ -7,7 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import mindG.mgip.KnownInstance;
-import mindG.mgip.InferenceTypes;
+import mindG.mgip.InferenceType;
 import mindG.mgip.KnownInstanceSet;
 import mindG.mgip.Report;
 import mindG.mgip.ReportType;
@@ -269,7 +269,7 @@ public class PropositionNode extends Node {
      */
 
     protected void getNodesToSendReport(ChannelType channelType, String currentContextName, int currentAttitudeID,
-            Substitutions substitutions, boolean reportSign, InferenceTypes inferenceType) {
+            Substitutions substitutions, boolean reportSign, InferenceType inferenceType) {
 
         try {
             PropositionSet supportPropSet = new PropositionSet();
@@ -371,9 +371,9 @@ public class PropositionNode extends Node {
         Substitutions reportSubs = report.getSubstitutions();
         int reportAttitude = report.getAttitude();
         boolean signReport = false;
-        KnownInstance compatibleReport = knownInstances.getAlmostReportByAttSubNve(reportAttitude, reportSubs);
+        KnownInstance compatibleReport = knownInstances.getKnownInstanceByAttSubNve(reportAttitude, reportSubs);
         if (compatibleReport == null) {
-            compatibleReport = knownInstances.getAlmostReportByAttSubPve(reportAttitude, reportSubs);
+            compatibleReport = knownInstances.getKnownInstanceByAttSubPve(reportAttitude, reportSubs);
             signReport = true;
         }
         boolean channelCheck = report.getReportType() == ReportType.MATCHED
@@ -418,10 +418,10 @@ public class PropositionNode extends Node {
         // Controller.isNegated(this);
 
         getNodesToSendReport(ChannelType.AntRule, currentContextName, currentAttitudeID, null, reportSign,
-                InferenceTypes.FORWARD);
+                InferenceType.FORWARD);
 
         getNodesToSendReport(ChannelType.MATCHED, currentContextName, currentAttitudeID, null, reportSign,
-                InferenceTypes.FORWARD);
+                InferenceType.FORWARD);
         Scheduler.schedule();
     }
 
@@ -451,7 +451,7 @@ public class PropositionNode extends Node {
         if (this.asserted(currentContext, currentAttitude)) {
             supportNodeSet.add((PropositionNode) this);
             Report NewReport = new Report(reportSubstitutions, supportNodeSet, currentAttitude, true,
-                    InferenceTypes.BACKWARD, requesterNode);
+                    InferenceType.BACKWARD, requesterNode);
             NewReport.setContextName(currentContext);
             NewReport.setReportType(currentChannel.getChannelType());
             sendReport(NewReport, currentRequest.getChannel());
@@ -463,7 +463,7 @@ public class PropositionNode extends Node {
 
             supportNodeSet.add((PropositionNode) this);
             Report NewReport = new Report(reportSubstitutions, supportNodeSet, currentAttitude, false,
-                    InferenceTypes.BACKWARD, requesterNode);
+                    InferenceType.BACKWARD, requesterNode);
             NewReport.setContextName(currentContext);
             NewReport.setReportType(currentChannel.getChannelType());
             sendReport(NewReport, currentRequest.getChannel());
@@ -479,7 +479,7 @@ public class PropositionNode extends Node {
                 Report currentPveReport = new Report(currentAlmostPveReport.getSubstitutions(),
                         currentAlmostPveReport.getSupports(), currentAlmostPveReport.getAttitudeID(),
                         true,
-                        InferenceTypes.BACKWARD, requesterNode);
+                        InferenceType.BACKWARD, requesterNode);
                 currentPveReport.setContextName(currentContext);
 
                 currentPveReport.setReportType(currentChannel.getChannelType());
@@ -495,7 +495,7 @@ public class PropositionNode extends Node {
                 Report currentNveReport = new Report(currentAlmostNveReport.getSubstitutions(),
                         currentAlmostNveReport.getSupports(), currentAlmostNveReport.getAttitudeID(),
                         false,
-                        InferenceTypes.BACKWARD, requesterNode);
+                        InferenceType.BACKWARD, requesterNode);
                 currentNveReport.setContextName(currentContext);
 
                 currentNveReport.setReportType(currentChannel.getChannelType());
@@ -614,7 +614,7 @@ public class PropositionNode extends Node {
 
         Report reportToBeBroadcasted = attemptAddingReportToKnownInstances(currentReport);
         if (reportToBeBroadcasted != null) {
-            boolean forwardReportType = reportToBeBroadcasted.getInferenceType() == InferenceTypes.FORWARD;
+            boolean forwardReportType = reportToBeBroadcasted.getInferenceType() == InferenceType.FORWARD;
             if (currentReport.getReportType() == ReportType.RuleCons) {
                 PropositionNode supportNode = new PropositionNode();
                 // hena el method el babuild biha node bl new subs

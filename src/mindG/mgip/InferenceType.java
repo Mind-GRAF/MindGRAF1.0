@@ -1,5 +1,5 @@
 package mindG.mgip;
 
-public enum InferenceTypes {
+public enum InferenceType {
     FORWARD, BACKWARD;
 }

@@ -1,6 +1,10 @@
 package mindG.mgip;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import mindG.mgip.matching.Substitutions;
+import mindG.network.PropositionNode;
 import mindG.network.PropositionSet;
 
 public class KnownInstance {
@@ -14,6 +18,14 @@ public class KnownInstance {
         this.attitudeID = attitudeID;
     }
 
+    // public String toString() {
+    // StringBuilder sb = new StringBuilder();
+    // sb.append("Substitutions: " + substitutions + "\n");
+    // sb.append("Supports: " + Arrays.deepToString(supports) + "\n");
+    // sb.append("Attitude ID: " + attitudeID + "\n");
+    // sb.append("Sign: " + sign + "\n");
+    // return sb.toString();
+    // }
     public Substitutions getSubstitutions() {
         return substitutions;
     }
@@ -22,16 +34,22 @@ public class KnownInstance {
         this.substitutions = substitutions;
     }
 
-    public PropositionSet getSupports() {
-        return supports;
-    }
+    /***
+     * this method checks if the nodes that helped in creating the report are
+     * supported in the attitude in the context belonging to the report
+     * 
+     * @param reportContextName
+     * @param reportAttitudeID
+     */
+    public boolean anySupportAssertedInAttitudeContext(String reportContextName,
+            int reportAttitudeID) {
+        for (PropositionNode propositionNode : supports) {
+            if (!(propositionNode.asserted(reportContextName, reportAttitudeID)))
+                return false;
 
-    public void setSupports(PropositionSet supports) {
-        this.supports = supports;
-    }
+        }
+        return true;
 
-    public boolean anySupportAssertedInAttitudeContext(String currentContext, int currentAttitude) {
-        return false;
     }
 
     public int getAttitudeID() {
@@ -42,8 +60,12 @@ public class KnownInstance {
         this.attitudeID = attitudeID;
     }
 
-    public Report computeReportFromDifferencesToSend(Report report) {
-        return null;
+    public PropositionSet getSupports() {
+        return supports;
+    }
+
+    public void setSupports(PropositionSet supports) {
+        this.supports = supports;
     }
 
 }

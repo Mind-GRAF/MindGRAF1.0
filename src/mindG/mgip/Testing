@@ -56,7 +56,7 @@ printContents();
 
 
 
-
+// strinset test
 
 public static void main(String[] args) {
     Channel matchChannel1 = new MatchChannel(null, null, "reality", 2, 0, null);
@@ -69,21 +69,12 @@ public static void main(String[] args) {
     Channel ruletocons = new RuleToConsequentChannel(null, null, "mythology", 3, null);
     Channel fdegfdg = new RuleToConsequentChannel(null, null, "fdgdfgdfgdf", 5, null);
 
-    // System.out.println(matchChannel1.getChannelType(matchChannel1));
-    // System.out.println(channel2.getChannelType(channel2));
-    // System.out.println(channel3Channel.getChannelType(channel3Channel));
-    // System.out.println(matchChannel2.getChannelType(matchChannel2));
-
     String match1 = matchChannel1.stringifyChannelID();
-    // System.out.println(match1.getPair().getKey().getChannelType(match1.getPair().getKey()));
     String ant = channel2.stringifyChannelID();
-    // System.out.println(ant.getPair().getKey().getChannelType(ant.getPair().getKey()));
 
     String rule = channel3Channel.stringifyChannelID();
-    // System.out.println(rule.getPair().getKey().getChannelType(rule.getPair().getKey()));
 
     String match2 = matchChannel2.stringifyChannelID();
-    // System.out.println(match2.getPair().getKey().getChannelType(match2.getPair().getKey()));
     String ruleToCons = matchChannel3.stringifyChannelID();
     String match3 = channelAnt.stringifyChannelID();
     String ant2 = matchChannel4.stringifyChannelID();
@@ -104,6 +95,55 @@ public static void main(String[] args) {
     System.out.println(getChannelsIDS());
     System.out.println(stringSet.getChannelID(fdegfdg));
 }
+
+
+
+
+
+
+//knownInstanceset test
+
+public static void main(String[] args) {
+    KnownInstanceSet set = new KnownInstanceSet();
+    int[] k1 = { 1, 2 };
+    int[] k2 = { 4, 5 };
+    int[] k3 = { 6, 7 };
+    int[] k4 = { 8, 9 };
+    int[] k5 = { 10, 11 };
+
+    KnownInstance KI1 = new KnownInstance("a/b", k1, 11, true);
+    KnownInstance KI2 = new KnownInstance("c/b", k2, 12, false);
+    KnownInstance KI3 = new KnownInstance("f/s", k3, 13, false);
+    KnownInstance KI4 = new KnownInstance("d/a", k4, 11, true);
+    KnownInstance KI6 = new KnownInstance("a/b", k4, 12, true);
+    KnownInstance KI5 = new KnownInstance("a/b", k5, 11, true);
+
+    set.addKnownInstance(KI1);
+    printKnownInstances(set.positiveKInstances, set.negativeKInstances);
+    System.out.println("end");
+    set.addKnownInstance(KI2);
+    printKnownInstances(set.positiveKInstances, set.negativeKInstances);
+    System.out.println("end");
+
+    set.addKnownInstance(KI3);
+    printKnownInstances(set.positiveKInstances, set.negativeKInstances);
+    System.out.println("end");
+
+    set.addKnownInstance(KI4);
+    printKnownInstances(set.positiveKInstances, set.negativeKInstances);
+    System.out.println("end");
+    set.addKnownInstance(KI5);
+    printKnownInstances(set.positiveKInstances, set.negativeKInstances);
+    System.out.println("end");
+    set.addKnownInstance(KI6);
+    printKnownInstances(set.positiveKInstances, set.negativeKInstances);
+    System.out.println("end");
+
+}
+
+
+
+
 
 
 

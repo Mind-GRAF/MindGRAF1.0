@@ -3,20 +3,16 @@ package mindG.network;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.regex.Matcher;
 
-import javafx.util.Pair;
 import mindG.mgip.KnownInstance;
-import mindG.mgip.InferenceTypes;
+import mindG.mgip.InferenceType;
 import mindG.mgip.Report;
 import mindG.mgip.Scheduler;
 import mindG.mgip.matching.Match;
 import mindG.mgip.matching.Substitutions;
 import mindG.mgip.requests.AntecedentToRuleChannel;
 import mindG.mgip.requests.Channel;
-import mindG.mgip.requests.StringChannelSet;
 import mindG.mgip.requests.ChannelSet;
 import mindG.mgip.requests.ChannelType;
 import mindG.mgip.requests.MatchChannel;
@@ -254,7 +250,7 @@ public abstract class RuleNode extends PropositionNode implements Serializable {
         String currentReportContextName = currentReport.getContextName();
         int currentReportAttitudeID = currentReport.getAttitude();
         Substitutions currentReportSubs = currentReport.getSubstitutions();
-        boolean forwardReportType = currentReport.getInferenceType() == InferenceTypes.FORWARD;
+        boolean forwardReportType = currentReport.getInferenceType() == InferenceType.FORWARD;
         Channel tempChannel = new Channel(null, currentReportSubs, currentReportContextName,
                 currentReportAttitudeID, currentReport.getRequesterNode());
         Request tempRequest = new Request(tempChannel, null);
