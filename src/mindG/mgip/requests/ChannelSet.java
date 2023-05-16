@@ -6,13 +6,13 @@ import java.util.Hashtable;
 import java.util.Iterator;
 
 public class ChannelSet implements Iterable<Channel> {
-    private Hashtable<ChannelType, Hashtable<String, Channel>> channels;
+    public Hashtable<ChannelType, Hashtable<String, Channel>> channels;
 
     public ChannelSet() {
         channels = new Hashtable<ChannelType, Hashtable<String, Channel>>();
         channels.put(ChannelType.MATCHED, new Hashtable<String, Channel>());
         channels.put(ChannelType.RuleCons, new Hashtable<String, Channel>());
-        channels.put(ChannelType.RuleCons, new Hashtable<String, Channel>());
+        channels.put(ChannelType.AntRule, new Hashtable<String, Channel>());
     }
 
     public Channel addChannel(Channel channel) {
@@ -96,11 +96,19 @@ public class ChannelSet implements Iterable<Channel> {
     public Channel getChannel(String newChannel) {
         Collection<Channel> mergedChannels = getChannels();
         for (Channel channel : mergedChannels) {
-            if (newChannel.equals(channel.stringifyChannelID())) {
+            if (newChannel == null) {
+                return null;
+            } else if (newChannel.equals(channel.stringifyChannelID())) {
                 return channel;
             }
         }
         return null;
+    }
+
+    public void printChannels(Collection<Channel> channelCollection) {
+        for (Channel channel : channelCollection) {
+            System.out.println(channel.stringifyChannelID());
+        }
     }
 
 }

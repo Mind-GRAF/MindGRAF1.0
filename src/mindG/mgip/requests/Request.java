@@ -28,4 +28,11 @@ public class Request {
         this.reporterNode = reporterNode;
     }
 
+    public String stringifyRequest() {
+        Node reporterNode = this.getReporterNode();
+        String channelId = this.channel.stringifyChannelID() +
+                " reporter is " + reporterNode.getName();
+        return channelId;
+    }
+
 }

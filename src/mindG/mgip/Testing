@@ -144,6 +144,57 @@ public static void main(String[] args) {
 
 
 
+//establish channel test
+Network network = new Network();
+Scheduler.initiate();
+
+Node base1 = Network.createNode("Mariam", "propositionnode"); // Proposition Node
+Node base2 = Network.createNode("Tarek", "propositionnode"); // Proposition Node
+Node base3 = Network.createNode("khayat", "propositionnode"); // Proposition Node
+
+Request newRequest = ((PropositionNode) base1).establishChannel(ChannelType.MATCHED, base2, null, null,
+        "reality", 1, 2, base1);
+Request newRequest2 = ((PropositionNode) base1).establishChannel(ChannelType.RuleCons, base3, null, null,
+        "reality", 1, 2, base1);
+Request newRequest3 = ((PropositionNode) base1).establishChannel(ChannelType.RuleCons, base3, null, null,
+        "reality", 1, 2, base1);
+// System.out.println(newRequest.stringifyRequest());
+// Scheduler.addToLowQueue(newRequest);
+// Scheduler.addToLowQueue(newRequest2);
+
+// Scheduler.printLowQueue();
+
+
+
+//testing send Report
+Network network = new Network();
+Scheduler.initiate();
+
+Node base1 = Network.createNode("Mariam", "propositionnode"); // Proposition Node
+Node base2 = Network.createVariableNode("X", "propositionnode"); // Proposition Node
+Node base3 = Network.createNode("Tarek", "propositionnode"); // Proposition
+Node base4 = Network.createVariableNode("Y", "propositionnode"); // Proposition
+Node base5 = Network.createNode("Tarek", "propositionnode"); // Proposition
+Node base6 = Network.createVariableNode("Z", "propositionnode"); // Proposition
+Node base7 = Network.createNode("jfenkdwn", "propositionnode"); // Proposition
+Substitutions subs1 = new Substitutions();
+subs1.add(base2, base1);
+subs1.add(base4, base5);
+Substitutions subs2 = new Substitutions();
+subs2.add(base6, base5);
+// subs2.add(base2, base1);
+
+System.out.println(subs1.toString());
+Channel matchChannel1 = new MatchChannel(null, subs1, "reality", 2, 0, base3);
+// Channel channel2 = new AntecedentToRuleChannel(null, null, "fiction", 2,
+// null);
+Report newReport = new Report(subs2, null, 1, true, InferenceType.BACKWARD, base3);
+newReport.setContextName("reality");
+System.out.println(((PropositionNode) base1).sendReport(newReport, matchChannel1));
+Scheduler.printHighQueue();
+
+
+
 
 
 

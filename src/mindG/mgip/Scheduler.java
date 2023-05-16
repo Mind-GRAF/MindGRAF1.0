@@ -23,12 +23,24 @@ public class Scheduler {
         forwardAssertedNodes = new Hashtable<Report, PropositionNode>();
     }
 
+    public static void printLowQueue() {
+        for (Request request : lowQueue) {
+            System.out.println(request.stringifyRequest());
+        }
+    }
+
+    public static void printHighQueue() {
+        for (Report report : highQueue) {
+            System.out.println(report.stringifyReport());
+        }
+    }
+
     /***
      * to Schedule requests before being put on the low priority queue
      * 
      * @param request
      */
-    public static void scheduleRequests(Request request) {
+    public void scheduleRequests(Request request) {
         addToLowQueue(request);
     }
 
@@ -37,7 +49,7 @@ public class Scheduler {
      * 
      * @param report
      */
-    public static void scheduleReports(Report report) {
+    public void scheduleReports(Report report) {
         addToHighQueue(report);
     }
 

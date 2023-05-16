@@ -27,7 +27,11 @@ public class MatchChannel extends Channel {
     }
 
     public boolean testReportToSend(Report report) {
-        return false;
+        int channelMatchType = getMatchType();
+        boolean toBeSentFlag = (channelMatchType == 0) || (channelMatchType == 1 && report.isSign())
+                || (channelMatchType == 2 && !report.isSign());
+        System.out.println("flag to be sent " + toBeSentFlag);
+        return toBeSentFlag && super.testReportToSend(report);
 
     }
 }

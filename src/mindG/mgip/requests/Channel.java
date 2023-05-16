@@ -12,32 +12,31 @@ public class Channel {
     private Substitutions switcherSubstitutions;
     private String contextName;
     private int attitudeID;
-    // private boolean valve;
     private Node requesterNode;
 
     public Channel(Substitutions switcherSubstitution, Substitutions filterSubstitutions, String contextID,
             int attitudeID, Node requesterNode) {
         idCount = count++;
-        this.filterSubstitutions = new Substitutions(filterSubstitutions);
-        this.switcherSubstitutions = new Substitutions(switcherSubstitution);
+        this.filterSubstitutions = filterSubstitutions;
+        this.switcherSubstitutions = switcherSubstitution;
         this.contextName = contextID;
         this.attitudeID = attitudeID;
-        // this.valve = v;
         this.requesterNode = requesterNode;
-        // this.reporter = reporter;
-        // setReportsBuffer(new ReportSet());
     }
-    // i need another type of channel called ActChannel nothing special about it
 
     public Channel() {
     }
 
-    // This method is responsible for trying to send a report over a
-    // channel.
+    /***
+     * Used to test sending a report through a certain channel
+     * 
+     * @param report
+     * @return boolean
+     */
     public boolean testReportToSend(Report report) {
-
-        boolean passTest = Substitutions.filtertest(report.getSubstitutions(), getFilterSubstitutions());
-
+        System.out.println(report.getSubstitutions().toString());
+        boolean passTest = report.getSubstitutions().isSubsetOf((filterSubstitutions));
+        System.out.println("flag is " + passTest);
         if (passTest && report.anySupportAssertedInAttitudeContext(contextName, attitudeID)) {
             Substitutions newReportSubs = Substitutions.switchReport(report.getSubstitutions(),
                     getSwitcherSubstitutions());
@@ -108,21 +107,13 @@ public class Channel {
         this.idCount = idCount;
     }
 
-    // public boolean isValve() {
-    // return valve;
-    // }
-
-    // public void setValve(boolean valve) {
-    // this.valve = valve;
-    // }
-
     public String stringifyChannelID() {
         String channelContextName = this.getContextName();
         int channelAttitudeId = this.getAttitudeID();
         Substitutions filterSubs = this.getFilterSubstitutions();
         Substitutions switchSubs = this.getSwitcherSubstitutions();
         Node requesterNode = this.getRequesterNode();
-        String channelId = channelContextName + "" + channelAttitudeId + "" + filterSubs.toString()
+        String channelId = channelContextName + " " + channelAttitudeId + " " + filterSubs.toString() + " "
                 + switchSubs.toString() +
                 " requestedFrom " + requesterNode.getName();
         return channelId;

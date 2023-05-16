@@ -1,31 +1,69 @@
 package mindG.network;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 
 public class NodeSet implements Iterable<Node> {
     private HashMap<String, Node> nodes;
+    private boolean isFinal;
 
     public NodeSet() {
         nodes = new HashMap<String, Node>();
     }
 
-    @Override
-    public Iterator<Node> iterator() {
-        // TODO Auto-generated method stub
-        return ((Iterable<Node>) nodes).iterator();
+    public NodeSet(HashMap<String, Node> nodes) {
+        this.nodes = nodes;
+    }
+
+    public NodeSet(Node... nodes) {
+        this.nodes = new HashMap<String, Node>();
+        for (Node n : nodes)
+            this.nodes.put(n.getName(), n);
+    }
+
+    public NodeSet(HashMap<String, Node> list, Node... nodes) {
+        this.nodes = list;
+        for (Node n : nodes)
+            this.nodes.put(n.getName(), n);
+
+    }
+
+    public boolean isFinal() {
+        return isFinal;
+    }
+
+    public void setIsFinal(boolean isFinal) {
+        this.isFinal = isFinal;
     }
 
     public NodeSet union(NodeSet otherSet) {
+
         NodeSet result = new NodeSet();
         result.putAll(this.nodes);
-        otherSet.addAllTo(result);
+        if (!isFinal) {
+            otherSet.addAllTo(result);
+        }
         return result;
     }
 
+    public NodeSet intersection(NodeSet otherSet) {
+        NodeSet result = new NodeSet();
+        for (Node entry : this.nodes.values()) {
+            if (otherSet.contains(entry)) {
+                result.add(entry);
+            }
+        }
+        if (!isFinal)
+            return result;
+        else
+            return this;
+    }
+
     public void putAll(HashMap<String, Node> Set) {
-        this.nodes.putAll(Set);
+        if (!isFinal)
+            this.nodes.putAll(Set);
 
     }
 
@@ -33,20 +71,21 @@ public class NodeSet implements Iterable<Node> {
         nodeSet.putAll(this.nodes);
     }
 
-    // public String toString() {
-    // String s = "[";
-    // int i = 1;
-    // for (Node n : nodes.values()) {
-    // s += n.getName() + (i == nodes.values().size() ? "" : ",");
-    // i++;
-    // }
-    // s += "]";
-    // return s;
+    public String toString() {
+        String s = "[";
+        int i = 1;
+        for (Node n : nodes.values()) {
+            s += n.getName() + (i == nodes.values().size() ? "" : ",");
+            i++;
+        }
+        s += "]";
+        return s;
 
-    // }
+    }
 
     public void add(Node n) {
-        nodes.put(n.getName(), n);
+        if (!isFinal)
+            nodes.put(n.getName(), n);
     }
 
     public int size() {
@@ -54,11 +93,15 @@ public class NodeSet implements Iterable<Node> {
     }
 
     public Node remove(Node n) {
-        return nodes.remove(n.getName());
+        if (!isFinal)
+            return nodes.remove(n.getName());
+        else
+            return null;
     }
 
     public void removeAll() {
-        nodes.clear();
+        if (!isFinal)
+            nodes.clear();
     }
 
     public Collection<Node> getValues() {
@@ -77,4 +120,21 @@ public class NodeSet implements Iterable<Node> {
         return this.nodes.containsKey(s) || this.nodes.containsValue(s);
     }
 
+    public ArrayList<String> getNames() {
+        ArrayList<String> result = new ArrayList<String>();
+        for (Node node : this.nodes.values()) {
+            result.add(node.getName());
+        }
+        return result;
+    }
+
+    public boolean equals(NodeSet n) {
+        return this.getNames().equals(n.getNames());
+    }
+
+    @Override
+    public Iterator<Node> iterator() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'iterator'");
+    }
 }

@@ -3,6 +3,7 @@ package mindG.mgip;
 import mindG.mgip.matching.Substitutions;
 import mindG.mgip.requests.ChannelType;
 import mindG.mgip.ReportType;
+import mindG.network.Network;
 import mindG.network.Node;
 import mindG.network.PropositionNode;
 import mindG.network.PropositionSet;
@@ -27,6 +28,18 @@ public class Report {
         this.inferenceType = inference;
     }
 
+    public String stringifyReport() {
+        ReportType reportType = this.getReportType();
+        String reportContextName = this.getContextName();
+        int reportAttitudeId = this.getAttitude();
+        Substitutions subs = this.getSubstitutions();
+        Node requesterNode = this.getRequesterNode();
+        String report = reportContextName + " " + reportAttitudeId + " " + subs.toString() + " " +
+                " requestedFrom " + requesterNode.getName() + " " + this.getReportType() + " ";
+        // + this.getSupport().toString();
+        return report;
+    }
+
     /***
      * this method checks if the nodes that helped in creating the report are
      * supported in the attitude in the context belonging to the report
@@ -35,8 +48,12 @@ public class Report {
      * @param reportAttitudeID
      */
     public boolean anySupportAssertedInAttitudeContext(String reportContextName, int reportAttitudeID) {
-        for (PropositionNode propositionNode : support) {
-            if (!(propositionNode.asserted(reportContextName, reportAttitudeID)))
+        int[] supportIds = support.getProps();
+        int currentPropNodeId;
+        for (int index = 0; index < supportIds.length; index++) {
+            currentPropNodeId = supportIds[index];
+            PropositionNode currentNode = (PropositionNode) Network.getNodeById(currentPropNodeId);
+            if (!(currentNode.asserted(reportContextName, reportAttitudeID)))
                 return false;
 
         }
