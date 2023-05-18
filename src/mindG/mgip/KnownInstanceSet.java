@@ -11,8 +11,8 @@ import mindG.network.PropositionSet;
 
 public class KnownInstanceSet implements Iterable<KnownInstance> {
 
-    static Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> positiveKInstances;
-    static Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> negativeKInstances;
+    Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> positiveKInstances;
+    Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> negativeKInstances;
 
     public KnownInstanceSet() {
         positiveKInstances = new Hashtable<Integer, Hashtable<Substitutions, KnownInstance>>();
@@ -39,8 +39,7 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
 
                 } else {
                     PropositionSet supportSet = targetKnownInstance.getSupports();
-                    // targetKnownInstance.setSupports(union(Supports, supportSet));
-                    // method hazem haye3melha ye2add in a set of nodes a set of nodes
+                    targetKnownInstance.setSupports(Supports.union(supportSet));
 
                 }
 
@@ -65,8 +64,7 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
                     negativeKInstances.put(attitude, targetSet);
                 } else {
                     PropositionSet supportSet = targetKnownInstance.getSupports();
-                    // supportSet = union(supportSet, Supports);
-                    // method hazem haye3melha ye2add in a set of nodes a set of nodes
+                    targetKnownInstance.setSupports(Supports.union(supportSet));
 
                 }
             }
@@ -75,19 +73,12 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
 
     }
 
-    public static int[] union(int[] arr1, int[] arr2) {
-        int[] result = Arrays.copyOf(arr1, arr1.length + arr2.length);
-        System.arraycopy(arr2, 0, result, arr1.length, arr2.length);
-        return result;
-    }
-
-    public static Collection<KnownInstance> mergeKInstancesBasedOnAtt(
+    public Collection<KnownInstance> mergeKInstancesBasedOnAtt(
             int i) {
         Collection<KnownInstance> theKnownInstanceSet = new ArrayList<KnownInstance>();
 
         if (getPositiveKInstances().containsKey(i)) {
             Collection<KnownInstance> collectionOfSetsPve = getPositiveKInstances().get(i).values();
-            Iterator ReportIteratorPve = collectionOfSetsPve.iterator();
             for (KnownInstance currentKIPve : collectionOfSetsPve) {
                 theKnownInstanceSet.add(currentKIPve);
             }
@@ -97,7 +88,6 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
         if (getNegativeKInstances().containsKey(i)) {
 
             Collection<KnownInstance> collectionOfSetsNve = getNegativeKInstances().get(i).values();
-            Iterator ReportIteratorNve = collectionOfSetsNve.iterator();
             for (KnownInstance currentKINve : collectionOfSetsNve) {
                 theKnownInstanceSet.add(currentKINve);
             }
@@ -108,7 +98,7 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
 
     }
 
-    public static void printKnownInstanceSet(Collection<KnownInstance> theKnownInstanceSet) {
+    public void printKnownInstanceSet(Collection<KnownInstance> theKnownInstanceSet) {
         if (theKnownInstanceSet == null) {
             System.out.println("Know Instance set is null");
         } else {
@@ -122,7 +112,7 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
 
     }
 
-    public static Collection<KnownInstance> getPositiveCollectionbyAttribute(
+    public Collection<KnownInstance> getPositiveCollectionbyAttribute(
             int attributeID) {
         if (getPositiveKInstances().containsKey(attributeID)) {
 
@@ -141,7 +131,6 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
             Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> positiveKInstances) {
         Collection<Hashtable<Substitutions, KnownInstance>> collectionOfSetsPve = positiveKInstances.values();
         Collection<KnownInstance> theKnownInstanceSet = new ArrayList<KnownInstance>();
-        Iterator ReportIteratorPve = collectionOfSetsPve.iterator();
         for (Hashtable<Substitutions, KnownInstance> currentKIPve : collectionOfSetsPve) {
             for (KnownInstance currentKnownInstancePve : currentKIPve.values()) {
                 theKnownInstanceSet.add(currentKnownInstancePve);
@@ -152,7 +141,7 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
 
     }
 
-    public static Collection<KnownInstance> getNegativeCollectionbyAttribute(
+    public Collection<KnownInstance> getNegativeCollectionbyAttribute(
             int attributeID) {
 
         if (getNegativeKInstances().containsKey(attributeID)) {
@@ -171,7 +160,6 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
             Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> negativeKInstances) {
         Collection<Hashtable<Substitutions, KnownInstance>> collectionOfSetsNve = negativeKInstances.values();
         Collection<KnownInstance> theKnownInstanceSet = new ArrayList<KnownInstance>();
-        Iterator ReportIteratorPve = collectionOfSetsNve.iterator();
         for (Hashtable<Substitutions, KnownInstance> currentKINve : collectionOfSetsNve) {
             for (KnownInstance currentKnownInstanceNve : currentKINve.values()) {
                 theKnownInstanceSet.add(currentKnownInstanceNve);
@@ -182,16 +170,8 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
 
     }
 
-    public static Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> getPositiveKInstances() {
-        return positiveKInstances;
-    }
-
     public void setPositiveKInstances(Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> positiveKInstances) {
         this.positiveKInstances = positiveKInstances;
-    }
-
-    public static Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> getNegativeKInstances() {
-        return negativeKInstances;
     }
 
     public void setNegativeKInstances(Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> negativeKInstances) {
@@ -214,7 +194,7 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
         return null;
     }
 
-    public static KnownInstance getKnownInstanceByAttSubPve(int reportAttitude, Substitutions reportSubs) {
+    public KnownInstance getKnownInstanceByAttSubPve(int reportAttitude, Substitutions reportSubs) {
         if (getPositiveKInstances().containsKey(reportAttitude)) {
 
             Hashtable<Substitutions, KnownInstance> collectionOfSetsPve = getPositiveKInstances().get(reportAttitude);
@@ -235,7 +215,7 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
         throw new UnsupportedOperationException("Unimplemented method 'iterator'");
     }
 
-    public static void printKnownInstances(
+    public void printKnownInstances(
             Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> positiveKInstances,
             Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> negativeKInstances) {
         System.out.println("Positive Known Instances:");
@@ -255,6 +235,14 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
                 System.out.println(instance + " : " + instances.get(instance).toString());
             }
         }
+    }
+
+    public Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> getPositiveKInstances() {
+        return positiveKInstances;
+    }
+
+    public Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> getNegativeKInstances() {
+        return negativeKInstances;
     }
 
 }

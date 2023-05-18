@@ -15,7 +15,11 @@ import mindG.mgip.Scheduler;
 import mindG.mgip.matching.Match;
 import mindG.mgip.matching.Substitutions;
 import mindG.mgip.requests.*;
+import mindG.mgip.rules.AndOr;
+import mindG.mgip.rules.Thresh;
+import mindG.network.cables.DownCable;
 import mindG.network.cables.DownCableSet;
+import mindG.network.cables.UpCable;
 
 public class PropositionNode extends Node {
     protected ChannelSet outgoingChannels;
@@ -42,6 +46,87 @@ public class PropositionNode extends Node {
         forwardChannels = new ChannelSet();
         forwardDone = false;
         knownInstances = new KnownInstanceSet();
+    }
+
+    /***
+     * Method getting the NodeSet that this current node is considered a consequent
+     * to
+     * 
+     * @return
+     */
+    public NodeSet getUpConsDomRuleNodeSet() {
+        NodeSet ret = new NodeSet();
+        UpCable consequentCable = this.getUpCableSet().get("consequent");
+        UpCable argsCable = this.getUpCableSet().get("args");
+        if (argsCable != null) {
+            ret.addAllTo(argsCable.getNodeSet());
+        }
+        if (consequentCable != null) {
+            ret.addAllTo(consequentCable.getNodeSet());
+        }
+        return ret;
+    }
+
+    /***
+     * Method getting the NodeSet that this current node is considered an antecedent
+     * to
+     * 
+     * @return
+     */
+    public NodeSet getUpAntDomRuleNodeSet() {
+        NodeSet ret = new NodeSet();
+        UpCable argsCable = this.getUpCableSet().get("args");
+        UpCable antCable = this.getUpCableSet().get("antecedent");
+        if (argsCable != null) {
+            ret.addAllTo(argsCable.getNodeSet());
+        }
+        if (antCable != null) {
+            ret.addAllTo(antCable.getNodeSet());
+        }
+
+        return ret;
+    }
+
+    /***
+     * Method getting the NodeSet of the antecedents for this current node
+     * 
+     * @return
+     */
+
+    public NodeSet getDownAntArgNodeSet() {
+        NodeSet ret = new NodeSet();
+        DownCable argsCable = this.getDownCableSet().get("args");
+        DownCable antCable = this.getDownCableSet().get("antecedent");
+        if (argsCable != null) {
+            ret.addAllTo(argsCable.getNodeSet());
+        }
+        if (antCable != null) {
+            ret.addAllTo(antCable.getNodeSet());
+        }
+
+        return ret;
+    }
+
+    public Substitutions onlyRelevantSubs(Substitutions filterSubs) {
+        System.out.println("i entered");
+        NodeSet freeVariablesSet = this.getFreeVariables();
+        System.out.println(freeVariablesSet.toString());
+        Substitutions relevantSubs = new Substitutions();
+        for (Node variableNode : freeVariablesSet.getValues()) {
+            for (Node var : filterSubs.getMap().keySet()) {
+                System.out.println(filterSubs.getMap().keySet());
+                System.out.println("enterrrr");
+                Node value = filterSubs.getMap().get(var);
+                if (var.getName().equals(variableNode.getName())) {
+                    System.out.println("1");
+                    relevantSubs.add(var, value);
+                }
+            }
+        }
+        if (relevantSubs.size() == 0) {
+            System.out.println("There are no Relevant Substitutions");
+        }
+        return relevantSubs;
     }
 
     /***
@@ -208,9 +293,9 @@ public class PropositionNode extends Node {
     protected void sendReportToNodeSet(NodeSet ns, Report toBeSent) {
         for (Node sentTo : ns) {
             Substitutions reportSubs = toBeSent.getSubstitutions();
-            Request newRequest = establishChannel(ChannelType.AntRule, sentTo, null, reportSubs,
-                    toBeSent.getContextName(),
-                    toBeSent.getAttitude(), -1, toBeSent.getRequesterNode());
+            Request newRequest = establishChannel(ChannelType.MATCHED, sentTo, null, reportSubs,
+                    toBeSent.getContextName(), toBeSent.getAttitude(),
+                    -1, toBeSent.getRequesterNode());
             if (toBeSent.getInferenceType() == InferenceType.FORWARD) {
                 forwardChannels.addChannel(newRequest.getChannel());
 
@@ -325,6 +410,7 @@ public class PropositionNode extends Node {
             PropositionSet supportPropSet = new PropositionSet();
             supportPropSet.add(this);
             Substitutions subs = substitutions == null ? new Substitutions() : substitutions;
+            Substitutions subs2 = new Substitutions();
             Report toBeSent = new Report(subs, supportPropSet, currentAttitudeID, reportSign, inferenceType, null);
             toBeSent.setContextName(currentContextName);
             toBeSent.setReportType(channelType);
@@ -336,12 +422,15 @@ public class PropositionNode extends Node {
                         sendReportToMatches(matchesReturned, toBeSent);
                     break;
                 case AntRule:
+                    NodeSet rulesNodes = getUpAntDomRuleNodeSet();
+                    sendReportToNodeSet(rulesNodes, toBeSent);
                     if (this instanceof RuleNode) {
-                        NodeSet antecedentsNodes = new NodeSet();
-                        // ((RuleNode) this).getDownAntNodeSet();
-                        sendReportToNodeSet(antecedentsNodes, toBeSent);
-                        break;
+                        NodeSet argAntNodes = getDownAntArgNodeSet();
+                        sendRequestsToNodeSet(argAntNodes, subs, subs2, currentContextName, currentAttitudeID,
+                                channelType, this);
+
                     }
+                    break;
 
                 default:
                     break;
@@ -374,11 +463,9 @@ public class PropositionNode extends Node {
                                 currentAttitudeID, channelType, this);
                     break;
                 case RuleCons:
-                    NodeSet dominatingRules = new NodeSet();
-                    // getUpConsNodeSet();
+                    NodeSet dominatingRules = getUpConsDomRuleNodeSet();
                     Substitutions filtersubs = substitutions == null ? new Substitutions() : substitutions;
                     Substitutions switchSubs = new Substitutions();
-
                     sendRequestsToNodeSet(dominatingRules, filtersubs, switchSubs, currentContextName,
                             currentAttitudeID,
                             channelType, this);
@@ -402,14 +489,15 @@ public class PropositionNode extends Node {
      * is not bound or not.
      * 
      * @param subs reference substitutions
-     * @return boolean computed from VariableNodeStats.areAllVariablesBound()
+     * @return boolean
      */
-    public boolean isVariableNodeNotBound(Substitutions subs) {
-        if (this.isVariable()) {
+    public boolean isOpenNodeNotBound(Substitutions subs) {
+        if (this.isOpen()) {
             boolean isBound = false;
             NodeSet freeVariableSet = this.getFreeVariables();
-            for (Node freeVariable : freeVariableSet) {
+            for (Node freeVariable : freeVariableSet.getValues()) {
                 isBound = subs.isFreeVariableBound(freeVariable);
+                System.out.println("isBound" + isBound);
                 if (!isBound)
                     return true;
 
@@ -426,7 +514,7 @@ public class PropositionNode extends Node {
         boolean signReport = false;
         KnownInstance compatibleReport = knownInstances.getKnownInstanceByAttSubNve(reportAttitude, reportSubs);
         if (compatibleReport == null) {
-            compatibleReport = KnownInstanceSet.getKnownInstanceByAttSubPve(reportAttitude, reportSubs);
+            compatibleReport = knownInstances.getKnownInstanceByAttSubPve(reportAttitude, reportSubs);
             signReport = true;
         }
         boolean channelCheck = report.getReportType() == ReportType.MATCHED
@@ -447,13 +535,12 @@ public class PropositionNode extends Node {
 
         Scheduler.initiate();
         String currentContextName = Controller.getContextName();
-        int currentattitudeID = Controller.getAttitudeID();
-        // anhi attitude?
+        int currentattitudeID = 0;
+        // given by the user
 
         getNodesToSendRequest(ChannelType.RuleCons, currentContextName, currentattitudeID, null);
 
         getNodesToSendRequest(ChannelType.MATCHED, currentContextName, currentattitudeID, null);
-        // what to return here ?
         Scheduler.schedule();
     }
 
@@ -497,8 +584,6 @@ public class PropositionNode extends Node {
         int currentAttitude = currentChannel.getAttitudeID();
         Node requesterNode = currentChannel.getRequesterNode();
         Substitutions reportSubstitutions = new Substitutions();
-        // meaning it is already closed no free variables so new substitutions will def
-        // pass through the filter subs
         PropositionSet supportNodeSet = new PropositionSet();
         if (this.asserted(currentContext, currentAttitude)) {
             supportNodeSet.add((PropositionNode) this);
@@ -508,29 +593,15 @@ public class PropositionNode extends Node {
             NewReport.setReportType(currentChannel.getChannelType());
             sendReport(NewReport, currentRequest.getChannel());
 
-        } else if (this.assertedNegation(currentContext, currentAttitude))
-        // law min we max betpoint le zero khodiha men hazem fa bacheck law el args
-        // asserted if they are asserted fa bab3at el report be -ve
-        {
-
-            supportNodeSet.add((PropositionNode) this);
-            Report NewReport = new Report(reportSubstitutions, supportNodeSet, currentAttitude, false,
-                    InferenceType.BACKWARD, requesterNode);
-            NewReport.setContextName(currentContext);
-            NewReport.setReportType(currentChannel.getChannelType());
-            sendReport(NewReport, currentRequest.getChannel());
-            ;
         } else {
             boolean sentSuccessfully = false;
-            this.getKnownInstances();
-            Collection<KnownInstance> theAlmostPveReportsSet = KnownInstanceSet
+            Collection<KnownInstance> thePveKnownInstancesSet = knownInstances
                     .getPositiveCollectionbyAttribute(
                             currentChannel.getAttitudeID());
-            Iterator ReportIteratorPve = theAlmostPveReportsSet.iterator();
-            for (KnownInstance currentAlmostPveReport : theAlmostPveReportsSet) {
+            for (KnownInstance currentPveKnownInstance : thePveKnownInstancesSet) {
 
-                Report currentPveReport = new Report(currentAlmostPveReport.getSubstitutions(),
-                        currentAlmostPveReport.getSupports(), currentAlmostPveReport.getAttitudeID(),
+                Report currentPveReport = new Report(currentPveKnownInstance.getSubstitutions(),
+                        currentPveKnownInstance.getSupports(), currentPveKnownInstance.getAttitudeID(),
                         true,
                         InferenceType.BACKWARD, requesterNode);
                 currentPveReport.setContextName(currentContext);
@@ -540,14 +611,11 @@ public class PropositionNode extends Node {
                 sentSuccessfully |= sendReport(currentPveReport, currentRequest.getChannel());
 
             }
-
-            this.getKnownInstances();
-            Collection<KnownInstance> theAlmostNveReportsSet = KnownInstanceSet
+            Collection<KnownInstance> theNveKnownInstancesSet = knownInstances
                     .getNegativeCollectionbyAttribute(currentChannel.getAttitudeID());
-            Iterator ReportIteratorNve = theAlmostNveReportsSet.iterator();
-            for (KnownInstance currentAlmostNveReport : theAlmostNveReportsSet) {
-                Report currentNveReport = new Report(currentAlmostNveReport.getSubstitutions(),
-                        currentAlmostNveReport.getSupports(), currentAlmostNveReport.getAttitudeID(),
+            for (KnownInstance currentNveKnownInstance : theNveKnownInstancesSet) {
+                Report currentNveReport = new Report(currentNveKnownInstance.getSubstitutions(),
+                        currentNveKnownInstance.getSupports(), currentNveKnownInstance.getAttitudeID(),
                         false,
                         InferenceType.BACKWARD, requesterNode);
                 currentNveReport.setContextName(currentContext);
@@ -560,10 +628,9 @@ public class PropositionNode extends Node {
 
             Substitutions filterSubs = currentChannel.getFilterSubstitutions();
             Substitutions switchSubs = currentChannel.getSwitcherSubstitutions();
-            if (!sentSuccessfully || isVariableNodeNotBound(filterSubs)) {
+            if (!sentSuccessfully || isOpenNodeNotBound(filterSubs)) {
 
-                NodeSet dominatingRules = new NodeSet();
-                // node set containg all the rule nodes that i am consequent to
+                NodeSet dominatingRules = getUpConsDomRuleNodeSet();
                 NodeSet remainingNodes = removeAlreadyEstablishedChannels(dominatingRules,
                         currentRequest, filterSubs);
                 sendRequestsToNodeSet(remainingNodes, filterSubs, switchSubs, currentContext,
@@ -572,7 +639,6 @@ public class PropositionNode extends Node {
                 if (!(currentChannel instanceof MatchChannel)) {
                     List<Match> matchesList = new ArrayList<Match>();
                     // liha 3elaka bel match class!!
-                    // shoufi hatakhdi el nodes nafsaha men el awel wala eh?
                     List<Match> remainingMatches = removeAlreadyEstablishedChannels(matchesList,
                             currentRequest, filterSubs);
                     sendRequestsToMatches(remainingMatches, filterSubs, switchSubs, currentContext, currentAttitude,
@@ -647,10 +713,6 @@ public class PropositionNode extends Node {
 
     }
 
-    private boolean assertedNegation(String currentContext, int currentAttitude) {
-        return false;
-    }
-
     public void processReports() {
         Report reportHasTurn = Scheduler.getHighQueue().poll();
         // Report reportHasTurn = Scheduler.getHighQueue().peek();
@@ -693,8 +755,7 @@ public class PropositionNode extends Node {
                     // Matcher.match(this);
                     sendReportToMatches(matchesReturned, currentReport);
                 }
-                NodeSet dominatingRules = new NodeSet();
-                // getUpAntNodeSet();
+                NodeSet dominatingRules = getUpAntDomRuleNodeSet();
                 sendReportToNodeSet(dominatingRules, currentReport);
             } else if (forwardReportType && forwardDone) {
                 for (Channel channel : forwardChannels) {
@@ -805,27 +866,24 @@ public class PropositionNode extends Node {
         Network network = new Network();
         Scheduler.initiate();
 
-        Node base1 = Network.createNode("Mariam", "propositionnode"); // Proposition Node
+        Node base1 = Network.createNode("A", "propositionnode"); // Proposition Node
         Node base2 = Network.createVariableNode("X", "propositionnode"); // Proposition Node
-        Node base3 = Network.createNode("Tarek", "propositionnode"); // Proposition
-        Node base4 = Network.createVariableNode("Y", "propositionnode"); // Proposition
-        Node base5 = Network.createNode("Tarek", "propositionnode"); // Proposition
-        Node base6 = Network.createVariableNode("Z", "propositionnode"); // Proposition
-        Node base7 = Network.createNode("jfenkdwn", "propositionnode"); // Proposition
-        Substitutions subs1 = new Substitutions();
-        subs1.add(base2, base1);
-        subs1.add(base4, base5);
-        Substitutions subs2 = new Substitutions();
-        subs2.add(base6, base5);
-        // subs2.add(base2, base1);
+        Node base4 = Network.createVariableNode("X", "propositionnode"); // Proposition Node
 
-        System.out.println(subs1.toString());
-        Channel matchChannel1 = new MatchChannel(null, subs1, "reality", 2, 0, base3);
-        // Channel channel2 = new AntecedentToRuleChannel(null, null, "fiction", 2,
-        // null);
-        Report newReport = new Report(subs2, null, 1, true, InferenceType.BACKWARD, base3);
-        newReport.setContextName("reality");
-        System.out.println(((PropositionNode) base1).sendReport(newReport, matchChannel1));
-        Scheduler.printHighQueue();
+        Node base3 = Network.createNode("B", "propositionnode"); // Proposition
+        Node base5 = Network.createNode("C", "propositionnode"); // Proposition
+        Node base6 = Network.createVariableNode("Y", "propositionnode"); // Proposition
+        Node base7 = Network.createVariableNode("Z", "propositionnode"); // Proposition
+
+        Substitutions subs1 = new Substitutions();
+        subs1.add(base2, base3);
+        subs1.add(base4, base1);
+        subs1.add(base6, base5);
+
+        NodeSet freeVariables = new NodeSet();
+        freeVariables.add(base7);
+        base5.setFreeVariableSet(freeVariables);
+        Substitutions newSubs = ((PropositionNode) base5).onlyRelevantSubs(subs1);
+        System.out.println(newSubs.toString());
     }
 }

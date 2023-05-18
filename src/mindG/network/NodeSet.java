@@ -134,7 +134,7 @@ public class NodeSet implements Iterable<Node> {
 
     @Override
     public Iterator<Node> iterator() {
+        return null;
         // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'iterator'");
     }
 }

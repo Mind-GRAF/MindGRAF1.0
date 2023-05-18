@@ -34,12 +34,9 @@ public class Channel {
      * @return boolean
      */
     public boolean testReportToSend(Report report) {
-        System.out.println(report.getSubstitutions().toString());
-        boolean passTest = report.getSubstitutions().isSubsetOf((filterSubstitutions));
-        System.out.println("flag is " + passTest);
+        boolean passTest = filterSubstitutions.filtertest(report.getSubstitutions());
         if (passTest && report.anySupportAssertedInAttitudeContext(contextName, attitudeID)) {
-            Substitutions newReportSubs = Substitutions.switchReport(report.getSubstitutions(),
-                    getSwitcherSubstitutions());
+            Substitutions newReportSubs = report.getSubstitutions().switchReport(getSwitcherSubstitutions());
             report.setSubstitutions(newReportSubs);
             Scheduler.addToHighQueue(report);
 

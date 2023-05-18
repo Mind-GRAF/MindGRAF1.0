@@ -195,8 +195,69 @@ Scheduler.printHighQueue();
 
 
 
+//switchSubs
+
+Network network = new Network();
+Scheduler.initiate();
+
+Node base1 = Network.createNode("X", "propositionnode"); // Proposition Node
+Node base2 = Network.createVariableNode("A", "propositionnode"); // Proposition Node
+Node base3 = Network.createNode("Y", "propositionnode"); // Proposition
+Node base4 = Network.createVariableNode("B", "propositionnode"); // Proposition
+Node base5 = Network.createNode("Z", "propositionnode"); // Proposition
+Node base6 = Network.createVariableNode("Y", "propositionnode"); // Proposition
+Substitutions subs1 = new Substitutions();
+subs1.add(base2, base1);
+subs1.add(base4, base3);
+Substitutions subs2 = new Substitutions();
+subs2.add(base6, base5);
+Substitutions newSubs = subs1.switchReport(subs2);
+System.out.println(newSubs.toString());
 
 
+//openNodeNotBound
+Network network = new Network();
+Scheduler.initiate();
 
+Node base1 = Network.createNode("X", "propositionnode"); // Proposition Node
+Node base2 = Network.createVariableNode("A", "propositionnode"); // Proposition Node
+Node base3 = Network.createNode("Y", "propositionnode"); // Proposition
+Node base4 = Network.createVariableNode("B", "propositionnode"); // Proposition
+Node base5 = Network.createNode("Z", "propositionnode"); // Proposition
+Node base6 = Network.createVariableNode("Y", "propositionnode"); // Proposition
+Substitutions subs1 = new Substitutions();
+subs1.add(base4, base3);
+subs1.add(base2, base1);
+NodeSet freeVariables = new NodeSet();
+freeVariables.add(base2);
+freeVariables.add(base6);
+freeVariables.add(base4);
+base5.setFreeVariableSet(freeVariables);
+boolean newSubs = ((PropositionNode) base5).isOpenNodeNotBound(subs1);
+System.out.println(newSubs);
+
+//onlyRelevantSubs
+Network network = new Network();
+Scheduler.initiate();
+
+Node base1 = Network.createNode("A", "propositionnode"); // Proposition Node
+Node base2 = Network.createVariableNode("X", "propositionnode"); // Proposition Node
+Node base4 = Network.createVariableNode("X", "propositionnode"); // Proposition Node
+
+Node base3 = Network.createNode("B", "propositionnode"); // Proposition
+Node base5 = Network.createNode("C", "propositionnode"); // Proposition
+Node base6 = Network.createVariableNode("Y", "propositionnode"); // Proposition
+Node base7 = Network.createVariableNode("Z", "propositionnode"); // Proposition
+
+Substitutions subs1 = new Substitutions();
+subs1.add(base2, base3);
+subs1.add(base4, base1);
+subs1.add(base6, base5);
+
+NodeSet freeVariables = new NodeSet();
+freeVariables.add(base7);
+base5.setFreeVariableSet(freeVariables);
+Substitutions newSubs = ((PropositionNode) base5).onlyRelevantSubs(subs1);
+System.out.println(newSubs.toString());
 
 

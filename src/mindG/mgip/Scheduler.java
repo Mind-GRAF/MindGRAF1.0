@@ -61,7 +61,7 @@ public class Scheduler {
             while (!highQueue.isEmpty()) {
                 System.out.println("\n\u2202 Runner: In HighQueue");
                 Report toRunNext = highQueue.peek();
-                // System.out.println("Processing " + toRunNext.getIdentifier() + " reports.");
+                System.out.println("Processing " + toRunNext.stringifyReport() + " reports.");
                 Node requesterNode = toRunNext.getRequesterNode();
                 requesterNode.processReports();
                 sequence += 'H';
@@ -69,10 +69,10 @@ public class Scheduler {
             while (!lowQueue.isEmpty()) {
                 System.out.println("\n\u2202 Runner: In LowQueue");
                 Request toRunNext = lowQueue.peek();
-                // System.out.println("Processing " + toRunNext.getIdentifier() + " requests.");
+                System.out.println("Processing " + toRunNext.stringifyRequest() + " requests.");
                 Node reporterNode = toRunNext.getReporterNode();
                 reporterNode.processRequests();
-                // sequence += 'L';
+                sequence += 'L';
                 if (!highQueue.isEmpty())
                     continue main;
             }

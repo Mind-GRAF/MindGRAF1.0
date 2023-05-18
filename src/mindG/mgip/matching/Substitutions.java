@@ -55,21 +55,47 @@ public class Substitutions {
     }
 
     // method for the switch substitutions
-    public static Substitutions switchReport(Substitutions reportSubstitutions, Substitutions switchSubstitutions) {
+    public Substitutions switchReport(Substitutions switchSubs) {
         Substitutions newReportSubstitutions = new Substitutions();
-        // method men ali add binding we a3mel el new substitution biha
+        for (Node var : map.keySet()) {
+            // System.out.println(var);
+            Node value = map.get(var);
+            // System.out.println(value);
+
+            for (Node var1 : switchSubs.getMap().keySet()) {
+                // System.out.println(var1);
+                Node value1 = switchSubs.getMap().get(var1);
+                // System.out.println("z " + value1);
+
+                if (!var1.getName().equals(value.getName())) {
+                    // System.out.println("in first condition");
+                    newReportSubstitutions.add(var, value);
+                } else {
+                    // System.out.println("in second condition");
+                    newReportSubstitutions.add(var, value1);
+
+                }
+            }
+
+        }
+
         return newReportSubstitutions;
     }
 
     // method for the filter substitutions
-    public boolean filtertest(Substitutions filterSubstitutions) {
-        if (isSubsetOf(filterSubstitutions))
+    public boolean filtertest(Substitutions reportSubstitutions) {
+        if (isSubsetOf(reportSubstitutions))
             return true;
         return false;
 
     }
 
     public boolean isFreeVariableBound(Node freeVariable) {
+        for (Node var : map.keySet()) {
+            if (var.getName().equals(freeVariable.getName())) {
+                return true;
+            }
+        }
         return false;
     }
 
@@ -83,5 +109,17 @@ public class Substitutions {
     @Override
     public String toString() {
         return map.toString();
+    }
+
+    public static void main(String[] args) {
+        Substitutions subs1 = new Substitutions();
+    }
+
+    public Map<Node, Node> getMap() {
+        return map;
+    }
+
+    public void setMap(Map<Node, Node> map) {
+        this.map = map;
     }
 }

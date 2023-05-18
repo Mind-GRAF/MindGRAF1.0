@@ -49,19 +49,22 @@ public abstract class RuleNode extends PropositionNode implements Serializable {
     // on a similar request to currentRequest.
 
     protected void requestAntecedentsNotAlreadyWorkingOn(Request currentRequest, KnownInstance knownInstance) {
-        NodeSet antecedentNodesToMe = this.getDownCableSet().get("antecedent").getNodeSet();
         boolean ruleType = this instanceof Thresh || this instanceof AndOr;
         Channel currentChannel = currentRequest.getChannel();
         String currentContextName = currentChannel.getContextName();
         int currentAttitudeID = currentChannel.getAttitudeID();
         Substitutions filterSubs = currentChannel.getFilterSubstitutions();
         Substitutions switchSubs = currentChannel.getSwitcherSubstitutions();
-
         Substitutions reportSubs = knownInstance.getSubstitutions();
         Substitutions unionSubs = Substitutions.union(filterSubs, reportSubs);
-        NodeSet toBeSentTo = removeAlreadyEstablishedChannels(antecedentNodesToMe, currentRequest, unionSubs, ruleType);
-        sendRequestsToNodeSet(toBeSentTo, unionSubs, switchSubs, currentContextName,
-                currentAttitudeID, ChannelType.AntRule, this);
+
+        NodeSet argumentsCloseToMe = getDownAntArgNodeSet();
+        NodeSet argNodesToConsiderClose = removeAlreadyEstablishedChannels(argumentsCloseToMe,
+                currentRequest,
+                unionSubs, ruleType);
+        sendRequestsToNodeSet(argNodesToConsiderClose, unionSubs, switchSubs, currentContextName,
+                currentAttitudeID,
+                ChannelType.AntRule, this);
     }
 
     // This method is implemented to do certain actions after calling
@@ -92,16 +95,17 @@ public abstract class RuleNode extends PropositionNode implements Serializable {
         Substitutions switchRuleSubs = currentRequest.getChannel().getSwitcherSubstitutions();
         String currentContext = currentRequest.getChannel().getContextName();
         int currentAttitude = currentRequest.getChannel().getAttitudeID();
-        NodeSet antecedentNodesToMe = this.getDownCableSet().get("antecedent").getNodeSet();
         boolean ruleType = this instanceof Thresh || this instanceof AndOr;
-        NodeSet antNodesToConsider = removeAlreadyEstablishedChannels(
-                antecedentNodesToMe,
+
+        NodeSet antArgNodeSet = getDownAntArgNodeSet();
+        NodeSet remainingAntArgNodeSet = removeAlreadyEstablishedChannels(antArgNodeSet,
                 currentRequest,
                 filterRuleSubs, ruleType);
-        sendRequestsToNodeSet(antNodesToConsider, filterRuleSubs, switchRuleSubs, currentContext,
+        sendRequestsToNodeSet(remainingAntArgNodeSet, filterRuleSubs, switchRuleSubs, currentContext,
                 currentAttitude,
                 ChannelType.AntRule, this);
         return;
+
     }
 
     /***
@@ -153,63 +157,57 @@ public abstract class RuleNode extends PropositionNode implements Serializable {
      */
     protected void processSingleRequests(Request currentRequest) {
         Channel currentChannel = currentRequest.getChannel();
-        if (currentChannel instanceof AntecedentToRuleChannel || currentChannel instanceof MatchChannel) {
+        if (currentChannel instanceof AntecedentToRuleChannel || currentChannel instanceof MatchChannel)
             super.processSingleRequests(currentRequest);
 
-        } else {
-            MolecularType closedTypeNode = this.getMolecularType();
+        else {
             String currentContext = currentChannel.getContextName();
             int currentAttitude = currentChannel.getAttitudeID();
             Substitutions filterRuleSubs = currentChannel.getFilterSubstitutions();
             Substitutions switchRuleSubs = currentChannel.getSwitcherSubstitutions();
 
-            if (closedTypeNode == MolecularType.CLOSED) {
-                if (super.asserted(currentContext, currentAttitude)) {
-                    NodeSet antecedentNodesToMeClose = new NodeSet();
-                    // hena el mafrood a7ot fel nodeset dih kol el antecedents leya
-                    boolean ruleTypeClose = this instanceof Thresh || this instanceof AndOr;
-                    NodeSet antNodesToConsiderClose = removeAlreadyEstablishedChannels(antecedentNodesToMeClose,
+            if (!this.isOpen()) {
+                if (this.asserted(currentContext, currentAttitude)) {
+                    boolean ruleType = this instanceof Thresh || this instanceof AndOr;
+                    NodeSet antArgCloseToMe = getDownAntArgNodeSet();
+                    NodeSet antArgNodesToConsiderClose = removeAlreadyEstablishedChannels(antArgCloseToMe,
                             currentRequest,
-                            filterRuleSubs, ruleTypeClose);
-                    sendRequestsToNodeSet(antNodesToConsiderClose, filterRuleSubs, switchRuleSubs, currentContext,
+                            filterRuleSubs, ruleType);
+                    sendRequestsToNodeSet(antArgNodesToConsiderClose, filterRuleSubs, switchRuleSubs, currentContext,
                             currentAttitude,
                             ChannelType.AntRule, this);
 
-                } else {
+                } else
                     super.processSingleRequests(currentRequest);
-                }
 
             } else {
-                if (this.isVariable()) {
-                    boolean isNotBound = isVariableNodeNotBound(filterRuleSubs);
-
-                    Collection<KnownInstance> theKnownInstanceSet = KnownInstanceSet.mergeKInstancesBasedOnAtt(
-                            currentChannel.getAttitudeID());
-                    for (KnownInstance currentKnownInstance : theKnownInstanceSet) {
-                        Substitutions currentAlmostSubs = currentKnownInstance.getSubstitutions();
-                        boolean subSetCheck = currentRequest.getChannel().getFilterSubstitutions()
-                                .isSubsetOf(currentAlmostSubs);
-
-                        boolean supportCheck = currentKnownInstance.anySupportAssertedInAttitudeContext(
-                                currentContext,
-                                currentAttitude);
-                        if (subSetCheck && supportCheck) {
-                            if (!isNotBound) {
-                                requestAntecedentsNotAlreadyWorkingOn(currentRequest);
-                                return;
-                            } else
-                                requestAntecedentsNotAlreadyWorkingOn(currentRequest, currentKnownInstance);
-                        }
-
+                boolean isNotBound = isOpenNodeNotBound(filterRuleSubs);
+                Collection<KnownInstance> theKnownInstanceSet = knownInstances.mergeKInstancesBasedOnAtt(
+                        currentChannel.getAttitudeID());
+                for (KnownInstance currentKnownInstance : theKnownInstanceSet) {
+                    Substitutions currentKISubs = currentKnownInstance.getSubstitutions();
+                    Substitutions onlySubsBindFreeVar = onlyRelevantSubs(filterRuleSubs);
+                    boolean subSetCheck = onlySubsBindFreeVar
+                            .isSubsetOf(currentKISubs);
+                    boolean supportCheck = currentKnownInstance.anySupportAssertedInAttitudeContext(
+                            currentContext,
+                            currentAttitude);
+                    if (subSetCheck && supportCheck) {
+                        if (!isNotBound) {
+                            requestAntecedentsNotAlreadyWorkingOn(currentRequest);
+                            return;
+                        } else
+                            requestAntecedentsNotAlreadyWorkingOn(currentRequest, currentKnownInstance);
                     }
-                    super.processSingleRequests(currentRequest);
-                    return;
 
                 }
+                super.processSingleRequests(currentRequest);
+                return;
 
             }
 
         }
+
     }
 
     /***
@@ -247,8 +245,7 @@ public abstract class RuleNode extends PropositionNode implements Serializable {
                         //// tempChannel);
                         // handleResponseOfApplyRuleHandler(ruleResponse, currentReport, tempChannel);
                     } else {
-                        NodeSet dominatingRules = new NodeSet();
-                        // nodeset with all the dominating rules for which i am antecedent to
+                        NodeSet dominatingRules = getUpAntDomRuleNodeSet();
                         NodeSet toBeSentToDom = removeAlreadyEstablishedChannels(dominatingRules, tempRequest,
                                 currentReportSubs, false);
                         sendRequestsToNodeSet(toBeSentToDom, currentReportSubs, null, currentReportContextName,
@@ -263,7 +260,7 @@ public abstract class RuleNode extends PropositionNode implements Serializable {
                     }
                 } else {
                     /* always sue the extracted report subs in the requests */
-                    Collection<KnownInstance> theKnownInstanceSet = KnownInstanceSet.mergeKInstancesBasedOnAtt(
+                    Collection<KnownInstance> theKnownInstanceSet = knownInstances.mergeKInstancesBasedOnAtt(
                             tempChannel.getAttitudeID());
                     for (KnownInstance currentKnownInstance : theKnownInstanceSet) {
                         Substitutions currentKISubs = currentKnownInstance.getSubstitutions();
@@ -286,12 +283,27 @@ public abstract class RuleNode extends PropositionNode implements Serializable {
                     // currentChannel);
                     // handleResponseOfApplyRuleHandler(ruleResponse, currentReport,
                     // currentChannel);
-                    NodeSet dominatingRules = new NodeSet();
+                    NodeSet dominatingRules = this.getUpCableSet().get("consequent").getNodeSet();
+
                     NodeSet toBeSentToDom = removeAlreadyEstablishedChannels(dominatingRules, tempRequest,
                             currentReportSubs, false);
-                    sendRequestsToNodeSet(toBeSentToDom, currentReportSubs, null, currentReportContextName,
+                    Substitutions switchSubs = new Substitutions();
+                    sendRequestsToNodeSet(toBeSentToDom, currentReportSubs, switchSubs, currentReportContextName,
                             currentReportAttitudeID,
-                            ChannelType.AntRule, this);
+                            ChannelType.RuleCons, this);
+                    NodeSet dominatingThreshAndOrRules = this.getUpCableSet().get("args").getNodeSet();
+                    NodeSet actualThreshAndOr = new NodeSet();
+                    for (Node currentNode : dominatingThreshAndOrRules) {
+                        if (currentNode instanceof Thresh || currentNode instanceof AndOr)
+                            actualThreshAndOr.add(currentNode);
+
+                    }
+                    NodeSet remainingThreshAndOrNodes = removeAlreadyEstablishedChannels(actualThreshAndOr,
+                            tempRequest, currentReportSubs, true);
+                    sendRequestsToNodeSet(remainingThreshAndOrNodes, currentReportSubs, switchSubs,
+                            currentReportContextName,
+                            currentReportAttitudeID,
+                            ChannelType.RuleCons, this);
                     List<Match> matchingNodes = new ArrayList<>();
                     // Matcher.match(this, ruleNodeExtractedSubs);
                     List<Match> toBeSentToMatch = removeAlreadyEstablishedChannels(matchingNodes, tempRequest,
