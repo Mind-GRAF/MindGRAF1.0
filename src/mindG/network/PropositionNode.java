@@ -107,28 +107,6 @@ public class PropositionNode extends Node {
         return ret;
     }
 
-    public Substitutions onlyRelevantSubs(Substitutions filterSubs) {
-        System.out.println("i entered");
-        NodeSet freeVariablesSet = this.getFreeVariables();
-        System.out.println(freeVariablesSet.toString());
-        Substitutions relevantSubs = new Substitutions();
-        for (Node variableNode : freeVariablesSet.getValues()) {
-            for (Node var : filterSubs.getMap().keySet()) {
-                System.out.println(filterSubs.getMap().keySet());
-                System.out.println("enterrrr");
-                Node value = filterSubs.getMap().get(var);
-                if (var.getName().equals(variableNode.getName())) {
-                    System.out.println("1");
-                    relevantSubs.add(var, value);
-                }
-            }
-        }
-        if (relevantSubs.size() == 0) {
-            System.out.println("There are no Relevant Substitutions");
-        }
-        return relevantSubs;
-    }
-
     /***
      * Method handling all types of sending requests, taking different inputs to
      * handle different cases.
@@ -522,9 +500,11 @@ public class PropositionNode extends Node {
         if (compatibleReport == null) {
             if (channelCheck)
                 knownInstances.addKnownInstance(report);
-        }
+            return report;
 
-        return report;
+        }
+        return null;
+
     }
 
     /***
@@ -534,7 +514,7 @@ public class PropositionNode extends Node {
     public void deduce() {
 
         Scheduler.initiate();
-        String currentContextName = Controller.getContextName();
+        String currentContextName = Controller.getCurrContext();
         int currentattitudeID = 0;
         // given by the user
 
@@ -551,10 +531,9 @@ public class PropositionNode extends Node {
     public void add() {
 
         Scheduler.initiate();
-        String currentContextName = Controller.getContextName();
-        int currentAttitudeID = Controller.getAttitudeID();
+        String currentContextName = Controller.getCurrContext();
+        int currentAttitudeID = 0;
         boolean reportSign = true;
-        // Controller.isNegated(this);
 
         getNodesToSendReport(ChannelType.AntRule, currentContextName, currentAttitudeID, null, reportSign,
                 InferenceType.FORWARD);
@@ -732,46 +711,44 @@ public class PropositionNode extends Node {
     protected void processSingleReports(Report currentReport) {
 
         Report reportToBeBroadcasted = attemptAddingReportToKnownInstances(currentReport);
-        if (reportToBeBroadcasted != null) {
-            boolean forwardReportType = reportToBeBroadcasted.getInferenceType() == InferenceType.FORWARD;
-            if (currentReport.getReportType() == ReportType.RuleCons) {
-                PropositionNode supportNode = new PropositionNode("M", forwardReportType);
-                // hena el method el babuild biha node bl new subs
-                // buildNodeSubstitutions(currentReport.getSubstitutions());
-                if (supportNode != null) {
-                    supportNode.addJustificationBasedSupport(reportToBeBroadcasted.getSupport());
-                    // bazawed lel node justification support
-                    PropositionSet reportSupportPropSet = new PropositionSet();
-                    reportSupportPropSet.add(supportNode);
-                    reportToBeBroadcasted.setSupport(reportSupportPropSet);
-                }
+        boolean forwardReportType = reportToBeBroadcasted.getInferenceType() == InferenceType.FORWARD;
+        if (currentReport.getReportType() == ReportType.RuleCons) {
+            ArrayList<Substitutions> subs = new ArrayList<Substitutions>();
+            subs.add(reportToBeBroadcasted.getSubstitutions());
+            PropositionNode supportNode = (PropositionNode) applySubstitution(subs);
+            if (supportNode != null) {
+                supportNode.addJustificationBasedSupport(reportToBeBroadcasted.getSupport());
+                PropositionSet reportSupportPropSet = new PropositionSet();
+                reportSupportPropSet.add(supportNode);
+                reportToBeBroadcasted.setSupport(reportSupportPropSet);
             }
-            // TODO: GRADED PROPOSITIONS HANDLING REPORTS
-            if (forwardReportType && !forwardDone) {
-                forwardDone = true;
-                if (currentReport.getReportType() == ReportType.MATCHED) {
-                    List<Match> matchesReturned = new ArrayList<Match>();
-                    // list of matches with a node
-                    // Matcher.match(this);
-                    sendReportToMatches(matchesReturned, currentReport);
-                }
-                NodeSet dominatingRules = getUpAntDomRuleNodeSet();
-                sendReportToNodeSet(dominatingRules, currentReport);
-            } else if (forwardReportType && forwardDone) {
-                for (Channel channel : forwardChannels) {
-                    sendReport(currentReport, channel);
-                }
-            } else
-                broadcastReport(reportToBeBroadcasted);
-
         }
-        // if ((this instanceof RuleNode))
-        // Scheduler.addToHighQueue(currentReport);
-        // ;
+        // TODO: GRADED PROPOSITIONS HANDLING REPORTS
+        if (forwardReportType && !forwardDone) {
+            forwardDone = true;
+            if (currentReport.getReportType() != ReportType.MATCHED) {
+                List<Match> matchesReturned = new ArrayList<Match>();
+                // list of matches with a node
+                // Matcher.match(this);
+                sendReportToMatches(matchesReturned, currentReport);
+            }
+            NodeSet dominatingRules = getUpAntDomRuleNodeSet();
+            sendReportToNodeSet(dominatingRules, currentReport);
+        } else if (forwardReportType && forwardDone) {
+            for (Channel channel : forwardChannels) {
+                sendReport(currentReport, channel);
+            }
+        } else
+            broadcastReport(reportToBeBroadcasted);
 
     }
+    // if ((this instanceof RuleNode))
+    // Scheduler.addToHighQueue(currentReport);
+    // ;
 
     private void addJustificationBasedSupport(PropositionSet support) {
+        // TODO Ahmed
+
     }
 
     public ChannelSet getOutgoingChannels() {
@@ -883,7 +860,7 @@ public class PropositionNode extends Node {
         NodeSet freeVariables = new NodeSet();
         freeVariables.add(base7);
         base5.setFreeVariableSet(freeVariables);
-        Substitutions newSubs = ((PropositionNode) base5).onlyRelevantSubs(subs1);
-        System.out.println(newSubs.toString());
+        // Substitutions newSubs = ((PropositionNode) base5).onlyRelevantSubs(subs1);
+        // System.out.println(newSubs.toString());
     }
 }

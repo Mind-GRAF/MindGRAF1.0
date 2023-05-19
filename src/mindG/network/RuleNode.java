@@ -48,6 +48,28 @@ public abstract class RuleNode extends PropositionNode implements Serializable {
     // working
     // on a similar request to currentRequest.
 
+    public Substitutions onlyRelevantSubs(Substitutions filterSubs) {
+        // System.out.println("i entered");
+        NodeSet freeVariablesSet = this.getFreeVariables();
+        // System.out.println(freeVariablesSet.toString());
+        Substitutions relevantSubs = new Substitutions();
+        for (Node variableNode : freeVariablesSet.getValues()) {
+            for (Node var : filterSubs.getMap().keySet()) {
+                // System.out.println(filterSubs.getMap().keySet());
+                // System.out.println("enterrrr");
+                Node value = filterSubs.getMap().get(var);
+                if (var.getName().equals(variableNode.getName())) {
+                    // System.out.println("1");
+                    relevantSubs.add(var, value);
+                }
+            }
+        }
+        if (relevantSubs.size() == 0) {
+            System.out.println("There are no Relevant Substitutions in the input substitutions");
+        }
+        return relevantSubs;
+    }
+
     protected void requestAntecedentsNotAlreadyWorkingOn(Request currentRequest, KnownInstance knownInstance) {
         boolean ruleType = this instanceof Thresh || this instanceof AndOr;
         Channel currentChannel = currentRequest.getChannel();
@@ -104,7 +126,6 @@ public abstract class RuleNode extends PropositionNode implements Serializable {
         sendRequestsToNodeSet(remainingAntArgNodeSet, filterRuleSubs, switchRuleSubs, currentContext,
                 currentAttitude,
                 ChannelType.AntRule, this);
-        return;
 
     }
 
@@ -188,7 +209,7 @@ public abstract class RuleNode extends PropositionNode implements Serializable {
                     Substitutions currentKISubs = currentKnownInstance.getSubstitutions();
                     Substitutions onlySubsBindFreeVar = onlyRelevantSubs(filterRuleSubs);
                     boolean subSetCheck = onlySubsBindFreeVar
-                            .isSubsetOf(currentKISubs);
+                            .compatible(currentKISubs);
                     boolean supportCheck = currentKnownInstance.anySupportAssertedInAttitudeContext(
                             currentContext,
                             currentAttitude);
@@ -198,6 +219,7 @@ public abstract class RuleNode extends PropositionNode implements Serializable {
                             return;
                         } else
                             requestAntecedentsNotAlreadyWorkingOn(currentRequest, currentKnownInstance);
+                        return;
                     }
 
                 }

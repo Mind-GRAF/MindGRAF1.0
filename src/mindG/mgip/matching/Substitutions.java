@@ -54,6 +54,13 @@ public class Substitutions {
         return true;
     }
 
+    public boolean compatible(Substitutions substitutions) {
+        if (isSubsetOf(substitutions))
+            return true;
+        return false;
+
+    }
+
     // method for the switch substitutions
     public Substitutions switchReport(Substitutions switchSubs) {
         Substitutions newReportSubstitutions = new Substitutions();

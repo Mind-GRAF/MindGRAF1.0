@@ -215,7 +215,7 @@ public abstract class Node {
         }
     }
 
-    public Node substitute(ArrayList<Substitutions> substitution) {
+    public Node applySubstitution(ArrayList<Substitutions> substitution) {
         HashMap<String, Node> builtNodes = new HashMap<String, Node>();
         LinkedList<Node> pathTrace = new LinkedList<Node>();
         return this.substituteHelper(this, substitution, builtNodes, pathTrace);

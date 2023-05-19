@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import mindG.mgip.matching.Substitutions;
+import mindG.network.Network;
 import mindG.network.PropositionNode;
 import mindG.network.PropositionSet;
 
@@ -43,8 +44,12 @@ public class KnownInstance {
      */
     public boolean anySupportAssertedInAttitudeContext(String reportContextName,
             int reportAttitudeID) {
-        for (PropositionNode propositionNode : supports) {
-            if (!(propositionNode.asserted(reportContextName, reportAttitudeID)))
+        int[] supportIds = supports.getProps();
+        int currentPropNodeId;
+        for (int index = 0; index < supportIds.length; index++) {
+            currentPropNodeId = supportIds[index];
+            PropositionNode currentNode = (PropositionNode) Network.getNodeById(currentPropNodeId);
+            if (!(currentNode.asserted(reportContextName, reportAttitudeID)))
                 return false;
 
         }
