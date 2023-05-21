@@ -12,4 +12,7 @@ public class ActNode extends Node {
         super(downCableSet);
     }
 
+    public void processIntends() {
+    }
+
 }

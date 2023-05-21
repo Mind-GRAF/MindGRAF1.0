@@ -7,19 +7,22 @@ import java.util.Stack;
 
 import mindG.mgip.requests.Channel;
 import mindG.mgip.requests.Request;
+import mindG.network.ActNode;
 import mindG.network.Node;
 import mindG.network.PropositionNode;
 
 public class Scheduler {
     private static Queue<Report> highQueue;
     private static Queue<Request> lowQueue;
-    private static Stack<Node> actQueue;
+    private static Stack<ActNode> actQueue;
+    private static PropositionNode originOfBackInf;
     private static Hashtable<Report, PropositionNode> forwardAssertedNodes;
+    private static Hashtable<Report, PropositionNode> backwardAssertedReplyNodes;
 
     public static void initiate() {
         highQueue = new ArrayDeque<Report>();
         lowQueue = new ArrayDeque<Request>();
-        actQueue = new Stack<Node>();
+        actQueue = new Stack<ActNode>();
         forwardAssertedNodes = new Hashtable<Report, PropositionNode>();
     }
 
@@ -76,17 +79,17 @@ public class Scheduler {
                 if (!highQueue.isEmpty())
                     continue main;
             }
-            // while (!actQueue.isEmpty()) {
-            // System.out.println("AT ACT QUEUE");
-            // ActNode toRunNext = actQueue.removeLast();
-            // System.out.println(toRunNext + " agenda: " + toRunNext.getAgenda());
-            // System.out.println("\n\n");
-            // toRunNext.processIntends();
-            // sequence += 'A';
-            // if (!highQueue.isEmpty() || !lowQueue.isEmpty()) {
-            // continue main;
-            // }
-            // }
+            while (!actQueue.isEmpty()) {
+                System.out.println("AT ACT QUEUE");
+                ActNode toRunNext = actQueue.pop();
+                // System.out.println(toRunNext + " agenda: " + toRunNext.getAgenda());
+                System.out.println("\n\n");
+                toRunNext.processIntends();
+                sequence += 'A';
+                if (!highQueue.isEmpty() || !lowQueue.isEmpty()) {
+                    continue main;
+                }
+            }
         }
         return sequence;
     }
@@ -111,6 +114,18 @@ public class Scheduler {
     public static void addNodeAssertionThroughFReport(Report report,
             PropositionNode node) {
         forwardAssertedNodes.put(report, node);
+    }
+
+    /***
+     * Method used to keep track of asserted nodes with a specific certain report as
+     * its hash in the hashtable forwardAssertedNodes instance
+     * 
+     * @param report
+     * @param node
+     */
+    public static void addNodeAssertionThroughBReport(Report report,
+            PropositionNode node) {
+        backwardAssertedReplyNodes.put(report, node);
     }
 
     /***
@@ -140,17 +155,6 @@ public class Scheduler {
         Scheduler.forwardAssertedNodes = forwardAssertedNodes;
     }
 
-    public static Request getRequestByChannel(Channel newChannel, Node requesterNode, Node reporterNode) {
-
-        String channelId = newChannel.stringifyChannelID();
-        for (Request request : getLowQueue()) {
-            if (request.getChannel().stringifyChannelID().equals(channelId)) {
-                return request;
-            }
-        }
-        return null;
-    }
-
     public static Queue<Report> getHighQueue() {
         return highQueue;
     }
@@ -159,12 +163,28 @@ public class Scheduler {
         Scheduler.highQueue = highQueue;
     }
 
-    public static Stack<Node> getActQueue() {
+    public static Hashtable<Report, PropositionNode> getBackwardAssertedReplyNodes() {
+        return backwardAssertedReplyNodes;
+    }
+
+    public static void setBackwardAssertedReplyNodes(Hashtable<Report, PropositionNode> backwardAssertedReplyNodes) {
+        Scheduler.backwardAssertedReplyNodes = backwardAssertedReplyNodes;
+    }
+
+    public static Stack<ActNode> getActQueue() {
         return actQueue;
     }
 
-    public static void setActQueue(Stack<Node> actQueue) {
+    public static void setActQueue(Stack<ActNode> actQueue) {
         Scheduler.actQueue = actQueue;
+    }
+
+    public static PropositionNode getOriginOfBackInf() {
+        return originOfBackInf;
+    }
+
+    public static void setOriginOfBackInf(PropositionNode originOfBackInf) {
+        Scheduler.originOfBackInf = originOfBackInf;
     }
 
 }

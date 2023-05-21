@@ -367,6 +367,7 @@ public class PropositionNode extends Node {
 
     public boolean asserted(String desiredContextName, int desiredAttitudeID) {
         return false;
+        // TODO Ahmed
 
     }
 
@@ -388,7 +389,7 @@ public class PropositionNode extends Node {
             PropositionSet supportPropSet = new PropositionSet();
             supportPropSet.add(this);
             Substitutions subs = substitutions == null ? new Substitutions() : substitutions;
-            Substitutions subs2 = new Substitutions();
+            // Substitutions subs2 = new Substitutions();
             Report toBeSent = new Report(subs, supportPropSet, currentAttitudeID, reportSign, inferenceType, null);
             toBeSent.setContextName(currentContextName);
             toBeSent.setReportType(channelType);
@@ -402,12 +403,13 @@ public class PropositionNode extends Node {
                 case AntRule:
                     NodeSet rulesNodes = getUpAntDomRuleNodeSet();
                     sendReportToNodeSet(rulesNodes, toBeSent);
-                    if (this instanceof RuleNode) {
-                        NodeSet argAntNodes = getDownAntArgNodeSet();
-                        sendRequestsToNodeSet(argAntNodes, subs, subs2, currentContextName, currentAttitudeID,
-                                channelType, this);
+                    // if (this instanceof RuleNode) {
+                    // NodeSet argAntNodes = getDownAntArgNodeSet();
+                    // sendRequestsToNodeSet(argAntNodes, subs, subs2, currentContextName,
+                    // currentAttitudeID,
+                    // channelType, this);
 
-                    }
+                    // }
                     break;
 
                 default:
@@ -517,7 +519,7 @@ public class PropositionNode extends Node {
         String currentContextName = Controller.getCurrContext();
         int currentattitudeID = 0;
         // given by the user
-
+        Scheduler.setOriginOfBackInf(this);
         getNodesToSendRequest(ChannelType.RuleCons, currentContextName, currentattitudeID, null);
 
         getNodesToSendRequest(ChannelType.MATCHED, currentContextName, currentattitudeID, null);
@@ -712,6 +714,10 @@ public class PropositionNode extends Node {
 
         Report reportToBeBroadcasted = attemptAddingReportToKnownInstances(currentReport);
         boolean forwardReportType = reportToBeBroadcasted.getInferenceType() == InferenceType.FORWARD;
+        if (this.equals(Scheduler.getOriginOfBackInf())
+                && reportToBeBroadcasted.getInferenceType() == InferenceType.BACKWARD) {
+            Scheduler.addNodeAssertionThroughBReport(reportToBeBroadcasted, this);
+        }
         if (currentReport.getReportType() == ReportType.RuleCons) {
             ArrayList<Substitutions> subs = new ArrayList<Substitutions>();
             subs.add(reportToBeBroadcasted.getSubstitutions());
@@ -723,6 +729,7 @@ public class PropositionNode extends Node {
                 reportToBeBroadcasted.setSupport(reportSupportPropSet);
             }
         }
+
         // TODO: GRADED PROPOSITIONS HANDLING REPORTS
         if (forwardReportType && !forwardDone) {
             forwardDone = true;
@@ -742,9 +749,6 @@ public class PropositionNode extends Node {
             broadcastReport(reportToBeBroadcasted);
 
     }
-    // if ((this instanceof RuleNode))
-    // Scheduler.addToHighQueue(currentReport);
-    // ;
 
     private void addJustificationBasedSupport(PropositionSet support) {
         // TODO Ahmed
