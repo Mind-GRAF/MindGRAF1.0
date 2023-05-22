@@ -1,5 +1,8 @@
 package network;
 
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -14,8 +17,11 @@ import set.NodeSet;
 import cables.DownCable;
 import cables.DownCableSet;
 import caseFrames.Adjustability;
-import components.MyClassCreator;
+import components.CustomClass;
+import components.CustomConstructor;
+import components.CustomMethod;
 import context.Context;
+import exceptions.NoSuchTypeException;
 import nodes.ActNode;
 import nodes.IndividualNode;
 import nodes.MolecularType;
@@ -28,19 +34,18 @@ public class Network {
 	private static HashMap<String, Node> baseNodes;
 	private static HashMap<String,Relation> relations; 
 	private static HashMap<Integer,Node> propositionNodes ; 
-	private static MyClassCreator classCreator;
 	public static HashMap<String, String> quantifiers = new HashMap<String, String>();
-
+	public static HashMap<String,CustomClass> userDefinedClasses = new HashMap<String,CustomClass>();
 	public Network() {
 		nodes = new HashMap<Integer, Node>();
 		molecularNodes = new HashMap<String, Node>();
-		classCreator = new MyClassCreator();
 		baseNodes = new HashMap<String,Node>();
 		propositionNodes = new HashMap<Integer,Node>();
+		relations = new HashMap<String,Relation>() ;
 	}
 	
 	// first constructor for molecular nodes
-	public static Node createNode(String SemanticType,DownCableSet downCableSet) {
+	public static Node createNode(String SemanticType,DownCableSet downCableSet) throws NoSuchTypeException {
 		if(downCableSet.size()==0){
 			return null;
 		}
@@ -63,8 +68,44 @@ public class Network {
 				node = new IndividualNode(downCableSet);
 				break;
 			default:
-				System.out.println("Invalid node type.");
-				return null;
+				if(userDefinedClasses.containsKey(SemanticType)){
+					CustomClass customClass =  userDefinedClasses.get(SemanticType);
+					Class<?> createdClass = customClass.getNewClass();
+						try {
+							node = (Node)customClass.createInstance(createdClass,downCableSet);
+						} catch (InstantiationException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							return null;
+						} catch (IllegalAccessException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							return null;
+						} catch (IllegalArgumentException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							return null;
+						} catch (InvocationTargetException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							return null;
+						} catch (NoSuchMethodException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							return null;
+						} catch (SecurityException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							return null;
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							return null;
+						}
+					
+				}else{
+					throw new NoSuchTypeException("No such Semantic Type, do you want to create a new one ?"); 
+				}
 			}
 			
 			node.fetchFreeVariables();
@@ -86,7 +127,7 @@ public class Network {
 
 	}
 	// second constructor for base nodes
-	public static Node createNode(String name, String SemanticType) {
+	public static Node createNode(String name, String SemanticType) throws NoSuchTypeException {
 		Node node;
 		switch (SemanticType.toLowerCase()) {
 		case "propositionnode":
@@ -100,8 +141,46 @@ public class Network {
 			node = new IndividualNode(name, false);
 			break;
 		default:
-			System.out.println("Invalid node type.");
-			return null;
+			if(userDefinedClasses.containsKey(SemanticType)){
+				CustomClass customClass =  userDefinedClasses.get(SemanticType);
+				Class<?> createdClass = customClass.getNewClass();
+					try {
+						node = (Node)customClass.createInstance(createdClass,name,false);
+					} catch (InstantiationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						return null;
+					} catch (IllegalAccessException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						return null;
+					} catch (IllegalArgumentException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						return null;
+					} catch (InvocationTargetException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						return null;
+					} catch (NoSuchMethodException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						return null;
+					} catch (SecurityException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						return null;
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						return null;
+
+					}
+					
+				
+			}else{
+				throw new NoSuchTypeException("No such Semantic Type, do you want to create a new one ?"); 
+			}
 		}
 		if(node!=null){	
 			if(nodes.containsKey(node.getId()))
@@ -115,7 +194,7 @@ public class Network {
 		return node;
 	}
 	// third constructor for base nodes
-		public static Node createVariableNode(String name, String SemanticType) {
+		public static Node createVariableNode(String name, String SemanticType) throws NoSuchTypeException {
 			Node node;
 			switch (SemanticType.toLowerCase()) {
 			case "propositionnode":
@@ -129,8 +208,44 @@ public class Network {
 				node = new IndividualNode(name, true);
 				break;
 			default:
-				System.out.println("Invalid node type.");
-				return null;
+				if(userDefinedClasses.containsKey(SemanticType)){
+					CustomClass customClass =  userDefinedClasses.get(SemanticType);
+					Class<?> createdClass = customClass.getNewClass();
+						try {
+							node = (Node)customClass.createInstance(createdClass,name,true);
+						} catch (InstantiationException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							return null;
+						} catch (IllegalAccessException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							return null;
+						} catch (IllegalArgumentException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							return null;
+						} catch (InvocationTargetException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							return null;
+						} catch (NoSuchMethodException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							return null;
+						} catch (SecurityException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							return null;
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							return null;
+						}
+					
+				}else{
+					throw new NoSuchTypeException("No such Semantic Type, do you want to create a new one ?"); 
+				}
 			}
 			if(node!=null){	
 				if(nodes.containsKey(node.getId()))
@@ -139,6 +254,26 @@ public class Network {
 			}
 			
 			return node;
+		}
+		public static Relation createRelation(String name, String type, Adjustability adjust, int limit){
+			Relation r = new Relation(name,type,adjust,limit);
+			relations.put(r.getName(), r);
+			return r ;
+		}
+		public static CustomClass createNewSemanticType(String name, String SuperClass, ArrayList<CustomMethod> methods) throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException, IOException{
+			CustomClass c = new CustomClass(name,SuperClass);
+			Class<?>[] params = {String.class,Boolean.class};
+			Object [] arguments = {"name","isVariable"};
+			Class<?>[] params2 = {DownCableSet.class};
+			Object [] arguments2 = {"downCableSet"};
+			CustomConstructor constructor = new CustomConstructor(name,params, arguments);
+			CustomConstructor constructor2 = new CustomConstructor(name,params2, arguments2);
+			ArrayList<CustomConstructor> constructors = new ArrayList<>();
+			constructors.add(constructor);
+			constructors.add(constructor2);
+			Class<?> Hazem = c.createClass(methods,constructors);
+			userDefinedClasses.put(name, c);
+			return c ; 
 		}
 		
 	public static HashMap<String, Relation> getRelations() {
@@ -205,7 +340,7 @@ public class Network {
 		System.out.println( result);
 	}
 
-	public static void main(String[] args) throws ClassCastException {
+	public static void main(String[] args) throws Exception {
 		Network Net = new Network();
 //		Node Z = createvariableNode("Z", "propositionnode");
 //		Node Y = createvariableNode("Y", "propositionnode");
@@ -213,8 +348,8 @@ public class Network {
 //		Node Base = createNode("base", "propositionnode");
 //		quantifiers.put("forall","forall");
 //		
-//		Relation relation = new Relation ("forall", "", Adjustability.EXPAND, 2);
-//		Relation relation2 = new Relation("b", "", Adjustability.EXPAND, 2);
+//		Relation relation = createRelation ("forall", "", Adjustability.EXPAND, 2);
+//		Relation relation2 = createRelation("b", "", Adjustability.EXPAND, 2);
 //		
 //		NodeSet nodeSetX = new NodeSet();
 //		NodeSet nodeSetZ = new NodeSet();
@@ -307,8 +442,8 @@ public class Network {
 //		
 //		quantifiers.put("forall","forall");
 //		
-//		Relation Qrelation = new Relation ("forall", "", Adjustability.EXPAND, 2);
-//		Relation relation = new Relation("relation", "", Adjustability.EXPAND, 2);
+//		Relation Qrelation = createRelation ("forall", "", Adjustability.EXPAND, 2);
+//		Relation relation = createRelation("relation", "", Adjustability.EXPAND, 2);
 //
 //		NodeSet nodeSetX = new NodeSet();
 //		NodeSet nodeSetY = new NodeSet();
@@ -392,10 +527,10 @@ public class Network {
 		Node bob = createNode("bob", "propositionnode");
 		Node know = createNode("know", "propositionnode");
 			
-		Relation agent = new Relation ("agent", "", Adjustability.EXPAND, 2);
-		Relation act = new Relation ("act", "", Adjustability.EXPAND, 2);
-		Relation obj = new Relation ("obj", "", Adjustability.EXPAND, 2);
-		Relation prop = new Relation ("prop", "", Adjustability.EXPAND, 2);
+		Relation agent = createRelation("agent", "", Adjustability.EXPAND, 2);
+		Relation act = createRelation ("act", "", Adjustability.EXPAND, 2);
+		Relation obj = createRelation ("obj", "", Adjustability.EXPAND, 2);
+		Relation prop = createRelation ("prop", "", Adjustability.EXPAND, 2);
 		
 		DownCable d1 = new DownCable(obj,new NodeSet(cs));
 		DownCable d2 = new DownCable(prop,new NodeSet(fun));

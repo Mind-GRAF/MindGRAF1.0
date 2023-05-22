@@ -1,8 +1,12 @@
 package view;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -11,7 +15,8 @@ import java.util.Map;
 
 import cables.DownCable;
 import cables.DownCableSet;
-import components.Substitution;
+
+import components.Substitutions;
 import caseFrames.Adjustability;
 import network.Network;
 import nodes.Node;
@@ -21,20 +26,32 @@ import set.NodeSet;
 public class NetworkUI extends JFrame {
     private JPanel networkPanel;
     private HashMap<String,String> createdNodes; 
-    public NetworkUI() {
+	BufferedImage background = null;
+	BufferedImage nodeImg = null;
+    public NetworkUI() throws IOException {
+		background = ImageIO.read(new File("images\\background.jpg"));
+		nodeImg = ImageIO.read(new File("images\\node.png"));
         createdNodes=new HashMap<String,String>();
         // Set up the UI
         setTitle("Network UI");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setPreferredSize(new Dimension(1200, 800));
         setLayout(new BorderLayout());
-
+        
         // Create and add UI components
-        networkPanel = new JPanel();
+        networkPanel = new JPanel(){
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.drawImage(background, 0, 0, this.getWidth(), this.getHeight(),
+    					this);
+            }
+        };
         networkPanel.setLayout(null); // Use absolute layout for custom node positioning
         networkPanel.setOpaque(false);
+        
         // Display nodes and cables recursively
-        int initialX = 100; // Initial X position for the root node
+        int initialX = 250; // Initial X position for the root node
         int initialY = 50; // Initial Y position for the root node
 
         int levelHeight = 100; // Vertical spacing between levels of nodes
@@ -50,9 +67,10 @@ public class NetworkUI extends JFrame {
 //        Collections.sort(MolIds);
          		
         for (Node node : Network.getMolecularNodes().values()) {
-			if(node.getUpCableSet().isEmpty())
-       createNodeUI(node, networkPanel, initialX, initialY,1, levelHeight,0);
-			initialX+=200;
+			if(node.getUpCableSet().isEmpty()){
+			int x = createNodeUI(node, networkPanel, initialX, initialY,1, levelHeight,0);
+			initialX+=x+300;
+			}
 			
         }
 
@@ -63,7 +81,7 @@ public class NetworkUI extends JFrame {
         setVisible(true);
     }
 
-    private void createNodeUI(Node node, JPanel parentPanel, int x, int y, int currentLevel, int levelHeight,int i) {
+    private int createNodeUI(Node node, JPanel parentPanel, int x, int y, int currentLevel, int levelHeight,int i) {
     	if(createdNodes.containsValue(node.getName())){
     		createdNodes.put(x+","+y,node.getName()+"temp"+i);
     		i++;
@@ -76,14 +94,19 @@ public class NetworkUI extends JFrame {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                g.setColor(Color.GRAY);
+                g.setColor(new Color(100,100,100));
                 g.fillOval(0, 0, getWidth(), getHeight());
+//                g.drawImage(nodeImg, 0, 0, 50, 50,this);
+                
             }
         };
         nodePanel.setPreferredSize(new Dimension(50, 50));
-        
-        nodePanel.setBounds(x, y, 50, 50);
+        nodePanel.setOpaque(false);
+        nodePanel.setBounds(x, y, 55, 55);
         JLabel nameLabel = new JLabel(node.getName());
+        nameLabel.setBounds(x+50, y+50, 100, 100);
+        
+        nameLabel.setForeground(Color.WHITE);
         nodePanel.add(nameLabel);
         parentPanel.add(nodePanel);
         // Create cable panels and child nodes recursively
@@ -127,7 +150,7 @@ public class NetworkUI extends JFrame {
                         protected void paintComponent(Graphics g) {
                             super.paintComponent(g);
                             
-                            g.setColor(Color.BLACK);
+                            g.setColor(Color.WHITE);
                             g.drawLine(parentX+25, parentY+25, currX+50 ,currY );
                             
                         }
@@ -150,12 +173,16 @@ public class NetworkUI extends JFrame {
                     currentX += childSpacing;
                 }
                 }
+                return childCount * childSpacing;
             }
         }
+        return 100;
     }
 
-            public static void main(String[] args) {
+            public static void main(String[] args)throws Exception  {
+            		
                 SwingUtilities.invokeLater(() -> {
+                	try {
                     Network network = new Network();
 //                    Node cs = Network.createNode("cs", "propositionnode");
 //                    Node fun = Network.createNode("fun", "propositionnode");
@@ -164,10 +191,10 @@ public class NetworkUI extends JFrame {
 //                    Node bob = Network.createNode("bob", "propositionnode");
 //                    Node know = Network.createNode("know", "propositionnode");
 //
-//                    Relation agent = new Relation("agent", "", Adjustability.EXPAND, 2);
-//                    Relation act = new Relation("act", "", Adjustability.EXPAND, 2);
-//                    Relation obj = new Relation("obj", "", Adjustability.EXPAND, 2);
-//                    Relation prop = new Relation("prop", "", Adjustability.EXPAND, 2);
+//                    Relation agent = Network.createRelation("agent", "", Adjustability.EXPAND, 2);
+//                    Relation act = Network.createRelation("act", "", Adjustability.EXPAND, 2);
+//                    Relation obj = Network.createRelation("obj", "", Adjustability.EXPAND, 2);
+//                    Relation prop = Network.createRelation("prop", "", Adjustability.EXPAND, 2);
 //
 //                    DownCable d1 = new DownCable(obj, new NodeSet(cs));
 //                    DownCable d2 = new DownCable(prop, new NodeSet(fun));
@@ -188,12 +215,13 @@ public class NetworkUI extends JFrame {
                 	
             		Node Z = Network.createVariableNode("Z", "propositionnode");
             		Node Y = Network.createVariableNode("Y", "propositionnode");
-            		Node X = Network.createVariableNode("X", "propositionnode");
+            		Network.createNewSemanticType("FearNode", "nodes.IndividualNode", null);
+            		Node X = Network.createVariableNode("X", "FearNode");
             		Node Base = Network.createNode("base", "propositionnode");
             		Network.quantifiers.put("forall","forall");
             		
-            		Relation relation = new Relation ("forall", "", Adjustability.EXPAND, 2);
-            		Relation relation2 = new Relation("b", "", Adjustability.EXPAND, 2);
+            		Relation relation = Network.createRelation ("forall", "", Adjustability.EXPAND, 2);
+            		Relation relation2 = Network.createRelation("b", "", Adjustability.EXPAND, 2);
             		
             		NodeSet nodeSetX = new NodeSet();
             		NodeSet nodeSetZ = new NodeSet();
@@ -263,24 +291,25 @@ public class NetworkUI extends JFrame {
             						
             					DownCableSet downCableSetM4 = new DownCableSet(CablesM4);		
             					Node M4 = Network.createNode("propositionnode", downCableSetM4);
-            					
-                				DownCableSet downCableSetM5 = new DownCableSet(dM4);		
-                				Node M5 = Network.createNode("propositionnode", downCableSetM5);
 
-            		System.out.println("-----------------------------------------------------");
+     /*       		System.out.println("-----------------------------------------------------");
             		System.out.println("free vars" + M4.getFreeVariables());
+            		*/
             		
-            		
-//            		Substitution s = new Substitution(Base, Z);
+            		Substitutions s = new Substitutions();
+            		s.add(Y,Base);
 //            		ArrayList<Substitution> substitutionArr = new ArrayList<>();
 //            		substitutionArr.add(s);
-//            		System.out.println(M4);
-////            		System.out.println(M4.clone());
-//            		
-//            		System.out.println(M4.substitute(substitutionArr));
+            		System.out.println(M4);
+//            		System.out.println(M4.clone());
+            		
+            		System.out.println("Hi" + M4.applySubstitution(s));
 //            		network.printNodes();
 
                     new NetworkUI();
+                	}catch(Exception e){
+                		e.printStackTrace();
+                	}
                 });
             }
         }
