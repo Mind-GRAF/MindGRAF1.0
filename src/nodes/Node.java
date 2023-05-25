@@ -46,7 +46,8 @@ public abstract class Node {
 	public Node(DownCableSet downCables) { // constructor for molecular nodes
 
 		this.id = count;
-		this.name = "M" + Network.getMolecularNodes().size();
+		this.name = "M" + Network.MolecularCount;
+
 
 		syntacticType = Syntactic.MOLECULAR;
 		if (downCables == null || downCables.size() == 0)
@@ -266,9 +267,9 @@ public abstract class Node {
 			HashMap<String, Node> builtNodes, LinkedList<Node> pathTrace)
 			throws NoSuchTypeException {
 		pathTrace.add(this);
+		String Semantic = this.getClass().getSimpleName();
 		if (this.isBase() || this.isVariable()) {
 
-			String Semantic = this.getClass().getSimpleName();
 
 			for (Entry<Node, Node> sub : substitutions.getMap().entrySet()) {
 				if (this.isVariable()) {
@@ -305,7 +306,6 @@ public abstract class Node {
 			pathTrace.removeLast();
 			return n;
 		} else {
-			String Semantic = this.getClass().getSimpleName();
 
 			HashMap<String, DownCable> downCables = new HashMap<String, DownCable>();
 			for (DownCable downCable : this.getDownCableSet().getValues()) {

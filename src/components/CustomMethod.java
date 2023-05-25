@@ -7,13 +7,16 @@ public class CustomMethod {
 	private String methodCode ;
 	private Class<?> returnType ;
 	private ArrayList<Class<?>> methodParams;
-	private ArrayList<Object> methodArgs ; 
+	private ArrayList<String> methodArgs ; 
 	
 	public CustomMethod(String methodName, String methodCode, Class<?> returnType,
-			ArrayList<Class<?>> methodParams, ArrayList<Object> methodArgs) {
+			ArrayList<Class<?>> methodParams, ArrayList<String> methodArgs) {
 		super();
 		this.methodName = methodName;
 		this.methodCode = methodCode;
+		if(returnType==null)
+			this.returnType=void.class; 
+		else
 		this.returnType = returnType;
 		if(methodParams!=null)
 			this.methodParams = methodParams;
@@ -62,13 +65,13 @@ public class CustomMethod {
 		return methodParams;
 	}
 	public void setMethodParams(ArrayList<Class<?>> methodParams) {
-		methodParams = methodParams;
+		this.methodParams = methodParams;
 	}
-	public ArrayList<Object> getMethodArgs() {
+	public ArrayList<String> getMethodArgs() {
 		return methodArgs;
 	}
-	public void setMethodArgs(ArrayList<Object> methodArgs) {
-		methodArgs = methodArgs;
+	public void setMethodArgs(ArrayList<String> methodArgs) {
+		this.methodArgs = methodArgs;
 	}
 
 }

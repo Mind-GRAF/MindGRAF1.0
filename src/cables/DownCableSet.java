@@ -56,6 +56,17 @@ public class DownCableSet {
 		}
 		return result;
 	}
+	public String getMolecularSetKey() {
+		String result = "";
+		int counter = 1;
+		for (DownCable c : this.getValues()) {
+		
+			result += c.getRelation().getName() + (counter == this.size() ? "" : "_");
+			
+			counter++;
+		}
+		return result;
+	}
 	public String getMolecularNodeKey() {
 		String result = "";
 		int counter = 1;

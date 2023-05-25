@@ -15,7 +15,7 @@ import java.util.Map;
 
 import cables.DownCable;
 import cables.DownCableSet;
-
+import cables.UpCable;
 import components.Substitutions;
 import caseFrames.Adjustability;
 import network.Network;
@@ -43,8 +43,7 @@ public class NetworkUI extends JFrame {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                g.drawImage(background, 0, 0, this.getWidth(), this.getHeight(),
-    					this);
+//                g.drawImage(background, 0, 0, this.getWidth(), this.getHeight(),this);
             }
         };
         networkPanel.setLayout(null); // Use absolute layout for custom node positioning
@@ -66,12 +65,14 @@ public class NetworkUI extends JFrame {
 //        // Sort the MolIds ArrayList in ascending order
 //        Collections.sort(MolIds);
          		
-        for (Node node : Network.getMolecularNodes().values()) {
+        for (HashMap<String,Node> Set : Network.getMolecularNodes().values()) {			
+        for (Node node : Set.values()) {
 			if(node.getUpCableSet().isEmpty()){
 			int x = createNodeUI(node, networkPanel, initialX, initialY,1, levelHeight,0);
 			initialX+=x+300;
 			}
 			
+        }
         }
 
         add(networkPanel, BorderLayout.CENTER);
@@ -150,7 +151,7 @@ public class NetworkUI extends JFrame {
                         protected void paintComponent(Graphics g) {
                             super.paintComponent(g);
                             
-                            g.setColor(Color.WHITE);
+                            g.setColor(Color.BLACK);
                             g.drawLine(parentX+25, parentY+25, currX+50 ,currY );
                             
                         }
@@ -223,33 +224,21 @@ public class NetworkUI extends JFrame {
             		Relation relation = Network.createRelation ("forall", "", Adjustability.EXPAND, 2);
             		Relation relation2 = Network.createRelation("b", "", Adjustability.EXPAND, 2);
             		
-            		NodeSet nodeSetX = new NodeSet();
-            		NodeSet nodeSetZ = new NodeSet();
-            		NodeSet nodeSetXZ = new NodeSet();
-            		NodeSet nodeSetY = new NodeSet();
+            		NodeSet nodeSetX = new NodeSet(X);
+            		NodeSet nodeSetZ = new NodeSet(Z);
+            		NodeSet nodeSetXZ = new NodeSet(X,Z);
+            		NodeSet nodeSetY = new NodeSet(Y);
             
-            		nodeSetZ.add(Z);
-            		nodeSetX.add(X);
-            		nodeSetXZ.add(X);
-            		nodeSetXZ.add(Z);
-            		nodeSetY.add(Y);
-            		
             		// M0
             		DownCable d2 = new DownCable(relation2, nodeSetXZ);
-            		HashMap<String, DownCable> Cables = new HashMap<>();
-            		Cables.put(d2.getRelation().getName(), d2);
-            		DownCableSet downCableSet = new DownCableSet(Cables);
+            		DownCableSet downCableSet = new DownCableSet(d2);
             		Node M0 = Network.createNode("propositionnode", downCableSet);
             
             		//M1 
-            		NodeSet nodeSetM0 = new NodeSet();
-            			nodeSetM0.add(M0);
+            		NodeSet nodeSetM0 = new NodeSet(M0);
             		DownCable d = new DownCable(relation, nodeSetZ);
             		DownCable d3 = new DownCable(relation2,nodeSetM0);
-            		HashMap<String, DownCable> Cables2 = new HashMap<>();
-            			Cables2.put(d3.getRelation().getName(), d3);
-            			Cables2.put(d.getRelation().getName(), d);
-            		DownCableSet downCableSet2 = new DownCableSet(Cables2);		
+            		DownCableSet downCableSet2 = new DownCableSet(d,d3);		
             		Node M1 = Network.createNode("propositionnode", downCableSet2);
             		
             		NodeSet nodeSetM1 = new NodeSet();
@@ -257,39 +246,23 @@ public class NetworkUI extends JFrame {
             		
             		//M2 
             		DownCable dM2 = new DownCable(relation2, nodeSetY.union(nodeSetM1));
-            			HashMap<String, DownCable> CablesM2 = new HashMap<>();
-            				CablesM2.put(dM2.getRelation().getName(), dM2);
-            			DownCableSet downCableSetM2 = new DownCableSet(CablesM2);		
+            			
+            			DownCableSet downCableSetM2 = new DownCableSet(dM2);		
             			Node M2 = Network.createNode("propositionnode", downCableSetM2);
             	
             			//M3 
-            			DownCable dM3 = new DownCable(relation2, nodeSetX.union(nodeSetZ.union(nodeSetY)));
+            			DownCable dM3 = new DownCable(relation2, new NodeSet(X,Y,Z));
             			
-            				HashMap<String, DownCable> CablesM3 = new HashMap<>();
-            					CablesM3.put(dM3.getRelation().getName(), dM3);
-            					
-            				DownCableSet downCableSetM3 = new DownCableSet(CablesM3);		
+            				DownCableSet downCableSetM3 = new DownCableSet(dM3);		
             				Node M3 = Network.createNode("propositionnode", downCableSetM3);
             		
             				//M4 
-            				NodeSet nodeSetM3 = new NodeSet();
-            				nodeSetM3.add(M3);
-            				NodeSet nodeSetM2 = new NodeSet();
-            				nodeSetM3.add(M2);
-            				
-            				NodeSet nodeSetM23 = new NodeSet();
-            				nodeSetM23.add(M2);
-            				nodeSetM23.add(M3);
+            				NodeSet nodeSetM23 = new NodeSet(M2,M3);
             				
             				DownCable dM4 = new DownCable(relation, nodeSetX);
             				DownCable dM4_2 = new DownCable(relation2,nodeSetM23);
-//            				DownCable dM4_3 = new DownCable(relation2,nodeSetM3);
             				
-            					HashMap<String, DownCable> CablesM4 = new HashMap<>();
-            						CablesM4.put(dM4.getRelation().getName(), dM4);
-            						CablesM4.put(dM4_2.getRelation().getName()+1, dM4_2);
-            						
-            					DownCableSet downCableSetM4 = new DownCableSet(CablesM4);		
+            					DownCableSet downCableSetM4 = new DownCableSet(dM4,dM4_2);		
             					Node M4 = Network.createNode("propositionnode", downCableSetM4);
 
      /*       		System.out.println("-----------------------------------------------------");
@@ -301,11 +274,12 @@ public class NetworkUI extends JFrame {
 //            		ArrayList<Substitution> substitutionArr = new ArrayList<>();
 //            		substitutionArr.add(s);
             		System.out.println(M4);
-//            		System.out.println(M4.clone());
             		
             		System.out.println("Hi" + M4.applySubstitution(s));
 //            		network.printNodes();
-
+            		for (UpCable up : X.getUpCableSet().getValues()) {
+						System.out.println(up);
+					}
                     new NetworkUI();
                 	}catch(Exception e){
                 		e.printStackTrace();

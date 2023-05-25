@@ -20,7 +20,7 @@
 
             1. downCables
                 1.1. to define a down cable you need to define a Relation for it and a NodeSet of nodes having this relation with the moleclar node.
-                    1.1.0. to define a Relation it's name, semanticType, adjust, and limit should be specified
+                    1.1.0. to define a Relation, it's name, semanticType, adjust, and limit should be specified
                         e.g.  
                                         Relation relation = new Relation("forall", "proposition", Adjustability.EXPAND, 2);
                                         

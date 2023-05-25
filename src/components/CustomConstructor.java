@@ -4,7 +4,7 @@ public class CustomConstructor {
 	private String name ; 
 	private Class<?>[] constructorParams; 
 	private Object[] constructorArgs;
-	public CustomConstructor(String name , Class<?>[] constructorParams, Object[] constructorArgs) {
+	public CustomConstructor(String name , Class<?>[] constructorParams, String[] constructorArgs) {
 		this.name = name ; 
 		this.constructorArgs = constructorArgs;
 		this.constructorParams = constructorParams;

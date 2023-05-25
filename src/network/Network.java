@@ -30,15 +30,16 @@ import nodes.PropositionNode;
 
 public class Network {
 	private static HashMap<Integer, Node> nodes;
-	private static HashMap<String, Node> molecularNodes;
+	private static HashMap<String, HashMap<String,Node>> molecularNodes;
 	private static HashMap<String, Node> baseNodes;
 	private static HashMap<String,Relation> relations; 
 	private static HashMap<Integer,Node> propositionNodes ; 
 	public static HashMap<String, String> quantifiers = new HashMap<String, String>();
 	public static HashMap<String,CustomClass> userDefinedClasses = new HashMap<String,CustomClass>();
+	public static int MolecularCount ; 
 	public Network() {
 		nodes = new HashMap<Integer, Node>();
-		molecularNodes = new HashMap<String, Node>();
+		molecularNodes = new HashMap<String, HashMap<String,Node>>();
 		baseNodes = new HashMap<String,Node>();
 		propositionNodes = new HashMap<Integer,Node>();
 		relations = new HashMap<String,Relation>() ;
@@ -49,10 +50,13 @@ public class Network {
 		if(downCableSet.size()==0){
 			return null;
 		}
-		String downCablesKey = downCableSet.getMolecularNodeKey();
+		String downCablesKey = downCableSet.getMolecularSetKey();
+		String molecularKey = downCableSet.getMolecularNodeKey();
 		Node node;
 	
-		if (!molecularNodes.containsKey(downCablesKey)) {
+		if (!molecularNodes.containsKey(downCablesKey)|| 
+				((molecularNodes.containsKey(downCablesKey) && 
+				!molecularNodes.get(downCablesKey).containsKey(molecularKey)))) {
 			
 			switch (SemanticType.toLowerCase()) {
 			case "propositionnode":
@@ -111,7 +115,9 @@ public class Network {
 			node.fetchFreeVariables();
 			if(node.getMolecularType()==MolecularType.CLOSED){
 				
-				for (Node molecular : molecularNodes.values()) {
+				for (HashMap<String,Node> molecularSet : molecularNodes.values()) {
+					
+				for (Node molecular : molecularSet.values()) {
 					String MolecularKey = molecular.getDownCableSet().getMolecularNodeKeyWithoutVars();
 					String newNodeKey   = downCableSet.getMolecularNodeKeyWithoutVars();
 					if(MolecularKey.equals(newNodeKey)){
@@ -119,11 +125,21 @@ public class Network {
 					}
 				}
 				}
+				}
 			nodes.put(node.getId(), node);
-			molecularNodes.put(downCablesKey, node);
+			if(molecularNodes.containsKey(downCablesKey)){
+				molecularNodes.get(downCablesKey).put(downCableSet.getMolecularNodeKey(), node);
+			}else{				
+			HashMap<String,Node> newSet = new HashMap<String,Node>();
+			newSet.put(downCableSet.getMolecularNodeKey(), node);
+			molecularNodes.put(downCablesKey, newSet);
+			}
+			MolecularCount++;
 			return node;
 		}
-		return molecularNodes.get(downCablesKey);
+		
+			return molecularNodes.get(downCablesKey).get(molecularKey);	
+		
 
 	}
 	// second constructor for base nodes
@@ -260,12 +276,12 @@ public class Network {
 			relations.put(r.getName(), r);
 			return r ;
 		}
-		public static CustomClass createNewSemanticType(String name, String SuperClass, ArrayList<CustomMethod> methods) throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException, IOException{
+		public static CustomClass createNewSemanticType(String name, String SuperClass, ArrayList<CustomMethod> methods) throws Exception{
 			CustomClass c = new CustomClass(name,SuperClass);
 			Class<?>[] params = {String.class,Boolean.class};
-			Object [] arguments = {"name","isVariable"};
+			String [] arguments = {"name","isVariable"};
 			Class<?>[] params2 = {DownCableSet.class};
-			Object [] arguments2 = {"downCableSet"};
+			String [] arguments2 = {"downCableSet"};
 			CustomConstructor constructor = new CustomConstructor(name,params, arguments);
 			CustomConstructor constructor2 = new CustomConstructor(name,params2, arguments2);
 			ArrayList<CustomConstructor> constructors = new ArrayList<>();
@@ -302,11 +318,11 @@ public class Network {
 		nodes = Nodes;
 	}
 
-	public static HashMap<String, Node> getMolecularNodes() {
+	public static HashMap<String, HashMap<String,Node>> getMolecularNodes() {
 		return molecularNodes;
 	}
 
-	public static void setMolecularNodes(HashMap<String, Node> MolecularNodes) {
+	public static void setMolecularNodes(HashMap<String, HashMap<String,Node>> MolecularNodes) {
 		molecularNodes = MolecularNodes;
 	}
 
@@ -329,9 +345,15 @@ public class Network {
 		Network.quantifiers = quantifiers;
 	}
 	public Node find(DownCableSet downCableSet){
+		String setKey = downCableSet.getMolecularSetKey();
 		String key = downCableSet.getMolecularNodeKey();
-		return molecularNodes.get(key);
+		return molecularNodes.get(setKey).get(key);
 	}
+	public HashMap<String,Node> findMolecularSet(DownCableSet downCableSet){
+		String setKey = downCableSet.getMolecularSetKey();
+		return molecularNodes.get(setKey);
+	}
+	
 	public void printNodes(){
 		String result = "";
 		for (Node node : nodes.values()) {
