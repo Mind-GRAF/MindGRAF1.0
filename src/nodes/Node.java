@@ -21,7 +21,7 @@ import exceptions.NoSuchTypeException;
 public abstract class Node {
 
 	private int id;
-	private String name;
+	protected String name;
 	private UpCableSet upCableSet;
 	private final Syntactic syntacticType;
 	private DownCableSet downCableSet;
@@ -47,8 +47,6 @@ public abstract class Node {
 
 		this.id = count;
 		this.name = "M" + Network.MolecularCount;
-
-
 		syntacticType = Syntactic.MOLECULAR;
 		if (downCables == null || downCables.size() == 0)
 			return;

@@ -88,6 +88,10 @@ public class ComposePath extends Path {
 
 	@Override
 	public Path clone() {
+		LinkedList<Path> paths = new LinkedList<Path>();
+		for (Path path : this.paths) {
+			paths.add(path.clone());
+		}
 		return new ComposePath(paths);		
 	}
 

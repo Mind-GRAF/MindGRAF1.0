@@ -18,24 +18,24 @@ public class FUnitPath extends Path {
 		this.relation = relation;
 	}
 
-	@Override
-	public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context) {
-		// TODO Auto-generated method stub
-		LinkedList<Object[]> result = new LinkedList<Object[]>();
-		if(node.isMolecular()){
-			DownCable d = node.getDownCable(relation.getName());
-			if(d != null){
-					NodeSet nodeSet = d.getNodeSet();
-					for (Node n : nodeSet.getValues()) {
-						PathTrace t = trace.clone();
-						t.compose(new FUnitPath(relation));
-						Object [] arr = {n,t} ;
-						result.add(arr);
-					}
+		@Override
+		public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context) {
+			// TODO Auto-generated method stub
+			LinkedList<Object[]> result = new LinkedList<Object[]>();
+			if(node.isMolecular()){
+				DownCable d = node.getDownCable(relation.getName());
+				if(d != null){
+						NodeSet nodeSet = d.getNodeSet();
+						for (Node n : nodeSet.getValues()) {
+							PathTrace t = trace.clone();
+							t.compose(new FUnitPath(relation));
+							Object [] arr = {n,t} ;
+							result.add(arr);
+						}
+				}
 			}
+			return result;
 		}
-		return result;
-	}
 
 	@Override
 	public LinkedList<Object[]> followConverse(Node node, PathTrace trace,
