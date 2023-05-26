@@ -69,7 +69,7 @@ public class NetworkUI extends JFrame {
         for (Node node : Set.values()) {
 			if(node.getUpCableSet().isEmpty()){
 			int x = createNodeUI(node, networkPanel, initialX, initialY,1, levelHeight,0);
-			initialX+=x+300;
+			initialX+=x;
 			}
 			
         }
@@ -213,73 +213,97 @@ public class NetworkUI extends JFrame {
 //                    DownCable d8 = new DownCable(agent, new NodeSet(bob));
 //
 //                    Node M3 = Network.createNode("propositionnode", new DownCableSet(d6, d7, d8));
-                	
-            		Node Z = Network.createVariableNode("Z", "propositionnode");
-            		Node Y = Network.createVariableNode("Y", "propositionnode");
-            		Network.createNewSemanticType("FearNode", "nodes.IndividualNode", null);
-            		Node X = Network.createVariableNode("X", "FearNode");
-            		Node Base = Network.createNode("base", "propositionnode");
-            		Network.quantifiers.put("forall","forall");
-            		
-            		Relation relation = Network.createRelation ("forall", "", Adjustability.EXPAND, 2);
-            		Relation relation2 = Network.createRelation("b", "", Adjustability.EXPAND, 2);
-            		
-            		NodeSet nodeSetX = new NodeSet(X);
-            		NodeSet nodeSetZ = new NodeSet(Z);
-            		NodeSet nodeSetXZ = new NodeSet(X,Z);
-            		NodeSet nodeSetY = new NodeSet(Y);
-            
-            		// M0
-            		DownCable d2 = new DownCable(relation2, nodeSetXZ);
-            		DownCableSet downCableSet = new DownCableSet(d2);
-            		Node M0 = Network.createNode("propositionnode", downCableSet);
-            
-            		//M1 
-            		NodeSet nodeSetM0 = new NodeSet(M0);
-            		DownCable d = new DownCable(relation, nodeSetZ);
-            		DownCable d3 = new DownCable(relation2,nodeSetM0);
-            		DownCableSet downCableSet2 = new DownCableSet(d,d3);		
-            		Node M1 = Network.createNode("propositionnode", downCableSet2);
-            		
-            		NodeSet nodeSetM1 = new NodeSet();
-            		nodeSetM1.add(M1);
-            		
-            		//M2 
-            		DownCable dM2 = new DownCable(relation2, nodeSetY.union(nodeSetM1));
-            			
-            			DownCableSet downCableSetM2 = new DownCableSet(dM2);		
-            			Node M2 = Network.createNode("propositionnode", downCableSetM2);
-            	
-            			//M3 
-            			DownCable dM3 = new DownCable(relation2, new NodeSet(X,Y,Z));
-            			
-            				DownCableSet downCableSetM3 = new DownCableSet(dM3);		
-            				Node M3 = Network.createNode("propositionnode", downCableSetM3);
-            		
-            				//M4 
-            				NodeSet nodeSetM23 = new NodeSet(M2,M3);
-            				
-            				DownCable dM4 = new DownCable(relation, nodeSetX);
-            				DownCable dM4_2 = new DownCable(relation2,nodeSetM23);
-            				
-            					DownCableSet downCableSetM4 = new DownCableSet(dM4,dM4_2);		
-            					Node M4 = Network.createNode("propositionnode", downCableSetM4);
-
-     /*       		System.out.println("-----------------------------------------------------");
-            		System.out.println("free vars" + M4.getFreeVariables());
-            		*/
-            		
-            		Substitutions s = new Substitutions();
-            		s.add(Y,Base);
-//            		ArrayList<Substitution> substitutionArr = new ArrayList<>();
-//            		substitutionArr.add(s);
-            		System.out.println(M4);
-            		
-            		System.out.println("Hi" + M4.applySubstitution(s));
-//            		network.printNodes();
-            		for (UpCable up : X.getUpCableSet().getValues()) {
-						System.out.println(up);
-					}
+                	//=====================================================================
+//            		Node Z = Network.createVariableNode("Z", "propositionnode");
+//            		Node Y = Network.createVariableNode("Y", "propositionnode");
+//            		Network.createNewSemanticType("FearNode", "nodes.IndividualNode", null);
+//            		Node X = Network.createVariableNode("X", "FearNode");
+//            		Node Base = Network.createNode("base", "propositionnode");
+//            		Network.quantifiers.put("forall","forall");
+//            		
+//            		Relation relation = Network.createRelation ("forall", "", Adjustability.EXPAND, 2);
+//            		Relation relation2 = Network.createRelation("b", "", Adjustability.EXPAND, 2);
+//            		
+//            		NodeSet nodeSetX = new NodeSet(X);
+//            		NodeSet nodeSetZ = new NodeSet(Z);
+//            		NodeSet nodeSetXZ = new NodeSet(X,Z);
+//            		NodeSet nodeSetY = new NodeSet(Y);
+//            
+//            		// M0
+//            		DownCable d2 = new DownCable(relation2, nodeSetXZ);
+//            		DownCableSet downCableSet = new DownCableSet(d2);
+//            		Node M0 = Network.createNode("propositionnode", downCableSet);
+//            
+//            		//M1 
+//            		NodeSet nodeSetM0 = new NodeSet(M0);
+//            		DownCable d = new DownCable(relation, nodeSetZ);
+//            		DownCable d3 = new DownCable(relation2,nodeSetM0);
+//            		DownCableSet downCableSet2 = new DownCableSet(d,d3);		
+//            		Node M1 = Network.createNode("propositionnode", downCableSet2);
+//            		
+//            		NodeSet nodeSetM1 = new NodeSet();
+//            		nodeSetM1.add(M1);
+//            		
+//            		//M2 
+//            		DownCable dM2 = new DownCable(relation2, nodeSetY.union(nodeSetM1));
+//            			
+//            			DownCableSet downCableSetM2 = new DownCableSet(dM2);		
+//            			Node M2 = Network.createNode("propositionnode", downCableSetM2);
+//            	
+//            			//M3 
+//            			DownCable dM3 = new DownCable(relation2, new NodeSet(X,Y,Z));
+//            			
+//            				DownCableSet downCableSetM3 = new DownCableSet(dM3);		
+//            				Node M3 = Network.createNode("propositionnode", downCableSetM3);
+//            		
+//            				//M4 
+//            				NodeSet nodeSetM23 = new NodeSet(M2,M3);
+//            				
+//            				
+//            				DownCable dM4 = new DownCable(relation, nodeSetX);
+//            				DownCable dM4_2 = new DownCable(relation2,nodeSetM23);
+//            				
+//            					DownCableSet downCableSetM4 = new DownCableSet(dM4,dM4_2);		
+//            					Node M4 = Network.createNode("propositionnode", downCableSetM4);
+//
+//     /*       		System.out.println("-----------------------------------------------------");
+//            		System.out.println("free vars" + M4.getFreeVariables());
+//            		*/
+//            		
+//            		Substitutions s = new Substitutions();
+//            		s.add(Y,Base);
+////            		ArrayList<Substitution> substitutionArr = new ArrayList<>();
+////            		substitutionArr.add(s);
+//            		System.out.println(M4);
+//            		
+//            		System.out.println("Hi" + M4.applySubstitution(s));
+////            		network.printNodes();
+//            		for (UpCable up : X.getUpCableSet().getValues()) {
+//						System.out.println(up);
+//					}
+                    //======================================================
+                    
+                    // 1. create the base nodes 
+                    	Node nemo = Network.createNode("Nemo", "propositionNode");
+                    	Node clown = Network.createNode("clownFish", "propositionNode");
+                    // 2. create the needed relations 
+                    	Relation object = Network.createRelation("object", "", Adjustability.EXPAND, 2);
+                    	Relation member = Network.createRelation("member", "", Adjustability.EXPAND, 2);
+                    	Relation Class = Network.createRelation("Class", "", Adjustability.EXPAND, 2);
+                    	Relation subClass = Network.createRelation("subClass", "", Adjustability.EXPAND, 2);
+                    // 3. create downcables for each molecularNode
+                    	
+                    	DownCable d1 = new DownCable(object, new NodeSet(nemo));
+                    	DownCable d2 = new DownCable(member, new NodeSet(nemo));
+                    	DownCable d3 = new DownCable(Class, new NodeSet(clown));
+                    	DownCable d4 = new DownCable(subClass, new NodeSet(clown));
+                    	
+                    // 4.create molecular nodes
+                    	
+                    	 Node M1 = Network.createNode("propositionnode", new DownCableSet(d1));
+                    	 Node M2 = Network.createNode("propositionnode", new DownCableSet(d2,d3));
+                    	 Node M3 = Network.createNode("propositionnode", new DownCableSet(d4));
+                    	
                     new NetworkUI();
                 	}catch(Exception e){
                 		e.printStackTrace();
