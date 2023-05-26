@@ -16,7 +16,7 @@ public class Channel {
 
     public Channel(Substitutions switcherSubstitution, Substitutions filterSubstitutions, String contextID,
             int attitudeID, Node requesterNode) {
-        idCount = count++;
+        idCount = ++count;
         this.filterSubstitutions = filterSubstitutions;
         this.switcherSubstitutions = switcherSubstitution;
         this.contextName = contextID;
@@ -34,11 +34,23 @@ public class Channel {
      * @return boolean
      */
     public boolean testReportToSend(Report report) {
+        System.out.println("testing report to be sent");
+        System.out.println();
         boolean passTest = filterSubstitutions.filtertest(report.getSubstitutions());
+        if (passTest == true) {
+            System.out.println("It passed the filter test");
+            System.out.println();
+        } else {
+            System.out.println("It failed the filter test");
+            System.out.println();
+        }
+
         if (passTest && report.anySupportAssertedInAttitudeContext(contextName, attitudeID)) {
             Substitutions newReportSubs = report.getSubstitutions().switchReport(getSwitcherSubstitutions());
             report.setSubstitutions(newReportSubs);
             Scheduler.addToHighQueue(report);
+            System.out.println("The report was just enqueued in the high priority queue to be processed");
+            System.out.println();
 
             return true;
         }
@@ -110,8 +122,9 @@ public class Channel {
         Substitutions filterSubs = this.getFilterSubstitutions();
         Substitutions switchSubs = this.getSwitcherSubstitutions();
         Node requesterNode = this.getRequesterNode();
-        String channelId = channelContextName + " " + channelAttitudeId + " " + filterSubs.toString() + " "
-                + switchSubs.toString() +
+        String channelId = "Context " + channelContextName + " and Attitude " + channelAttitudeId + " of filter "
+                + filterSubs + " and switch"
+                + switchSubs +
                 " requestedFrom " + requesterNode.getName();
         return channelId;
     }

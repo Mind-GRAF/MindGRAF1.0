@@ -24,17 +24,21 @@ public class Scheduler {
         lowQueue = new ArrayDeque<Request>();
         actQueue = new Stack<ActNode>();
         forwardAssertedNodes = new Hashtable<Report, PropositionNode>();
+        backwardAssertedReplyNodes = new Hashtable<Report, PropositionNode>();
+
     }
 
     public static void printLowQueue() {
+        System.out.println("Low Priority Queue:");
         for (Request request : lowQueue) {
-            System.out.println(request.stringifyRequest());
+            System.out.println("Request of channel Id " + request.getChannel().getIdCount());
         }
     }
 
     public static void printHighQueue() {
+        System.out.println("High Priority Queue:");
         for (Report report : highQueue) {
-            System.out.println(report.stringifyReport());
+            System.out.println("Report of substitutions " + report.getSubstitutions());
         }
     }
 

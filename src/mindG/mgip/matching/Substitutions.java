@@ -65,21 +65,24 @@ public class Substitutions {
     public Substitutions switchReport(Substitutions switchSubs) {
         Substitutions newReportSubstitutions = new Substitutions();
         for (Node var : map.keySet()) {
-            // System.out.println(var);
+            // System.out.println(var);// y
             Node value = map.get(var);
-            // System.out.println(value);
+            // System.out.println(value);// b
 
             for (Node var1 : switchSubs.getMap().keySet()) {
-                // System.out.println(var1);
+                // System.out.println(var1); // z
                 Node value1 = switchSubs.getMap().get(var1);
-                // System.out.println("z " + value1);
+                // System.out.println("z " + value1); // y
+                // System.out.println(var.getName());
+                // System.out.println(value1.getName());
+                if (var.getName().equals(value1.getName())) {
 
-                if (!var1.getName().equals(value.getName())) {
                     // System.out.println("in first condition");
-                    newReportSubstitutions.add(var, value);
+                    newReportSubstitutions.add(var1, value);
+
                 } else {
                     // System.out.println("in second condition");
-                    newReportSubstitutions.add(var, value1);
+                    newReportSubstitutions.add(var, value);
 
                 }
             }

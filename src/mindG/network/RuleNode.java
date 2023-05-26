@@ -39,14 +39,10 @@ public abstract class RuleNode extends PropositionNode implements Serializable {
 
     }
 
-    // public Collection<RuleResponse> applyRuleHandler(Report report, Channel
-    // currentRequest) {
-    // return null;
+    public void applyRuleHandler(Report report, RuleNode ruleNode) {
+        // TODO Ossama
 
-    // }
-    // This method is implemented to send requests to antecedents that are not
-    // working
-    // on a similar request to currentRequest.
+    }
 
     public Substitutions onlyRelevantSubs(Substitutions filterSubs) {
         // System.out.println("i entered");
@@ -88,15 +84,6 @@ public abstract class RuleNode extends PropositionNode implements Serializable {
                 currentAttitudeID,
                 ChannelType.AntRule, this);
     }
-
-    // This method is implemented to do certain actions after calling
-    // applyRuleHandler()
-    // and receive ruleResponses
-    // public void handleResponseOfApplyRuleHandler(Collection<RuleResponse>
-    // ruleResponses, Report currentReport,
-    // Channel currentRequest) {
-
-    // }
 
     // This method iterates over all the node’s outgoing channels calling on each
     // processSingleRequestsChannel(outgoingRequest) and handles the exceptions that
@@ -265,29 +252,9 @@ public abstract class RuleNode extends PropositionNode implements Serializable {
                     if (assertedInContext) {
                         forwardDone = true;
                         requestAntecedentsNotAlreadyWorkingOn(tempRequest);
-                        //// Collection<RuleResponse> ruleResponse = applyRuleHandler(currentReport,
-                        //// tempChannel);
-                        // handleResponseOfApplyRuleHandler(ruleResponse, currentReport, tempChannel);
-                        // TODO Ossama
+                        applyRuleHandler(currentReport, this);
                     } else {
-                        // boolean ruleType = this instanceof Thresh || this instanceof AndOr;
                         super.processSingleRequests(tempRequest);
-                        // NodeSet dominatingRules = getUpAntDomRuleNodeSet();
-                        // NodeSet toBeSentToDom = removeAlreadyEstablishedChannels(dominatingRules,
-                        // tempRequest,
-                        // currentReportSubs, ruleType);
-                        // sendRequestsToNodeSet(toBeSentToDom, currentReportSubs, null,
-                        // currentReportContextName,
-                        // currentReportAttitudeID,
-                        // ChannelType.AntRule, this);
-                        // List<Match> matchesList = new ArrayList<Match>();
-                        // // Matcher.match(this, ruleNodeExtractedSubs);
-                        // List<Match> toBeSentToMatch = removeAlreadyEstablishedChannels(matchesList,
-                        // tempRequest,
-                        // currentReportSubs);
-                        // sendRequestsToMatches(toBeSentToMatch, currentReportSubs, null,
-                        // currentReportContextName,
-                        // currentReportAttitudeID, ChannelType.MATCHED, this);
                     }
                 } else {
                     Collection<KnownInstance> theKnownInstanceSet = knownInstances.mergeKInstancesBasedOnAtt(
@@ -295,8 +262,8 @@ public abstract class RuleNode extends PropositionNode implements Serializable {
                     Boolean notBound = isOpenNodeNotBound(currentReportSubs);
                     for (KnownInstance currentKnownInstance : theKnownInstanceSet) {
                         Substitutions currentKISubs = currentKnownInstance.getSubstitutions();
-                        boolean subSetCheck = onlySubsBindFreeVar
-                                .compatible(currentKISubs);
+                        boolean subSetCheck = currentKISubs
+                                .compatible(onlySubsBindFreeVar);
                         boolean supportCheck = currentKnownInstance.anySupportAssertedInAttitudeContext(
                                 currentReportContextName,
                                 currentReportAttitudeID);
@@ -311,39 +278,13 @@ public abstract class RuleNode extends PropositionNode implements Serializable {
 
                         }
                     }
-                    // Collection<RuleResponse> ruleResponse = applyRuleHandler(currentReport,
-                    // tmpChanl);
-                    // handleResponseOfApplyRuleHandler(ruleResponse, currentReport,
-                    // tmpChanl);
-                    // TODO Ossama
-                    boolean ruleType = this instanceof Thresh || this instanceof AndOr;
-                    NodeSet dominatingRules = getUpConsDomRuleNodeSet();
-                    NodeSet toBeSentToDom = removeAlreadyEstablishedChannels(dominatingRules,
-                            tempRequest,
-                            currentReportSubs, ruleType);
-                    Substitutions switchSubs = new Substitutions();
-                    sendRequestsToNodeSet(toBeSentToDom, onlySubsBindFreeVar, switchSubs,
-                            currentReportContextName,
-                            currentReportAttitudeID,
-                            ChannelType.RuleCons, this);
-                    List<Match> matchingNodes = new ArrayList<>();
-                    // Matcher.match(this, ruleNodeExtractedSubs);
-                    List<Match> toBeSentToMatch = removeAlreadyEstablishedChannels(matchingNodes,
-                            tempRequest,
-                            currentReportSubs);
-                    sendRequestsToMatches(toBeSentToMatch, onlySubsBindFreeVar, null,
-                            currentReportContextName,
-                            currentReportAttitudeID, ChannelType.MATCHED, this);
-                    // super.processSingleRequests(tempRequest);
+                    forwardDone = true;
+                    applyRuleHandler(currentReport, this);
+                    super.processSingleRequests(tempRequest);
                 }
             } else {
                 /** Backward Inference */
-                // Collection<RuleResponse> ruleResponse = applyRuleHandler(currentReport,
-                // currentChannel);
-                // handleResponseOfApplyRuleHandler(ruleResponse, currentReport,
-                // currentChannel);
-                // currentChannelReportBuffer.removeReport(currentReport);
-                // TODO Ossama
+                applyRuleHandler(currentReport, this);
 
             }
         } else {
@@ -357,20 +298,15 @@ public abstract class RuleNode extends PropositionNode implements Serializable {
                 // wel antecedents
                 if (!this.isOpen()) {
                     Scheduler.addNodeAssertionThroughFReport(currentReport, this);
-                    // we gali positive reports
                 }
-                Channel tempChannel = new Channel(null, currentReportSubs, currentReportContextName,
+                forwardDone = true;
+                Substitutions switchSubs = new Substitutions();
+
+                Channel tempChannel = new Channel(switchSubs, currentReportSubs, currentReportContextName,
                         currentReportAttitudeID, currentReport.getRequesterNode());
                 Request tempRequest = new Request(tempChannel, null);
                 forwardReport = true;
-                NodeSet argAntNodes = getDownAntArgNodeSet();
-                Substitutions switchSubs = new Substitutions();
-                boolean ruleType = this instanceof Thresh || this instanceof AndOr;
-                NodeSet remainingArgAntNodes = removeAlreadyEstablishedChannels(argAntNodes, tempRequest,
-                        currentReportSubs, ruleType);
-                sendRequestsToNodeSet(remainingArgAntNodes, currentReportSubs, switchSubs, currentReportContextName,
-                        currentReportAttitudeID,
-                        ChannelType.AntRule, this);
+                requestAntecedentsNotAlreadyWorkingOn(tempRequest);
 
                 // backward inference during forward inference
                 // law ana 3andi consequents lazem acheck el antecedents el awel
@@ -399,14 +335,17 @@ public abstract class RuleNode extends PropositionNode implements Serializable {
                         currentReportSubs, ruleType);
 
                 for (Channel outConsChannel : outgoingRuleConsChannels) {
-                    if (currentReportSubs.isSubsetOf(outConsChannel.getFilterSubstitutions()))
-                        sendRequestsToNodeSet(remainingArgAntNodes, currentReportSubs, switchSubs,
-                                currentReportContextName,
-                                currentReportAttitudeID,
-                                ChannelType.AntRule, this);
+                    Substitutions outConsChannelSubs = outConsChannel.getFilterSubstitutions();
+                    Substitutions onlySubsBindFreeVarChnl = onlyRelevantSubs(outConsChannelSubs);
+                    boolean compatibilityCheck = onlySubsBindFreeVar
+                            .compatible(onlySubsBindFreeVarChnl);
 
+                    if (compatibilityCheck) {
+                        Substitutions unionSubs = Substitutions.union(currentReportSubs, outConsChannelSubs);
+                        sendRequestsToNodeSet(remainingArgAntNodes, unionSubs, switchSubs, currentReportContextName,
+                                currentReportAttitudeID, ChannelType.AntRule, this);
+                    }
                 }
-
                 // mmkn a broadcast the report over the outgoing channels we khalas
                 // bass ana keda keda babroadcats fe process Single reports
                 // hacheck el outgoing channels beta3ty incase backward we hab3at le matched we

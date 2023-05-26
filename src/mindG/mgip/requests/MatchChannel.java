@@ -30,7 +30,15 @@ public class MatchChannel extends Channel {
         int channelMatchType = getMatchType();
         boolean toBeSentFlag = (channelMatchType == 0) || (channelMatchType == 1 && report.isSign())
                 || (channelMatchType == 2 && !report.isSign());
-        System.out.println("flag to be sent " + toBeSentFlag);
+        if (toBeSentFlag == true) {
+            System.out.println("The report passed the channel match type test");
+            System.out.println();
+        } else {
+            System.out.println("The report failed the channel match type test since match type = " + channelMatchType
+                    + " and report's sign " + report.isSign());
+            System.out.println();
+        }
+
         return toBeSentFlag && super.testReportToSend(report);
 
     }

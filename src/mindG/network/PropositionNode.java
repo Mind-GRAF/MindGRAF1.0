@@ -23,7 +23,6 @@ import mindG.network.cables.UpCable;
 
 public class PropositionNode extends Node {
     protected ChannelSet outgoingChannels;
-    protected StringChannelSet incomingChannels;
     protected ChannelSet forwardChannels;
     protected KnownInstanceSet knownInstances;
     protected boolean forwardDone;
@@ -32,7 +31,6 @@ public class PropositionNode extends Node {
         super(name, isVariable);
 
         outgoingChannels = new ChannelSet();
-        incomingChannels = new StringChannelSet();
         forwardChannels = new ChannelSet();
         forwardDone = false;
         knownInstances = new KnownInstanceSet();
@@ -42,7 +40,6 @@ public class PropositionNode extends Node {
         super(downCableSet);
 
         outgoingChannels = new ChannelSet();
-        incomingChannels = new StringChannelSet();
         forwardChannels = new ChannelSet();
         forwardDone = false;
         knownInstances = new KnownInstanceSet();
@@ -156,59 +153,27 @@ public class PropositionNode extends Node {
                         requesterNode);
                 break;
         }
-        StringChannelSet incomingChannels = ((PropositionNode) requesterNode).getIncomingChannels();
-        String currentChannelID = incomingChannels.getChannelID(newChannel);
-        Channel currentChannel = ((PropositionNode) targetNode).getOutgoingChannels().getChannel(currentChannelID);
-        if (currentChannelID == null) {
+
+        Channel currentChannel = ((PropositionNode) targetNode).getOutgoingChannels().getChannel(newChannel);
+        if (currentChannel == null) {
             /* BEGIN - Helpful Prints */
             System.out.println("Channel of type " + newChannel.getChannelType()
                     + " is successfully created and used for further operations");
             /* END - Helpful Prints */
             Request newRequest = new Request(newChannel, targetNode);
             ((PropositionNode) targetNode).addToOutgoingChannels(newChannel);
+            System.out.println("The " + targetNode.getName() + " outgoing channels:");
             printChannelSet(((PropositionNode) targetNode).getOutgoingChannels());
-            // .printChannels(((PropositionNode)
-            // targetNode).getOutgoingChannels().getChannels());
-            addToIncomingChannels(newChannel);
-            printStringChannelSet(getIncomingChannels());
-            // this.getIncomingChannels().printArrayList(this.getIncomingChannels().getChannelsIDS());
-            return newRequest;
-        } else if (currentChannelID != null && currentChannel == null) {
-            /* BEGIN - Helpful Prints */
-            System.out.println("Channel of type " + newChannel.getChannelType()
-                    + " is successfully created and used for further operations");
-            /* END - Helpful Prints */
-            Request newRequest = new Request(newChannel, targetNode);
-            ((PropositionNode) targetNode).addToOutgoingChannels(newChannel);
-            printChannelSet(((PropositionNode) targetNode).getOutgoingChannels());
-            // .printChannels(((PropositionNode)
-            // targetNode).getOutgoingChannels().getChannels());
-            printStringChannelSet(getIncomingChannels());
-            // this.getIncomingChannels().printArrayList(this.getIncomingChannels().getChannelsIDS());
             return newRequest;
         }
 
         /* BEGIN - Helpful Prints */
         System.out.println(
-                "Channel of type " + currentChannel.getChannelType() + " with ID: "
-                        + currentChannel.stringifyChannelID()
-                        + " is already established and retrieved for further operations");
+                "Channel of type " + currentChannel.getChannelType()
+                        + " was already established and re-enqueued for further operations");
         /* END - Helpful Prints */
         return new Request(currentChannel, targetNode);
 
-    }
-
-    public void printStringChannelSet(StringChannelSet stringChannelSet) {
-        for (ChannelType channelType : StringChannelSet.channelsIDs.keySet()) {
-            System.out.println("Channel Type: " + channelType);
-
-            ArrayList<String> channelIDs = StringChannelSet.channelsIDs.get(channelType);
-            for (String channelID : channelIDs) {
-                System.out.println("Channel ID: " + channelID);
-            }
-
-            System.out.println(); // Add a blank line between channel types
-        }
     }
 
     public void printChannelSet(ChannelSet channelSet) {
@@ -218,7 +183,7 @@ public class PropositionNode extends Node {
             Hashtable<String, Channel> channelHashtable = channelSet.channels.get(channelType);
             for (String channelId : channelHashtable.keySet()) {
                 Channel channel = channelHashtable.get(channelId);
-                System.out.println("Channel ID: " + channelId);
+                System.out.println("Channel ID: " + channel.stringifyChannelID());
                 // Print other channel properties as needed
             }
 
@@ -234,14 +199,20 @@ public class PropositionNode extends Node {
      * @return
      */
     public boolean sendReport(Report report, Channel currentChannel) {
+        System.out.println("Sending Report (" + report.stringifyReport() + ") through the channel ("
+                + currentChannel.getChannelType() + " of id " + currentChannel.getIdCount() + ")");
+        System.out.println();
         if (currentChannel.testReportToSend(report)) {
-            System.out.println("the report " + report.stringifyReport() + " was succefully sent over channel "
-                    + currentChannel.getChannelType() + " " + currentChannel.stringifyChannelID());
+            System.out.println("the report (" + report.stringifyReport() + ") was succefully sent over channel ("
+                    + currentChannel.getChannelType() + " " + currentChannel.getIdCount() + ")");
+            System.out.println();
             return true;
 
         } else {
-            System.out.println("the report " + report.stringifyReport() + " has failed to be sent over channel "
-                    + currentChannel.getChannelType() + " " + currentChannel.stringifyChannelID());
+            System.out.println("the report (" + report.stringifyReport() + ") has failed to be sent over channel ("
+                    + currentChannel.getChannelType() + " " + currentChannel.stringifyChannelID() + ")");
+            System.out.println();
+
             return false;
 
         }
@@ -389,7 +360,7 @@ public class PropositionNode extends Node {
             PropositionSet supportPropSet = new PropositionSet();
             supportPropSet.add(this);
             Substitutions subs = substitutions == null ? new Substitutions() : substitutions;
-            // Substitutions subs2 = new Substitutions();
+            Substitutions subs2 = new Substitutions();
             Report toBeSent = new Report(subs, supportPropSet, currentAttitudeID, reportSign, inferenceType, null);
             toBeSent.setContextName(currentContextName);
             toBeSent.setReportType(channelType);
@@ -403,13 +374,13 @@ public class PropositionNode extends Node {
                 case AntRule:
                     NodeSet rulesNodes = getUpAntDomRuleNodeSet();
                     sendReportToNodeSet(rulesNodes, toBeSent);
-                    // if (this instanceof RuleNode) {
-                    // NodeSet argAntNodes = getDownAntArgNodeSet();
-                    // sendRequestsToNodeSet(argAntNodes, subs, subs2, currentContextName,
-                    // currentAttitudeID,
-                    // channelType, this);
+                    if (this instanceof RuleNode) {
+                        NodeSet argAntNodes = getDownAntArgNodeSet();
+                        sendRequestsToNodeSet(argAntNodes, subs, subs2, currentContextName,
+                                currentAttitudeID,
+                                channelType, this);
 
-                    // }
+                    }
                     break;
 
                 default:
@@ -509,6 +480,68 @@ public class PropositionNode extends Node {
 
     }
 
+    private NodeSet removeAlreadyEstablishedChannels(NodeSet nodeSetRemoveFrom, Request currentRequest,
+            Substitutions toBeCompared) {
+        /* BEGIN - Helpful Prints */
+        String nodesToBeFiltered = "[ ";
+        String nodesToBeKept = "[ ";
+        /* END - Helpful Prints */
+        NodeSet remainingNodes = new NodeSet();
+        for (Node currentNode : nodeSetRemoveFrom) {
+            if (currentNode instanceof PropositionNode) {
+                boolean notTheSame = currentNode.getId() != currentRequest.getChannel().getRequesterNode().getId();
+                // dih fe case the andor wel thresh node
+                if (notTheSame) {
+                    ChannelSet outgoingChannels = ((PropositionNode) currentNode).getOutgoingChannels();
+                    for (Channel outgoingChannel : outgoingChannels) {
+                        Substitutions processedRequestChannelFilterSubs = outgoingChannel.getFilterSubstitutions();
+                        notTheSame &= !processedRequestChannelFilterSubs.isSubsetOf(toBeCompared)
+                                && outgoingChannel.getRequesterNode().getId() == currentRequest.getReporterNode()
+                                        .getId();
+                    }
+                    if (notTheSame) {
+                        remainingNodes.add(currentNode);
+                    }
+                }
+
+            }
+        }
+
+        return remainingNodes;
+    }
+
+    /***
+     * This method is specifically implemented to filter matchingNodes with a
+     * certain
+     * criteria. The filter is perfomed through iterating over each Match extracting
+     * the node
+     * either to keep it or remove it according to the filtering criteria we are
+     * applying over matchingNodes.
+     * 
+     * @param matchingNodes
+     * @param currentRequest
+     * @return
+     */
+    protected List<Match> removeAlreadyEstablishedChannels(List<Match> matchingNodes,
+            Request currentRequest, Substitutions toBeCompared) {
+        List<Match> nodesToConsider = new ArrayList<Match>();
+        for (Match sourceMatch : matchingNodes) {
+            Node sourceNode = sourceMatch.getNode();
+            boolean conditionMet = false;
+            ChannelSet outgoingChannels = ((PropositionNode) sourceNode).getOutgoingChannels();
+            for (Channel outgoingChannel : outgoingChannels) {
+                Substitutions processedRequestChannelFilterSubs = outgoingChannel.getFilterSubstitutions();
+                conditionMet &= !processedRequestChannelFilterSubs.isSubsetOf(toBeCompared) &&
+                        outgoingChannel.getRequesterNode().getId() == currentRequest.getReporterNode().getId();
+            }
+            if (conditionMet)
+                nodesToConsider.add(sourceMatch);
+
+        }
+        return nodesToConsider;
+
+    }
+
     /***
      * this method is used to initiate the whole process of backward inference
      * 
@@ -520,6 +553,32 @@ public class PropositionNode extends Node {
         int currentattitudeID = 0;
         // given by the user
         Scheduler.setOriginOfBackInf(this);
+        Collection<KnownInstance> thePveKnownInstancesSet = knownInstances
+                .getPositiveCollectionbyAttribute(
+                        currentattitudeID);
+        for (KnownInstance currentPveKnownInstance : thePveKnownInstancesSet) {
+
+            PropositionNode replyNode = (PropositionNode) applySubstitution(currentPveKnownInstance.getSubstitutions());
+            Report currentPveReport = new Report(currentPveKnownInstance.getSubstitutions(),
+                    currentPveKnownInstance.getSupports(), currentPveKnownInstance.getAttitudeID(),
+                    true,
+                    InferenceType.BACKWARD, this);
+            currentPveReport.setContextName(currentContextName);
+
+            Scheduler.addNodeAssertionThroughBReport(currentPveReport, replyNode);
+        }
+        Collection<KnownInstance> theNveKnownInstancesSet = knownInstances
+                .getNegativeCollectionbyAttribute(currentattitudeID);
+        for (KnownInstance currentNveKnownInstance : theNveKnownInstancesSet) {
+            PropositionNode replyNode = (PropositionNode) applySubstitution(currentNveKnownInstance.getSubstitutions());
+            Report currentNveReport = new Report(currentNveKnownInstance.getSubstitutions(),
+                    currentNveKnownInstance.getSupports(), currentNveKnownInstance.getAttitudeID(),
+                    false,
+                    InferenceType.BACKWARD, this);
+            currentNveReport.setContextName(currentContextName);
+            Scheduler.addNodeAssertionThroughBReport(currentNveReport, replyNode);
+
+        }
         getNodesToSendRequest(ChannelType.RuleCons, currentContextName, currentattitudeID, null);
 
         getNodesToSendRequest(ChannelType.MATCHED, currentContextName, currentattitudeID, null);
@@ -535,6 +594,7 @@ public class PropositionNode extends Node {
         Scheduler.initiate();
         String currentContextName = Controller.getCurrContext();
         int currentAttitudeID = 0;
+        // given by the user
         boolean reportSign = true;
 
         getNodesToSendReport(ChannelType.AntRule, currentContextName, currentAttitudeID, null, reportSign,
@@ -632,68 +692,6 @@ public class PropositionNode extends Node {
 
     }
 
-    private NodeSet removeAlreadyEstablishedChannels(NodeSet nodeSetRemoveFrom, Request currentRequest,
-            Substitutions toBeCompared) {
-        /* BEGIN - Helpful Prints */
-        String nodesToBeFiltered = "[ ";
-        String nodesToBeKept = "[ ";
-        /* END - Helpful Prints */
-        NodeSet remainingNodes = new NodeSet();
-        for (Node currentNode : nodeSetRemoveFrom) {
-            if (currentNode instanceof PropositionNode) {
-                boolean notTheSame = currentNode.getId() != currentRequest.getChannel().getRequesterNode().getId();
-                // dih fe case the andor wel thresh node
-                if (notTheSame) {
-                    ChannelSet outgoingChannels = ((PropositionNode) currentNode).getOutgoingChannels();
-                    for (Channel outgoingChannel : outgoingChannels) {
-                        Substitutions processedRequestChannelFilterSubs = outgoingChannel.getFilterSubstitutions();
-                        notTheSame &= !processedRequestChannelFilterSubs.isSubsetOf(toBeCompared)
-                                && outgoingChannel.getRequesterNode().getId() == currentRequest.getReporterNode()
-                                        .getId();
-                    }
-                    if (notTheSame) {
-                        remainingNodes.add(currentNode);
-                    }
-                }
-
-            }
-        }
-
-        return remainingNodes;
-    }
-
-    /***
-     * This method is specifically implemented to filter matchingNodes with a
-     * certain
-     * criteria. The filter is perfomed through iterating over each Match extracting
-     * the node
-     * either to keep it or remove it according to the filtering criteria we are
-     * applying over matchingNodes.
-     * 
-     * @param matchingNodes
-     * @param currentRequest
-     * @return
-     */
-    protected List<Match> removeAlreadyEstablishedChannels(List<Match> matchingNodes,
-            Request currentRequest, Substitutions toBeCompared) {
-        List<Match> nodesToConsider = new ArrayList<Match>();
-        for (Match sourceMatch : matchingNodes) {
-            Node sourceNode = sourceMatch.getNode();
-            boolean conditionMet = false;
-            ChannelSet outgoingChannels = ((PropositionNode) sourceNode).getOutgoingChannels();
-            for (Channel outgoingChannel : outgoingChannels) {
-                Substitutions processedRequestChannelFilterSubs = outgoingChannel.getFilterSubstitutions();
-                conditionMet &= !processedRequestChannelFilterSubs.isSubsetOf(toBeCompared) &&
-                        outgoingChannel.getRequesterNode().getId() == currentRequest.getReporterNode().getId();
-            }
-            if (conditionMet)
-                nodesToConsider.add(sourceMatch);
-
-        }
-        return nodesToConsider;
-
-    }
-
     public void processReports() {
         Report reportHasTurn = Scheduler.getHighQueue().poll();
         // Report reportHasTurn = Scheduler.getHighQueue().peek();
@@ -713,41 +711,45 @@ public class PropositionNode extends Node {
     protected void processSingleReports(Report currentReport) {
 
         Report reportToBeBroadcasted = attemptAddingReportToKnownInstances(currentReport);
-        boolean forwardReportType = reportToBeBroadcasted.getInferenceType() == InferenceType.FORWARD;
-        if (this.equals(Scheduler.getOriginOfBackInf())
-                && reportToBeBroadcasted.getInferenceType() == InferenceType.BACKWARD) {
-            Scheduler.addNodeAssertionThroughBReport(reportToBeBroadcasted, this);
-        }
-        if (currentReport.getReportType() == ReportType.RuleCons) {
-            ArrayList<Substitutions> subs = new ArrayList<Substitutions>();
-            subs.add(reportToBeBroadcasted.getSubstitutions());
-            PropositionNode supportNode = (PropositionNode) applySubstitution(subs);
-            if (supportNode != null) {
-                supportNode.addJustificationBasedSupport(reportToBeBroadcasted.getSupport());
-                PropositionSet reportSupportPropSet = new PropositionSet();
-                reportSupportPropSet.add(supportNode);
-                reportToBeBroadcasted.setSupport(reportSupportPropSet);
-            }
-        }
 
-        // TODO: GRADED PROPOSITIONS HANDLING REPORTS
-        if (forwardReportType && !forwardDone) {
-            forwardDone = true;
-            if (currentReport.getReportType() != ReportType.MATCHED) {
-                List<Match> matchesReturned = new ArrayList<Match>();
-                // list of matches with a node
-                // Matcher.match(this);
-                sendReportToMatches(matchesReturned, currentReport);
-            }
-            NodeSet dominatingRules = getUpAntDomRuleNodeSet();
-            sendReportToNodeSet(dominatingRules, currentReport);
-        } else if (forwardReportType && forwardDone) {
-            for (Channel channel : forwardChannels) {
-                sendReport(currentReport, channel);
-            }
-        } else
-            broadcastReport(reportToBeBroadcasted);
+        if (reportToBeBroadcasted != null) {
 
+            boolean forwardReportType = reportToBeBroadcasted.getInferenceType() == InferenceType.FORWARD;
+
+            if (reportToBeBroadcasted.getReportType() == ReportType.RuleCons) {
+                PropositionNode supportNode = (PropositionNode) applySubstitution(
+                        reportToBeBroadcasted.getSubstitutions());
+                if (supportNode != null) {
+                    supportNode.addJustificationBasedSupport(reportToBeBroadcasted.getSupport());
+                    PropositionSet reportSupportPropSet = new PropositionSet();
+                    reportSupportPropSet.add(supportNode);
+                    reportToBeBroadcasted.setSupport(reportSupportPropSet);
+                    if (this.equals(Scheduler.getOriginOfBackInf())
+                            && reportToBeBroadcasted.getInferenceType() == InferenceType.BACKWARD) {
+                        Scheduler.addNodeAssertionThroughBReport(reportToBeBroadcasted, supportNode);
+                    }
+                }
+            }
+
+            // TODO: GRADED PROPOSITIONS HANDLING REPORTS
+            if (forwardReportType && !forwardDone) {
+                forwardDone = true;
+                if (reportToBeBroadcasted.getReportType() != ReportType.MATCHED) {
+                    List<Match> matchesReturned = new ArrayList<Match>();
+                    // list of matches with a node
+                    // Matcher.match(this);
+                    sendReportToMatches(matchesReturned, reportToBeBroadcasted);
+                }
+                NodeSet dominatingRules = getUpAntDomRuleNodeSet();
+                sendReportToNodeSet(dominatingRules, reportToBeBroadcasted);
+            } else if (forwardReportType && forwardDone) {
+                for (Channel channel : forwardChannels) {
+                    sendReport(reportToBeBroadcasted, channel);
+                }
+            } else
+                broadcastReport(reportToBeBroadcasted);
+
+        }
     }
 
     private void addJustificationBasedSupport(PropositionSet support) {
@@ -779,38 +781,6 @@ public class PropositionNode extends Node {
         outgoingChannels.addChannel(channel);
     }
 
-    public void addToIncomingChannels(Channel channel) {
-        incomingChannels.addChannel(channel);
-    }
-
-    protected ArrayList<String> getIncomingAntecedentRuleChannels() {
-        return incomingChannels.getAntRuleChannels();
-    }
-
-    protected ArrayList<String> getIncomingRuleConsequentChannels() {
-        return incomingChannels.getRuleConsChannels();
-    }
-
-    protected ArrayList<String> getIncomingMatchChannels() {
-        return incomingChannels.getMatchChannels();
-    }
-
-    /***
-     * Requests received added to the low priority queue to be served accordingly
-     * through the Scheduler.
-     */
-    public void receiveRequest(Request tempRequest) {
-        Scheduler.addToLowQueue(tempRequest);
-    }
-
-    /***
-     * Reports received added to the high priority queue to be served accordingly
-     * through the Scheduler.
-     */
-    public void receiveReport(Report currentReport) {
-        Scheduler.addToHighQueue(currentReport);
-    }
-
     public ChannelSet getForwardChannels() {
         return forwardChannels;
     }
@@ -835,36 +805,35 @@ public class PropositionNode extends Node {
         return knownInstances;
     }
 
-    public StringChannelSet getIncomingChannels() {
-        return incomingChannels;
-    }
-
-    public void setIncomingChannels(StringChannelSet incomingChannels) {
-        this.incomingChannels = incomingChannels;
-    }
-
     public static void main(String[] args) {
         Network network = new Network();
         Scheduler.initiate();
 
-        Node base1 = Network.createNode("A", "propositionnode"); // Proposition Node
-        Node base2 = Network.createVariableNode("X", "propositionnode"); // Proposition Node
-        Node base4 = Network.createVariableNode("X", "propositionnode"); // Proposition Node
+        Node base1 = Network.createNode("M1", "propositionnode"); // Proposition Node
+        Node base2 = Network.createNode("M2", "propositionnode"); // Proposition Node
+        Node base3 = Network.createNode("M5", "propositionnode"); // Proposition Node
+        Node var1 = Network.createVariableNode("X", "propositionnode"); // Proposition Node
+        Substitutions filterSubs = new Substitutions();
+        filterSubs.add(var1, base1);
+        filterSubs.add(var1, base1);
+        Substitutions switchSubs = new Substitutions();
+        // NodeSet sentTo = new NodeSet();
+        // sentTo.add(base3);
+        // sentTo.add(base2);
+        // sentTo.add(base3);
+        Request newRequest = ((PropositionNode) base1).establishChannel(ChannelType.MATCHED, base2, switchSubs,
+                filterSubs,
+                "reality", 1, 2, base1);
+        Request newRequest2 = ((PropositionNode) base1).establishChannel(ChannelType.RuleCons, base3, switchSubs,
+                filterSubs,
+                "reality", 1, 2, base1);
+        Request newRequest3 = ((PropositionNode) base1).establishChannel(ChannelType.RuleCons, base3, switchSubs,
+                filterSubs,
+                "reality", 1, 2, base1);
+        Scheduler.addToLowQueue(newRequest);
+        Scheduler.addToLowQueue(newRequest2);
+        Scheduler.addToLowQueue(newRequest3);
+        Scheduler.printLowQueue();
 
-        Node base3 = Network.createNode("B", "propositionnode"); // Proposition
-        Node base5 = Network.createNode("C", "propositionnode"); // Proposition
-        Node base6 = Network.createVariableNode("Y", "propositionnode"); // Proposition
-        Node base7 = Network.createVariableNode("Z", "propositionnode"); // Proposition
-
-        Substitutions subs1 = new Substitutions();
-        subs1.add(base2, base3);
-        subs1.add(base4, base1);
-        subs1.add(base6, base5);
-
-        NodeSet freeVariables = new NodeSet();
-        freeVariables.add(base7);
-        base5.setFreeVariableSet(freeVariables);
-        // Substitutions newSubs = ((PropositionNode) base5).onlyRelevantSubs(subs1);
-        // System.out.println(newSubs.toString());
     }
 }

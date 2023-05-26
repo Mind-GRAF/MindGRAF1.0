@@ -36,6 +36,11 @@ public class BridgeRule extends RuleNode {
 
     }
 
+    public static void applyRuleHandler(Report report, BridgeRule node) {
+        // TODO Ossama
+
+    }
+
     protected void requestAntecedentsNotAlreadyWorkingOn(Request currentRequest, KnownInstance knownInstance) {
         Channel currentChannel = currentRequest.getChannel();
         String currentContextName = currentChannel.getContextName();
@@ -164,28 +169,10 @@ public class BridgeRule extends RuleNode {
                     if (assertedInContext) {
                         forwardDone = true;
                         requestAntecedentsNotAlreadyWorkingOn(tempRequest);
-                        //// Collection<RuleResponse> ruleResponse = applyRuleHandler(currentReport,
-                        //// tempChannel);
-                        // handleResponseOfApplyRuleHandler(ruleResponse, currentReport, tempChannel);
-                        // TODO Ossama
+                        applyRuleHandler(currentReport, this);
                     } else {
-                        // boolean ruleType = this instanceof Thresh || this instanceof AndOr;
-                        grandparentMethodRequest(tempRequest); // NodeSet dominatingRules = getUpAntDomRuleNodeSet();
-                        // NodeSet toBeSentToDom = removeAlreadyEstablishedChannels(dominatingRules,
-                        // tempRequest,
-                        // currentReportSubs, ruleType);
-                        // sendRequestsToNodeSet(toBeSentToDom, currentReportSubs, null,
-                        // currentReportContextName,
-                        // currentReportAttitudeID,
-                        // ChannelType.AntRule, this);
-                        // List<Match> matchesList = new ArrayList<Match>();
-                        // // Matcher.match(this, ruleNodeExtractedSubs);
-                        // List<Match> toBeSentToMatch = removeAlreadyEstablishedChannels(matchesList,
-                        // tempRequest,
-                        // currentReportSubs);
-                        // sendRequestsToMatches(toBeSentToMatch, currentReportSubs, null,
-                        // currentReportContextName,
-                        // currentReportAttitudeID, ChannelType.MATCHED, this);
+                        grandparentMethodRequest(tempRequest);
+
                     }
                 } else {
                     Collection<KnownInstance> theKnownInstanceSet = knownInstances.mergeKInstancesBasedOnAtt(
@@ -209,39 +196,13 @@ public class BridgeRule extends RuleNode {
 
                         }
                     }
-                    // Collection<RuleResponse> ruleResponse = applyRuleHandler(currentReport,
-                    // tmpChanl);
-                    // handleResponseOfApplyRuleHandler(ruleResponse, currentReport,
-                    // tmpChanl);
-                    // TODO Ossama
-                    // boolean ruleType = this instanceof Thresh || this instanceof AndOr;
-                    NodeSet dominatingRules = getUpConsDomRuleNodeSet();
-                    NodeSet toBeSentToDom = removeAlreadyEstablishedChannels(dominatingRules,
-                            tempRequest,
-                            currentReportSubs, false);
-                    Substitutions switchSubs = new Substitutions();
-                    sendRequestsToNodeSet(toBeSentToDom, onlySubsBindFreeVar, switchSubs,
-                            currentReportContextName,
-                            currentReportAttitudeID,
-                            ChannelType.RuleCons, this);
-                    List<Match> matchingNodes = new ArrayList<>();
-                    // Matcher.match(this, ruleNodeExtractedSubs);
-                    List<Match> toBeSentToMatch = removeAlreadyEstablishedChannels(matchingNodes,
-                            tempRequest,
-                            currentReportSubs);
-                    sendRequestsToMatches(toBeSentToMatch, onlySubsBindFreeVar, null,
-                            currentReportContextName,
-                            currentReportAttitudeID, ChannelType.MATCHED, this);
-                    // super.processSingleRequests(tempRequest);
+                    forwardDone = true;
+                    applyRuleHandler(currentReport, this);
+                    grandparentMethodRequest(tempRequest);
                 }
             } else {
                 /** Backward Inference */
-                // Collection<RuleResponse> ruleResponse = applyRuleHandler(currentReport,
-                // currentChannel);
-                // handleResponseOfApplyRuleHandler(ruleResponse, currentReport,
-                // currentChannel);
-                // currentChannelReportBuffer.removeReport(currentReport);
-                // TODO Ossama
+                applyRuleHandler(currentReport, this);
 
             }
         } else {
@@ -255,31 +216,15 @@ public class BridgeRule extends RuleNode {
                 // wel antecedents
                 if (!this.isOpen()) {
                     Scheduler.addNodeAssertionThroughFReport(currentReport, this);
-                    // we gali positive reports
                 }
-                Channel tempChannel = new Channel(null, currentReportSubs, currentReportContextName,
+                forwardDone = true;
+                Substitutions switchSubs = new Substitutions();
+
+                Channel tempChannel = new Channel(switchSubs, currentReportSubs, currentReportContextName,
                         currentReportAttitudeID, currentReport.getRequesterNode());
                 Request tempRequest = new Request(tempChannel, null);
                 forwardReport = true;
-                NodeSet argAntNodes = getDownAntArgNodeSet();
-                Substitutions switchSubs = new Substitutions();
-                NodeSet remainingArgAntNodes = removeAlreadyEstablishedChannels(argAntNodes, tempRequest,
-                        currentReportSubs, false);
-                Context currContext = mindG.network.Controller.getContext(currentReportContextName);
-                for (Node currentNode : remainingArgAntNodes) {
-                    int currentNodeAttitude = currContext.getPropositionAttitude(currentNode.getId());
-                    Request newRequest = establishChannel(ChannelType.AntRule, currentNode, switchSubs,
-                            currentReportSubs,
-                            currentReportContextName, currentNodeAttitude, -1, (PropositionNode) this);
-                    Scheduler.addToLowQueue(newRequest);
-
-                }
-                // Collection<RuleResponse> ruleResponse = applyRuleHandler(currentReport,
-                // currentChannel);
-                // handleResponseOfApplyRuleHandler(ruleResponse, currentReport,
-                // currentChannel);
-                // currentChannelReportBuffer.removeReport(currentReport);
-                // TODO Ossama
+                requestAntecedentsNotAlreadyWorkingOn(tempRequest);
 
                 // backward inference during forward inference
                 // law ana 3andi consequents lazem acheck el antecedents el awel
@@ -307,24 +252,34 @@ public class BridgeRule extends RuleNode {
                         currentReportSubs, false);
 
                 for (Channel outConsChannel : outgoingRuleConsChannels) {
-                    if (currentReportSubs.isSubsetOf(outConsChannel.getFilterSubstitutions()))
-                        sendRequestsToNodeSet(remainingArgAntNodes, currentReportSubs, switchSubs,
-                                currentReportContextName,
-                                currentReportAttitudeID,
-                                ChannelType.AntRule, this);
+                    Substitutions outConsChannelSubs = outConsChannel.getFilterSubstitutions();
+                    Substitutions onlySubsBindFreeVarChnl = onlyRelevantSubs(outConsChannelSubs);
+                    boolean compatibilityCheck = onlySubsBindFreeVar
+                            .compatible(onlySubsBindFreeVarChnl);
 
+                    if (compatibilityCheck) {
+                        Substitutions unionSubs = Substitutions.union(currentReportSubs, outConsChannelSubs);
+                        Context currContext = mindG.network.Controller.getContext(currentReportContextName);
+                        for (Node currentNode : remainingArgAntNodes) {
+                            int currentNodeAttitude = currContext.getPropositionAttitude(currentNode.getId());
+                            Request newRequest = establishChannel(ChannelType.AntRule, currentNode, switchSubs,
+                                    unionSubs,
+                                    currentReportContextName, currentNodeAttitude, -1, (PropositionNode) this);
+                            Scheduler.addToLowQueue(newRequest);
+                        }
+                    }
+
+                    // mmkn a broadcast the report over the outgoing channels we khalas
+                    // bass ana keda keda babroadcats fe process Single reports
+                    // hacheck el outgoing channels beta3ty incase backward we hab3at le matched we
+                    // antRule
+                    // law heya RuleCons bashoouf law el report's subs is compatible ma3 el filter
+                    // subs beta3et el channel if it is bab3at lel antecedents requests bel reps
+                    // subs
                 }
-
-                // mmkn a broadcast the report over the outgoing channels we khalas
-                // bass ana keda keda babroadcats fe process Single reports
-                // hacheck el outgoing channels beta3ty incase backward we hab3at le matched we
-                // antRule
-                // law heya RuleCons bashoouf law el report's subs is compatible ma3 el filter
-                // subs beta3et el channel if it is bab3at lel antecedents requests bel reps
-                // subs
             }
+
         }
 
     }
-
 }

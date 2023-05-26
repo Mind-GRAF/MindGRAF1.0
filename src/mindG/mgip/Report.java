@@ -29,14 +29,13 @@ public class Report {
     }
 
     public String stringifyReport() {
-        ReportType reportType = this.getReportType();
         String reportContextName = this.getContextName();
         int reportAttitudeId = this.getAttitude();
         Substitutions subs = this.getSubstitutions();
         Node requesterNode = this.getRequesterNode();
-        String report = reportContextName + " " + reportAttitudeId + " " + subs.toString() + " " +
-                " requestedFrom " + requesterNode.getName() + " " + this.getReportType() + " ";
-        // + this.getSupport().toString();
+        String report = "Context " + reportContextName + " and Attitude " + reportAttitudeId + " and substitutions "
+                + subs.toString() +
+                " requestedFrom " + requesterNode.getName();
         return report;
     }
 

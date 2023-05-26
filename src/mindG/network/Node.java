@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Map.Entry;
 
 import mindG.mgip.matching.Substitutions;
 import mindG.network.cables.Cable;
@@ -215,32 +216,23 @@ public abstract class Node {
         }
     }
 
-    public Node applySubstitution(ArrayList<Substitutions> substitution) {
+    public Node applySubstitution(Substitutions substitutions) {
         HashMap<String, Node> builtNodes = new HashMap<String, Node>();
         LinkedList<Node> pathTrace = new LinkedList<Node>();
-        return this.substituteHelper(this, substitution, builtNodes, pathTrace);
+        return this.substituteHelper(this, substitutions, builtNodes, pathTrace);
     }
 
-    public void processReports() {
-        // TODO Auto-generated method stub
-
-    }
-
-    public void processRequests() {
-        // TODO Auto-generated method stub
-
-    }
-
-    private Node substituteHelper(Node parent, ArrayList<Substitutions> substitution, HashMap<String, Node> builtNodes,
-            LinkedList<Node> pathTrace) {
+    private Node substituteHelper(Node parent,
+            Substitutions substitutions,
+            HashMap<String, Node> builtNodes, LinkedList<Node> pathTrace) {
         pathTrace.add(this);
         if (this.isBase() || this.isVariable()) {
 
             String Semantic = this.getClass().getSimpleName();
 
-            for (Substitutions sub : substitution) {
+            for (Entry<Node, Node> sub : substitutions.getMap().entrySet()) {
                 if (this.isVariable()) {
-                    if (this.equals(sub.get(parent)) && this.isFree(parent)) {
+                    if (this.equals(sub.getKey()) && this.isFree(parent)) {
                         boolean flag = true;
                         for (Node node : pathTrace) {
                             if (node.isMolecular() && !this.isFree(node)) {
@@ -248,9 +240,10 @@ public abstract class Node {
                             }
                         }
                         if (flag) {
-                            builtNodes.put(sub.get(parent).getName(), sub.get(parent));
+                            builtNodes.put(sub.getValue().getName(),
+                                    sub.getValue());
                             pathTrace.removeLast();
-                            return sub.get(parent);
+                            return sub.getValue();
                         }
                     }
                 }
@@ -263,7 +256,8 @@ public abstract class Node {
             }
             Node n;
             if (isVariable())
-                n = Network.createVariableNode(this.getName() + "temp", Semantic);
+                n = Network.createVariableNode(this.getName() + "temp",
+                        Semantic);
             else
                 n = Network.createNode(this.getName() + "temp", Semantic);
 
@@ -277,7 +271,8 @@ public abstract class Node {
             for (DownCable downCable : this.getDownCableSet().getValues()) {
                 NodeSet n = new NodeSet();
                 for (Node node : downCable.getNodeSet().getValues()) {
-                    n.add(node.substituteHelper(parent, substitution, builtNodes, pathTrace));
+                    n.add(node.substituteHelper(parent, substitutions,
+                            builtNodes, pathTrace));
 
                 }
 
@@ -295,6 +290,16 @@ public abstract class Node {
             pathTrace.removeLast();
             return n;
         }
+    }
+
+    public void processReports() {
+        // TODO Auto-generated method stub
+
+    }
+
+    public void processRequests() {
+        // TODO Auto-generated method stub
+
     }
 
     public String toString() {

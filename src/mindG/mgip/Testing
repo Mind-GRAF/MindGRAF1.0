@@ -1,62 +1,5 @@
-Channel matchChannel1 = new MatchChannel();
-Channel channel2 = new AntecedentToRuleChannel();
-Channel channel3Channel = new RuleToConsequentChannel();
-Channel matchChannel2 = new MatchChannel();
-Channel matchChannel3 = new MatchChannel();
-Channel channelAnt = new AntecedentToRuleChannel();
-Channel matchChannel4 = new MatchChannel();
-Channel ruletocons = new RuleToConsequentChannel();
-// System.out.println(matchChannel1.getChannelType(matchChannel1));
-// System.out.println(channel2.getChannelType(channel2));
-// System.out.println(channel3Channel.getChannelType(channel3Channel));
-// System.out.println(matchChannel2.getChannelType(matchChannel2));
 
-ChannelPair match1 = new ChannelPair(matchChannel1);
-// System.out.println(match1.getPair().getKey().getChannelType(match1.getPair().getKey()));
-ChannelPair ant = new ChannelPair(channel2);
-// System.out.println(ant.getPair().getKey().getChannelType(ant.getPair().getKey()));
-
-ChannelPair rule = new ChannelPair(channel3Channel);
-// System.out.println(rule.getPair().getKey().getChannelType(rule.getPair().getKey()));
-
-ChannelPair match2 = new ChannelPair(matchChannel2);
-// System.out.println(match2.getPair().getKey().getChannelType(match2.getPair().getKey()));
-ChannelPair ruleToCons = new ChannelPair(ruletocons);
-ChannelPair match3 = new ChannelPair(matchChannel4);
-ChannelPair ant2 = new ChannelPair(channelAnt);
-ChannelPair match4 = new ChannelPair(matchChannel3);
-ChannelSet channelSet = new ChannelSet();
-
-// Set<ChannelPair> channelSetMatch =
-// channelPairs.getOrDefault(ChannelType.MATCHED, new HashSet<>());
-// Set<ChannelPair> channelSetAnt =
-// channelPairs.getOrDefault(ChannelType.AntRule, new HashSet<>());
-// Set<ChannelPair> channelSetRule =
-// channelPairs.getOrDefault(ChannelType.RuleCons, new HashSet<>());
-channelSet.addChannelPair(match1);
-channelSet.addChannelPair(ant);
-channelSet.addChannelPair(rule);
-channelSet.addChannelPair(match2);
-// channelSetMatch.add(match1);
-// channelSetMatch.add(match2);
-// channelSetAnt.add(ant);
-// channelSetRule.add(rule);
-// channelPairs.put(ChannelType.MATCHED, channelSetMatch);
-// channelPairs.put(ChannelType.RuleCons, channelSetRule);
-// printContents();
-
-// System.out.println("yayyyyyyyyy");
-
-channelSet.addChannelPair(ruleToCons);
-channelSet.addChannelPair(ant2);
-channelSet.addChannelPair(match3);
-channelSet.addChannelPair(match4);
-
-printContents();
-
-
-
-// strinset test
+// stringset test
 
 public static void main(String[] args) {
     Channel matchChannel1 = new MatchChannel(null, null, "reality", 2, 0, null);
@@ -148,21 +91,31 @@ public static void main(String[] args) {
 Network network = new Network();
 Scheduler.initiate();
 
-Node base1 = Network.createNode("Mariam", "propositionnode"); // Proposition Node
-Node base2 = Network.createNode("Tarek", "propositionnode"); // Proposition Node
-Node base3 = Network.createNode("khayat", "propositionnode"); // Proposition Node
-
-Request newRequest = ((PropositionNode) base1).establishChannel(ChannelType.MATCHED, base2, null, null,
+Node base1 = Network.createNode("M1", "propositionnode"); // Proposition Node
+Node base2 = Network.createNode("M2", "propositionnode"); // Proposition Node
+Node base3 = Network.createNode("M5", "propositionnode"); // Proposition Node
+Node var1 = Network.createVariableNode("X", "propositionnode"); // Proposition Node
+Substitutions filterSubs = new Substitutions();
+filterSubs.add(var1, base1);
+filterSubs.add(var1, base1);
+Substitutions switchSubs = new Substitutions();
+// NodeSet sentTo = new NodeSet();
+// sentTo.add(base3);
+// sentTo.add(base2);
+// sentTo.add(base3);
+Request newRequest = ((PropositionNode) base1).establishChannel(ChannelType.MATCHED, base2, switchSubs,
+        filterSubs,
         "reality", 1, 2, base1);
-Request newRequest2 = ((PropositionNode) base1).establishChannel(ChannelType.RuleCons, base3, null, null,
+Request newRequest2 = ((PropositionNode) base1).establishChannel(ChannelType.RuleCons, base3, switchSubs,
+        filterSubs,
         "reality", 1, 2, base1);
-Request newRequest3 = ((PropositionNode) base1).establishChannel(ChannelType.RuleCons, base3, null, null,
+Request newRequest3 = ((PropositionNode) base1).establishChannel(ChannelType.RuleCons, base3, switchSubs,
+        filterSubs,
         "reality", 1, 2, base1);
-// System.out.println(newRequest.stringifyRequest());
-// Scheduler.addToLowQueue(newRequest);
-// Scheduler.addToLowQueue(newRequest2);
-
-// Scheduler.printLowQueue();
+Scheduler.addToLowQueue(newRequest);
+Scheduler.addToLowQueue(newRequest2);
+Scheduler.addToLowQueue(newRequest3);
+Scheduler.printLowQueue();
 
 
 
@@ -170,30 +123,33 @@ Request newRequest3 = ((PropositionNode) base1).establishChannel(ChannelType.Rul
 Network network = new Network();
 Scheduler.initiate();
 
-Node base1 = Network.createNode("Mariam", "propositionnode"); // Proposition Node
+Node base1 = Network.createNode("a", "propositionnode"); // Proposition Node
 Node base2 = Network.createVariableNode("X", "propositionnode"); // Proposition Node
-Node base3 = Network.createNode("Tarek", "propositionnode"); // Proposition
+Node base3 = Network.createNode("b", "propositionnode"); // Proposition
 Node base4 = Network.createVariableNode("Y", "propositionnode"); // Proposition
-Node base5 = Network.createNode("Tarek", "propositionnode"); // Proposition
+Node base5 = Network.createNode("Y", "propositionnode"); // Proposition
 Node base6 = Network.createVariableNode("Z", "propositionnode"); // Proposition
-Node base7 = Network.createNode("jfenkdwn", "propositionnode"); // Proposition
-Substitutions subs1 = new Substitutions();
-subs1.add(base2, base1);
-subs1.add(base4, base5);
-Substitutions subs2 = new Substitutions();
-subs2.add(base6, base5);
+Node base7 = Network.createNode("d", "propositionnode"); // Proposition
+Node base8 = Network.createVariableNode("F", "propositionnode"); // Proposition
+Substitutions filter = new Substitutions();
+filter.add(base2, base1);
+filter.add(base4, base3);
+Substitutions switchsubs = new Substitutions();
+switchsubs.add(base6, base5);
+
+Substitutions reportSubs = new Substitutions();
+reportSubs.add(base2, base1);
+
 // subs2.add(base2, base1);
-
-System.out.println(subs1.toString());
-Channel matchChannel1 = new MatchChannel(null, subs1, "reality", 2, 0, base3);
-// Channel channel2 = new AntecedentToRuleChannel(null, null, "fiction", 2,
-// null);
-Report newReport = new Report(subs2, null, 1, true, InferenceType.BACKWARD, base3);
+// System.out.println(subs1.toString());
+// System.out.println(subs2.toString());
+Channel matchChannel = new MatchChannel(switchsubs, filter, "reality", 2, 1,
+        base3);
+Report newReport = new Report(reportSubs, null, 1, true, InferenceType.BACKWARD,
+        base1);
 newReport.setContextName("reality");
-System.out.println(((PropositionNode) base1).sendReport(newReport, matchChannel1));
+System.out.println(((PropositionNode) base1).sendReport(newReport, matchChannel));
 Scheduler.printHighQueue();
-
-
 
 //switchSubs
 
