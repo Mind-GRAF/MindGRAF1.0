@@ -1,11 +1,17 @@
 package mindG.network;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 
 import mindG.network.cables.DownCable;
 import mindG.network.cables.DownCableSet;
 import mindG.network.caseFrames.Adjustability;
+import mindG.network.components.CustomClass;
+import mindG.network.components.CustomConstructor;
+import mindG.network.components.CustomMethod;
 import mindG.network.components.MyClassCreator;
 import mindG.network.paths.AndPath;
 import mindG.network.paths.ComposePath;
@@ -14,33 +20,98 @@ import mindG.network.paths.KPlusPath;
 import mindG.network.paths.Path;
 import mindG.network.paths.PathTrace;
 import mindG.network.relations.Relation;
+import mindG.mgip.KnownInstance;
+import mindG.mgip.KnownInstanceSet;
+import mindG.mgip.Report;
+import mindG.mgip.matching.Substitutions;
+import mindG.network.RuleNode;
 
 public class Network {
     private static HashMap<Integer, Node> nodes;
-    private static HashMap<String, Node> molecularNodes;
+    private static HashMap<String, HashMap<String, Node>> molecularNodes;
     private static HashMap<String, Node> baseNodes;
     private static HashMap<String, Relation> relations;
     private static HashMap<Integer, Node> propositionNodes;
-    private static MyClassCreator classCreator;
     public static HashMap<String, String> quantifiers = new HashMap<String, String>();
+    public static HashMap<String, CustomClass> userDefinedClasses = new HashMap<String, CustomClass>();
+    public static int MolecularCount;
+    private static List<Node> matches;
+    private static List<Node> matchRule;
+    private static List<Node> matchesLast;
+
+    public static List<Node> getMatchesLast() {
+        return matchesLast;
+    }
+
+    public static void setMatchesLast(List<Node> matchesLast) {
+        Network.matchesLast = matchesLast;
+    }
+
+    public static List<Node> getMatchRule() {
+        return matchRule;
+    }
+
+    public static void setMatchRule(List<Node> matchRule) {
+        Network.matchRule = matchRule;
+    }
+
+    private static Node x;
+    private static Node nemo;
+    private static Node y;
+
+    public static Node getY() {
+        return y;
+    }
+
+    public static void setY(Node y) {
+        Network.y = y;
+    }
+
+    public static List<Node> getMatches() {
+        return matches;
+    }
+
+    public static void setMatches(List<Node> matches) {
+        Network.matches = matches;
+    }
+
+    public static Node getNemo() {
+        return nemo;
+    }
+
+    public static void setNemo(Node nemo) {
+        Network.nemo = nemo;
+    }
+
+    public static Node getX() {
+        return x;
+    }
+
+    public static void setX(Node x) {
+        Network.x = x;
+    }
 
     public Network() {
         nodes = new HashMap<Integer, Node>();
-        molecularNodes = new HashMap<String, Node>();
-        classCreator = new MyClassCreator();
+        molecularNodes = new HashMap<String, HashMap<String, Node>>();
         baseNodes = new HashMap<String, Node>();
         propositionNodes = new HashMap<Integer, Node>();
+        relations = new HashMap<String, Relation>();
+        matches = new ArrayList<Node>();
     }
 
     // first constructor for molecular nodes
-    public static Node createNode(String SemanticType, DownCableSet downCableSet) {
+    public static Node createNode(String SemanticType, DownCableSet downCableSet) throws NoSuchTypeException {
         if (downCableSet.size() == 0) {
             return null;
         }
-        String downCablesKey = downCableSet.getMolecularNodeKey();
+        String downCablesKey = downCableSet.getMolecularSetKey();
+        String molecularKey = downCableSet.getMolecularNodeKey();
         Node node;
 
-        if (!molecularNodes.containsKey(downCablesKey)) {
+        if (!molecularNodes.containsKey(downCablesKey) ||
+                ((molecularNodes.containsKey(downCablesKey) &&
+                        !molecularNodes.get(downCablesKey).containsKey(molecularKey)))) {
 
             switch (SemanticType.toLowerCase()) {
                 case "propositionnode":
@@ -55,32 +126,82 @@ public class Network {
                 case "individualnode":
                     node = new IndividualNode(downCableSet);
                     break;
+                case "rulenode":
+                    node = new RuleNode(downCableSet);
+                    break;
                 default:
-                    System.out.println("Invalid node type.");
-                    return null;
+                    if (userDefinedClasses.containsKey(SemanticType)) {
+                        CustomClass customClass = userDefinedClasses.get(SemanticType);
+                        Class<?> createdClass = customClass.getNewClass();
+                        try {
+                            node = (Node) customClass.createInstance(createdClass, downCableSet);
+                        } catch (InstantiationException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                            return null;
+                        } catch (IllegalAccessException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                            return null;
+                        } catch (IllegalArgumentException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                            return null;
+                        } catch (InvocationTargetException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                            return null;
+                        } catch (NoSuchMethodException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                            return null;
+                        } catch (SecurityException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                            return null;
+                        } catch (Exception e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                            return null;
+                        }
+
+                    } else {
+                        throw new NoSuchTypeException("No such Semantic Type, do you want to create a new one ?");
+                    }
             }
 
             node.fetchFreeVariables();
             if (node.getMolecularType() == MolecularType.CLOSED) {
 
-                for (Node molecular : molecularNodes.values()) {
-                    String MolecularKey = molecular.getDownCableSet().getMolecularNodeKeyWithoutVars();
-                    String newNodeKey = downCableSet.getMolecularNodeKeyWithoutVars();
-                    if (MolecularKey.equals(newNodeKey)) {
-                        return molecular;
+                for (HashMap<String, Node> molecularSet : molecularNodes.values()) {
+
+                    for (Node molecular : molecularSet.values()) {
+                        String MolecularKey = molecular.getDownCableSet().getMolecularNodeKeyWithoutVars();
+                        String newNodeKey = downCableSet.getMolecularNodeKeyWithoutVars();
+                        if (MolecularKey.equals(newNodeKey)) {
+                            return molecular;
+                        }
                     }
                 }
             }
             nodes.put(node.getId(), node);
-            molecularNodes.put(downCablesKey, node);
+            if (molecularNodes.containsKey(downCablesKey)) {
+                molecularNodes.get(downCablesKey).put(downCableSet.getMolecularNodeKey(), node);
+            } else {
+                HashMap<String, Node> newSet = new HashMap<String, Node>();
+                newSet.put(downCableSet.getMolecularNodeKey(), node);
+                molecularNodes.put(downCablesKey, newSet);
+            }
+            MolecularCount++;
             return node;
         }
-        return molecularNodes.get(downCablesKey);
+
+        return molecularNodes.get(downCablesKey).get(molecularKey);
 
     }
 
     // second constructor for base nodes
-    public static Node createNode(String name, String SemanticType) {
+    public static Node createNode(String name, String SemanticType) throws NoSuchTypeException {
         Node node;
         switch (SemanticType.toLowerCase()) {
             case "propositionnode":
@@ -93,9 +214,49 @@ public class Network {
             case "individualnode":
                 node = new IndividualNode(name, false);
                 break;
+            case "rulenode":
+                node = new RuleNode(name, false);
+                break;
             default:
-                System.out.println("Invalid node type.");
-                return null;
+                if (userDefinedClasses.containsKey(SemanticType)) {
+                    CustomClass customClass = userDefinedClasses.get(SemanticType);
+                    Class<?> createdClass = customClass.getNewClass();
+                    try {
+                        node = (Node) customClass.createInstance(createdClass, name, false);
+                    } catch (InstantiationException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                        return null;
+                    } catch (IllegalAccessException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                        return null;
+                    } catch (IllegalArgumentException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                        return null;
+                    } catch (InvocationTargetException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                        return null;
+                    } catch (NoSuchMethodException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                        return null;
+                    } catch (SecurityException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                        return null;
+                    } catch (Exception e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                        return null;
+
+                    }
+
+                } else {
+                    throw new NoSuchTypeException("No such Semantic Type, do you want to create a new one ?");
+                }
         }
         if (node != null) {
             if (nodes.containsKey(node.getId()))
@@ -110,7 +271,7 @@ public class Network {
     }
 
     // third constructor for base nodes
-    public static Node createVariableNode(String name, String SemanticType) {
+    public static Node createVariableNode(String name, String SemanticType) throws NoSuchTypeException {
         Node node;
         switch (SemanticType.toLowerCase()) {
             case "propositionnode":
@@ -123,9 +284,48 @@ public class Network {
             case "individualnode":
                 node = new IndividualNode(name, true);
                 break;
+            case "rulenode":
+                node = new RuleNode(name, true);
+                break;
             default:
-                System.out.println("Invalid node type.");
-                return null;
+                if (userDefinedClasses.containsKey(SemanticType)) {
+                    CustomClass customClass = userDefinedClasses.get(SemanticType);
+                    Class<?> createdClass = customClass.getNewClass();
+                    try {
+                        node = (Node) customClass.createInstance(createdClass, name, true);
+                    } catch (InstantiationException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                        return null;
+                    } catch (IllegalAccessException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                        return null;
+                    } catch (IllegalArgumentException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                        return null;
+                    } catch (InvocationTargetException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                        return null;
+                    } catch (NoSuchMethodException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                        return null;
+                    } catch (SecurityException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                        return null;
+                    } catch (Exception e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                        return null;
+                    }
+
+                } else {
+                    throw new NoSuchTypeException("No such Semantic Type, do you want to create a new one ?");
+                }
         }
         if (node != null) {
             if (nodes.containsKey(node.getId()))
@@ -134,6 +334,29 @@ public class Network {
         }
 
         return node;
+    }
+
+    public static Relation createRelation(String name, String type, Adjustability adjust, int limit) {
+        Relation r = new Relation(name, type, adjust, limit);
+        relations.put(r.getName(), r);
+        return r;
+    }
+
+    public static CustomClass createNewSemanticType(String name, String SuperClass, ArrayList<CustomMethod> methods)
+            throws Exception {
+        CustomClass c = new CustomClass(name, SuperClass);
+        Class<?>[] params = { String.class, Boolean.class };
+        String[] arguments = { "name", "isVariable" };
+        Class<?>[] params2 = { DownCableSet.class };
+        String[] arguments2 = { "downCableSet" };
+        CustomConstructor constructor = new CustomConstructor(name, params, arguments);
+        CustomConstructor constructor2 = new CustomConstructor(name, params2, arguments2);
+        ArrayList<CustomConstructor> constructors = new ArrayList<>();
+        constructors.add(constructor);
+        constructors.add(constructor2);
+        Class<?> Hazem = c.createClass(methods, constructors);
+        userDefinedClasses.put(name, c);
+        return c;
     }
 
     public static HashMap<String, Relation> getRelations() {
@@ -163,11 +386,11 @@ public class Network {
         nodes = Nodes;
     }
 
-    public static HashMap<String, Node> getMolecularNodes() {
+    public static HashMap<String, HashMap<String, Node>> getMolecularNodes() {
         return molecularNodes;
     }
 
-    public static void setMolecularNodes(HashMap<String, Node> MolecularNodes) {
+    public static void setMolecularNodes(HashMap<String, HashMap<String, Node>> MolecularNodes) {
         molecularNodes = MolecularNodes;
     }
 
@@ -192,8 +415,14 @@ public class Network {
     }
 
     public Node find(DownCableSet downCableSet) {
+        String setKey = downCableSet.getMolecularSetKey();
         String key = downCableSet.getMolecularNodeKey();
-        return molecularNodes.get(key);
+        return molecularNodes.get(setKey).get(key);
+    }
+
+    public HashMap<String, Node> findMolecularSet(DownCableSet downCableSet) {
+        String setKey = downCableSet.getMolecularSetKey();
+        return molecularNodes.get(setKey);
     }
 
     public void printNodes() {
@@ -204,240 +433,71 @@ public class Network {
         System.out.println(result);
     }
 
-    public static void main(String[] args) throws ClassCastException {
-        Network Net = new Network();
-        // Node Z = createvariableNode("Z", "propositionnode");
-        // Node Y = createvariableNode("Y", "propositionnode");
-        // Node X = createvariableNode("X", "propositionnode");
-        // Node Base = createNode("base", "propositionnode");
-        // quantifiers.put("forall","forall");
-        //
-        // Relation relation = new Relation ("forall", "", Adjustability.EXPAND, 2);
-        // Relation relation2 = new Relation("b", "", Adjustability.EXPAND, 2);
-        //
-        // NodeSet nodeSetX = new NodeSet();
-        // NodeSet nodeSetZ = new NodeSet();
-        // NodeSet nodeSetXZ = new NodeSet();
-        // NodeSet nodeSetY = new NodeSet();
-        //
-        // nodeSetZ.add(Z);
-        // nodeSetX.add(X);
-        // nodeSetXZ.add(X);
-        // nodeSetXZ.add(Z);
-        // nodeSetY.add(Y);
-        //
-        // // M0
-        // DownCable d2 = new DownCable(relation2, nodeSetXZ);
-        // HashMap<String, DownCable> Cables = new HashMap<>();
-        // Cables.put(d2.getRelation().getName(), d2);
-        // DownCableSet downCableSet = new DownCableSet(Cables);
-        // Node M0 = createNode("propositionnode", downCableSet);
-        //
-        // //M1
-        // NodeSet nodeSetM0 = new NodeSet();
-        // nodeSetM0.add(M0);
-        // DownCable d = new DownCable(relation, nodeSetZ);
-        // DownCable d3 = new DownCable(relation2,nodeSetM0);
-        // HashMap<String, DownCable> Cables2 = new HashMap<>();
-        // Cables2.put(d3.getRelation().getName(), d3);
-        // Cables2.put(d.getRelation().getName(), d);
-        // DownCableSet downCableSet2 = new DownCableSet(Cables2);
-        // Node M1 = createNode("propositionnode", downCableSet2);
-        //
-        // NodeSet nodeSetM1 = new NodeSet();
-        // nodeSetM1.add(M1);
-        //
-        // //M2
-        // DownCable dM2 = new DownCable(relation2, nodeSetY.union(nodeSetM1));
-        // HashMap<String, DownCable> CablesM2 = new HashMap<>();
-        // CablesM2.put(dM2.getRelation().getName(), dM2);
-        // DownCableSet downCableSetM2 = new DownCableSet(CablesM2);
-        // Node M2 = createNode("propositionnode", downCableSetM2);
-        //
-        // //M3
-        // DownCable dM3 = new DownCable(relation2,
-        // nodeSetX.union(nodeSetZ.union(nodeSetY)));
-        //
-        // HashMap<String, DownCable> CablesM3 = new HashMap<>();
-        // CablesM3.put(dM3.getRelation().getName(), dM3);
-        //
-        // DownCableSet downCableSetM3 = new DownCableSet(CablesM3);
-        // Node M3 = createNode("propositionnode", downCableSetM3);
-        //
-        // //M4
-        // NodeSet nodeSetM3 = new NodeSet();
-        // nodeSetM3.add(M3);
-        // NodeSet nodeSetM2 = new NodeSet();
-        // nodeSetM3.add(M2);
-        //
-        // NodeSet nodeSetM23 = new NodeSet();
-        // nodeSetM23.add(M2);
-        // nodeSetM23.add(M3);
-        //
-        // DownCable dM4 = new DownCable(relation, nodeSetX);
-        // DownCable dM4_2 = new DownCable(relation2,nodeSetM23);
-        //// DownCable dM4_3 = new DownCable(relation2,nodeSetM3);
-        //
-        // HashMap<String, DownCable> CablesM4 = new HashMap<>();
-        // CablesM4.put(dM4.getRelation().getName(), dM4);
-        // CablesM4.put(dM4_2.getRelation().getName()+1, dM4_2);
-        //
-        // DownCableSet downCableSetM4 = new DownCableSet(CablesM4);
-        // Node M4 = createNode("propositionnode", downCableSetM4);
-        //
-        // System.out.println("-----------------------------------------------------");
-        // System.out.println("free vars" + M4.getFreeVariables());
-        //
-        //
-        // Substitution s = new Substitution(Base, Z);
-        // ArrayList<Substitution> substitutionArr = new ArrayList<>();
-        // substitutionArr.add(s);
-        // System.out.println(M4);
-        //// System.out.println(M4.clone());
-        //
-        // System.out.println(M4.substitute(substitutionArr));
-        // printNodes();
+    public static void main(String[] args) throws ClassCastException, NoSuchTypeException {
+        Network network = new Network();
 
-        // ======================================================================================================================
+        // ======================================================
 
-        // Node X = createvariableNode("X", "propositionnode");
-        // Node Y = createvariableNode("Y", "propositionnode");
-        // Node Base = createNode("base", "propositionnode", false);
-        // Node Bob = createNode("bob", "propositionnode", false);
-        //
-        // quantifiers.put("forall","forall");
-        //
-        // Relation Qrelation = new Relation ("forall", "", Adjustability.EXPAND, 2);
-        // Relation relation = new Relation("relation", "", Adjustability.EXPAND, 2);
-        //
-        // NodeSet nodeSetX = new NodeSet();
-        // NodeSet nodeSetY = new NodeSet();
-        //
-        // nodeSetX.add(X);;
-        // nodeSetY.add(Y);
-        //
-        // // M0
-        // DownCable d2 = new DownCable(relation, nodeSetX.union(nodeSetY));
-        // HashMap<String, DownCable> Cables = new HashMap<>();
-        // Cables.put(d2.getRelation().getName(), d2);
-        // DownCableSet downCableSet = new DownCableSet(Cables);
-        // Node M0 = createNode("propositionnode", downCableSet);
-        //
-        // //M1
-        // NodeSet nodeSetM0 = new NodeSet();
-        // nodeSetM0.add(M0);
-        // DownCable d = new DownCable(relation, nodeSetM0.union(nodeSetY));
-        // HashMap<String, DownCable> Cables2 = new HashMap<>();
-        // Cables2.put(d.getRelation().getName(), d);
-        // DownCableSet downCableSet2 = new DownCableSet(Cables2);
-        // Node M1 = createNode("propositionnode", downCableSet2);
-        //
-        // NodeSet nodeSetM1 = new NodeSet();
-        // nodeSetM1.add(M1);
-        //
-        // //M2
-        // NodeSet nodeSetBob = new NodeSet(); nodeSetBob.add(Bob);
-        // DownCable dM2 = new DownCable(relation, nodeSetY.union(nodeSetBob));
-        // HashMap<String, DownCable> CablesM2 = new HashMap<>();
-        // CablesM2.put(dM2.getRelation().getName(), dM2);
-        // DownCableSet downCableSetM2 = new DownCableSet(CablesM2);
-        // Node M2 = createNode("propositionnode", downCableSetM2);
-        //
-        // //M3
-        // NodeSet NodeSetM2 = new NodeSet(); NodeSetM2.add(M2);
-        // DownCable dM3 = new DownCable(Qrelation, (nodeSetY));
-        // DownCable dM3_2 = new DownCable(relation, (nodeSetM1.union(NodeSetM2)));
-        //
-        // HashMap<String, DownCable> CablesM3 = new HashMap<>();
-        // CablesM3.put(dM3.getRelation().getName(), dM3);
-        // CablesM3.put(dM3_2.getRelation().getName(), dM3_2);
-        //
-        // DownCableSet downCableSetM3 = new DownCableSet(CablesM3);
-        // Node M3 = createNode("propositionnode", downCableSetM3);
-        //
-        // //M4
-        // NodeSet nodeSetM3 = new NodeSet();
-        // nodeSetM3.add(M3);
-        //
-        // NodeSet nodeSetM03 = new NodeSet();
-        // nodeSetM03.add(M0);
-        // nodeSetM03.add(M3);
-        //
-        // DownCable dM4_2 = new DownCable(relation,nodeSetM03);
-        //// DownCable dM4_3 = new DownCable(relation2,nodeSetM3);
-        //
-        // HashMap<String, DownCable> CablesM4 = new HashMap<>();
-        // CablesM4.put(dM4_2.getRelation().getName()+1, dM4_2);
-        //
-        // DownCableSet downCableSetM4 = new DownCableSet(CablesM4);
-        // Node M4 = createNode("propositionnode", downCableSetM4);
-        //
-        // System.out.println("-----------------------------------------------------");
-        // System.out.println("free vars" + M4.getFreeVariables());
-        //
-        //
-        // Substitution s = new Substitution(Base, Y);
-        // ArrayList<Substitution> substitutionArr = new ArrayList<>();
-        // substitutionArr.add(s);
-        // System.out.println(M4);
-        // System.out.println(M4.clone());
+        // // 1. create the base nodes
+        Node nemo = Network.createNode("Nemo", "propositionNode");
+        Node clown = Network.createNode("clownFish", "propositionNode");
+        Node X = Network.createVariableNode("X", "propositionNode");
+        Node aquatic = Network.createNode("aquatic", "propositionNode");
 
-        // System.out.println(M4.substitute(substitutionArr));
-        // printNodes();
-        // =============================================================================================================
-        Node cs = createNode("cs", "propositionnode");
-        Node fun = createNode("fun", "propositionnode");
-        Node mary = createNode("mary", "propositionnode");
-        Node believe = createNode("believe", "propositionnode");
-        Node bob = createNode("bob", "propositionnode");
-        Node know = createNode("know", "propositionnode");
+        // 2. create the needed relations
+        Relation object = Network.createRelation("object", "",
+                Adjustability.EXPAND, 2);
+        Relation member = Network.createRelation("member", "",
+                Adjustability.EXPAND, 2);
+        Relation Class = Network.createRelation("Class", "",
+                Adjustability.EXPAND, 2);
+        Relation property = Network.createRelation("property", "",
+                Adjustability.EXPAND, 2);
+        Relation antecedent = Network.createRelation("antecedent", "",
+                Adjustability.EXPAND, 2);
+        Relation cons = Network.createRelation("consequent", "",
+                Adjustability.EXPAND, 2);
+        Network.quantifiers.put("forall", "forall");
 
-        Relation agent = new Relation("agent", "", Adjustability.EXPAND, 2);
-        Relation act = new Relation("act", "", Adjustability.EXPAND, 2);
-        Relation obj = new Relation("obj", "", Adjustability.EXPAND, 2);
-        Relation prop = new Relation("prop", "", Adjustability.EXPAND, 2);
+        Relation forAll = Network.createRelation("forall", "",
+                Adjustability.EXPAND, 2);
+        // 3. create downcables for each molecularNode
 
-        DownCable d1 = new DownCable(obj, new NodeSet(cs));
-        DownCable d2 = new DownCable(prop, new NodeSet(fun));
+        DownCable d1 = new DownCable(object, new NodeSet(X));
+        DownCable d2 = new DownCable(member, new NodeSet(nemo));
+        DownCable d5 = new DownCable(member, new NodeSet(X));
+        DownCable d3 = new DownCable(Class, new NodeSet(clown));
+        DownCable d4 = new DownCable(property, new NodeSet(aquatic));
 
-        Node M1 = createNode("propositionnode", new DownCableSet(d1, d2));
+        // 4.create molecular nodes
+        Node M0 = Network.createNode("propositionnode",
+                new DownCableSet(d2, d3));
 
-        DownCable d3 = new DownCable(obj, new NodeSet(M1));
-        DownCable d4 = new DownCable(act, new NodeSet(believe));
-        DownCable d5 = new DownCable(agent, new NodeSet(mary));
+        Node M1 = Network.createNode("propositionnode",
+                new DownCableSet(d3, d5));
+        Node M2 = Network.createNode("propositionnode",
+                new DownCableSet(d1, d4));
+        DownCable d6 = new DownCable(antecedent, new NodeSet(M1));
+        DownCable d7 = new DownCable(cons, new NodeSet(M2));
+        DownCable d8 = new DownCable(forAll, new NodeSet(X));
+        Node P3 = Network.createNode("rulenode",
+                new DownCableSet(d6, d8, d7));
 
-        Node M2 = createNode("propositionnode", new DownCableSet(d3, d4, d5));
-
-        DownCable d6 = new DownCable(obj, new NodeSet(M2));
-        DownCable d7 = new DownCable(act, new NodeSet(know));
-        DownCable d8 = new DownCable(agent, new NodeSet(bob));
-
-        Node M3 = createNode("propositionnode", new DownCableSet(d6, d7, d8));
-
-        FUnitPath p1 = new FUnitPath(agent);
-        FUnitPath p2 = new FUnitPath(act);
-        FUnitPath p3 = new FUnitPath(obj);
-
-        ComposePath pCompose = new ComposePath(p2, p3);
-
-        FUnitPath pF4 = new FUnitPath(agent);
-        FUnitPath pF5 = new FUnitPath(act);
-        FUnitPath pF6 = new FUnitPath(obj);
-
-        ComposePath pCompose2 = new ComposePath(pF5, pF4);
-
-        LinkedList<Object[]> s = p3.follow(M3, new PathTrace(), new Context());
-        Path p4 = new KPlusPath(p3);
-        LinkedList<Object[]> s2 = p4.follow(M3, new PathTrace(), new Context());
-
-        for (Object[] object : s) {
-            System.out.println(object[0]);
-        }
-
-        AndPath and = new AndPath(pCompose);
-        AndPath and2 = new AndPath(pCompose2);
-
-        System.out.println(and.equals(and2));
+        network.printNodes();
+        List<Node> match = new ArrayList<Node>();
+        match.add(M0);
+        Network.setMatches(match);
+        Network.setX(X);
+        Network.setNemo(nemo);
+        // KnownInstanceSet set = new KnownInstanceSet();
+        // Substitutions subs = new Substitutions();
+        // subs.add(x, nemo);
+        // PropositionSet supports = new PropositionSet();
+        // supports.add(M0);
+        // Report newRp = new Report(subs, supports, 1, true, null, P3);
+        // set.addKnownInstance(newRp);
+        // ((PropositionNode) M2).setKnownInstances(set);
+        ((PropositionNode) M2).deduce();
 
     }
 

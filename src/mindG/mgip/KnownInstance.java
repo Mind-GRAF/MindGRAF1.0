@@ -19,14 +19,13 @@ public class KnownInstance {
         this.attitudeID = attitudeID;
     }
 
-    // public String toString() {
-    // StringBuilder sb = new StringBuilder();
-    // sb.append("Substitutions: " + substitutions + "\n");
-    // sb.append("Supports: " + Arrays.deepToString(supports) + "\n");
-    // sb.append("Attitude ID: " + attitudeID + "\n");
-    // sb.append("Sign: " + sign + "\n");
-    // return sb.toString();
-    // }
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Substitutions: " + substitutions + "\n");
+        sb.append("Supports: " + supports.toString() + "\n");
+        return sb.toString();
+    }
+
     public Substitutions getSubstitutions() {
         return substitutions;
     }
@@ -42,17 +41,18 @@ public class KnownInstance {
      * @param reportContextName
      * @param reportAttitudeID
      */
-    public boolean anySupportAssertedInAttitudeContext(String reportContextName,
+    public boolean anySupportSupportedInAttitudeContext(String reportContextName,
             int reportAttitudeID) {
-        int[] supportIds = supports.getProps();
-        int currentPropNodeId;
-        for (int index = 0; index < supportIds.length; index++) {
-            currentPropNodeId = supportIds[index];
-            PropositionNode currentNode = (PropositionNode) Network.getNodeById(currentPropNodeId);
-            if (!(currentNode.asserted(reportContextName, reportAttitudeID)))
-                return false;
+        // int[] supportIds = supports.getProps();
+        // int currentPropNodeId;
+        // for (int index = 0; index < supportIds.length; index++) {
+        // currentPropNodeId = supportIds[index];
+        // PropositionNode currentNode = (PropositionNode)
+        // Network.getNodeById(currentPropNodeId);
+        // if (!(currentNode.asserted(reportContextName, reportAttitudeID)))
+        // return false;
 
-        }
+        // }
         return true;
 
     }

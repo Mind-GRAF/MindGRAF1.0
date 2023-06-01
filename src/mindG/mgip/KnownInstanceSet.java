@@ -1,7 +1,6 @@
 package mindG.mgip;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -11,8 +10,8 @@ import mindG.network.PropositionSet;
 
 public class KnownInstanceSet implements Iterable<KnownInstance> {
 
-    Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> positiveKInstances;
-    Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> negativeKInstances;
+    public Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> positiveKInstances;
+    public Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> negativeKInstances;
 
     public KnownInstanceSet() {
         positiveKInstances = new Hashtable<Integer, Hashtable<Substitutions, KnownInstance>>();
@@ -20,7 +19,7 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
 
     }
 
-    public void addKnownInstance(Report Report) {
+    public boolean addKnownInstance(Report Report) {
         Boolean ReportSign = Report.isSign();
         Substitutions ReportSubs = Report.getSubstitutions();
         PropositionSet Supports = Report.getSupport();
@@ -32,19 +31,30 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
                 KnownInstance targetKnownInstance = new KnownInstance(ReportSubs, Supports, attitude);
                 targetSet.put(ReportSubs, targetKnownInstance);
                 positiveKInstances.put(attitude, targetSet);
+                return false;// ya3ni it didn't get handledd
             } else {
-                KnownInstance targetKnownInstance = targetSet.remove(ReportSubs);
-                if (targetKnownInstance == null) {
-                    targetKnownInstance = new KnownInstance(ReportSubs, Supports, attitude);
+                KnownInstance targetKnownInstance;
+                for (Substitutions key : targetSet.keySet()) {
+                    if (key.compatible(ReportSubs)) {
+                        targetKnownInstance = targetSet.remove(key);
+                        if (targetKnownInstance == null) {
+                            targetKnownInstance = new KnownInstance(ReportSubs, Supports, attitude);
+                            targetSet.put(ReportSubs, targetKnownInstance);
+                            positiveKInstances.put(attitude, targetSet);
+                            return false;
 
-                } else {
-                    PropositionSet supportSet = targetKnownInstance.getSupports();
-                    targetKnownInstance.setSupports(Supports.union(supportSet));
+                        } else {
+                            PropositionSet supportSet = targetKnownInstance.getSupports();
+                            targetKnownInstance.setSupports(Supports.union(supportSet));
+                            targetSet.put(ReportSubs, targetKnownInstance);
+                            positiveKInstances.put(attitude, targetSet);
+                            return true;
 
+                        }
+
+                    }
                 }
 
-                targetSet.put(ReportSubs, targetKnownInstance);
-                positiveKInstances.put(attitude, targetSet);
             }
 
         }
@@ -56,20 +66,32 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
                 KnownInstance targetKnownInstance = new KnownInstance(ReportSubs, Supports, attitude);
                 targetSet.put(ReportSubs, targetKnownInstance);
                 negativeKInstances.put(attitude, targetSet);
+                return false;
             } else {
-                KnownInstance targetKnownInstance = targetSet.remove(ReportSubs);
-                if (targetKnownInstance == null) {
-                    targetKnownInstance = new KnownInstance(ReportSubs, Supports, attitude);
-                    targetSet.put(ReportSubs, targetKnownInstance);
-                    negativeKInstances.put(attitude, targetSet);
-                } else {
-                    PropositionSet supportSet = targetKnownInstance.getSupports();
-                    targetKnownInstance.setSupports(Supports.union(supportSet));
+                KnownInstance targetKnownInstance;
+                for (Substitutions key : targetSet.keySet()) {
+                    if (key.compatible(ReportSubs)) {
+                        targetKnownInstance = targetSet.remove(key);
+                        if (targetKnownInstance == null) {
+                            targetKnownInstance = new KnownInstance(ReportSubs, Supports, attitude);
+                            targetSet.put(ReportSubs, targetKnownInstance);
+                            positiveKInstances.put(attitude, targetSet);
 
+                            return false;
+                        } else {
+                            PropositionSet supportSet = targetKnownInstance.getSupports();
+                            targetKnownInstance.setSupports(Supports.union(supportSet));
+                            targetSet.put(ReportSubs, targetKnownInstance);
+                            positiveKInstances.put(attitude, targetSet);
+                            return true;
+                        }
+
+                    }
                 }
             }
 
         }
+        return false;
 
     }
 
@@ -121,7 +143,6 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
             return theKnownInstanceSet;
 
         }
-        System.out.println("there is no Pve Known Instance with the attitude you are looking for");
 
         return null;
 
@@ -150,7 +171,6 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
             Collection<KnownInstance> theKnownInstanceSet = collectionOfSetsNve.values();
             return theKnownInstanceSet;
         }
-        System.out.println("there is no Nve Known Instance with the attitude you are looking for");
 
         return null;
 
@@ -196,17 +216,26 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
 
     public KnownInstance getKnownInstanceByAttSubPve(int reportAttitude, Substitutions reportSubs) {
         if (getPositiveKInstances().containsKey(reportAttitude)) {
-
+            System.out.println("ana dakhalttttttttttt");
             Hashtable<Substitutions, KnownInstance> collectionOfSetsPve = getPositiveKInstances().get(reportAttitude);
-            if (collectionOfSetsPve.containsKey(reportSubs)) {
-                KnownInstance myKnownInstance = collectionOfSetsPve.get(reportSubs);
-                return myKnownInstance;
+            for (Substitutions key : collectionOfSetsPve.keySet()) {
+
+                if (key.compatible(reportSubs)) {
+                    System.out.println("ana nege7ttttt");
+
+                    KnownInstance myKnownInstance = collectionOfSetsPve.get(key);
+                    System.out.println(myKnownInstance.toString());
+                    return myKnownInstance;
+
+                }
+
             }
 
         }
         System.out.println(
                 "there is no Pve Known Instance with either the attitude or the substitutions you are looking for");
         return null;
+
     }
 
     @Override

@@ -3,7 +3,7 @@ package mindG.network;
 import java.util.Hashtable;
 
 public class Controller {
-    private static String currContext = "default";
+    private static String currContext = "Cartoon";
     private static ContextSet contextSet = new ContextSet(currContext);
     private static Hashtable<Integer, String> attitudeNames = new Hashtable<Integer, String>();
 

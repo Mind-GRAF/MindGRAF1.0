@@ -17,14 +17,15 @@ import mindG.network.relations.Relation;
 public abstract class Node {
 
     private int id;
-    private String name;
+    protected String name;
     private UpCableSet upCableSet;
     private final Syntactic syntacticType;
     private DownCableSet downCableSet;
     private NodeSet freeVariableSet;
     private static int count = 0;
 
-    public Node(String name, Boolean isVariable) { // constructor for base and variable nodes
+    public Node(String name, Boolean isVariable) { // constructor for base and
+                                                   // variable nodes
 
         this.id = count;
         this.name = name;
@@ -41,8 +42,7 @@ public abstract class Node {
     public Node(DownCableSet downCables) { // constructor for molecular nodes
 
         this.id = count;
-        this.name = "M" + Network.getMolecularNodes().size();
-
+        this.name = "M" + Network.MolecularCount;
         syntacticType = Syntactic.MOLECULAR;
         if (downCables == null || downCables.size() == 0)
             return;
@@ -110,44 +110,51 @@ public abstract class Node {
     }
 
     public NodeSet fetchFreeVariables() {
-        NodeSet freeVars = new NodeSet();
-        HashSet<String> inValid = new HashSet<>();
-        LinkedList<Node> pathTrace = new LinkedList<Node>();
-        this.findFreeVariables(freeVars, inValid, pathTrace);
-        this.setFreeVariableSet(freeVars);
-        return freeVars;
+        NodeSet freeVariables = new NodeSet();
+        HashSet<String> invalidPairs = new HashSet<>();
+        LinkedList<Node> pathTrace = new LinkedList<>();
+
+        findFreeVariables(freeVariables, invalidPairs, pathTrace);
+
+        setFreeVariableSet(freeVariables);
+        return freeVariables;
     }
 
-    private void findFreeVariables(NodeSet freeVars, HashSet<String> inValid,
-            LinkedList<Node> PathTrace) {
-
-        PathTrace.add(this);
-
+    private void findFreeVariables(NodeSet freeVariables, HashSet<String> invalidPairs, LinkedList<Node> pathTrace) {
+        pathTrace.addLast(this);
         if (this.isVariable()) {
-            for (Node n : PathTrace) {
-                String key = n.getName() + "_" + this.getName();
-                if (inValid.contains(key))
+            for (Node node : pathTrace) {
+                String inValidPair = node.getName() + "_" + this.getName();
+                if (invalidPairs.contains(inValidPair)) {
                     return;
-
+                }
             }
-            freeVars.add(this);
+            freeVariables.add(this);
             return;
         }
-        if (this.isBase())
+
+        if (this.isBase()) {
             return;
+        }
 
-        for (Cable cable : this.getDownCableSet().getValues())
-            if (cable.getRelation().isQuantifier())
-                for (Node child : cable.getNodeSet().getValues())
-                    if (child.isVariable())
-                        inValid.add(this.getName() + '_' + child.getName());
-
-        for (Cable cable : this.getDownCableSet().getValues())
-            if (!cable.getRelation().isQuantifier())
+        for (Cable cable : this.getDownCableSet().getValues()) {
+            if (cable.getRelation().isQuantifier()) {
                 for (Node child : cable.getNodeSet().getValues()) {
-                    child.findFreeVariables(freeVars, inValid, PathTrace);
-                    PathTrace.removeLast();
+                    if (child.isVariable()) {
+                        invalidPairs.add(this.getName() + '_' + child.getName());
+                    }
                 }
+            }
+        }
+
+        for (Cable cable : this.getDownCableSet().getValues()) {
+            if (!cable.getRelation().isQuantifier()) {
+                for (Node child : cable.getNodeSet().getValues()) {
+                    child.findFreeVariables(freeVariables, invalidPairs, pathTrace);
+                    pathTrace.removeLast();
+                }
+            }
+        }
     }
 
     public Node getNegation() {
@@ -186,12 +193,30 @@ public abstract class Node {
                 return builtNodes.get(this.getName() + "temp");
             }
             Node n;
-            if (isVariable())
-                n = Network.createVariableNode(this.getName() + "temp", Semantic);
-            else
-                n = Network.createNode(this.getName() + "temp", Semantic);
-            builtNodes.put(n.getName(), n);
-            return n;
+            if (isVariable()) {
+
+                try {
+                    n = Network.createVariableNode(this.getName() + "temp",
+                            Semantic);
+                    return n;
+                } catch (NoSuchTypeException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                    return null;
+                }
+            } else {
+
+                try {
+                    n = Network.createNode(this.getName() + "temp", Semantic);
+                    builtNodes.put(n.getName(), n);
+                    return n;
+                } catch (NoSuchTypeException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+
         } else {
             String Semantic = this.getClass().getSimpleName();
 
@@ -210,13 +235,21 @@ public abstract class Node {
             if (builtNodes.containsKey(dcKey)) {
                 return builtNodes.get(dcKey);
             }
-            Node n = Network.createNode(Semantic, dc);
-            builtNodes.put(dcKey, n);
-            return n;
+            Node n;
+            try {
+                n = Network.createNode(Semantic, dc);
+                builtNodes.put(dcKey, n);
+                return n;
+            } catch (NoSuchTypeException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                return null;
+            }
         }
     }
 
-    public Node applySubstitution(Substitutions substitutions) {
+    public Node applySubstitution(Substitutions substitutions)
+            throws NoSuchTypeException {
         HashMap<String, Node> builtNodes = new HashMap<String, Node>();
         LinkedList<Node> pathTrace = new LinkedList<Node>();
         return this.substituteHelper(this, substitutions, builtNodes, pathTrace);
@@ -224,11 +257,11 @@ public abstract class Node {
 
     private Node substituteHelper(Node parent,
             Substitutions substitutions,
-            HashMap<String, Node> builtNodes, LinkedList<Node> pathTrace) {
+            HashMap<String, Node> builtNodes, LinkedList<Node> pathTrace)
+            throws NoSuchTypeException {
         pathTrace.add(this);
+        String Semantic = this.getClass().getSimpleName();
         if (this.isBase() || this.isVariable()) {
-
-            String Semantic = this.getClass().getSimpleName();
 
             for (Entry<Node, Node> sub : substitutions.getMap().entrySet()) {
                 if (this.isVariable()) {
@@ -250,22 +283,21 @@ public abstract class Node {
 
             }
 
-            if (builtNodes.containsKey(this.getName() + "temp")) {
+            if (builtNodes.containsKey(this.getName() + " ")) {
                 pathTrace.removeLast();
-                return builtNodes.get(this.getName() + "temp");
+                return builtNodes.get(this.getName() + " ");
             }
             Node n;
             if (isVariable())
-                n = Network.createVariableNode(this.getName() + "temp",
+                n = Network.createVariableNode(this.getName() + " ",
                         Semantic);
             else
-                n = Network.createNode(this.getName() + "temp", Semantic);
+                n = Network.createNode(this.getName() + " ", Semantic);
 
             builtNodes.put(n.getName(), n);
             pathTrace.removeLast();
             return n;
         } else {
-            String Semantic = this.getClass().getSimpleName();
 
             HashMap<String, DownCable> downCables = new HashMap<String, DownCable>();
             for (DownCable downCable : this.getDownCableSet().getValues()) {
@@ -292,16 +324,6 @@ public abstract class Node {
         }
     }
 
-    public void processReports() {
-        // TODO Auto-generated method stub
-
-    }
-
-    public void processRequests() {
-        // TODO Auto-generated method stub
-
-    }
-
     public String toString() {
         if (this.isMolecular())
             return "{" + this.name + ", " + this.syntacticType + ", "
@@ -311,7 +333,8 @@ public abstract class Node {
     }
 
     public MolecularType getMolecularType() {
-        if (this.getFreeVariables() == null || this.getFreeVariables().size() == 0)
+        if (this.getFreeVariables() == null
+                || this.getFreeVariables().size() == 0)
             return MolecularType.CLOSED;
 
         return MolecularType.OPEN;
@@ -390,6 +413,16 @@ public abstract class Node {
                     || this.getName().equals(n.getName())
                             && this.getSyntacticType() == n.getSyntacticType();
         }
+
+    }
+
+    public void processReports() {
+        // TODO Auto-generated method stub
+
+    }
+
+    public void processRequests() {
+        // TODO Auto-generated method stub
 
     }
 

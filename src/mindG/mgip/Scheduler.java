@@ -10,6 +10,7 @@ import mindG.mgip.requests.Request;
 import mindG.network.ActNode;
 import mindG.network.Node;
 import mindG.network.PropositionNode;
+import mindG.network.RuleNode;
 
 public class Scheduler {
     private static Queue<Report> highQueue;
@@ -38,74 +39,86 @@ public class Scheduler {
     public static void printHighQueue() {
         System.out.println("High Priority Queue:");
         for (Report report : highQueue) {
-            System.out.println("Report of substitutions " + report.getSubstitutions());
+            System.out.println("Report of substitutions " + report.stringifyReport());
         }
-    }
-
-    /***
-     * to Schedule requests before being put on the low priority queue
-     * 
-     * @param request
-     */
-    public void scheduleRequests(Request request) {
-        addToLowQueue(request);
-    }
-
-    /***
-     * to Schedule reports before being put on the high priority queue
-     * 
-     * @param report
-     */
-    public void scheduleReports(Report report) {
-        addToHighQueue(report);
     }
 
     // The main scheduling method of dequeuing of the queue which request/report
     // will be processed next
     public static String schedule() {
-        String sequence = "";
+        String sequence = "The sequence of the scheduler is ";
         main: while (!highQueue.isEmpty() || !lowQueue.isEmpty() || !actQueue.isEmpty()) {
             while (!highQueue.isEmpty()) {
+                System.out.println(
+                        "------------------------------------------------------------------------------------------------------------------------------------");
+
                 System.out.println("\n\u2202 Runner: In HighQueue");
                 Report toRunNext = highQueue.peek();
-                System.out.println("Processing " + toRunNext.stringifyReport() + " reports.");
+                System.out.println("Processing report with " + toRunNext.stringifyReport() + ".");
                 Node requesterNode = toRunNext.getRequesterNode();
                 requesterNode.processReports();
-                sequence += 'H';
+
+                sequence += "H ";
             }
             while (!lowQueue.isEmpty()) {
+                System.out.println(
+                        "------------------------------------------------------------------------------------------------------------------------------------");
+
                 System.out.println("\n\u2202 Runner: In LowQueue");
                 Request toRunNext = lowQueue.peek();
-                System.out.println("Processing " + toRunNext.stringifyRequest() + " requests.");
+                System.out.println("Processing request with " + toRunNext.stringifyRequest() + ".");
                 Node reporterNode = toRunNext.getReporterNode();
                 reporterNode.processRequests();
-                sequence += 'L';
+                sequence += "L ";
                 if (!highQueue.isEmpty())
                     continue main;
             }
             while (!actQueue.isEmpty()) {
+                System.out.println(
+                        "------------------------------------------------------------------------------------------------------------------------------------");
+
                 System.out.println("AT ACT QUEUE");
                 ActNode toRunNext = actQueue.pop();
                 // System.out.println(toRunNext + " agenda: " + toRunNext.getAgenda());
                 System.out.println("\n\n");
                 toRunNext.processIntends();
-                sequence += 'A';
+                sequence += "A ";
                 if (!highQueue.isEmpty() || !lowQueue.isEmpty()) {
                     continue main;
                 }
             }
         }
+        System.out.println(
+                "------------------------------------------------------------------------------------------------------------------------------------");
+
         return sequence;
     }
 
-    // to add the reports on the high queue
+    /***
+     * Method to add a report to high queue
+     * 
+     * @param report
+     */
     public static void addToHighQueue(Report report) {
         highQueue.add(report);
     }
 
-    // to add the requests on the high queue
+    /***
+     * Method to add a request to low queue
+     * 
+     * @param request
+     */
     public static void addToLowQueue(Request newRequest) {
         lowQueue.add(newRequest);
+    }
+
+    /***
+     * Method to add an act node to act queue
+     * 
+     * @param actNode
+     */
+    public static void addToActQueue(ActNode actNode) {
+        actQueue.add(actNode);
     }
 
     /***
@@ -117,12 +130,13 @@ public class Scheduler {
      */
     public static void addNodeAssertionThroughFReport(Report report,
             PropositionNode node) {
+
         forwardAssertedNodes.put(report, node);
     }
 
     /***
      * Method used to keep track of asserted nodes with a specific certain report as
-     * its hash in the hashtable forwardAssertedNodes instance
+     * its hash in the hashtable backwardAssertedReplyNodes instance
      * 
      * @param report
      * @param node
@@ -130,17 +144,6 @@ public class Scheduler {
     public static void addNodeAssertionThroughBReport(Report report,
             PropositionNode node) {
         backwardAssertedReplyNodes.put(report, node);
-    }
-
-    /***
-     * Method checks if the given node was asserted (added in the
-     * forwardAssertedNodes instance) with a forward report
-     * 
-     * @param node
-     * @return
-     */
-    public static boolean isNodeAssertedThroughForwardInf(PropositionNode node) {
-        return forwardAssertedNodes.containsValue(node);
     }
 
     public static Queue<Request> getLowQueue() {

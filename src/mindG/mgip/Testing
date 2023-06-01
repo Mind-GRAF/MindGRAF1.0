@@ -217,3 +217,210 @@ Substitutions newSubs = ((PropositionNode) base5).onlyRelevantSubs(subs1);
 System.out.println(newSubs.toString());
 
 
+//backward inference
+public static void main(String[] args) throws ClassCastException, NoSuchTypeException {
+    Network network = new Network();
+
+    // ======================================================
+
+    // // 1. create the base nodes
+    Node nemo = Network.createNode("Nemo", "propositionNode");
+    Node clown = Network.createNode("clownFish", "propositionNode");
+    Node X = Network.createVariableNode("X", "propositionNode");
+    Node aquatic = Network.createNode("aquatic", "propositionNode");
+
+    // 2. create the needed relations
+    Relation object = Network.createRelation("object", "",
+            Adjustability.EXPAND, 2);
+    Relation member = Network.createRelation("member", "",
+            Adjustability.EXPAND, 2);
+    Relation Class = Network.createRelation("Class", "",
+            Adjustability.EXPAND, 2);
+    Relation property = Network.createRelation("property", "",
+            Adjustability.EXPAND, 2);
+    Relation antecedent = Network.createRelation("antecedent", "",
+            Adjustability.EXPAND, 2);
+    Relation cons = Network.createRelation("consequent", "",
+            Adjustability.EXPAND, 2);
+    Network.quantifiers.put("forall", "forall");
+
+    Relation forAll = Network.createRelation("forall", "",
+            Adjustability.EXPAND, 2);
+    // 3. create downcables for each molecularNode
+
+    DownCable d1 = new DownCable(object, new NodeSet(X));
+    DownCable d2 = new DownCable(member, new NodeSet(nemo));
+    DownCable d5 = new DownCable(member, new NodeSet(X));
+    DownCable d3 = new DownCable(Class, new NodeSet(clown));
+    DownCable d4 = new DownCable(property, new NodeSet(aquatic));
+
+    // 4.create molecular nodes
+    Node M0 = Network.createNode("propositionnode",
+            new DownCableSet(d2, d3));
+
+    Node M1 = Network.createNode("propositionnode",
+            new DownCableSet(d3, d5));
+    Node M2 = Network.createNode("propositionnode",
+            new DownCableSet(d1, d4));
+    DownCable d6 = new DownCable(antecedent, new NodeSet(M1));
+    DownCable d7 = new DownCable(cons, new NodeSet(M2));
+    DownCable d8 = new DownCable(forAll, new NodeSet(X));
+    Node P3 = Network.createNode("rulenode",
+            new DownCableSet(d6, d8, d7));
+            
+    network.printNodes();
+    List<Node> match = new ArrayList<Node>();
+    match.add(M0);
+    Network.setMatches(match);
+    Network.setX(X);
+    Network.setNemo(nemo);
+
+    ((PropositionNode) M2).deduce();
+}
+
+//forward inference
+Network network = new Network();
+
+// ======================================================
+
+// // 1. create the base nodes
+Node nemo = Network.createNode("Nemo", "propositionNode");
+Node marlin = Network.createNode("Marlin", "propositionNode");
+Node clown = Network.createNode("clownFish", "propositionNode");
+Node X = Network.createVariableNode("X", "propositionNode");
+Node aquatic = Network.createNode("aquatic", "propositionNode");
+
+// 2. create the needed relations
+Relation object = Network.createRelation("object", "",
+        Adjustability.EXPAND, 2);
+Relation member = Network.createRelation("member", "",
+        Adjustability.EXPAND, 2);
+Relation Class = Network.createRelation("Class", "",
+        Adjustability.EXPAND, 2);
+Relation property = Network.createRelation("property", "",
+        Adjustability.EXPAND, 2);
+Relation antecedent = Network.createRelation("antecedent", "",
+        Adjustability.EXPAND, 2);
+Relation cons = Network.createRelation("consequent", "",
+        Adjustability.EXPAND, 2);
+Network.quantifiers.put("forall", "forall");
+
+Relation forAll = Network.createRelation("forall", "",
+        Adjustability.EXPAND, 2);
+// 3. create downcables for each molecularNode
+
+DownCable d1 = new DownCable(object, new NodeSet(X));
+DownCable d2 = new DownCable(member, new NodeSet(nemo));
+DownCable d9 = new DownCable(member, new NodeSet(marlin));
+DownCable d5 = new DownCable(member, new NodeSet(X));
+DownCable d3 = new DownCable(Class, new NodeSet(clown));
+DownCable d4 = new DownCable(property, new NodeSet(aquatic));
+
+// 4.create molecular nodes
+Node M0 = Network.createNode("propositionnode",
+        new DownCableSet(d2, d3));
+
+Node M1 = Network.createNode("propositionnode",
+        new DownCableSet(d3, d5));
+Node M2 = Network.createNode("propositionnode",
+        new DownCableSet(d1, d4));
+DownCable d6 = new DownCable(antecedent, new NodeSet(M1));
+DownCable d7 = new DownCable(cons, new NodeSet(M2));
+DownCable d8 = new DownCable(forAll, new NodeSet(X));
+Node P3 = Network.createNode("rulenode",
+        new DownCableSet(d6, d8, d7));
+Node M4 = Network.createNode("propositionnode",
+        new DownCableSet(d9, d3));
+
+network.printNodes();
+List<Node> match = new ArrayList<Node>();
+match.add(M0);
+match.add(M1);
+Network.setMatches(match);
+Network.setX(X);
+Network.setNemo(nemo);
+Network.setMarlin(marlin);
+
+((PropositionNode) M4).add();
+
+
+
+
+//forwardInference
+Network network = new Network();
+
+// ======================================================
+
+// // 1. create the base nodes
+Node Y = Network.createVariableNode("Y", "propositionNode");
+Node clown = Network.createNode("clownFish", "propositionNode");
+Node X = Network.createVariableNode("X", "propositionNode");
+Node aquatic = Network.createNode("aquatic", "propositionNode");
+Node nemo = Network.createNode("Nemo", "propositionNode");
+
+// 2. create the needed relations
+Relation object = Network.createRelation("object", "",
+        Adjustability.EXPAND, 2);
+Relation member = Network.createRelation("member", "",
+        Adjustability.EXPAND, 2);
+Relation Class = Network.createRelation("Class", "",
+        Adjustability.EXPAND, 2);
+Relation property = Network.createRelation("property", "",
+        Adjustability.EXPAND, 2);
+Relation antecedent = Network.createRelation("antecedent", "",
+        Adjustability.EXPAND, 2);
+Relation cons = Network.createRelation("consequent", "",
+        Adjustability.EXPAND, 2);
+Network.quantifiers.put("forall", "forall");
+
+Relation forAll = Network.createRelation("forall", "",
+        Adjustability.EXPAND, 2);
+// 3. create downcables for each molecularNode
+
+DownCable d1 = new DownCable(object, new NodeSet(X));
+DownCable d5 = new DownCable(member, new NodeSet(X));
+DownCable d10 = new DownCable(member, new NodeSet(Y));
+DownCable d11 = new DownCable(object, new NodeSet(Y));
+
+DownCable d2 = new DownCable(member, new NodeSet(nemo));
+
+DownCable d3 = new DownCable(Class, new NodeSet(clown));
+DownCable d4 = new DownCable(property, new NodeSet(aquatic));
+
+// 4.create molecular nodes
+Node M0 = Network.createNode("propositionnode",
+        new DownCableSet(d10, d3));
+
+Node M1 = Network.createNode("propositionnode",
+        new DownCableSet(d3, d5));
+Node M2 = Network.createNode("propositionnode",
+        new DownCableSet(d1, d4));
+DownCable d6 = new DownCable(antecedent, new NodeSet(M1));
+DownCable d7 = new DownCable(cons, new NodeSet(M2));
+// DownCable d8 = new DownCable(forAll, new NodeSet(X));
+Node P3 = Network.createNode("rulenode",
+        new DownCableSet(d6, d7));
+Node M4 = Network.createNode("propositionnode",
+        new DownCableSet(d11, d4));
+DownCable d12 = new DownCable(antecedent, new NodeSet(M0));
+DownCable d13 = new DownCable(cons, new NodeSet(M4));
+DownCable d8 = new DownCable(forAll, new NodeSet(Y));
+Node P5 = Network.createNode("rulenode",
+        new DownCableSet(d12, d8, d13));
+Node M6 = Network.createNode("propositionnode",
+        new DownCableSet(d2, d3));
+network.printNodes();
+List<Node> match = new ArrayList<Node>();
+match.add(M0);
+match.add(M1);
+List<Node> matchRule = new ArrayList<Node>();
+matchRule.add(P5);
+List<Node> matchesLast = new ArrayList<Node>();
+matchesLast.add(M2);
+Network.setMatchRule(matchRule);
+Network.setMatches(match);
+Network.setMatchesLast(matchesLast);
+Network.setX(X);
+Network.setNemo(nemo);
+Network.setY(Y);
+((PropositionNode) M6).add();

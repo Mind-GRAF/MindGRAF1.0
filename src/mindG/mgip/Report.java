@@ -35,7 +35,7 @@ public class Report {
         Node requesterNode = this.getRequesterNode();
         String report = "Context " + reportContextName + " and Attitude " + reportAttitudeId + " and substitutions "
                 + subs.toString() +
-                " requestedFrom " + requesterNode.getName();
+                " to " + requesterNode.getName();
         return report;
     }
 
@@ -46,16 +46,17 @@ public class Report {
      * @param reportContextName
      * @param reportAttitudeID
      */
-    public boolean anySupportAssertedInAttitudeContext(String reportContextName, int reportAttitudeID) {
-        int[] supportIds = support.getProps();
-        int currentPropNodeId;
-        for (int index = 0; index < supportIds.length; index++) {
-            currentPropNodeId = supportIds[index];
-            PropositionNode currentNode = (PropositionNode) Network.getNodeById(currentPropNodeId);
-            if (!(currentNode.asserted(reportContextName, reportAttitudeID)))
-                return false;
+    public boolean anySupportSupportedInAttitudeContext(String ChnlContextName, int ChnlAttitudeID) {
+        // int[] supportIds = support.getProps();
+        // int currentPropNodeId;
+        // for (int index = 0; index < supportIds.length; index++) {
+        // currentPropNodeId = supportIds[index];
+        // PropositionNode currentNode = (PropositionNode)
+        // Network.getNodeById(currentPropNodeId);
+        // if (!(currentNode.asserted(ChnlContextName, ChnlAttitudeID)))
+        // return false;
 
-        }
+        // }
         return true;
 
     }
@@ -118,8 +119,8 @@ public class Report {
 
     public void setReportType(ChannelType channelType) {
         switch (channelType) {
-            case MATCHED:
-                this.setReportType(ReportType.MATCHED);
+            case Matched:
+                this.setReportType(ReportType.Matched);
                 break;
             case AntRule:
                 this.setReportType(ReportType.AntRule);

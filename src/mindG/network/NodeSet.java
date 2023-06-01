@@ -134,7 +134,6 @@ public class NodeSet implements Iterable<Node> {
 
     @Override
     public Iterator<Node> iterator() {
-        return null;
-        // TODO Auto-generated method stub
+        return nodes.values().iterator();
     }
 }

@@ -34,27 +34,35 @@ public class Channel {
      * @return boolean
      */
     public boolean testReportToSend(Report report) {
-        System.out.println("testing report to be sent");
-        System.out.println();
+        System.out.println("Testing report to be sent:");
         boolean passTest = filterSubstitutions.filtertest(report.getSubstitutions());
         if (passTest == true) {
             System.out.println("It passed the filter test");
-            System.out.println();
         } else {
             System.out.println("It failed the filter test");
-            System.out.println();
         }
 
-        if (passTest && report.anySupportAssertedInAttitudeContext(contextName, attitudeID)) {
-            Substitutions newReportSubs = report.getSubstitutions().switchReport(getSwitcherSubstitutions());
-            report.setSubstitutions(newReportSubs);
-            Scheduler.addToHighQueue(report);
-            System.out.println("The report was just enqueued in the high priority queue to be processed");
-            System.out.println();
+        if (passTest && report.anySupportSupportedInAttitudeContext(contextName, attitudeID)) {
 
+            Substitutions newReportSubs = report.getSubstitutions().switchReport(getSwitcherSubstitutions());
+            if (report.getSubstitutions().size() == 0)
+                report.setSubstitutions(getSwitcherSubstitutions());
+
+            else if (getSwitcherSubstitutions().size() == 0)
+                report.setSubstitutions(report.getSubstitutions());
+            else
+                report.setSubstitutions(newReportSubs);
+            report.setRequesterNode(this.getRequesterNode());
+            report.setReportType(getChannelType());
+            report.setAttitude(attitudeID);
+            report.setContextName(contextName);
+            Scheduler.addToHighQueue(report);
+            System.out.println("The report to " + report.getRequesterNode().getName()
+                    + " was just enqueued in the high priority queue to be processed");
             return true;
         }
         return false;
+
     }
 
     public ChannelType getChannelType() {
@@ -64,7 +72,7 @@ public class Channel {
         else if (this instanceof RuleToConsequentChannel)
             channelType = ChannelType.RuleCons;
         else
-            channelType = ChannelType.MATCHED;
+            channelType = ChannelType.Matched;
         return channelType;
     }
 
@@ -122,8 +130,8 @@ public class Channel {
         Substitutions filterSubs = this.getFilterSubstitutions();
         Substitutions switchSubs = this.getSwitcherSubstitutions();
         Node requesterNode = this.getRequesterNode();
-        String channelId = "Context " + channelContextName + " and Attitude " + channelAttitudeId + " of filter "
-                + filterSubs + " and switch"
+        String channelId = "Context: " + channelContextName + " and Attitude: " + channelAttitudeId + " of filter: "
+                + filterSubs + " and switch: "
                 + switchSubs +
                 " requestedFrom " + requesterNode.getName();
         return channelId;

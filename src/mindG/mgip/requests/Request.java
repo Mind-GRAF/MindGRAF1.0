@@ -31,7 +31,7 @@ public class Request {
     public String stringifyRequest() {
         Node reporterNode = this.getReporterNode();
         String channelId = this.channel.stringifyChannelID() +
-                " reporter is " + reporterNode.getName();
+                " reportedBy " + reporterNode.getName();
         return channelId;
     }
 

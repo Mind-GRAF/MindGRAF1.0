@@ -10,7 +10,7 @@ public class ChannelSet implements Iterable<Channel> {
 
     public ChannelSet() {
         channels = new Hashtable<ChannelType, Hashtable<String, Channel>>();
-        channels.put(ChannelType.MATCHED, new Hashtable<String, Channel>());
+        channels.put(ChannelType.Matched, new Hashtable<String, Channel>());
         channels.put(ChannelType.RuleCons, new Hashtable<String, Channel>());
         channels.put(ChannelType.AntRule, new Hashtable<String, Channel>());
     }
@@ -22,16 +22,6 @@ public class ChannelSet implements Iterable<Channel> {
         Channel added = targetSet.put(channelId, channel);
         channels.put(channelType, targetSet);
         return added;
-    }
-
-    public Channel removeChannel(Channel channel) {
-
-        ChannelType channelType = channel.getChannelType();
-        Hashtable<String, Channel> targetSet = channels.remove(channelType);
-        String channelId = channel.stringifyChannelID();
-        Channel removed = targetSet.remove(channelId);
-        channels.put(channelType, targetSet);
-        return removed;
     }
 
     @Override
@@ -78,7 +68,7 @@ public class ChannelSet implements Iterable<Channel> {
     }
 
     public Collection<Channel> getMatchChannels() {
-        Hashtable<String, Channel> channelsHash = channels.get(ChannelType.MATCHED);
+        Hashtable<String, Channel> channelsHash = channels.get(ChannelType.Matched);
         return channelsHash.values();
     }
 

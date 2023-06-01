@@ -18,6 +18,7 @@ import mindG.mgip.requests.ChannelType;
 import mindG.mgip.requests.MatchChannel;
 import mindG.mgip.requests.Request;
 import mindG.network.Context;
+import mindG.network.NoSuchTypeException;
 import mindG.network.Node;
 import mindG.network.NodeSet;
 import mindG.network.PropositionNode;
@@ -98,7 +99,7 @@ public class BridgeRule extends RuleNode {
             Substitutions switchRuleSubs = currentChannel.getSwitcherSubstitutions();
 
             if (!this.isOpen()) {
-                if (this.asserted(currentContext, currentAttitude)) {
+                if (this.supported(currentContext, currentAttitude)) {
                     NodeSet antArgCloseToMe = getDownAntArgNodeSet();
                     NodeSet antArgNodesToConiderClose = removeAlreadyEstablishedChannels(antArgCloseToMe,
                             currentRequest,
@@ -126,7 +127,7 @@ public class BridgeRule extends RuleNode {
                     Substitutions onlySubsBindFreeVar = onlyRelevantSubs(filterRuleSubs);
                     boolean subSetCheck = onlySubsBindFreeVar
                             .compatible(currentKISubs);
-                    boolean supportCheck = currentKnownInstance.anySupportAssertedInAttitudeContext(
+                    boolean supportCheck = currentKnownInstance.anySupportSupportedInAttitudeContext(
                             currentContext,
                             currentAttitude);
                     if (subSetCheck && supportCheck) {
@@ -148,13 +149,13 @@ public class BridgeRule extends RuleNode {
 
     }
 
-    protected void processSingleReports(Report currentReport) {
+    protected void processSingleReports(Report currentReport) throws NoSuchTypeException {
         String currentReportContextName = currentReport.getContextName();
         int currentReportAttitudeID = currentReport.getAttitude();
         Substitutions currentReportSubs = currentReport.getSubstitutions();
         boolean forwardReportType = currentReport.getInferenceType() == InferenceType.FORWARD;
 
-        boolean assertedInContext = asserted(currentReportContextName, currentReportAttitudeID);
+        boolean assertedInContext = supported(currentReportContextName, currentReportAttitudeID);
         Substitutions onlySubsBindFreeVar = onlyRelevantSubs(currentReportSubs);
 
         if (currentReport.getReportType() == ReportType.AntRule) {
@@ -167,9 +168,10 @@ public class BridgeRule extends RuleNode {
                 if (!this.isOpen()) {
                     /** Close Type Implementation */
                     if (assertedInContext) {
-                        forwardDone = true;
-                        requestAntecedentsNotAlreadyWorkingOn(tempRequest);
-                        applyRuleHandler(currentReport, this);
+                        if (this.isForwardReport() == false) {
+                            this.setForwardReport(true);
+                            requestAntecedentsNotAlreadyWorkingOn(tempRequest);
+                        }
                     } else {
                         grandparentMethodRequest(tempRequest);
 
@@ -180,25 +182,32 @@ public class BridgeRule extends RuleNode {
                     Boolean notBound = isOpenNodeNotBound(currentReportSubs);
                     for (KnownInstance currentKnownInstance : theKnownInstanceSet) {
                         Substitutions currentKISubs = currentKnownInstance.getSubstitutions();
-                        boolean subSetCheck = onlySubsBindFreeVar
+                        boolean compatibilityCheck = onlySubsBindFreeVar
                                 .compatible(currentKISubs);
-                        boolean supportCheck = currentKnownInstance.anySupportAssertedInAttitudeContext(
+                        boolean supportCheck = currentKnownInstance.anySupportSupportedInAttitudeContext(
                                 currentReportContextName,
                                 currentReportAttitudeID);
-                        if (subSetCheck && supportCheck) {
+                        if (compatibilityCheck && supportCheck) {
                             if (notBound) {
-                                requestAntecedentsNotAlreadyWorkingOn(tempRequest, currentKnownInstance);
+                                if (this.isForwardReport() == false) {
+                                    this.setForwardReport(true);
+                                    requestAntecedentsNotAlreadyWorkingOn(tempRequest, currentKnownInstance);
+                                }
 
                             } else {
-                                requestAntecedentsNotAlreadyWorkingOn(tempRequest);
+                                if (this.isForwardReport() == false) {
+                                    this.setForwardReport(true);
+                                    requestAntecedentsNotAlreadyWorkingOn(tempRequest);
+                                }
 
                             }
 
                         }
                     }
-                    forwardDone = true;
-                    applyRuleHandler(currentReport, this);
-                    grandparentMethodRequest(tempRequest);
+                    if (this.isForwardReport() == false) {
+                        this.setForwardReport(true);
+                        grandparentMethodRequest(tempRequest);
+                    }
                 }
             } else {
                 /** Backward Inference */
@@ -207,6 +216,11 @@ public class BridgeRule extends RuleNode {
             }
         } else {
             /** Not AntecedentToRule Channel */
+            Substitutions switchSubs = new Substitutions();
+
+            Channel tempChannel = new Channel(switchSubs, currentReportSubs, currentReportContextName,
+                    currentReportAttitudeID, currentReport.getRequesterNode());
+            Request tempRequest = new Request(tempChannel, null);
             if (forwardReportType) {
                 super.grandparentMethodReport(currentReport);
                 // Rule is asserted we do backward inference
@@ -217,13 +231,8 @@ public class BridgeRule extends RuleNode {
                 if (!this.isOpen()) {
                     Scheduler.addNodeAssertionThroughFReport(currentReport, this);
                 }
-                forwardDone = true;
-                Substitutions switchSubs = new Substitutions();
 
-                Channel tempChannel = new Channel(switchSubs, currentReportSubs, currentReportContextName,
-                        currentReportAttitudeID, currentReport.getRequesterNode());
-                Request tempRequest = new Request(tempChannel, null);
-                forwardReport = true;
+                this.setForwardReport(true);
                 requestAntecedentsNotAlreadyWorkingOn(tempRequest);
 
                 // backward inference during forward inference
@@ -241,45 +250,41 @@ public class BridgeRule extends RuleNode {
                 for (Channel outAntChannel : outgoingAntRuleChannels) {
                     sendReport(currentReport, outAntChannel);
 
-                }
-                Channel tempChannel = new Channel(null, currentReportSubs, currentReportContextName,
-                        currentReportAttitudeID, currentReport.getRequesterNode());
-                Request tempRequest = new Request(tempChannel, null);
-                NodeSet argAntNodes = getDownAntArgNodeSet();
-                Substitutions switchSubs = new Substitutions();
-                NodeSet remainingArgAntNodes = removeAlreadyEstablishedChannels(argAntNodes,
-                        tempRequest,
-                        currentReportSubs, false);
+                    NodeSet argAntNodes = getDownAntArgNodeSet();
+                    NodeSet remainingArgAntNodes = removeAlreadyEstablishedChannels(argAntNodes,
+                            tempRequest,
+                            currentReportSubs, false);
 
-                for (Channel outConsChannel : outgoingRuleConsChannels) {
-                    Substitutions outConsChannelSubs = outConsChannel.getFilterSubstitutions();
-                    Substitutions onlySubsBindFreeVarChnl = onlyRelevantSubs(outConsChannelSubs);
-                    boolean compatibilityCheck = onlySubsBindFreeVar
-                            .compatible(onlySubsBindFreeVarChnl);
+                    for (Channel outConsChannel : outgoingRuleConsChannels) {
+                        Substitutions outConsChannelSubs = outConsChannel.getFilterSubstitutions();
+                        Substitutions onlySubsBindFreeVarChnl = onlyRelevantSubs(outConsChannelSubs);
+                        boolean compatibilityCheck = onlySubsBindFreeVar
+                                .compatible(onlySubsBindFreeVarChnl);
 
-                    if (compatibilityCheck) {
-                        Substitutions unionSubs = Substitutions.union(currentReportSubs, outConsChannelSubs);
-                        Context currContext = mindG.network.Controller.getContext(currentReportContextName);
-                        for (Node currentNode : remainingArgAntNodes) {
-                            int currentNodeAttitude = currContext.getPropositionAttitude(currentNode.getId());
-                            Request newRequest = establishChannel(ChannelType.AntRule, currentNode, switchSubs,
-                                    unionSubs,
-                                    currentReportContextName, currentNodeAttitude, -1, (PropositionNode) this);
-                            Scheduler.addToLowQueue(newRequest);
+                        if (compatibilityCheck) {
+                            Substitutions unionSubs = Substitutions.union(currentReportSubs, outConsChannelSubs);
+                            Context currContext = mindG.network.Controller.getContext(currentReportContextName);
+                            for (Node currentNode : remainingArgAntNodes) {
+                                int currentNodeAttitude = currContext.getPropositionAttitude(currentNode.getId());
+                                Request newRequest = establishChannel(ChannelType.AntRule, currentNode, switchSubs,
+                                        unionSubs,
+                                        currentReportContextName, currentNodeAttitude, -1, this);
+                                Scheduler.addToLowQueue(newRequest);
+                            }
                         }
-                    }
 
-                    // mmkn a broadcast the report over the outgoing channels we khalas
-                    // bass ana keda keda babroadcats fe process Single reports
-                    // hacheck el outgoing channels beta3ty incase backward we hab3at le matched we
-                    // antRule
-                    // law heya RuleCons bashoouf law el report's subs is compatible ma3 el filter
-                    // subs beta3et el channel if it is bab3at lel antecedents requests bel reps
-                    // subs
+                        // mmkn a broadcast the report over the outgoing channels we khalas
+                        // bass ana keda keda babroadcats fe process Single reports
+                        // hacheck el outgoing channels beta3ty incase backward we hab3at le matched we
+                        // antRule
+                        // law heya RuleCons bashoouf law el report's subs is compatible ma3 el filter
+                        // subs beta3et el channel if it is bab3at lel antecedents requests bel reps
+                        // subs
+                    }
                 }
+
             }
 
         }
-
     }
 }

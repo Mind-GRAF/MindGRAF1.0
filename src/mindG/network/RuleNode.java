@@ -1,18 +1,11 @@
 package mindG.network;
 
-import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-
-import javax.xml.crypto.dsig.spec.XPathType.Filter;
 
 import mindG.mgip.KnownInstance;
-import mindG.mgip.KnownInstanceSet;
 import mindG.mgip.InferenceType;
 import mindG.mgip.Report;
 import mindG.mgip.Scheduler;
-import mindG.mgip.matching.Match;
 import mindG.mgip.matching.Substitutions;
 import mindG.mgip.requests.AntecedentToRuleChannel;
 import mindG.mgip.requests.Channel;
@@ -23,97 +16,75 @@ import mindG.mgip.ReportType;
 import mindG.mgip.requests.Request;
 import mindG.mgip.rules.AndOr;
 import mindG.mgip.rules.Thresh;
+import mindG.network.cables.DownCable;
 import mindG.network.cables.DownCableSet;
 
-public abstract class RuleNode extends PropositionNode implements Serializable {
+public class RuleNode extends PropositionNode {
+    private boolean forwardReport;
 
-    protected boolean forwardReport;
+    public boolean isForwardReport() {
+        return forwardReport;
+    }
+
+    public void setForwardReport(boolean forwardReport) {
+        this.forwardReport = forwardReport;
+    }
 
     public RuleNode(String name, Boolean isVariable) {
         super(name, isVariable);
-
+        this.forwardReport = false;
+        // TODO Auto-generated constructor stub
     }
 
     public RuleNode(DownCableSet downCableSet) {
         super(downCableSet);
+        this.name = "P" + (Network.MolecularCount);
+        this.forwardReport = false;
 
+        // TODO Auto-generated constructor stub
     }
 
     public void applyRuleHandler(Report report, RuleNode ruleNode) {
+        if (this.isForwardReport() == true) {
+            this.setForwardReport(false);
+            report.setInferenceType(InferenceType.FORWARD);
+            NodeSet downCons = getDownConsNodeSet();
+            sendReportToCons(downCons, report);
+
+        } else {
+            for (Channel outChnl : outgoingChannels)
+                sendReport(report, outChnl);
+        }
+
         // TODO Ossama
 
     }
 
+    public NodeSet getDownConsNodeSet() {
+        NodeSet ret = new NodeSet();
+        DownCable consequentCable = this.getDownCableSet().get("consequent");
+        DownCable argsCable = this.getDownCableSet().get("args");
+        if (argsCable != null) {
+            argsCable.getNodeSet().addAllTo(ret);
+        }
+        if (consequentCable != null) {
+            consequentCable.getNodeSet().addAllTo(ret);
+        }
+        return ret;
+    }
+
     public Substitutions onlyRelevantSubs(Substitutions filterSubs) {
-        // System.out.println("i entered");
         NodeSet freeVariablesSet = this.getFreeVariables();
-        // System.out.println(freeVariablesSet.toString());
         Substitutions relevantSubs = new Substitutions();
         for (Node variableNode : freeVariablesSet.getValues()) {
             for (Node var : filterSubs.getMap().keySet()) {
-                // System.out.println(filterSubs.getMap().keySet());
-                // System.out.println("enterrrr");
                 Node value = filterSubs.getMap().get(var);
                 if (var.getName().equals(variableNode.getName())) {
-                    // System.out.println("1");
                     relevantSubs.add(var, value);
                 }
             }
         }
-        if (relevantSubs.size() == 0) {
-            System.out.println("There are no Relevant Substitutions in the input substitutions");
-        }
         return relevantSubs;
-    }
-
-    protected void requestAntecedentsNotAlreadyWorkingOn(Request currentRequest, KnownInstance knownInstance) {
-        boolean ruleType = this instanceof Thresh || this instanceof AndOr;
-        Channel currentChannel = currentRequest.getChannel();
-        String currentContextName = currentChannel.getContextName();
-        int currentAttitudeID = currentChannel.getAttitudeID();
-        Substitutions filterSubs = currentChannel.getFilterSubstitutions();
-        Substitutions switchSubs = currentChannel.getSwitcherSubstitutions();
-        Substitutions reportSubs = knownInstance.getSubstitutions();
-        Substitutions unionSubs = Substitutions.union(filterSubs, reportSubs);
-
-        NodeSet argumentsCloseToMe = getDownAntArgNodeSet();
-        NodeSet argNodesToConsiderClose = removeAlreadyEstablishedChannels(argumentsCloseToMe,
-                currentRequest,
-                unionSubs, ruleType);
-        sendRequestsToNodeSet(argNodesToConsiderClose, unionSubs, switchSubs, currentContextName,
-                currentAttitudeID,
-                ChannelType.AntRule, this);
-    }
-
-    // This method iterates over all the node’s outgoing channels calling on each
-    // processSingleRequestsChannel(outgoingRequest) and handles the exceptions that
-    // might be
-    // thrown.
-
-    public void processRequests() {
-        Request requestHasTurn = Scheduler.getLowQueue().poll();
-        try {
-            processSingleRequests(requestHasTurn);
-        } catch (Exception e) {
-            // TODO: handle exception
-        }
-    }
-
-    protected void requestAntecedentsNotAlreadyWorkingOn(Request currentRequest) {
-        Substitutions filterRuleSubs = currentRequest.getChannel().getFilterSubstitutions();
-        Substitutions switchRuleSubs = currentRequest.getChannel().getSwitcherSubstitutions();
-        String currentContext = currentRequest.getChannel().getContextName();
-        int currentAttitude = currentRequest.getChannel().getAttitudeID();
-        boolean ruleType = this instanceof Thresh || this instanceof AndOr;
-
-        NodeSet antArgNodeSet = getDownAntArgNodeSet();
-        NodeSet remainingAntArgNodeSet = removeAlreadyEstablishedChannels(antArgNodeSet,
-                currentRequest,
-                filterRuleSubs, ruleType);
-        sendRequestsToNodeSet(remainingAntArgNodeSet, filterRuleSubs, switchRuleSubs, currentContext,
-                currentAttitude,
-                ChannelType.AntRule, this);
-
     }
 
     /***
@@ -155,8 +126,55 @@ public abstract class RuleNode extends PropositionNode implements Serializable {
 
     }
 
-    // ha3mel method lel bridge rule fel process requests be casee el heya el
-    // different attitudes
+    protected void requestAntecedentsNotAlreadyWorkingOn(Request currentRequest, KnownInstance knownInstance) {
+        boolean ruleType = this instanceof Thresh || this instanceof AndOr;
+        Channel currentChannel = currentRequest.getChannel();
+        String currentContextName = currentChannel.getContextName();
+        int currentAttitudeID = currentChannel.getAttitudeID();
+        Substitutions filterSubs = currentChannel.getFilterSubstitutions();
+        Substitutions switchSubs = currentChannel.getSwitcherSubstitutions();
+        Substitutions reportSubs = knownInstance.getSubstitutions();
+        Substitutions unionSubs = Substitutions.union(filterSubs, reportSubs);
+
+        NodeSet argumentsCloseToMe = getDownAntArgNodeSet();
+        NodeSet argNodesToConsiderClose = removeAlreadyEstablishedChannels(argumentsCloseToMe,
+                currentRequest,
+                unionSubs, ruleType);
+        sendRequestsToNodeSet(argNodesToConsiderClose, unionSubs, switchSubs, currentContextName,
+                currentAttitudeID,
+                ChannelType.AntRule, this);
+    }
+
+    protected void requestAntecedentsNotAlreadyWorkingOn(Request currentRequest) {
+        Substitutions filterRuleSubs = currentRequest.getChannel().getFilterSubstitutions();
+        Substitutions switchRuleSubs = currentRequest.getChannel().getSwitcherSubstitutions();
+        String currentContext = currentRequest.getChannel().getContextName();
+        int currentAttitude = currentRequest.getChannel().getAttitudeID();
+        boolean ruleType = this instanceof Thresh || this instanceof AndOr;
+
+        NodeSet antArgNodeSet = getDownAntArgNodeSet();
+        NodeSet remainingAntArgNodeSet = removeAlreadyEstablishedChannels(antArgNodeSet,
+                currentRequest,
+                filterRuleSubs, ruleType);
+        sendRequestsToNodeSet(remainingAntArgNodeSet, filterRuleSubs, switchRuleSubs, currentContext,
+                currentAttitude,
+                ChannelType.AntRule, this);
+
+    }
+
+    // This method iterates over all the node’s outgoing channels calling on each
+    // processSingleRequestsChannel(outgoingRequest) and handles the exceptions that
+    // might be
+    // thrown.
+
+    public void processRequests() {
+        Request requestHasTurn = Scheduler.getLowQueue().poll();
+        try {
+            processSingleRequests(requestHasTurn);
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+    }
 
     /***
      * Request handling in Rule proposition nodes.
@@ -164,6 +182,7 @@ public abstract class RuleNode extends PropositionNode implements Serializable {
      * @param currentRequest
      */
     protected void processSingleRequests(Request currentRequest) {
+        System.out.println(this.getName() + " Processing Requests as a Rule node");
         Channel currentChannel = currentRequest.getChannel();
         if (currentChannel instanceof AntecedentToRuleChannel || currentChannel instanceof MatchChannel)
             super.processSingleRequests(currentRequest);
@@ -175,7 +194,7 @@ public abstract class RuleNode extends PropositionNode implements Serializable {
             Substitutions switchRuleSubs = currentChannel.getSwitcherSubstitutions();
 
             if (!this.isOpen()) {
-                if (this.asserted(currentContext, currentAttitude)) {
+                if (this.supported(currentContext, currentAttitude)) {
                     boolean ruleType = this instanceof Thresh || this instanceof AndOr;
                     NodeSet antArgCloseToMe = getDownAntArgNodeSet();
                     NodeSet antArgNodesToConsiderClose = removeAlreadyEstablishedChannels(antArgCloseToMe,
@@ -195,12 +214,12 @@ public abstract class RuleNode extends PropositionNode implements Serializable {
                 for (KnownInstance currentKnownInstance : theKnownInstanceSet) {
                     Substitutions currentKISubs = currentKnownInstance.getSubstitutions();
                     Substitutions onlySubsBindFreeVar = onlyRelevantSubs(filterRuleSubs);
-                    boolean subSetCheck = onlySubsBindFreeVar
+                    boolean compatibilityCheck = onlySubsBindFreeVar
                             .compatible(currentKISubs);
-                    boolean supportCheck = currentKnownInstance.anySupportAssertedInAttitudeContext(
+                    boolean supportCheck = currentKnownInstance.anySupportSupportedInAttitudeContext(
                             currentContext,
                             currentAttitude);
-                    if (subSetCheck && supportCheck) {
+                    if (compatibilityCheck && supportCheck) {
                         if (!isNotBound) {
                             requestAntecedentsNotAlreadyWorkingOn(currentRequest);
                             return;
@@ -231,13 +250,15 @@ public abstract class RuleNode extends PropositionNode implements Serializable {
         }
     }
 
-    protected void processSingleReports(Report currentReport) {
+    protected void processSingleReports(Report currentReport) throws NoSuchTypeException {
+        System.out.println(this.getName() + " Processing Reports as a Rule node");
+
         String currentReportContextName = currentReport.getContextName();
         int currentReportAttitudeID = currentReport.getAttitude();
         Substitutions currentReportSubs = currentReport.getSubstitutions();
         boolean forwardReportType = currentReport.getInferenceType() == InferenceType.FORWARD;
 
-        boolean assertedInContext = asserted(currentReportContextName, currentReportAttitudeID);
+        boolean assertedInContext = supported(currentReportContextName, currentReportAttitudeID);
         Substitutions onlySubsBindFreeVar = onlyRelevantSubs(currentReportSubs);
 
         if (currentReport.getReportType() == ReportType.AntRule) {
@@ -250,37 +271,58 @@ public abstract class RuleNode extends PropositionNode implements Serializable {
                 if (!this.isOpen()) {
                     /** Close Type Implementation */
                     if (assertedInContext) {
-                        forwardDone = true;
-                        requestAntecedentsNotAlreadyWorkingOn(tempRequest);
-                        applyRuleHandler(currentReport, this);
+                        if (this.isForwardReport() == false) {
+                            this.setForwardReport(true);
+                            requestAntecedentsNotAlreadyWorkingOn(tempRequest);
+                        }
+                        // applyRuleHandler(currentReport, this);
+                        // i removed the apply rule handler here because i call it only when the
+                        // antecedents report back replying to my request thus whenever its a backward
+                        // inference
+
                     } else {
                         super.processSingleRequests(tempRequest);
                     }
                 } else {
+
                     Collection<KnownInstance> theKnownInstanceSet = knownInstances.mergeKInstancesBasedOnAtt(
                             currentReportAttitudeID);
+                    knownInstances.printKnownInstanceSet(theKnownInstanceSet);
                     Boolean notBound = isOpenNodeNotBound(currentReportSubs);
                     for (KnownInstance currentKnownInstance : theKnownInstanceSet) {
                         Substitutions currentKISubs = currentKnownInstance.getSubstitutions();
-                        boolean subSetCheck = currentKISubs
+                        boolean compatibilityCheck = currentKISubs
                                 .compatible(onlySubsBindFreeVar);
-                        boolean supportCheck = currentKnownInstance.anySupportAssertedInAttitudeContext(
+                        boolean supportCheck = currentKnownInstance.anySupportSupportedInAttitudeContext(
                                 currentReportContextName,
                                 currentReportAttitudeID);
-                        if (subSetCheck && supportCheck) {
+                        if (compatibilityCheck && supportCheck) {
                             if (notBound) {
-                                requestAntecedentsNotAlreadyWorkingOn(tempRequest, currentKnownInstance);
-
+                                if (this.isForwardReport() == false) {
+                                    this.setForwardReport(true);
+                                    requestAntecedentsNotAlreadyWorkingOn(tempRequest, currentKnownInstance);
+                                    return;
+                                }
                             } else {
-                                requestAntecedentsNotAlreadyWorkingOn(tempRequest);
+                                if (this.isForwardReport() == false) {
+                                    this.setForwardReport(true);
+                                    requestAntecedentsNotAlreadyWorkingOn(tempRequest);
+                                    return;
 
+                                }
                             }
 
                         }
                     }
-                    forwardDone = true;
-                    applyRuleHandler(currentReport, this);
-                    super.processSingleRequests(tempRequest);
+                    // applyRuleHandler(currentReport, this);
+                    // i removed the apply rule handler here because i call it only when the
+                    // antecedents report back replying to my request thus whenever its a backward
+                    // inference
+                    if (this.isForwardReport() == false) {
+                        this.setForwardReport(true);
+                        super.processSingleRequests(tempRequest);
+
+                    }
                 }
             } else {
                 /** Backward Inference */
@@ -288,6 +330,11 @@ public abstract class RuleNode extends PropositionNode implements Serializable {
 
             }
         } else {
+            Substitutions switchSubs = new Substitutions();
+
+            Channel tempChannel = new Channel(switchSubs, currentReportSubs, currentReportContextName,
+                    currentReportAttitudeID, currentReport.getRequesterNode());
+            Request tempRequest = new Request(tempChannel, null);
             /** Not AntecedentToRule Channel */
             if (forwardReportType) {
                 super.processSingleReports(currentReport);
@@ -299,13 +346,8 @@ public abstract class RuleNode extends PropositionNode implements Serializable {
                 if (!this.isOpen()) {
                     Scheduler.addNodeAssertionThroughFReport(currentReport, this);
                 }
-                forwardDone = true;
-                Substitutions switchSubs = new Substitutions();
+                this.setForwardReport(true);
 
-                Channel tempChannel = new Channel(switchSubs, currentReportSubs, currentReportContextName,
-                        currentReportAttitudeID, currentReport.getRequesterNode());
-                Request tempRequest = new Request(tempChannel, null);
-                forwardReport = true;
                 requestAntecedentsNotAlreadyWorkingOn(tempRequest);
 
                 // backward inference during forward inference
@@ -324,11 +366,8 @@ public abstract class RuleNode extends PropositionNode implements Serializable {
                     sendReport(currentReport, outAntChannel);
 
                 }
-                Channel tempChannel = new Channel(null, currentReportSubs, currentReportContextName,
-                        currentReportAttitudeID, currentReport.getRequesterNode());
-                Request tempRequest = new Request(tempChannel, null);
+
                 NodeSet argAntNodes = getDownAntArgNodeSet();
-                Substitutions switchSubs = new Substitutions();
                 boolean ruleType = this instanceof Thresh || this instanceof AndOr;
                 NodeSet remainingArgAntNodes = removeAlreadyEstablishedChannels(argAntNodes,
                         tempRequest,
@@ -358,34 +397,16 @@ public abstract class RuleNode extends PropositionNode implements Serializable {
 
     }
 
+    // method for any of the children rules to call whenever it needs to act as a
+    // normal proposition node
     public void grandparentMethodRequest(Request currentRequest) {
         // Call the grandparent's method
         super.processSingleRequests(currentRequest);
     }
 
-    public void grandparentMethodReport(Report currentReport) {
+    public void grandparentMethodReport(Report currentReport) throws NoSuchTypeException {
         // Call the grandparent's method
         super.processSingleReports(currentReport);
-    }
-
-    public boolean isForwardReport() {
-        return forwardReport;
-    }
-
-    public void setForwardReport(boolean forwardReport) {
-        this.forwardReport = forwardReport;
-    }
-
-    public static void main(String[] args) {
-
-        int x = 5;
-        int y = 6;
-        boolean ruleType = true; // it is thresh or AndOr
-        System.out.println(x != y);
-        System.out.println(!ruleType);
-        boolean notTheSame = !ruleType
-                || x != y;
-        System.out.println(notTheSame);
     }
 
 }
