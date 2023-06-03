@@ -3,9 +3,20 @@ package view;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
+import paths.AndPath;
 import paths.BUnitPath;
+import paths.ComposePath;
+import paths.DomainRestrictPath;
 import paths.FUnitPath;
+import paths.IrreflexiveRestrictPath;
+import paths.KPlusPath;
+import paths.KStarPath;
+import paths.Path;
 import paths.PathTrace;
+import paths.RangeRestrictPath;
+
+
+
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -14,8 +25,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+
+
 
 import cables.DownCable;
 import cables.DownCableSet;
@@ -23,6 +38,7 @@ import cables.UpCable;
 import components.Substitutions;
 import context.Context;
 import caseFrames.Adjustability;
+import exceptions.CannotRemoveNodeException;
 import network.Network;
 import nodes.Node;
 import relations.Relation;
@@ -41,7 +57,7 @@ public class NetworkUI extends JFrame {
 		// Set up the UI
 		setTitle("Network UI");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setPreferredSize(new Dimension(1200, 800));
+		setPreferredSize(new Dimension(1800, 900));
 		setLayout(new BorderLayout());
 
 		// Create and add UI components
@@ -58,7 +74,7 @@ public class NetworkUI extends JFrame {
 		networkPanel.setOpaque(false);
 
 		// Display nodes and cables recursively
-		int initialX = 200; // Initial X position for the root node
+		int initialX = 250; // Initial X position for the root node
 		int initialY = 50; // Initial Y position for the root node
 
 		int levelHeight = 100; // Vertical spacing between levels of nodes
@@ -72,7 +88,6 @@ public class NetworkUI extends JFrame {
 		//
 		// // Sort the MolIds ArrayList in ascending order
 		// Collections.sort(MolIds);
-		ArrayList<Node> moleculars = new ArrayList<Node>();
 		HashMap<String, Node> hashedMoleculars = new HashMap<String, Node>();
 
 		for (HashMap<String, Node> Set : Network.getMolecularNodes().values()) {
@@ -81,20 +96,40 @@ public class NetworkUI extends JFrame {
 			}
 		}
 
-		System.out.println(hashedMoleculars);
 		for (int i = 0; i < hashedMoleculars.values().size(); i++) {
 			String key = "";
 				if(hashedMoleculars.containsKey("P"+i))
 					key = "P" + i ;
 				else 
 					key = "M" + i ;
+				if(hashedMoleculars.containsKey(key)){
+									
 				if (hashedMoleculars.get(key).getUpCableSet().isEmpty()) {
 					int x = createNodeUI(hashedMoleculars.get(key), networkPanel, initialX,
 							initialY, 1, levelHeight, 0);
-					initialX += x+350;
+					initialX += x+150;
+				}
 				}
 		}
+	
+		HashMap<String, Node> hashednodes = new HashMap<String, Node>();
 
+			for (Node node : Network.getNodes().values()) {
+				if(node.isBase()||node.isVariable())
+				hashednodes.put(node.getName(), node);
+			}
+		
+
+	for (Node node : hashednodes.values()) {
+											
+				if (node.getUpCableSet().isEmpty()) {
+					int x = createNodeUI(node, networkPanel, initialX,
+							initialY, 1, levelHeight, 0);
+					initialX += x+50;
+				
+				}
+		}
+	
 			
 		
 
@@ -210,109 +245,136 @@ public class NetworkUI extends JFrame {
 		}
 		return 100;
 	}
-
+	public static void print(LinkedList<Object[]> l){
+		int i = 0 ;
+		String result = "[";
+		for (Object[] objects : l) {
+			result +=(objects[0]+(i==l.size()-1?"]":", "));
+		}
+		System.out.println(result);
+	}
 	public static void main(String[] args) throws Exception {
 
 		SwingUtilities.invokeLater(() -> {
 			try {
 				Network network = new Network();
-				// Node cs = Network.createNode("cs", "propositionnode");
-				// Node fun = Network.createNode("fun", "propositionnode");
-				// Node mary = Network.createNode("mary", "propositionnode");
-				// Node believe = Network.createNode("believe",
-				// "propositionnode");
-				// Node bob = Network.createNode("bob", "propositionnode");
-				// Node know = Network.createNode("know", "propositionnode");
-				//
-				// Relation agent = Network.createRelation("agent", "",
-				// Adjustability.EXPAND, 2);
-				// Relation act = Network.createRelation("act", "",
-				// Adjustability.EXPAND, 2);
-				// Relation obj = Network.createRelation("obj", "",
-				// Adjustability.EXPAND, 2);
-				// Relation prop = Network.createRelation("prop", "",
-				// Adjustability.EXPAND, 2);
-				//
-				// DownCable d1 = new DownCable(obj, new NodeSet(cs));
-				// DownCable d2 = new DownCable(prop, new NodeSet(fun));
-				//
-				// Node M1 = Network.createNode("propositionnode", new
-				// DownCableSet(d1, d2));
-				//
-				// DownCable d3 = new DownCable(obj, new NodeSet(M1));
-				// DownCable d4 = new DownCable(act, new NodeSet(believe));
-				// DownCable d5 = new DownCable(agent, new NodeSet(mary));
-				//
-				// Node M2 = Network.createNode("propositionnode", new
-				// DownCableSet(d3, d4, d5));
-				//
-				// DownCable d6 = new DownCable(obj, new NodeSet(M2));
-				// DownCable d7 = new DownCable(act, new NodeSet(know));
-				// DownCable d8 = new DownCable(agent, new NodeSet(bob));
-				//
-				// Node M3 = Network.createNode("propositionnode", new
-				// DownCableSet(d6, d7, d8));
+//				Node cs = Network.createNode("cs", "propositionnode");
+//				Node fun = Network.createNode("fun", "propositionnode");
+//				Node mary = Network.createNode("mary", "propositionnode");
+//				Node believe = Network.createNode("believe", "propositionnode");
+//				Node bob = Network.createNode("bob", "propositionnode");
+//				Node know = Network.createNode("know", "propositionnode");
+//					
+//				Relation agent = Network.createRelation("agent", "", Adjustability.EXPAND, 2);
+//				Relation act = Network.createRelation ("act", "", Adjustability.EXPAND, 2);
+//				Relation obj = Network.createRelation ("obj", "", Adjustability.EXPAND, 2);
+//				Relation prop = Network.createRelation ("prop", "", Adjustability.EXPAND, 2);
+//				
+//				DownCable d1 = new DownCable(obj,new NodeSet(cs));
+//				DownCable d2 = new DownCable(prop,new NodeSet(fun));
+//				
+//
+//				
+//				
+//				Node M0 = Network.createNode("propositionnode", new DownCableSet(d1,d2));
+//
+//				DownCable d3 = new DownCable(obj,new NodeSet(M0));
+//				DownCable d4 = new DownCable(act,new NodeSet(believe));
+//				DownCable d5 = new DownCable(agent,new NodeSet(mary));
+//				
+//				Node M1 = Network.createNode("propositionnode", new DownCableSet(d3,d4,d5));
+//				
+//				
+//				DownCable d6 = new DownCable(obj,new NodeSet(M1));
+//				DownCable d7 = new DownCable(act,new NodeSet(know));
+//				DownCable d8 = new DownCable(agent,new NodeSet(bob));
+//				
+//				Node M2 = Network.createNode("propositionnode", new DownCableSet(d6,d7,d8));
+//				
+//				FUnitPath p1 = new FUnitPath(agent);
+//				FUnitPath p2 = new FUnitPath(act);
+//				FUnitPath p3 = new FUnitPath(obj);
+//
+//				
+//				BUnitPath b1 = new BUnitPath(agent);
+//				BUnitPath b2 = new BUnitPath(act);
+//				BUnitPath b3 = new BUnitPath(obj);
+//				ComposePath pCompose = new ComposePath(p2,b2);
+//				
+//				DomainRestrictPath dp1 = new DomainRestrictPath(p2, p1, believe);
+//				RangeRestrictPath r1 = new RangeRestrictPath(p2, b1, believe);
+//				IrreflexiveRestrictPath ir = new IrreflexiveRestrictPath(pCompose);
+//				IrreflexiveRestrictPath ir2 = new IrreflexiveRestrictPath(p2);
+//
+//				
+//				LinkedList<Object[]> result1 = ir.follow(M1,new PathTrace(),new Context());
+//				print(result1);
+//				LinkedList<Object[]> result2 = pCompose.follow(M1,new PathTrace(),new Context());
+//				print(result2);
+//				LinkedList<Object[]> result3 = ir2.follow(M1,new PathTrace(),new Context());
+//				print(result3);
+//				
+////				ComposePath pCompose2 = new ComposePath(pF5,pF4);
+//				AndPath and  = new AndPath(p3,p3);
+//				
+//				
+//				LinkedList <Object[]> s  = p3.follow(M2,new PathTrace(),new Context());
+//				Path p4 = new KPlusPath(p3);
+//				LinkedList <Object[]> s2  = p4.follow(M2,new PathTrace(),new Context());
+				
+//				for (Object[] object : s2) {
+//					System.out.println("KStar " + object[0]);
+//				}
+				
+			
+//				AndPath and2  = new AndPath(pF6,pF5);
+//				System.out.println(and.equals(and2));
+//				Network.createNewSemanticType("FearNode","nodes.IndividualNode", null);
+//				 Node X = Network.createVariableNode("X", "FearNode");
+//				 
 				// =====================================================================
+			
+				 // build some variable nodes
 				 Node Z = Network.createVariableNode("Z", "propositionnode");
 				 Node Y = Network.createVariableNode("Y", "propositionnode");
-				 Network.createNewSemanticType("FearNode",
-				 "nodes.IndividualNode", null);
-				 Node X = Network.createVariableNode("X", "FearNode");
+				 Node X = Network.createVariableNode("X", "propositionnode");
+				 
+				 // build some base nodes 
 				 Node Base = Network.createNode("base", "propositionnode");
-				 Network.quantifiers.put("forall","forall");
+				 
+				 
+				 Relation relation = Network.getRelations().get("forall");
+				 Relation relation2 = Network.createRelation("b", "propositionNode",Adjustability.EXPAND, 2);
 				
-				 Relation relation = Network.createRelation ("forall", "",
-				 Adjustability.EXPAND, 2);
-				 Relation relation2 = Network.createRelation("b", "",
-				 Adjustability.EXPAND, 2);
-				
-				 NodeSet nodeSetX = new NodeSet(X);
-				 NodeSet nodeSetZ = new NodeSet(Z);
-				 NodeSet nodeSetXZ = new NodeSet(X,Z);
-				 NodeSet nodeSetY = new NodeSet(Y);
-				
-				 // M0
+				 // create downCableSet and build M0
 				 DownCable d2 = new DownCable(relation2, new NodeSet(X,Z));
 				 DownCableSet downCableSet = new DownCableSet(d2);
 				 Node M0 = Network.createNode("propositionnode",
 				 downCableSet);
 				
-				 //M1
-				 NodeSet nodeSetM0 = new NodeSet(M0);
-				 DownCable d = new DownCable(relation, nodeSetZ);
-				 DownCable d3 = new DownCable(relation2,nodeSetM0);
+				 // create downCableSet and build M1
+				 DownCable d = new DownCable(relation, new NodeSet(Z));
+				 DownCable d3 = new DownCable(relation2, new NodeSet(M0));
 				 DownCableSet downCableSet2 = new DownCableSet(d,d3);
-				 Node M1 = Network.createNode("propositionnode",
-				 downCableSet2);
+				 Node M1 = Network.createNode("propositionnode",downCableSet2);
 				
-				 NodeSet nodeSetM1 = new NodeSet();
-				 nodeSetM1.add(M1);
-				
-				 //M2
-				 DownCable dM2 = new DownCable(relation2,
-				 nodeSetY.union(nodeSetM1));
-				
+				 // create down cable set and build M2
+				 DownCable dM2 = new DownCable(relation2,new NodeSet(Y,M1));
 				 DownCableSet downCableSetM2 = new DownCableSet(dM2);
 				 Node M2 = Network.createNode("propositionnode",
 				 downCableSetM2);
 				
-				 //M3
+				 // create down cable set and build M3
 				 DownCable dM3 = new DownCable(relation2, new NodeSet(X,Y,Z));
-				
 				 DownCableSet downCableSetM3 = new DownCableSet(dM3);
 				 Node M3 = Network.createNode("propositionnode",
 				 downCableSetM3);
 				
-				 //M4
-				 NodeSet nodeSetM23 = new NodeSet(M2,M3);
-				
-				
-				 DownCable dM4 = new DownCable(relation, nodeSetX);
-				 DownCable dM4_2 = new DownCable(relation2,nodeSetM23);
-				
+				 // create down cable set and build M4
+				 DownCable dM4 = new DownCable(relation, new NodeSet(X));
+				 DownCable dM4_2 = new DownCable(relation2, new NodeSet (M2,M3));
 				 DownCableSet downCableSetM4 = new DownCableSet(dM4,dM4_2);
-				 Node M4 = Network.createNode("rulenode",
-				 downCableSetM4);
+				 Node M4 = Network.createNode("propositionNode",downCableSetM4);
 				
 				 /*
 				 System.out.println("-----------------------------------------------------");
@@ -323,23 +385,18 @@ public class NetworkUI extends JFrame {
 				 s.add(Y,Base);
 //				  ArrayList<Substitution> substitutionArr = new ArrayList<>();
 				 // substitutionArr.add(s);
-				 System.out.println(M4);
-				FUnitPath fp = new FUnitPath(relation2);
 				
-				for (Object[] object : fp.follow(M2, new PathTrace(), new Context())) {
-					System.out.println(fp.follow(M2, new PathTrace(), new Context()).size());
-					System.out.println("FUnit " + object[0]);
-				}
+				 System.out.println("Hi" + M4.applySubstitution(s));
 				
-//				 System.out.println("Hi" + M4.applySubstitution(s));
-				 // network.printNodes();
-				 
+//					Network.RemoveNode(M4);
+				
+				System.out.println(Network.getNodes());
 				// ======================================================
 
 				// 1. create the base nodes
 				   // // 1. create the base nodes
 //                Node nemo = Network.createNode("Nemo", "propositionNode");
-//                Node clown = Network.createNode("clownFish", "propositionNode");
+//                Node clown = Network.createNode("Fish", "propositionNode");
 //                Node X = Network.createVariableNode("X", "propositionNode");
 //                Node aquatic = Network.createNode("aquatic", "propositionNode");
 //
@@ -381,11 +438,11 @@ public class NetworkUI extends JFrame {
 //                DownCable d8 = new DownCable(forAll, new NodeSet(X));
 //                Node M3 = Network.createNode("propositionnode",
 //                        new DownCableSet(d6, d8, d7));
+//
+//
 
+				NetworkUI m = new NetworkUI();
 
-
-
-				new NetworkUI();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

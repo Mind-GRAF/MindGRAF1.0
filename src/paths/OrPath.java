@@ -49,9 +49,9 @@ public class OrPath extends Path{
 			LinkedList<Path> pList = new LinkedList<Path>();
 			pList.addAll(this.paths);
 			Path p = pList.removeFirst();
-			AndPath andPath = new AndPath(pList);
+			OrPath orPath = new OrPath(pList);
 			if(pList.size() > 0)
-				return union(p.follow(node, trace, context), andPath.follow(node, trace, context));
+				return union(p.follow(node, trace, context), orPath.follow(node, trace, context));
 			else
 				return p.follow(node, trace, context);
 
@@ -64,9 +64,9 @@ public class OrPath extends Path{
 			LinkedList<Path> pList = new LinkedList<Path>();
 			pList.addAll(this.paths);
 			Path p = pList.removeFirst();
-			AndPath andPath = new AndPath(pList);
+			OrPath orPath = new OrPath(pList);
 			if(pList.size() > 0)
-				return union(p.followConverse(node, trace, context), andPath.followConverse(node, trace, context));
+				return union(p.followConverse(node, trace, context), orPath.followConverse(node, trace, context));
 			else
 				return p.followConverse(node, trace, context);
 
@@ -84,32 +84,28 @@ public class OrPath extends Path{
 		for (Path path : this.paths)
 			pList.add(path.clone());	
 
-		return new AndPath(pList);
+		return new OrPath(pList);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-			if (!(obj instanceof AndPath))
-				return false;
-			AndPath andPath = (AndPath) obj;
-			if (this.paths.size() != andPath.getPaths().size())
-				return false;
-			
-			HashMap<String, Path> HashedResult = new HashMap<String,Path>();
-			for (Path path : paths) 
-				HashedResult.put(path.toString(), path);
-			
-			for (Path path : andPath.getPaths()) {
-				boolean found = false ; 
-				if(HashedResult.containsKey(path.toString()))
-					found = true ;
-			
-					if(!found) 
-					return false;
-			}
-			return true;
+		if (!(obj instanceof OrPath))
+			return false;
+		OrPath orPath = (OrPath) obj;
+		if (this.paths.size() != orPath.getPaths().size())
+			return false;
 		
-	}
+		HashMap<String, Path> HashedResult = new HashMap<String,Path>();
+		for (Path path : paths) 
+			HashedResult.put(path.toString(), path);
+		 
+		for (Path path : orPath.getPaths())
+			if(!HashedResult.containsKey(path.toString()))
+				return false;
+				 
+		return true;
+	
+}
 	public String toString(){
 		String id = "Or Path(" ;
 		int i = 1 ;
@@ -129,8 +125,8 @@ public class OrPath extends Path{
 		for (Path path : paths)
 			result.add(path.converse());
 		
-		AndPath and = new AndPath(result);
-		return and;
+		OrPath or = new OrPath(result);
+		return or;
 	}
 
 }

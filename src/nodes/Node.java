@@ -54,7 +54,7 @@ public abstract class Node {
 
 		this.downCableSet = downCables;
 		freeVariableSet = new NodeSet();
-
+		System.out.println(freeVariableSet.getValues());
 		for (Cable c : downCables.getValues())
 			for (Node node : c.getNodeSet().getValues())
 				node.getUpCableSet().updateCables(c.getRelation(), this);
@@ -410,14 +410,14 @@ public abstract class Node {
 	}
 
 	public boolean equals(Node n) {
-		if (n.isMolecular()) {
+		if (n.isMolecular() && this.isMolecular()) {
 			String nKey = n.getDownCableSet().getMolecularNodeKey();
 			String myKey = this.getDownCableSet().getMolecularNodeKey();
 			return this.getId() == n.getId() || (nKey.equals(myKey));
 		} else {
 			return this.getId() == n.getId()
-					|| this.getName().equals(n.getName())
-					&& this.getSyntacticType() == n.getSyntacticType();
+					|| (this.getName().equals(n.getName())
+					&& this.getSyntacticType() == n.getSyntacticType());
 		}
 
 	}

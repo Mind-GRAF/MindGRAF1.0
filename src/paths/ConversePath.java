@@ -48,7 +48,7 @@ public class ConversePath extends Path {
 
 	@Override
 	public Path converse() {
-		return new ConversePath(this.path);
+		return this.path;
 	}
 	public String toString(){
 		return "Converse("+this.path.toString()+")";

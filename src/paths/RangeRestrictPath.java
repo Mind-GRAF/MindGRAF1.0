@@ -2,6 +2,7 @@ package paths;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+
 import nodes.Node;
 import context.Context;
 
@@ -10,7 +11,7 @@ public class RangeRestrictPath extends Path {
 	private Path p;
 	private Node zNode;
 
-	public RangeRestrictPath(Path p, Path q, Node zNode) {
+	public RangeRestrictPath(Path q, Path p, Node zNode) {
 		// TODO Auto-generated constructor stub
 		this.q = q;
 		this.p = p;
@@ -40,6 +41,7 @@ public class RangeRestrictPath extends Path {
 	public void setzNode(Node zNode) {
 		this.zNode = zNode;
 	}
+	
 
 	@Override
 	public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context) {
@@ -57,7 +59,7 @@ public class RangeRestrictPath extends Path {
                         if(nodeQ.equals(this.zNode))
                         {
                                 Object[] r = new Object[2];
-                                r[0] = nodeQ;
+                                r[0] = nodeP;
                                 PathTrace ptrace = pathTraceP.clone();
                                 ptrace.addAllSupports(pathTraceQ.getSupports());
                                 r[1] = ptrace;
@@ -73,12 +75,12 @@ public class RangeRestrictPath extends Path {
 	@Override
 	public LinkedList<Object[]> followConverse(Node node, PathTrace trace,
 			Context context) {
-		return new DomainRestrictPath(new ConversePath(p),q,zNode).follow(node,trace,context);
+		return new DomainRestrictPath(q,p.converse(),zNode).follow(node,trace,context);
 	}
 
 	@Override
 	public RangeRestrictPath clone() {
-		return new RangeRestrictPath(this.p.clone(), this.q.clone(), this.zNode);
+		return new RangeRestrictPath( this.q.clone(),this.p.clone(), this.zNode);
 	}
 
 	@Override
@@ -99,7 +101,7 @@ public class RangeRestrictPath extends Path {
 
 	@Override
 	public Path converse() {
-		return new DomainRestrictPath(p.converse(), q, zNode);
+		return new DomainRestrictPath( q,p.converse(), zNode);
 	}
 
 }

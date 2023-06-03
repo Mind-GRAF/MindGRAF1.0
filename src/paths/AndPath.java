@@ -104,15 +104,11 @@ public class AndPath extends Path{
 			HashMap<String, Path> HashedResult = new HashMap<String,Path>();
 			for (Path path : paths) 
 				HashedResult.put(path.toString(), path);
-			
-			for (Path path : andPath.getPaths()) {
-				boolean found = false ; 
-				if(HashedResult.containsKey(path.toString()))
-					found = true ;
-			
-					if(!found) 
+			 
+			for (Path path : andPath.getPaths())
+				if(!HashedResult.containsKey(path.toString()))
 					return false;
-			}
+					 
 			return true;
 		
 	}

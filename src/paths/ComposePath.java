@@ -37,12 +37,12 @@ public class ComposePath extends Path {
 	@Override
 	public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context) {
 		if(this.paths.isEmpty())
-			return (new LinkedList<Object[]>());	
+			return new LinkedList<Object[]>();	
 
 		LinkedList<Path> paths = new LinkedList<Path>(this.paths);
 		Path p = paths.removeFirst();
-		ComposePath cPath = new ComposePath(p);
-		LinkedList<Object[]> pathList = cPath.follow(node, trace, context);
+		ComposePath cPath = new ComposePath(paths);
+		LinkedList<Object[]> pathList = p.follow(node, trace, context);
 		return follow(pathList,cPath,context);
 	}
 	
@@ -50,9 +50,9 @@ public class ComposePath extends Path {
 		if(cPath.getPaths().isEmpty())
 			return pathList;
 		LinkedList<Object[]> result = new LinkedList<Object[]>();
-			for (Object[] objects : pathList) {
-				Node node = (Node) objects[0];
-				PathTrace pt = (PathTrace) objects[1];
+		for(int i = 0; i < pathList.size(); i++){
+				Node node = (Node) pathList.get(i)[0];
+				PathTrace pt = (PathTrace) pathList.get(i)[1];
 				LinkedList<Object[]> fList = cPath.follow(node, pt, context);
 				result.addAll(fList);		
 		}
@@ -63,12 +63,12 @@ public class ComposePath extends Path {
 	@Override
 	public LinkedList<Object[]> followConverse(Node node, PathTrace trace,Context context) {
 		if(this.paths.isEmpty())
-			return (new LinkedList<Object[]>());	
+			return new LinkedList<Object[]>();	
 
 		LinkedList<Path> paths = new LinkedList<Path>(this.paths);
-		Path p = paths.removeLast();
-		ComposePath cPath = new ComposePath(p);
-		LinkedList<Object[]> pathList = cPath.followConverse(node, trace, context);
+		Path p = paths.removeFirst();
+		ComposePath cPath = new ComposePath(paths);
+		LinkedList<Object[]> pathList = p.followConverse(node, trace, context);
 		return followConverse(pathList,cPath,context);
 
 	}
@@ -76,12 +76,11 @@ public class ComposePath extends Path {
 		if(cPath.getPaths().isEmpty())
 			return pathList;
 		LinkedList<Object[]> result = new LinkedList<Object[]>();
-			for (Object[] objects : pathList) {
-				Node node = (Node) objects[0];
-				PathTrace pt = (PathTrace) objects[1];
+		for(int i = 0; i < pathList.size(); i++){
+				Node node = (Node) pathList.get(i)[0];
+				PathTrace pt = (PathTrace) pathList.get(i)[1];
 				LinkedList<Object[]> fList = cPath.followConverse(node, pt, context);
-				result.addAll(fList);
-				
+				result.addAll(fList);		
 		}
 		return result;
 	}
@@ -97,16 +96,22 @@ public class ComposePath extends Path {
 
 	@Override
 	public boolean equals(Object obj) {
-		if(!(obj instanceof ComposePath))
-			return false;
-		
-		for (Path path : paths) 
-			for (Path path2 : ((ComposePath)obj).getPaths()) 
-				if(!path.equals(path2))
-					return false;
-			
-		return true;
+	    if (this == obj) {
+	        return true;
+	    }
+
+	    if (!(obj instanceof ComposePath)) {
+	        return false;
+	    }
+
+	    ComposePath cPath = (ComposePath) obj;
+
+	    if (cPath.getPaths().size() != this.paths.size()) {
+	        return false;
+	    }
+	    return this.paths.equals(cPath.getPaths());
 	}
+
 
 	@Override
 	public Path converse() {

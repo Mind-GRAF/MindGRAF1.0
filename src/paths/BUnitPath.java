@@ -19,7 +19,7 @@ public class BUnitPath extends Path {
 	@Override
 	public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context) {
 		LinkedList<Object[]> result = new LinkedList<Object[]>();
-		if(node.isMolecular()){
+		
 			UpCable d = node.getUpCable(relation.getName());
 			if(d != null){
 					NodeSet nodeSet = d.getNodeSet();
@@ -30,7 +30,7 @@ public class BUnitPath extends Path {
 						result.add(arr);
 					}
 			}
-		}
+		
 		return result;
 	}
 
