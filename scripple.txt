@@ -1,0 +1,17 @@
+For X implies Y
+I cannot do that right now as this is part of basic supports of a proposition which is missing.
+I can try to implement it. But that won't be a good idea as I am not sure I can do that correctly.
+
+Here is an example of why I cannot do it 
+    @Test
+    public void isAsserted() throws NotAPropositionNodeException, NodeNotFoundInNetworkException, NodeNotFoundInPropSetException, ContextNameDoesntExistException, CustomException, ContradictionFoundException, DuplicatePropositionException, CannotInsertJustificationSupportException {
+        PropositionSet p = new PropositionSet(new int[]{12, 58});
+        Controller.addPropsToCurrentContext(p);
+        ((PropositionNode) Network.getNodeById(10)).getBasicSupport().addJustificationBasedSupport(p);
+        assertTrue(Controller.getCurrentContext().isAsserted((PropositionNode) Network.getNodeById(12)));
+        assertTrue(Controller.getCurrentContext().isAsserted((PropositionNode) Network.getNodeById(58)));
+        assertTrue(Controller.getCurrentContext().isAsserted((PropositionNode) Network.getNodeById(10)));
+        assertFalse(Controller.getCurrentContext().isAsserted((PropositionNode) Network.getNodeById(37)));
+    }
+In this example I say that the above implies 10 and hence isAsserted returns true if you check the prop set 
+Because eventually they imply indeed this prop.
