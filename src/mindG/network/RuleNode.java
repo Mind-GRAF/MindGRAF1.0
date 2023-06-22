@@ -19,16 +19,8 @@ import mindG.mgip.rules.Thresh;
 import mindG.network.cables.DownCable;
 import mindG.network.cables.DownCableSet;
 
-public class RuleNode extends PropositionNode {
+public abstract class RuleNode extends PropositionNode {
     private boolean forwardReport;
-
-    public boolean isForwardReport() {
-        return forwardReport;
-    }
-
-    public void setForwardReport(boolean forwardReport) {
-        this.forwardReport = forwardReport;
-    }
 
     public RuleNode(String name, Boolean isVariable) {
         super(name, isVariable);
@@ -45,20 +37,27 @@ public class RuleNode extends PropositionNode {
     }
 
     public void applyRuleHandler(Report report, RuleNode ruleNode) {
-        if (this.isForwardReport() == true) {
-            this.setForwardReport(false);
-            report.setInferenceType(InferenceType.FORWARD);
-            NodeSet downCons = getDownConsNodeSet();
-            sendReportToCons(downCons, report);
+        // if (this.isForwardReport() == true) {
+        // this.setForwardReport(false);
+        // report.setInferenceType(InferenceType.FORWARD);
+        // NodeSet downCons = getDownConsNodeSet();
+        // sendReportToCons(downCons, report);
 
-        } else {
-            for (Channel outChnl : outgoingChannels)
-                sendReport(report, outChnl);
-        }
+        // } else {
+        // for (Channel outChnl : outgoingChannels)
+        // sendReport(report, outChnl);
+        // }
 
         // TODO Ossama
 
     }
+
+    /***
+     * this method gets all the consequents and arguments that this node is a rule
+     * to
+     * 
+     * @return nodeSet
+     */
 
     public NodeSet getDownConsNodeSet() {
         NodeSet ret = new NodeSet();
@@ -72,6 +71,16 @@ public class RuleNode extends PropositionNode {
         }
         return ret;
     }
+
+    /***
+     * This method loops on the set of free variables of curRNode and checks if the
+     * given substitutions contain bindings for its free variables. Finally, it
+     * returns only
+     * the relevant substitutions with the free variables’ bindings.
+     * 
+     * @param filterSubs
+     * @return substitutions
+     */
 
     public Substitutions onlyRelevantSubs(Substitutions filterSubs) {
         NodeSet freeVariablesSet = this.getFreeVariables();
@@ -88,8 +97,8 @@ public class RuleNode extends PropositionNode {
     }
 
     /***
-     * Method comparing opened outgoing channels over each match's node of the
-     * matches whether a more generic request of the specified channel was
+     * Method comparing opened outgoing channels over each node of the
+     * nodeSet whether a more generic request of the specified channel was
      * previously sent in order not to re-send redundant requests -- ruleType gets
      * applied on Andor or Thresh part.
      * 
@@ -97,7 +106,7 @@ public class RuleNode extends PropositionNode {
      * @param currentRequest
      * @param toBeCompared
      * @param ruleType
-     * @return
+     * @return nodeSet
      */
     protected static NodeSet removeAlreadyEstablishedChannels(NodeSet nodes, Request currentRequest,
             Substitutions toBeCompared,
@@ -126,6 +135,13 @@ public class RuleNode extends PropositionNode {
 
     }
 
+    /***
+     * Method to request antecedents that did not receive a similar request before
+     * 
+     * @param currentRequest
+     * @param knownInstance
+     * @return
+     */
     protected void requestAntecedentsNotAlreadyWorkingOn(Request currentRequest, KnownInstance knownInstance) {
         boolean ruleType = this instanceof Thresh || this instanceof AndOr;
         Channel currentChannel = currentRequest.getChannel();
@@ -145,6 +161,12 @@ public class RuleNode extends PropositionNode {
                 ChannelType.AntRule, this);
     }
 
+    /***
+     * Method to request antecedents that did not receive a similar request before
+     * 
+     * @param currentRequest
+     * @return
+     */
     protected void requestAntecedentsNotAlreadyWorkingOn(Request currentRequest) {
         Substitutions filterRuleSubs = currentRequest.getChannel().getFilterSubstitutions();
         Substitutions switchRuleSubs = currentRequest.getChannel().getSwitcherSubstitutions();
@@ -162,10 +184,11 @@ public class RuleNode extends PropositionNode {
 
     }
 
-    // This method iterates over all the node’s outgoing channels calling on each
-    // processSingleRequestsChannel(outgoingRequest) and handles the exceptions that
-    // might be
-    // thrown.
+    /***
+     * Method for a certain node to process incoming requests
+     * 
+     * @return
+     */
 
     public void processRequests() {
         Request requestHasTurn = Scheduler.getLowQueue().poll();
@@ -180,6 +203,7 @@ public class RuleNode extends PropositionNode {
      * Request handling in Rule proposition nodes.
      * 
      * @param currentRequest
+     * @return
      */
     protected void processSingleRequests(Request currentRequest) {
         System.out.println(this.getName() + " Processing Requests as a Rule node");
@@ -239,7 +263,9 @@ public class RuleNode extends PropositionNode {
     }
 
     /***
-     * Report handling in Rule proposition nodes.
+     * Method for a certain node to process incoming reports
+     * 
+     * @return
      */
     public void processReports() {
         Report reportHasTurn = Scheduler.getHighQueue().poll();
@@ -250,6 +276,12 @@ public class RuleNode extends PropositionNode {
         }
     }
 
+    /***
+     * report handling in Rule proposition nodes.
+     * 
+     * @param currentReport
+     * @return
+     */
     protected void processSingleReports(Report currentReport) throws NoSuchTypeException {
         System.out.println(this.getName() + " Processing Reports as a Rule node");
 
@@ -400,13 +432,19 @@ public class RuleNode extends PropositionNode {
     // method for any of the children rules to call whenever it needs to act as a
     // normal proposition node
     public void grandparentMethodRequest(Request currentRequest) {
-        // Call the grandparent's method
         super.processSingleRequests(currentRequest);
     }
 
     public void grandparentMethodReport(Report currentReport) throws NoSuchTypeException {
-        // Call the grandparent's method
         super.processSingleReports(currentReport);
+    }
+
+    public boolean isForwardReport() {
+        return forwardReport;
+    }
+
+    public void setForwardReport(boolean forwardReport) {
+        this.forwardReport = forwardReport;
     }
 
 }

@@ -253,11 +253,6 @@ public class NetworkUI extends JFrame {
                 Node P3 = Network.createNode("rulenode",
                         new DownCableSet(d6, d8, d7));
                 network.printNodes();
-                List<Node> match = new ArrayList<Node>();
-                match.add(M0);
-                Network.setMatches(match);
-                Network.setX(X);
-                Network.setNemo(nemo);
 
                 ((PropositionNode) M2).deduce();
                 new NetworkUI();

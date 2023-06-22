@@ -35,61 +35,6 @@ public class Network {
     public static HashMap<String, String> quantifiers = new HashMap<String, String>();
     public static HashMap<String, CustomClass> userDefinedClasses = new HashMap<String, CustomClass>();
     public static int MolecularCount;
-    private static List<Node> matches;
-    private static List<Node> matchRule;
-    private static List<Node> matchesLast;
-
-    public static List<Node> getMatchesLast() {
-        return matchesLast;
-    }
-
-    public static void setMatchesLast(List<Node> matchesLast) {
-        Network.matchesLast = matchesLast;
-    }
-
-    public static List<Node> getMatchRule() {
-        return matchRule;
-    }
-
-    public static void setMatchRule(List<Node> matchRule) {
-        Network.matchRule = matchRule;
-    }
-
-    private static Node x;
-    private static Node nemo;
-    private static Node y;
-
-    public static Node getY() {
-        return y;
-    }
-
-    public static void setY(Node y) {
-        Network.y = y;
-    }
-
-    public static List<Node> getMatches() {
-        return matches;
-    }
-
-    public static void setMatches(List<Node> matches) {
-        Network.matches = matches;
-    }
-
-    public static Node getNemo() {
-        return nemo;
-    }
-
-    public static void setNemo(Node nemo) {
-        Network.nemo = nemo;
-    }
-
-    public static Node getX() {
-        return x;
-    }
-
-    public static void setX(Node x) {
-        Network.x = x;
-    }
 
     public Network() {
         nodes = new HashMap<Integer, Node>();
@@ -97,7 +42,6 @@ public class Network {
         baseNodes = new HashMap<String, Node>();
         propositionNodes = new HashMap<Integer, Node>();
         relations = new HashMap<String, Relation>();
-        matches = new ArrayList<Node>();
     }
 
     // first constructor for molecular nodes
@@ -127,8 +71,7 @@ public class Network {
                     node = new IndividualNode(downCableSet);
                     break;
                 case "rulenode":
-                    node = new RuleNode(downCableSet);
-                    break;
+s                    break;
                 default:
                     if (userDefinedClasses.containsKey(SemanticType)) {
                         CustomClass customClass = userDefinedClasses.get(SemanticType);
@@ -484,19 +427,6 @@ public class Network {
                 new DownCableSet(d6, d8, d7));
 
         network.printNodes();
-        List<Node> match = new ArrayList<Node>();
-        match.add(M0);
-        Network.setMatches(match);
-        Network.setX(X);
-        Network.setNemo(nemo);
-        // KnownInstanceSet set = new KnownInstanceSet();
-        // Substitutions subs = new Substitutions();
-        // subs.add(x, nemo);
-        // PropositionSet supports = new PropositionSet();
-        // supports.add(M0);
-        // Report newRp = new Report(subs, supports, 1, true, null, P3);
-        // set.addKnownInstance(newRp);
-        // ((PropositionNode) M2).setKnownInstances(set);
         ((PropositionNode) M2).deduce();
 
     }
