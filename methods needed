@@ -1,0 +1,19 @@
+public Node GetNodeByID(String id); DONE
+HashSet of molecular nodes, hashed with the concat of relations. DONE // sort them
+Bang Path Have Attitude attribute.
+
+Mariam : 
+	private FreeVariableSet freeVariableSet; DONE
+	public NodeSet getParentsWithRelation(Relation r); DONE
+	public Syntactic getMolecularType(); DONE
+	
+	get open or closed  done 
+	check free variable  done 
+	base node hash map by name done 
+ 	apply substitution and build new node ?? 
+	find method ( DownCableSet) done ? 
+	find Negation() recursive  done 
+	
+	temp nodes -- azwed el count wala laa ? el id hyb2a eh ?
+	
+	law fe 2 molecular nodes closed w 3ndhom vars names mokhtlefa harga3 el mwgooda already 
