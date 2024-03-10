@@ -1,23 +1,25 @@
-package mindG.network;
+package nodes;
 
 import java.util.Collection;
 
-import mindG.mgip.KnownInstance;
-import mindG.mgip.InferenceType;
-import mindG.mgip.Report;
-import mindG.mgip.Scheduler;
-import mindG.mgip.matching.Substitutions;
-import mindG.mgip.requests.AntecedentToRuleChannel;
-import mindG.mgip.requests.Channel;
-import mindG.mgip.requests.ChannelSet;
-import mindG.mgip.requests.ChannelType;
-import mindG.mgip.requests.MatchChannel;
-import mindG.mgip.ReportType;
-import mindG.mgip.requests.Request;
-import mindG.mgip.rules.AndOr;
-import mindG.mgip.rules.Thresh;
-import mindG.network.cables.DownCable;
-import mindG.network.cables.DownCableSet;
+import mgip.KnownInstance;
+import mgip.InferenceType;
+import mgip.Report;
+import mgip.Scheduler;
+import mgip.matching.Substitutions;
+import mgip.requests.AntecedentToRuleChannel;
+import mgip.requests.Channel;
+import mgip.requests.ChannelSet;
+import mgip.requests.ChannelType;
+import mgip.requests.MatchChannel;
+import mgip.ReportType;
+import mgip.requests.Request;
+import mgip.rules.AndOr;
+import mgip.rules.Thresh;
+import network.Network;
+import set.NodeSet;
+import cables.DownCable;
+import cables.DownCableSet;
 
 public abstract class RuleNode extends PropositionNode {
     private boolean forwardReport;

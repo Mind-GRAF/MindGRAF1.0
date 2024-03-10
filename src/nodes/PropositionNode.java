@@ -1,4 +1,4 @@
-package mindG.network;
+package nodes;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -6,18 +6,19 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Scanner;
 
-import mindG.mgip.KnownInstance;
-import mindG.mgip.InferenceType;
-import mindG.mgip.KnownInstanceSet;
-import mindG.mgip.Report;
-import mindG.mgip.ReportType;
-import mindG.mgip.Scheduler;
-import mindG.mgip.matching.Match;
-import mindG.mgip.matching.Substitutions;
-import mindG.mgip.requests.*;
-import mindG.network.cables.DownCable;
-import mindG.network.cables.DownCableSet;
-import mindG.network.cables.UpCable;
+import mgip.KnownInstance;
+import mgip.InferenceType;
+import mgip.KnownInstanceSet;
+import mgip.Report;
+import mgip.ReportType;
+import mgip.Scheduler;
+import mgip.matching.Match;
+import mgip.matching.Substitutions;
+import mgip.requests.*;
+import set.NodeSet;
+import cables.DownCable;
+import cables.DownCableSet;
+import cables.UpCable;
 
 public class PropositionNode extends Node {
     protected ChannelSet outgoingChannels;

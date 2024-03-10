@@ -1,13 +1,13 @@
-package mindG.network;
+package exceptions;
 
-public class NoSuchTypeException extends Exception {
+public class NoSuchTypeException extends Exception{
 
-    public NoSuchTypeException() {
-        super();
-    }
-
-    public NoSuchTypeException(String s) {
-        super(s);
-    }
+	public NoSuchTypeException() {
+		super();
+	}
+	public NoSuchTypeException(String s) {
+		super(s);
+	}
+	
 
 }

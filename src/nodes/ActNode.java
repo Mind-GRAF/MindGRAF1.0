@@ -1,8 +1,8 @@
-package mindG.network;
+package nodes;
 
-import mindG.mgip.requests.Channel;
-import mindG.mgip.requests.ChannelSet;
-import mindG.network.cables.DownCableSet;
+import mgip.requests.Channel;
+import mgip.requests.ChannelSet;
+import cables.DownCableSet;
 
 public class ActNode extends Node {
     protected ChannelSet outgoingChannels;

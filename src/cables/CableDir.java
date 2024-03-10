@@ -1,5 +1,5 @@
-package mindG.network.cables;
+package cables;
 
 public enum CableDir {
-    Up, Down
+	UP,DOWN
 }

@@ -1,7 +1,9 @@
-package mindG.network;
+package context;
 
 import java.util.BitSet;
 import java.util.Hashtable;
+
+import set.PropositionSet;
 
 public class Context {
 

@@ -1,4 +1,4 @@
-package mindG.network;
+package set;
 
 import java.util.ArrayList;
 import java.util.Collection;
