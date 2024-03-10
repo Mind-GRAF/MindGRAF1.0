@@ -6,7 +6,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 
 import components.Substitutions;
-import set.PropositionSet;
+import set.PropositionNodeSet;
 
 public class KnownInstanceSet implements Iterable<KnownInstance> {
 
@@ -22,7 +22,7 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
     public boolean addKnownInstance(Report Report) {
         Boolean ReportSign = Report.isSign();
         Substitutions ReportSubs = Report.getSubstitutions();
-        PropositionSet Supports = Report.getSupport();
+        PropositionNodeSet Supports = Report.getSupport();
         int attitude = Report.getAttitude();
         if (ReportSign) {
             Hashtable<Substitutions, KnownInstance> targetSet = positiveKInstances.remove(attitude);
@@ -44,7 +44,7 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
                             return false;
 
                         } else {
-                            PropositionSet supportSet = targetKnownInstance.getSupports();
+                            PropositionNodeSet supportSet = targetKnownInstance.getSupports();
                             targetKnownInstance.setSupports(Supports.union(supportSet));
                             targetSet.put(ReportSubs, targetKnownInstance);
                             positiveKInstances.put(attitude, targetSet);
@@ -79,7 +79,7 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
 
                             return false;
                         } else {
-                            PropositionSet supportSet = targetKnownInstance.getSupports();
+                            PropositionNodeSet supportSet = targetKnownInstance.getSupports();
                             targetKnownInstance.setSupports(Supports.union(supportSet));
                             targetSet.put(ReportSubs, targetKnownInstance);
                             positiveKInstances.put(attitude, targetSet);

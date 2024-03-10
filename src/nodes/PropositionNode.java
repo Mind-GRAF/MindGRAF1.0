@@ -20,7 +20,7 @@ import cables.DownCable;
 import cables.DownCableSet;
 import cables.UpCable;
 import exceptions.NoSuchTypeException;
-import set.PropositionSet;
+import set.PropositionNodeSet;
 import components.Substitutions;
 
 public class PropositionNode extends Node {
@@ -422,7 +422,7 @@ public class PropositionNode extends Node {
             Substitutions substitutions, boolean reportSign, InferenceType inferenceType) {
 
         try {
-            PropositionSet supportPropSet = new PropositionSet();
+            PropositionNodeSet supportPropSet = new PropositionNodeSet();
             supportPropSet.add(this);
             Substitutions subs = substitutions == null ? new Substitutions() : substitutions;
             Substitutions subs2 = new Substitutions();
@@ -768,7 +768,7 @@ public class PropositionNode extends Node {
         int currentAttitude = currentChannel.getAttitudeID();
         Node requesterNode = currentChannel.getRequesterNode();
         Substitutions reportSubstitutions = new Substitutions();
-        PropositionSet supportNodeSet = new PropositionSet();
+        PropositionNodeSet supportNodeSet = new PropositionNodeSet();
         if (this.supported(currentContext, currentAttitude)) {
             supportNodeSet.add((PropositionNode) this);
             Report NewReport = new Report(reportSubstitutions, supportNodeSet, currentAttitude, true,
@@ -890,7 +890,7 @@ public class PropositionNode extends Node {
                         reportToBeBroadcasted.getSubstitutions());
                 if (supportNode != null) {
                     supportNode.addJustificationBasedSupport(reportToBeBroadcasted.getSupport());
-                    PropositionSet reportSupportPropSet = new PropositionSet();
+                    PropositionNodeSet reportSupportPropSet = new PropositionNodeSet();
                     reportSupportPropSet.add(supportNode);
                     reportToBeBroadcasted.setSupport(reportSupportPropSet);
                     if (reportToBeBroadcasted.getInferenceType() == InferenceType.FORWARD) {
@@ -931,7 +931,7 @@ public class PropositionNode extends Node {
 
     }
 
-    private void addJustificationBasedSupport(PropositionSet support) {
+    private void addJustificationBasedSupport(PropositionNodeSet support) {
         // TODO Ahmed
 
     }

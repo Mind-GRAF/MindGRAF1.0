@@ -3,11 +3,11 @@ package context;
 import java.util.BitSet;
 import java.util.Hashtable;
 
-import set.PropositionSet;
+import set.PropositionNodeSet;
 
 public class Context {
 
-    private Hashtable<Integer, PropositionSet> attitudes;
+    private Hashtable<Integer, PropositionNodeSet> attitudes;
     private String name;
     private Hashtable<Integer, BitSet> AttitudesBitset;
 

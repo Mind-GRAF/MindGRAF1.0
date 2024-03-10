@@ -6,14 +6,14 @@ import java.util.Arrays;
 import components.Substitutions;
 import network.Network;
 import nodes.PropositionNode;
-import set.PropositionSet;
+import set.PropositionNodeSet;
 
 public class KnownInstance {
     private Substitutions substitutions;
-    private PropositionSet supports;
+    private PropositionNodeSet supports;
     private int attitudeID;
 
-    public KnownInstance(Substitutions substitutions, PropositionSet supports, int attitudeID) {
+    public KnownInstance(Substitutions substitutions, PropositionNodeSet supports, int attitudeID) {
         this.substitutions = substitutions;
         this.supports = supports;
         this.attitudeID = attitudeID;
@@ -65,11 +65,11 @@ public class KnownInstance {
         this.attitudeID = attitudeID;
     }
 
-    public PropositionSet getSupports() {
+    public PropositionNodeSet getSupports() {
         return supports;
     }
 
-    public void setSupports(PropositionSet supports) {
+    public void setSupports(PropositionNodeSet supports) {
         this.supports = supports;
     }
 

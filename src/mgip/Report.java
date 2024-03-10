@@ -6,11 +6,11 @@ import mgip.ReportType;
 import network.Network;
 import nodes.Node;
 import nodes.PropositionNode;
-import set.PropositionSet;
+import set.PropositionNodeSet;
 
 public class Report {
     private Substitutions substitutions;
-    private PropositionSet support;
+    private PropositionNodeSet support;
     private boolean sign;
     private InferenceType inferenceType;
     private Node requesterNode;
@@ -18,7 +18,7 @@ public class Report {
     private String contextName;
     private ReportType reportType;
 
-    public Report(Substitutions substitution, PropositionSet suppt, int attitudeid,
+    public Report(Substitutions substitution, PropositionNodeSet suppt, int attitudeid,
             boolean sign, InferenceType inference, Node requesterNode) {
         this.substitutions = substitution;
         this.attitude = attitudeid;
@@ -69,11 +69,11 @@ public class Report {
         this.substitutions = substitutions;
     }
 
-    public PropositionSet getSupport() {
+    public PropositionNodeSet getSupport() {
         return support;
     }
 
-    public void setSupport(PropositionSet support) {
+    public void setSupport(PropositionNodeSet support) {
         this.support = support;
     }
 
