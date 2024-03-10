@@ -1,9 +1,9 @@
-package mindG.mgip.requests;
+package mgip.requests;
 
-import mindG.mgip.Report;
-import mindG.mgip.Scheduler;
-import mindG.mgip.matching.Substitutions;
-import mindG.network.Node;
+import mgip.Report;
+import mgip.Scheduler;
+import mgip.matching.Substitutions;
+import nodes.Node;
 
 public class Channel {
     static int count = 0;

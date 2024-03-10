@@ -1,6 +1,6 @@
-package mindG.mgip.rules;
+package mgip.rules;
 
-import mindG.network.RuleNode;
+import nodes.RuleNode;
 
 public class Thresh extends RuleNode {
 

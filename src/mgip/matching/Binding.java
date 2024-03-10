@@ -1,6 +1,6 @@
-package mindG.mgip.matching;
+package mgip.matching;
 
-import mindG.network.Node;
+import nodes.Node;
 
 public class Binding {
     private Node sourceNode;

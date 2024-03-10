@@ -1,4 +1,4 @@
-package mindG.mgip.matching;
+package mgip.matching;
 
 public class Matcher {
 

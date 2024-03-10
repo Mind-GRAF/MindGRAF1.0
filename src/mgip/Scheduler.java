@@ -1,16 +1,16 @@
-package mindG.mgip;
+package mgip;
 
 import java.util.ArrayDeque;
 import java.util.Hashtable;
 import java.util.Queue;
 import java.util.Stack;
 
-import mindG.mgip.requests.Channel;
-import mindG.mgip.requests.Request;
-import mindG.network.ActNode;
-import mindG.network.Node;
-import mindG.network.PropositionNode;
-import mindG.network.RuleNode;
+import mgip.requests.Channel;
+import mgip.requests.Request;
+import nodes.ActNode;
+import nodes.Node;
+import nodes.PropositionNode;
+import nodes.RuleNode;
 
 public class Scheduler {
     private static Queue<Report> highQueue;

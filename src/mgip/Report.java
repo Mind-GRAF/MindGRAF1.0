@@ -1,12 +1,12 @@
-package mindG.mgip;
+package mgip;
 
-import mindG.mgip.matching.Substitutions;
-import mindG.mgip.requests.ChannelType;
-import mindG.mgip.ReportType;
-import mindG.network.Network;
-import mindG.network.Node;
-import mindG.network.PropositionNode;
-import mindG.network.PropositionSet;
+import mgip.matching.Substitutions;
+import mgip.requests.ChannelType;
+import mgip.ReportType;
+import network.Network;
+import nodes.Node;
+import nodes.PropositionNode;
+import set.PropositionSet;
 
 public class Report {
     private Substitutions substitutions;

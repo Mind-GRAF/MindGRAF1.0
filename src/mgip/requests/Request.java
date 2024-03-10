@@ -1,6 +1,6 @@
-package mindG.mgip.requests;
+package mgip.requests;
 
-import mindG.network.Node;
+import nodes.Node;
 
 public class Request {
 

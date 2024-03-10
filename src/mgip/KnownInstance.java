@@ -1,12 +1,12 @@
-package mindG.mgip;
+package mgip;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import mindG.mgip.matching.Substitutions;
-import mindG.network.Network;
-import mindG.network.PropositionNode;
-import mindG.network.PropositionSet;
+import mgip.matching.Substitutions;
+import network.Network;
+import nodes.PropositionNode;
+import set.PropositionSet;
 
 public class KnownInstance {
     private Substitutions substitutions;

@@ -19,6 +19,8 @@ import set.NodeSet;
 import cables.DownCable;
 import cables.DownCableSet;
 import cables.UpCable;
+import exceptions.NoSuchTypeException;
+import set.PropositionSet;
 
 public class PropositionNode extends Node {
     protected ChannelSet outgoingChannels;
@@ -873,7 +875,7 @@ public class PropositionNode extends Node {
      * @param currentReport
      * @throws NoSuchTypeException
      */
-    protected void processSingleReports(Report currentReport) throws NoSuchTypeException {
+    protected void processSingleReports(Report currentReport) throws NoSuchTypeException, NoSuchTypeException {
         System.out.println(this.getName() + " Processing Reports as a Proposition node");
         boolean forwardReportType = currentReport.getInferenceType() == InferenceType.FORWARD;
 

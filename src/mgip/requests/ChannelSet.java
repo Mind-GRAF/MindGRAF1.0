@@ -1,4 +1,4 @@
-package mindG.mgip.requests;
+package mgip.requests;
 
 import java.util.ArrayList;
 import java.util.Collection;

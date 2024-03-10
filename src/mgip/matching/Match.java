@@ -1,6 +1,6 @@
-package mindG.mgip.matching;
+package mgip.matching;
 
-import mindG.network.Node;
+import nodes.Node;
 
 public class Match {
     private Substitutions filterSubs; // whquestion atleastone free not bound

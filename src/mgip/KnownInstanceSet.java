@@ -1,12 +1,12 @@
-package mindG.mgip;
+package mgip;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
 
-import mindG.mgip.matching.Substitutions;
-import mindG.network.PropositionSet;
+import mgip.matching.Substitutions;
+import set.PropositionSet;
 
 public class KnownInstanceSet implements Iterable<KnownInstance> {
 

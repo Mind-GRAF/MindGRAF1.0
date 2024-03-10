@@ -1,9 +1,10 @@
-package mindG.network;
+package set;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import nodes.Node;
 
 public class PropositionSet implements Iterable<PropositionNode> {
 

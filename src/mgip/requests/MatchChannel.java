@@ -1,8 +1,8 @@
-package mindG.mgip.requests;
+package mgip.requests;
 
-import mindG.mgip.Report;
-import mindG.mgip.matching.Substitutions;
-import mindG.network.Node;
+import mgip.Report;
+import mgip.matching.Substitutions;
+import nodes.Node;
 
 public class MatchChannel extends Channel {
     private int matchType;

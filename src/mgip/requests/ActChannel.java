@@ -1,7 +1,7 @@
-package mindG.mgip.requests;
+package mgip.requests;
 
-import mindG.mgip.matching.Substitutions;
-import mindG.network.Node;
+import mgip.matching.Substitutions;
+import nodes.Node;
 
 public class ActChannel extends Channel {
     public ActChannel(Substitutions switchSubstitution, Substitutions filterSubstitutions,

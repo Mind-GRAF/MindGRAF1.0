@@ -1,29 +1,29 @@
-package mindG.mgip.rules;
+package mgip.rules;
 
-import java.lang.ModuleLayer.Controller;
+import network.Controller;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import mindG.mgip.InferenceType;
-import mindG.mgip.KnownInstance;
-import mindG.mgip.Report;
-import mindG.mgip.ReportType;
-import mindG.mgip.Scheduler;
-import mindG.mgip.matching.Match;
-import mindG.mgip.matching.Substitutions;
-import mindG.mgip.requests.AntecedentToRuleChannel;
-import mindG.mgip.requests.Channel;
-import mindG.mgip.requests.ChannelType;
-import mindG.mgip.requests.MatchChannel;
-import mindG.mgip.requests.Request;
-import mindG.network.Context;
-import mindG.network.NoSuchTypeException;
-import mindG.network.Node;
-import mindG.network.NodeSet;
-import mindG.network.PropositionNode;
-import mindG.network.RuleNode;
-import mindG.network.cables.DownCableSet;
+import mgip.InferenceType;
+import mgip.KnownInstance;
+import mgip.Report;
+import mgip.ReportType;
+import mgip.Scheduler;
+import mgip.matching.Match;
+import mgip.matching.Substitutions;
+import mgip.requests.AntecedentToRuleChannel;
+import mgip.requests.Channel;
+import mgip.requests.ChannelType;
+import mgip.requests.MatchChannel;
+import mgip.requests.Request;
+import context.Context;
+import exceptions.NoSuchTypeException;
+import nodes.Node;
+import set.NodeSet;
+import nodes.PropositionNode;
+import nodes.RuleNode;
+import cables.DownCableSet;
 
 public class BridgeRule extends RuleNode {
 
@@ -54,7 +54,7 @@ public class BridgeRule extends RuleNode {
         NodeSet argAntNodesToConsiderClose = removeAlreadyEstablishedChannels(argAntCloseToMe,
                 currentRequest,
                 unionSubs, false);
-        Context currContext = mindG.network.Controller.getContext(currentContextName);
+        Context currContext = network.Controller.getContext(currentContextName);
         for (Node currentNode : argAntNodesToConsiderClose) {
             int currentNodeAttitude = currContext.getPropositionAttitude(currentNode.getId());
             Request newRequest = establishChannel(ChannelType.AntRule, currentNode, switchSubs, unionSubs,
@@ -72,7 +72,7 @@ public class BridgeRule extends RuleNode {
         NodeSet remainingAntArgNodeSet = removeAlreadyEstablishedChannels(antArgNodeSet,
                 currentRequest,
                 filterRuleSubs, false);
-        Context currContext = mindG.network.Controller.getContext(currentContext);
+        Context currContext = network.Controller.getContext(currentContext);
         for (Node currentNode : remainingAntArgNodeSet) {
             int currentNodeAttitude = currContext.getPropositionAttitude(currentNode.getId());
             Request newRequest = establishChannel(ChannelType.AntRule, currentNode, switchRuleSubs, filterRuleSubs,
@@ -104,7 +104,7 @@ public class BridgeRule extends RuleNode {
                     NodeSet antArgNodesToConiderClose = removeAlreadyEstablishedChannels(antArgCloseToMe,
                             currentRequest,
                             filterRuleSubs, false);
-                    Context currContext = mindG.network.Controller.getContext(currentContext);
+                    Context currContext = network.Controller.getContext(currentContext);
                     for (Node currentNode : antArgNodesToConiderClose) {
                         int currentNodeAttitude = currContext.getPropositionAttitude(currentNode.getId());
                         Request newRequest = establishChannel(ChannelType.AntRule, currentNode, switchRuleSubs,
@@ -263,7 +263,7 @@ public class BridgeRule extends RuleNode {
 
                         if (compatibilityCheck) {
                             Substitutions unionSubs = Substitutions.union(currentReportSubs, outConsChannelSubs);
-                            Context currContext = mindG.network.Controller.getContext(currentReportContextName);
+                            Context currContext = network.Controller.getContext(currentReportContextName);
                             for (Node currentNode : remainingArgAntNodes) {
                                 int currentNodeAttitude = currContext.getPropositionAttitude(currentNode.getId());
                                 Request newRequest = establishChannel(ChannelType.AntRule, currentNode, switchSubs,

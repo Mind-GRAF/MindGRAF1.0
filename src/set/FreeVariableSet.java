@@ -1,9 +1,10 @@
-package mindG.network;
+package set;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
+import nodes.Node;
 
 public class FreeVariableSet implements Iterable<Node>, Serializable {
     private HashMap<String, Node> freeVariables;

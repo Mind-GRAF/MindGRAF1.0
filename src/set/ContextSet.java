@@ -1,4 +1,6 @@
-package mindG.network;
+package set;
+
+import context.Context;
 
 public class ContextSet {
 

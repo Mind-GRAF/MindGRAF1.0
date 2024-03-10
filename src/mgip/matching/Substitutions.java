@@ -1,9 +1,9 @@
-package mindG.mgip.matching;
+package mgip.matching;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import mindG.network.Node;
+import nodes.Node;
 
 //this class is based on the old implementation of the substitutions class, another version was implemented after
 public class Substitutions {

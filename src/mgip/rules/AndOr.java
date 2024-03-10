@@ -1,7 +1,7 @@
-package mindG.mgip.rules;
+package mgip.rules;
 
-import mindG.network.RuleNode;
-import mindG.network.cables.DownCableSet;
+import nodes.RuleNode;
+import cables.DownCableSet;
 
 public class AndOr extends RuleNode {
 
