@@ -11,7 +11,6 @@ import mgip.Report;
 import mgip.ReportType;
 import mgip.Scheduler;
 import mgip.matching.Match;
-import mgip.matching.Substitutions;
 import mgip.requests.AntecedentToRuleChannel;
 import mgip.requests.Channel;
 import mgip.requests.ChannelType;
@@ -24,6 +23,7 @@ import set.NodeSet;
 import nodes.PropositionNode;
 import nodes.RuleNode;
 import cables.DownCableSet;
+import components.Substitutions;
 
 public class BridgeRule extends RuleNode {
 

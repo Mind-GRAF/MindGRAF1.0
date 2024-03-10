@@ -1,7 +1,7 @@
 package mgip;
 
-import mgip.matching.Substitutions;
 import mgip.requests.ChannelType;
+import components.Substitutions;
 import mgip.ReportType;
 import network.Network;
 import nodes.Node;

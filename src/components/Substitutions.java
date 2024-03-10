@@ -5,7 +5,7 @@ import java.util.Map;
 
 import nodes.Node;
 
-
+//this class is based on the old implementation of the substitutions class, another version was implemented after
 public class Substitutions {
 
     private Map<Node, Node> map;
@@ -66,25 +66,15 @@ public class Substitutions {
     public Substitutions switchReport(Substitutions switchSubs) {
         Substitutions newReportSubstitutions = new Substitutions();
         for (Node var : map.keySet()) {
-            // System.out.println(var);
             Node value = map.get(var);
-            // System.out.println(value);
-
             for (Node var1 : switchSubs.getMap().keySet()) {
-                // System.out.println(var1);
                 Node value1 = switchSubs.getMap().get(var1);
-                // System.out.println("z " + value1);
-
-                if (!var1.getName().equals(value.getName())) {
-                    // System.out.println("in first condition");
-                    newReportSubstitutions.add(var, value);
+                if (var.getName().equals(value1.getName())) {
+                    newReportSubstitutions.add(var1, value);
                 } else {
-                    // System.out.println("in second condition");
-                    newReportSubstitutions.add(var, value1);
-
+                    newReportSubstitutions.add(var, value);
                 }
             }
-
         }
 
         return newReportSubstitutions;

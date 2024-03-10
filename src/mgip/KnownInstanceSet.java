@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
 
-import mgip.matching.Substitutions;
+import components.Substitutions;
 import set.PropositionSet;
 
 public class KnownInstanceSet implements Iterable<KnownInstance> {

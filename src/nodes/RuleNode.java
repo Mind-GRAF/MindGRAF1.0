@@ -6,7 +6,6 @@ import mgip.KnownInstance;
 import mgip.InferenceType;
 import mgip.Report;
 import mgip.Scheduler;
-import mgip.matching.Substitutions;
 import mgip.requests.AntecedentToRuleChannel;
 import mgip.requests.Channel;
 import mgip.requests.ChannelSet;
@@ -20,9 +19,10 @@ import network.Network;
 import set.NodeSet;
 import cables.DownCable;
 import cables.DownCableSet;
+import components.Substitutions;
 import exceptions.NoSuchTypeException;
 
-public abstract class RuleNode extends PropositionNode {
+public class RuleNode extends PropositionNode {
     private boolean forwardReport;
 
     public RuleNode(String name, Boolean isVariable) {

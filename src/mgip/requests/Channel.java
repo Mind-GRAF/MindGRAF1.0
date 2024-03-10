@@ -1,8 +1,8 @@
 package mgip.requests;
 
+import components.Substitutions;
 import mgip.Report;
 import mgip.Scheduler;
-import mgip.matching.Substitutions;
 import nodes.Node;
 
 public class Channel {

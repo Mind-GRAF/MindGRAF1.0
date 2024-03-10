@@ -1,7 +1,7 @@
 package mgip.requests;
 
+import components.Substitutions;
 import mgip.Report;
-import mgip.matching.Substitutions;
 import nodes.Node;
 
 public class MatchChannel extends Channel {

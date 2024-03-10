@@ -3,7 +3,7 @@ package mgip;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import mgip.matching.Substitutions;
+import components.Substitutions;
 import network.Network;
 import nodes.PropositionNode;
 import set.PropositionSet;

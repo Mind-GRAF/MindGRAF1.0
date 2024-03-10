@@ -1,5 +1,6 @@
 package mgip.matching;
 
+import components.Substitutions;
 import nodes.Node;
 
 public class Match {

@@ -1,4 +1,4 @@
-package mindG.network.components;
+package components;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;

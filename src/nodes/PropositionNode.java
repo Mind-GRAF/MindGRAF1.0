@@ -13,14 +13,15 @@ import mgip.Report;
 import mgip.ReportType;
 import mgip.Scheduler;
 import mgip.matching.Match;
-import mgip.matching.Substitutions;
 import mgip.requests.*;
+import network.Controller;
 import set.NodeSet;
 import cables.DownCable;
 import cables.DownCableSet;
 import cables.UpCable;
 import exceptions.NoSuchTypeException;
 import set.PropositionSet;
+import components.Substitutions;
 
 public class PropositionNode extends Node {
     protected ChannelSet outgoingChannels;

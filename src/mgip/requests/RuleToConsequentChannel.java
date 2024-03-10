@@ -1,6 +1,6 @@
 package mgip.requests;
 
-import mgip.matching.Substitutions;
+import components.Substitutions;
 import nodes.Node;
 
 public class RuleToConsequentChannel extends Channel {
