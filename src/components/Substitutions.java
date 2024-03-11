@@ -64,17 +64,21 @@ public class Substitutions {
 
     // method for the switch substitutions
     public Substitutions switchReport(Substitutions switchSubs) {
+
         Substitutions newReportSubstitutions = new Substitutions();
+
         for (Node var : map.keySet()) {
+
             Node value = map.get(var);
             for (Node var1 : switchSubs.getMap().keySet()) {
                 Node value1 = switchSubs.getMap().get(var1);
-                if (var.getName().equals(value1.getName())) {
-                    newReportSubstitutions.add(var1, value);
-                } else {
+                if (!var1.getName().equals(value.getName())) {
                     newReportSubstitutions.add(var, value);
+                } else {
+                    newReportSubstitutions.add(var, value1);
                 }
             }
+
         }
 
         return newReportSubstitutions;
