@@ -876,7 +876,7 @@ public class PropositionNode extends Node {
      * @param currentReport
      * @throws NoSuchTypeException
      */
-    protected void processSingleReports(Report currentReport) throws NoSuchTypeException, NoSuchTypeException {
+    protected void processSingleReports(Report currentReport) throws NoSuchTypeException{
         System.out.println(this.getName() + " Processing Reports as a Proposition node");
         boolean forwardReportType = currentReport.getInferenceType() == InferenceType.FORWARD;
 
