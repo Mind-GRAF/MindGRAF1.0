@@ -4,92 +4,95 @@ import java.util.Collection;
 import java.util.HashMap;
 
 import nodes.Node;
-import set.NodeSet;
-
 
 public class DownCableSet {
-	private final HashMap<String,DownCable> downCables ;
+	private final HashMap<String, DownCable> downCables;
 
-	public DownCableSet(HashMap<String,DownCable> cables) {
-			this.downCables=cables;
+	public DownCableSet(HashMap<String, DownCable> cables) {
+		this.downCables = cables;
 	}
-	
-	public DownCableSet(DownCable...cables) {
+
+	public DownCableSet(DownCable... cables) {
 		super();
-		HashMap<String,DownCable> cablesTemp = new HashMap<String,DownCable>();
+		HashMap<String, DownCable> cablesTemp = new HashMap<String, DownCable>();
 		for (DownCable cable : cables) {
-			cablesTemp.put(cable.getRelation().getName(),cable);
-			
+			cablesTemp.put(cable.getRelation().getName(), cable);
+
 		}
-		
-		this.downCables=cablesTemp;
+
+		this.downCables = cablesTemp;
 	}
-	
-	public DownCable get(String key){
+
+	public DownCable get(String key) {
 		return this.downCables.get(key);
 	}
-	
-	public boolean contains(Object s){
+
+	public boolean contains(Object s) {
 		return this.downCables.containsKey(s) || this.downCables.containsValue(s);
 	}
-	public boolean isEmpty(){
+
+	public boolean isEmpty() {
 		return downCables.isEmpty();
 	}
-	public Collection<DownCable> getValues(){
+
+	public Collection<DownCable> getValues() {
 		return this.downCables.values();
 	}
-	
-	public int size(){
+
+	public int size() {
 		return downCables.size();
 	}
-	public String toString(){
+
+	public String toString() {
 		String result = "[";
-		if(downCables!=null&& downCables.size()>0){
-		int i = 0 ;
-		for (DownCable d : downCables.values())
-			{
-			result += d + (i==downCables.size()-1 ? "]":", ");
-			i++;
+		if (downCables != null && downCables.size() > 0) {
+			int i = 0;
+			for (DownCable d : downCables.values()) {
+				result += d + (i == downCables.size() - 1 ? "]" : ", ");
+				i++;
 			}
-		}else{
+		} else {
 			result = "Down Cable Set is Empty";
 		}
 		return result;
 	}
+
 	public String getMolecularSetKey() {
 		String result = "";
 		int counter = 1;
 		for (DownCable c : this.getValues()) {
-		
+
 			result += c.getRelation().getName() + (counter == this.size() ? "" : "_");
-			
+
 			counter++;
 		}
 		return result;
 	}
+
 	public String getMolecularNodeKey() {
 		String result = "";
 		int counter = 1;
 		for (DownCable c : this.getValues()) {
-		
+
 			result += c.getRelation().getName() + (counter == this.size() ? "" : "_");
 			for (Node node : c.getNodeSet().getValues()) {
-				result+=node.getId();
+				result += node.getId();
 			}
 			counter++;
 		}
 		return result;
 	}
+
 	public String getMolecularNodeKeyWithoutVars() {
 		String result = "";
 		int counter = 1;
 		for (DownCable c : this.getValues()) {
 			result += c.getRelation().getName() + (counter == this.size() ? "" : "_");
 			for (Node node : c.getNodeSet().getValues()) {
-				if(node.isVariable())
-					result+="_VAR_";
+				if (node.isVariable())
+					result += "_VAR_";
 				else
-				result+=node.getId();
+					result += node.getId();
 			}
 			counter++;
 		}
