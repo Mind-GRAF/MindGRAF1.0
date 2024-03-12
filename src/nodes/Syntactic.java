@@ -1,5 +1,5 @@
 package nodes;
 
 public enum Syntactic {
-	TERM,BASE,MOLECULAR,VARIABLE
+	TERM, BASE, MOLECULAR, VARIABLE
 }

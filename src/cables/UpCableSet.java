@@ -11,7 +11,6 @@ public class UpCableSet {
 	private HashMap<String, UpCable> upCables;
 
 	public UpCableSet(HashMap<String, UpCable> cables) {
-
 		this.upCables = cables;
 	}
 

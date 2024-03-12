@@ -147,19 +147,19 @@ public class RuleNode extends PropositionNode {
      */
     protected void requestAntecedentsNotAlreadyWorkingOn(Request currentRequest, KnownInstance knownInstance) {
         boolean ruleType = this instanceof Thresh || this instanceof AndOr;
-            Channel currentChannel = currentRequest.getChannel();
-            String currentContextName = currentChannel.getContextName();
-            int currentAttitudeID = currentChannel.getAttitudeID();
-            Substitutions filterSubs = currentChannel.getFilterSubstitutions();
-            Substitutions switchSubs = currentChannel.getSwitcherSubstitutions();
-            Substitutions reportSubs = knownInstance.getSubstitutions();
-            Substitutions unionSubs = Substitutions.union(filterSubs, reportSubs);
+        Channel currentChannel = currentRequest.getChannel();
+        String currentContextName = currentChannel.getContextName();
+        int currentAttitudeID = currentChannel.getAttitudeID();
+        Substitutions filterSubs = currentChannel.getFilterSubstitutions();
+        Substitutions switchSubs = currentChannel.getSwitcherSubstitutions();
+        Substitutions reportSubs = knownInstance.getSubstitutions();
+        Substitutions unionSubs = Substitutions.union(filterSubs, reportSubs);
 
-            NodeSet argumentsCloseToMe = getDownAntArgNodeSet();
-            NodeSet argNodesToConsiderClose = removeAlreadyEstablishedChannels(argumentsCloseToMe,
+        NodeSet argumentsCloseToMe = getDownAntArgNodeSet();
+        NodeSet argNodesToConsiderClose = removeAlreadyEstablishedChannels(argumentsCloseToMe,
                 currentRequest,
                 unionSubs, ruleType);
-            sendRequestsToNodeSet(argNodesToConsiderClose, unionSubs, switchSubs, currentContextName,
+        sendRequestsToNodeSet(argNodesToConsiderClose, unionSubs, switchSubs, currentContextName,
                 currentAttitudeID,
                 ChannelType.AntRule, this);
     }
