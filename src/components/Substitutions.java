@@ -5,7 +5,6 @@ import java.util.Map;
 
 import nodes.Node;
 
-//this class is based on the old implementation of the substitutions class, another version was implemented after
 public class Substitutions {
 
     private Map<Node, Node> map;

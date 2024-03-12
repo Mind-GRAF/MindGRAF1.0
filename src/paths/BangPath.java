@@ -1,9 +1,7 @@
 package paths;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import nodes.Node;
-import nodes.PropositionNode;
 import context.Context;
 
 public class BangPath extends Path {
