@@ -98,7 +98,7 @@ public class CustomClass {
 								: ",");
 				k++;
 			}
-			
+
 			result += "\n" + " public " + constructor.getName() + "(" + Params
 					+ ")" + "{" + "\n" + "super(" + Args + ");" + "\n" + "}";
 		}
@@ -144,55 +144,55 @@ public class CustomClass {
 	}
 
 	public Class<?> createClass(ArrayList<CustomMethod> methods, ArrayList<CustomConstructor> constructors)
-	        throws ClassNotFoundException, IOException, InstantiationException, IllegalAccessException,
-	        NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException {
-	    // Set to store unique classes
-	    Set<Class<?>> uniqueClasses = new HashSet<>();
+			throws ClassNotFoundException, IOException, InstantiationException, IllegalAccessException,
+			NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException {
+		// Set to store unique classes
+		Set<Class<?>> uniqueClasses = new HashSet<>();
 
-	    // Iterate over constructors and add parameter classes to uniqueClasses
-	    for (CustomConstructor constructor : constructors) {
-	        Class<?>[] constructorParams = constructor.getConstructorParams();
-	        if (constructorParams != null) {
-	            Collections.addAll(uniqueClasses, constructorParams);
-	        }
-	    }
+		// Iterate over constructors and add parameter classes to uniqueClasses
+		for (CustomConstructor constructor : constructors) {
+			Class<?>[] constructorParams = constructor.getConstructorParams();
+			if (constructorParams != null) {
+				Collections.addAll(uniqueClasses, constructorParams);
+			}
+		}
 
-	    // Generate import statements for the unique classes
-	    List<String> importStatements = new ArrayList<>();
-	    Set<String> packageNames = new HashSet<>();
+		// Generate import statements for the unique classes
+		List<String> importStatements = new ArrayList<>();
+		Set<String> packageNames = new HashSet<>();
 
-	    // Extract package names from uniqueClasses
-	    for (Class<?> Class : uniqueClasses) {
-	        String packageName = Class.getPackage().getName();
-	        packageNames.add(packageName);
-	    }
+		// Extract package names from uniqueClasses
+		for (Class<?> Class : uniqueClasses) {
+			String packageName = Class.getPackage().getName();
+			packageNames.add(packageName);
+		}
 
-	    // Create import statements
-	    for (String packageName : packageNames) {
-	        importStatements.add("import " + packageName + ".*;");
-	    }
+		// Create import statements
+		for (String packageName : packageNames) {
+			importStatements.add("import " + packageName + ".*;");
+		}
 
-	    // Combine import statements into a single string
-	    StringBuilder imports = new StringBuilder();
-	    for (String importStatement : importStatements) {
-	        imports.append(importStatement).append("\n");
-	    }
+		// Combine import statements into a single string
+		StringBuilder imports = new StringBuilder();
+		for (String importStatement : importStatements) {
+			imports.append(importStatement).append("\n");
+		}
 
-	    // Determine if a superclass is specified
-	    String extend = superClass.isEmpty() ? "" : " extends " + superClass;
+		// Determine if a superclass is specified
+		String extend = superClass.isEmpty() ? "" : " extends " + superClass;
 
-	    // Generate the class code
-	    StringBuilder classCode = new StringBuilder();
-	    classCode.append(imports)
-	            .append("public class ").append(className).append(extend).append(" {\n")
-	            .append(constructorToString(constructors)).append("\n")  // Convert constructors to string representation
-	            .append(MethodToString(methods)).append("\n")  // Convert methods to string representation
-	            .append("}");
+		// Generate the class code
+		StringBuilder classCode = new StringBuilder();
+		classCode.append(imports)
+				.append("public class ").append(className).append(extend).append(" {\n")
+				.append(constructorToString(constructors)).append("\n") // Convert constructors to string representation
+				.append(MethodToString(methods)).append("\n") // Convert methods to string representation
+				.append("}");
 
-	    // Create the class using the generated code
-	    Class<?> myClass = buildClass(className, classCode.toString(), className, superClass);
-	    newClass = myClass;
-	    return myClass;
+		// Create the class using the generated code
+		Class<?> myClass = buildClass(className, classCode.toString(), className, superClass);
+		newClass = myClass;
+		return myClass;
 	}
 
 	public Object createInstance(Class<?> myClass, Object... constructorArgs)
@@ -243,50 +243,51 @@ public class CustomClass {
 
 	}
 
-	public Class<?> buildClass(String className, String classCode, String fileName, String superClassName) throws IOException, ClassNotFoundException {
-	    // Specify the file path where the class will be written
-	    String filePath = fileName + ".java";
-	    
-	    // Write the class code to the file
-	    try (PrintWriter out = new PrintWriter(filePath)) {
-	        out.println(classCode);
-	    }
-	    
-	    // Print a success message with the file path
-	    System.out.println("Class " + className + " successfully created as " + filePath);
-	    
-	    // Set up compilation options and tools
-	    String[] options = new String[] { "-d", "bin" };
-	    JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-	    DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
-	    StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
-	    
-	    // Set the output location for compiled class files
-	    fileManager.setLocation(StandardLocation.CLASS_OUTPUT, Arrays.asList(new File("bin")));
-	    
-	    // Create a JavaFileObject representing the source file
-	    JavaFileObject sourceFile = new SourceFile(className, classCode);
-	    Iterable<? extends JavaFileObject> compilationUnits = Arrays.asList(sourceFile);
-	    
-	    // Compile the source file
-	    CompilationTask task = compiler.getTask(null, fileManager, diagnostics, Arrays.asList(options), null, compilationUnits);
-	    
-	    // Check if compilation failed and throw an exception if it did
-	    if (!task.call()) {
-	        throw new RuntimeException("Compilation failed: " + diagnostics.getDiagnostics());
-	    }
-	    
-	    // Obtain a class loader and load the compiled class
-	    ClassLoader classLoader = fileManager.getClassLoader(StandardLocation.CLASS_OUTPUT);
-	    Class<?> compiledClass = Class.forName(className, true, classLoader);
-	    
-	    // Close the file manager
-	    fileManager.close();
-	    
-	    // Return the compiled class
-	    return compiledClass;
-	}
+	public Class<?> buildClass(String className, String classCode, String fileName, String superClassName)
+			throws IOException, ClassNotFoundException {
+		// Specify the file path where the class will be written
+		String filePath = fileName + ".java";
 
+		// Write the class code to the file
+		try (PrintWriter out = new PrintWriter(filePath)) {
+			out.println(classCode);
+		}
+
+		// Print a success message with the file path
+		System.out.println("Class " + className + " successfully created as " + filePath);
+
+		// Set up compilation options and tools
+		String[] options = new String[] { "-d", "bin" };
+		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+		DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
+		StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
+
+		// Set the output location for compiled class files
+		fileManager.setLocation(StandardLocation.CLASS_OUTPUT, Arrays.asList(new File("bin")));
+
+		// Create a JavaFileObject representing the source file
+		JavaFileObject sourceFile = new SourceFile(className, classCode);
+		Iterable<? extends JavaFileObject> compilationUnits = Arrays.asList(sourceFile);
+
+		// Compile the source file
+		CompilationTask task = compiler.getTask(null, fileManager, diagnostics, Arrays.asList(options), null,
+				compilationUnits);
+
+		// Check if compilation failed and throw an exception if it did
+		if (!task.call()) {
+			throw new RuntimeException("Compilation failed: " + diagnostics.getDiagnostics());
+		}
+
+		// Obtain a class loader and load the compiled class
+		ClassLoader classLoader = fileManager.getClassLoader(StandardLocation.CLASS_OUTPUT);
+		Class<?> compiledClass = Class.forName(className, true, classLoader);
+
+		// Close the file manager
+		fileManager.close();
+
+		// Return the compiled class
+		return compiledClass;
+	}
 
 	public Object createInstance(Class<?> myClass)
 			throws InstantiationException, IllegalAccessException,
@@ -296,53 +297,54 @@ public class CustomClass {
 	}
 
 	static class Compiler {
-		 public byte[] compile(String className, String code) throws Exception {
-		        // Get the system Java compiler
-		        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-		        
-		        // Create a diagnostic collector to collect compilation diagnostics
-		        DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
-		        
-		        // Get the standard file manager from the compiler
-		        StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
-		        
-		        // Set the output location to the "bin" directory
-		        fileManager.setLocation(StandardLocation.CLASS_OUTPUT, Arrays.asList(new File("bin")));
-		        
-		        // Create a Java source file object with the given class name and code
-		        JavaFileObject sourceFile = new SourceFile(className, code);
-		        
-		        // Create a compilation task with the file manager, diagnostics, and source file
-		        Iterable<? extends JavaFileObject> compilationUnits = Arrays.asList(sourceFile);
-		        CompilationTask task = compiler.getTask(null, fileManager, diagnostics, null, null, compilationUnits);
-		        
-		        // Call the compilation task and check if it was successful
-		        if (!task.call()) {
-		            // Compilation failed, throw a runtime exception with the diagnostics information
-		            throw new RuntimeException("Compilation failed: " + diagnostics.getDiagnostics());
-		        }
-		        
-		        // Get the class loader from the file manager
-		        ClassLoader classLoader = fileManager.getClassLoader(StandardLocation.CLASS_OUTPUT);
-		        
-		        // Load the compiled class using the class loader
-		        Class<?> compiledClass = Class.forName(className, true, classLoader);
-		        
-		        // Close the file manager
-		        fileManager.close();
-		        
-		        // Read the compiled class bytes from the file system and return as a byte array
-		        return Files.readAllBytes(Paths.get(
-		                compiledClass.getProtectionDomain().getCodeSource().getLocation().toURI())
-		                .resolve(className.replace('.', '/') + ".class"));
-		    }
+		public byte[] compile(String className, String code) throws Exception {
+			// Get the system Java compiler
+			JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+
+			// Create a diagnostic collector to collect compilation diagnostics
+			DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
+
+			// Get the standard file manager from the compiler
+			StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
+
+			// Set the output location to the "bin" directory
+			fileManager.setLocation(StandardLocation.CLASS_OUTPUT, Arrays.asList(new File("bin")));
+
+			// Create a Java source file object with the given class name and code
+			JavaFileObject sourceFile = new SourceFile(className, code);
+
+			// Create a compilation task with the file manager, diagnostics, and source file
+			Iterable<? extends JavaFileObject> compilationUnits = Arrays.asList(sourceFile);
+			CompilationTask task = compiler.getTask(null, fileManager, diagnostics, null, null, compilationUnits);
+
+			// Call the compilation task and check if it was successful
+			if (!task.call()) {
+				// Compilation failed, throw a runtime exception with the diagnostics
+				// information
+				throw new RuntimeException("Compilation failed: " + diagnostics.getDiagnostics());
+			}
+
+			// Get the class loader from the file manager
+			ClassLoader classLoader = fileManager.getClassLoader(StandardLocation.CLASS_OUTPUT);
+
+			// Load the compiled class using the class loader
+			Class<?> compiledClass = Class.forName(className, true, classLoader);
+
+			// Close the file manager
+			fileManager.close();
+
+			// Read the compiled class bytes from the file system and return as a byte array
+			return Files.readAllBytes(Paths.get(
+					compiledClass.getProtectionDomain().getCodeSource().getLocation().toURI())
+					.resolve(className.replace('.', '/') + ".class"));
+		}
 	}
 
-//	static class ByteClassLoader extends ClassLoader {
-//		public Class<?> defineClass(String name, byte[] b) {
-//			return defineClass(name, b, 0, b.length);
-//		}
-//	}
+	// static class ByteClassLoader extends ClassLoader {
+	// public Class<?> defineClass(String name, byte[] b) {
+	// return defineClass(name, b, 0, b.length);
+	// }
+	// }
 
 	static class SourceFile extends SimpleJavaFileObject {
 		private final String code;
@@ -357,24 +359,25 @@ public class CustomClass {
 			return code;
 		}
 	}
-//
-//	static class ByteArrayJavaClass extends SimpleJavaFileObject {
-//		private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-//
-//		public ByteArrayJavaClass(String className) {
-//			super(URI.create("bytes:///" + className), Kind.CLASS);
-//		}
-//
-//		public byte[] getBytes() {
-//			return outputStream.toByteArray();
-//		}
-//
-//		@Override
-//		public OutputStream openOutputStream() throws IOException {
-//			return outputStream;
-//		}
-//
-//	}
+	//
+	// static class ByteArrayJavaClass extends SimpleJavaFileObject {
+	// private final ByteArrayOutputStream outputStream = new
+	// ByteArrayOutputStream();
+	//
+	// public ByteArrayJavaClass(String className) {
+	// super(URI.create("bytes:///" + className), Kind.CLASS);
+	// }
+	//
+	// public byte[] getBytes() {
+	// return outputStream.toByteArray();
+	// }
+	//
+	// @Override
+	// public OutputStream openOutputStream() throws IOException {
+	// return outputStream;
+	// }
+	//
+	// }
 
 	public String getClassName() {
 		return className;

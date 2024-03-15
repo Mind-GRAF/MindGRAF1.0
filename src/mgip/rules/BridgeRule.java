@@ -1,16 +1,11 @@
 package mgip.rules;
 
-import network.Controller;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-
 import mgip.InferenceType;
 import mgip.KnownInstance;
 import mgip.Report;
 import mgip.ReportType;
 import mgip.Scheduler;
-import mgip.matching.Match;
 import mgip.requests.AntecedentToRuleChannel;
 import mgip.requests.Channel;
 import mgip.requests.ChannelType;

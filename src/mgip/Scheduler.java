@@ -5,12 +5,10 @@ import java.util.Hashtable;
 import java.util.Queue;
 import java.util.Stack;
 
-import mgip.requests.Channel;
 import mgip.requests.Request;
 import nodes.ActNode;
 import nodes.Node;
 import nodes.PropositionNode;
-import nodes.RuleNode;
 
 public class Scheduler {
     private static Queue<Report> highQueue;

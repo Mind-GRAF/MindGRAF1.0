@@ -1,11 +1,6 @@
 package mgip;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import components.Substitutions;
-import network.Network;
-import nodes.PropositionNode;
 import set.PropositionNodeSet;
 
 public class KnownInstance {

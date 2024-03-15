@@ -2,10 +2,7 @@ package mgip;
 
 import mgip.requests.ChannelType;
 import components.Substitutions;
-import mgip.ReportType;
-import network.Network;
 import nodes.Node;
-import nodes.PropositionNode;
 import set.PropositionNodeSet;
 
 public class Report {
