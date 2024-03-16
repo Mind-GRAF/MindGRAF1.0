@@ -1,6 +1,5 @@
 package paths;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 
 import nodes.Node;
@@ -12,7 +11,7 @@ public class EmptyPath extends Path {
 	public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context) {
 		// TODO Auto-generated method stub
 		LinkedList<Object[]> result = new LinkedList<Object[]>();
-		Object[] obj = {node,trace} ;
+		Object[] obj = { node, trace };
 		result.add(obj);
 		return result;
 	}
@@ -22,10 +21,10 @@ public class EmptyPath extends Path {
 			Context context) {
 		// TODO Auto-generated method stub
 		LinkedList<Object[]> result = new LinkedList<Object[]>();
-		Object[] obj = {node,trace} ;
+		Object[] obj = { node, trace };
 		result.add(obj);
-		return result;	
-		}
+		return result;
+	}
 
 	@Override
 	public Path clone() {
@@ -37,7 +36,7 @@ public class EmptyPath extends Path {
 	@Override
 	public boolean equals(Object obj) {
 		// TODO Auto-generated method stub
-		if(obj instanceof EmptyPath)
+		if (obj instanceof EmptyPath)
 			return true;
 		return false;
 	}
@@ -46,7 +45,7 @@ public class EmptyPath extends Path {
 	public Path converse() {
 		// TODO Auto-generated method stub
 		return this;
-		
+
 	}
 
 }

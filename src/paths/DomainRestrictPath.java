@@ -10,8 +10,7 @@ public class DomainRestrictPath extends Path {
 	private Path p;
 	private Node zNode;
 
-	public DomainRestrictPath( Path q, Path p,Node zNode) {
-		// TODO Auto-generated constructor stub
+	public DomainRestrictPath(Path q, Path p, Node zNode) {
 		this.q = q;
 		this.p = p;
 		this.zNode = zNode;
@@ -44,7 +43,6 @@ public class DomainRestrictPath extends Path {
 	@Override
 	public LinkedList<Object[]> follow(Node node, PathTrace trace,
 			Context context) {
-		// TODO Auto-generated method stub
 		LinkedList<Object[]> result = new LinkedList<Object[]>();
 		LinkedList<Object[]> temp = q.follow(node, trace, context);
 		for (Object[] objects : temp) {
@@ -61,14 +59,14 @@ public class DomainRestrictPath extends Path {
 	@Override
 	public LinkedList<Object[]> followConverse(Node node, PathTrace trace,
 			Context context) {
-		return new RangeRestrictPath( this.q,this.p.converse(),
+		return new RangeRestrictPath(this.q, this.p.converse(),
 				this.zNode).follow(node, trace, context);
 
 	}
 
 	@Override
 	public DomainRestrictPath clone() {
-		return new DomainRestrictPath( this.q.clone(),this.p.clone(),
+		return new DomainRestrictPath(this.q.clone(), this.p.clone(),
 				this.zNode);
 	}
 
@@ -92,7 +90,7 @@ public class DomainRestrictPath extends Path {
 
 	@Override
 	public Path converse() {
-		return new RangeRestrictPath(q,p.converse(), zNode);
+		return new RangeRestrictPath(q, p.converse(), zNode);
 	}
 
 }

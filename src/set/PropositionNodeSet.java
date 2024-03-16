@@ -3,215 +3,234 @@ package set;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 
 import network.Network;
 import nodes.Node;
 import nodes.PropositionNode;
 
-public class PropositionNodeSet {
-	private HashSet<Integer> nodes;
-	private boolean isFinal;
+public class PropositionNodeSet implements Iterable<PropositionNode> {
 
-	// Empty constructor
-	public PropositionNodeSet() {
-		nodes = new HashSet<Integer>();
-	}
+    private HashSet<Integer> nodes;
+    private boolean isFinal;
 
-	// Constructor using HashSet of Ids 
-	public PropositionNodeSet(HashSet<Integer> nodes) {
-		this.nodes = nodes;
-	}
-	// Constructor with arity parameter ... you can add variable number of IDs ( including Zero ) 
-	public PropositionNodeSet(Integer... nodeIDs) {
-		this.nodes = new HashSet<Integer>();
-		for (Integer id : nodeIDs)
-			this.nodes.add(id);
-	}
-	// Constructor with array of nodes 
-	public PropositionNodeSet(int[] nodeIDs) {
-		this.nodes = new HashSet<Integer>();
-		for (int id : nodeIDs) {
-			this.nodes.add(id);
-		}
-	}
-	// Constructor using both hashSet and araity parameter
-	public PropositionNodeSet(HashSet<Integer> list, Integer... nodeIDs) {
-		this.nodes = list;
-		for (Integer id : nodeIDs)
-			this.nodes.add(id);
+    // Empty constructor
+    public PropositionNodeSet() {
+        nodes = new HashSet<Integer>();
+    }
 
-	}
-	// constructor taking the node itself and storing it's id ( Ariaty Parameter with variable number of nodes) 
-	public PropositionNodeSet(Node... nodes) {
-		this.nodes = new HashSet<Integer>();
-		for (Node n : nodes)
-			this.nodes.add(n.getId());
-	}
+    // Constructor using HashSet of Ids
+    public PropositionNodeSet(HashSet<Integer> nodes) {
+        this.nodes = nodes;
+    }
 
-	// constructor taking a nodeset itself and storing it's id 
-	public PropositionNodeSet(NodeSet nodeSet) {
-		this.nodes = new HashSet<Integer>();
-		for (Node n : nodeSet.getValues())
-			this.nodes.add(n.getId());
-	}
+    // Constructor with arity parameter ... you can add variable number of IDs (
+    // including Zero )
+    public PropositionNodeSet(Integer... nodeIDs) {
+        this.nodes = new HashSet<Integer>();
+        for (Integer id : nodeIDs)
+            this.nodes.add(id);
+    }
 
-	// Return the Ids of the propositions in the PropositionNodeSet node hashset
-	private int[] getProps() {
-		int[] props = new int[this.nodes.size()];
-		int i = 0;
-		for (Integer id : this.nodes) {
-			props[i] = id;
-			i++;
-		}
-		return props;
-	}
+    // Constructor with array of nodes
+    public PropositionNodeSet(int[] nodeIDs) {
+        this.nodes = new HashSet<Integer>();
+        for (int id : nodeIDs) {
+            this.nodes.add(id);
+        }
+    }
 
-	// Returns an array of the props in a given PropositionSet but insures
-	// immutability through deep cloning of the props done by the PropositionSet
-	// constructor.
-	public static int[] getPropsSafely(PropositionNodeSet set) {
-		return new PropositionNodeSet(set.getProps()).getProps();
-	}
+    // Constructor using both hashSet and araity parameter
+    public PropositionNodeSet(HashSet<Integer> list, Integer... nodeIDs) {
+        this.nodes = list;
+        for (Integer id : nodeIDs)
+            this.nodes.add(id);
 
-	public boolean isFinal() {
-		return isFinal;
-	}
+    }
 
-	public void setIsFinal(boolean isFinal) {
-		this.isFinal = isFinal;
-	}
+    // constructor taking the node itself and storing it's id ( Ariaty Parameter
+    // with variable number of nodes)
+    public PropositionNodeSet(Node... nodes) {
+        this.nodes = new HashSet<Integer>();
+        for (Node n : nodes)
+            this.nodes.add(n.getId());
+    }
 
-	public PropositionNodeSet union(PropositionNodeSet otherSet) {
+    // constructor taking a nodeset itself and storing it's id
+    public PropositionNodeSet(NodeSet nodeSet) {
+        this.nodes = new HashSet<Integer>();
+        for (Node n : nodeSet.getValues())
+            this.nodes.add(n.getId());
+    }
 
-		PropositionNodeSet result = new PropositionNodeSet();
-		result.putAll(this.nodes);
-		if (!isFinal) {
-			otherSet.addAllTo(result);
-		}
-		return result;
-	}
+    // Return the Ids of the propositions in the PropositionSet node hashset
+    public int[] getProps() {
+        int[] props = new int[this.nodes.size()];
+        int i = 0;
+        for (Integer id : this.nodes) {
+            props[i] = id;
+            i++;
+        }
+        return props;
+    }
 
-	public PropositionNodeSet intersection(NodeSet otherSet) {
-		PropositionNodeSet result = new PropositionNodeSet();
-		for (Integer entry : this.nodes) {
-			if (otherSet.contains(entry)) {
-				result.add(entry);
-			}
-		}
-		if (!isFinal)
-			return result;
-		else
-			return this;
-	}
+    // Returns an array of the props in a given PropositionSet but insures
+    // immutability through deep cloning of the props done by the PropositionSet
+    // constructor.
+    public static int[] getPropsSafely(PropositionNodeSet set) {
+        return new PropositionNodeSet(set.getProps()).getProps();
+    }
 
-	public PropositionNodeSet difference(PropositionNodeSet otherSet) {
-		PropositionNodeSet result = new PropositionNodeSet();
-		for (Integer entry : this.nodes) {
-			if (!otherSet.contains(entry)) {
-				result.add(entry);
-			}
-		}
-		return result;
-	}
+    public boolean isFinal() {
+        return isFinal;
+    }
 
-	public boolean isSubset(PropositionNodeSet otherSet) {
-		return otherSet.nodes.containsAll(this.nodes);
-	}
+    public void setIsFinal(boolean isFinal) {
+        this.isFinal = isFinal;
+    }
 
-	public void putAll(HashSet<Integer> Set) {
-		if (!isFinal)
-			this.nodes.addAll(Set);
+    public PropositionNodeSet union(PropositionNodeSet otherSet) {
 
-	}
-	public void putAll(HashMap<Integer,Node> Set) {
-	
-		if (!isFinal)
-		{
-			HashSet<Integer>s = new HashSet<Integer>();
-			for (Node n : Set.values()) {
-				s.add(n.getId());
-			}
-			this.nodes.addAll(s);
-			
-		}
+        PropositionNodeSet result = new PropositionNodeSet();
+        result.putAll(this.nodes);
+        if (!isFinal) {
+            otherSet.addAllTo(result);
+        }
+        return result;
+    }
 
-	}
-	public void addAllTo(PropositionNodeSet nodeSet) {
-		nodeSet.putAll(this.nodes);
-	}
+    public PropositionNodeSet intersection(NodeSet otherSet) {
+        PropositionNodeSet result = new PropositionNodeSet();
+        for (Integer entry : this.nodes) {
+            if (otherSet.contains(entry)) {
+                result.add(entry);
+            }
+        }
+        if (!isFinal)
+            return result;
+        else
+            return this;
+    }
 
-	public String toString() {
-		String s = "[";
-		int i = 1;
-		for (int n : nodes) {
-			s += n + (i == nodes.size() ? "" : ",");
-			i++;
-		}
-		s += "]";
-		return s;
+    public PropositionNodeSet difference(PropositionNodeSet otherSet) {
+        PropositionNodeSet result = new PropositionNodeSet();
+        for (Integer entry : this.nodes) {
+            if (!otherSet.contains(entry)) {
+                result.add(entry);
+            }
+        }
+        return result;
+    }
 
-	}
+    public boolean isSubset(PropositionNodeSet otherSet) {
+        return otherSet.nodes.containsAll(this.nodes);
+    }
 
-	public void add(int id) {
-		if (!isFinal)
-			nodes.add(id);
-	}
+    public void putAll(HashSet<Integer> Set) {
+        if (!isFinal)
+            this.nodes.addAll(Set);
 
-	public void add(Node node) {
-		if (!isFinal)
-			nodes.add(node.getId());
-	}
+    }
 
-	public int size() {
-		return nodes.size();
-	}
+    public void putAll(HashMap<Integer, Node> Set) {
 
-	public boolean remove(int i) {
-		if (!isFinal)
-			return nodes.remove(i);
-		else
-			return false;
-	}
+        if (!isFinal) {
+            HashSet<Integer> s = new HashSet<Integer>();
+            for (Node n : Set.values()) {
+                s.add(n.getId());
+            }
+            this.nodes.addAll(s);
 
-	public boolean remove(Node n) {
-		if (!isFinal)
-			return nodes.remove(n.getId());
-		else
-			return false;
+        }
 
-	}
+    }
 
-	public void removeAll() {
-		if (!isFinal)
-			nodes.clear();
-	}
+    public void addAllTo(PropositionNodeSet nodeSet) {
+        nodeSet.putAll(this.nodes);
+    }
 
-	public HashSet<Integer> getValues() {
-		return this.nodes;
-	}
-	public Collection<Node> getNodes(){
-		HashMap<Integer,Node> nodes = new HashMap<Integer,Node>();
-		for (Integer integer : this.nodes) {
-			nodes.put(integer, Network.getNodeById(integer));
-		}
-		return nodes.values();
-	}
-	public boolean isEmpty() {
-		return this.nodes.size() == 0;
-	}
+    public String toString() {
+        String s = "[";
+        int i = 1;
+        for (int n : nodes) {
+            s += n + (i == nodes.size() ? "" : ",");
+            i++;
+        }
+        s += "]";
+        return s;
 
-	public Node get(int id) {
-		return Network.getNodeById(id);
-	}
+    }
 
-	public boolean contains(Integer s) {
-		return this.nodes.contains(s);
-	}
-	public boolean contains(Node n) {
-		return this.nodes.contains(n.getId());
-	}
+    public void add(int id) {
+        if (!isFinal)
+            nodes.add(id);
+    }
 
-	public boolean equals(PropositionNodeSet n) {
-		return this.getValues().equals(n.getValues());
-	}
+    public void add(Node node) {
+        if (!isFinal)
+            nodes.add(node.getId());
+    }
+
+    public int size() {
+        return nodes.size();
+    }
+
+    public boolean remove(int i) {
+        if (!isFinal)
+            return nodes.remove(i);
+        else
+            return false;
+    }
+
+    public boolean remove(Node n) {
+        if (!isFinal)
+            return nodes.remove(n.getId());
+        else
+            return false;
+
+    }
+
+    public void removeAll() {
+        if (!isFinal)
+            nodes.clear();
+    }
+
+    public HashSet<Integer> getValues() {
+        return this.nodes;
+    }
+
+    public Collection<Node> getNodes() {
+        HashMap<Integer, Node> nodes = new HashMap<Integer, Node>();
+        for (Integer integer : this.nodes) {
+            nodes.put(integer, Network.getNodeById(integer));
+        }
+        return nodes.values();
+    }
+
+    public boolean isEmpty() {
+        return this.nodes.size() == 0;
+    }
+
+    public Node get(int id) {
+        return Network.getNodeById(id);
+    }
+
+    public boolean contains(Integer s) {
+        return this.nodes.contains(s);
+    }
+
+    public boolean contains(Node n) {
+        return this.nodes.contains(n.getId());
+    }
+
+    public boolean equals(PropositionNodeSet n) {
+        return this.getValues().equals(n.getValues());
+    }
+
+    @Override
+    public Iterator<PropositionNode> iterator() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'iterator'");
+    }
+
 }

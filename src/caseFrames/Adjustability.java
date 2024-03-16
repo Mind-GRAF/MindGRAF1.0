@@ -1,5 +1,5 @@
 package caseFrames;
 
 public enum Adjustability {
-	EXPAND,REDUCE,NONE
+	EXPAND, REDUCE, NONE
 }

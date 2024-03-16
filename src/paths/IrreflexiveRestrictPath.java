@@ -1,6 +1,5 @@
 package paths;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import nodes.Node;
 import context.Context;
