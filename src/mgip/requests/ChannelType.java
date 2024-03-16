@@ -1,5 +1,5 @@
 package mgip.requests;
 
 public enum ChannelType {
-    Matched, AntRule, RuleCons, Act;
+    Matched, AntRule, RuleCons, Act, Introduction;
 }
