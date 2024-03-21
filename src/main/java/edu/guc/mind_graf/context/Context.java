@@ -23,5 +23,9 @@ public class Context {
         }
         throw new RuntimeException("PropositionNode is not in any attitude");
     }
+    
+    public PropositionNodeSet getAllPropositionsInAnAttitude(int attitude) {
+        return this.attitudes.get(attitude);
+    }
 
 }
