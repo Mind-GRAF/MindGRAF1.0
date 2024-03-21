@@ -5,13 +5,13 @@ import java.util.Set;
 import mgip.ruleIntroduction.RII;
 
 public class RIISet {
-    private Set<RII> riiSet;
+    private static Set<RII> riiSet;
 
     public RIISet() {
         riiSet = new HashSet<>();
     }
 
-    public void addRII(RII rii) {
+    public static void addRII(RII rii) {
         riiSet.add(rii);
     }
 

@@ -7,9 +7,18 @@ public class MCII {
     int RIIsCount;
     boolean isSufficent;
 
-    public MCII(RIISet riiSet, int rIIsCount, boolean isSufficent) {
+    public MCII() {
+
+    }
+
+    public MCII(RIISet riiSet) {
         this.riiSet = riiSet;
-        RIIsCount = rIIsCount;
-        this.isSufficent = isSufficent;
+        RIIsCount = 0;
+        this.isSufficent = false;
+    }
+
+    public void add(RIISet riiSet) {
+        riiSet.add(riiSet);
+        RIIsCount++;
     }
 }

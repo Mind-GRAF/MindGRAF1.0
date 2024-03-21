@@ -10,16 +10,23 @@ import mgip.requests.AntecedentToRuleChannel;
 import mgip.requests.Channel;
 import mgip.requests.ChannelSet;
 import mgip.requests.ChannelType;
+import mgip.requests.IntroductionChannel;
 import mgip.requests.MatchChannel;
 import mgip.ReportType;
 import mgip.requests.Request;
+import mgip.ruleIntroduction.MCII;
+import mgip.ruleIntroduction.RII;
 import mgip.rules.AndOr;
 import mgip.rules.Thresh;
 import network.Network;
+import set.ContextSet;
+import set.MCIISet;
 import set.NodeSet;
+import set.RIISet;
 import cables.DownCable;
 import cables.DownCableSet;
 import components.Substitutions;
+import context.Context;
 import exceptions.NoSuchTypeException;
 
 public class RuleNode extends PropositionNode {
@@ -200,6 +207,76 @@ public class RuleNode extends PropositionNode {
         } catch (Exception e) {
             // TODO: handle exception
         }
+    }
+
+    protected IntroductionChannel intiateIntroChannel(Channel channel, NodeSet consNodeSet, NodeSet antArgNodeSet) {
+        // implementation of the method intiateIntroChannel
+        IntroductionChannel introChannel = new IntroductionChannel();
+        introChannel.setContextName(channel.getContextName());
+        introChannel.setAttitudeID(channel.getAttitudeID());
+        introChannel.setFilterSubstitutions(channel.getFilterSubstitutions());
+        introChannel.setSwitcherSubstitutions(channel.getSwitcherSubstitutions());
+        introChannel.setRequesterNode(this);
+        return introChannel;
+    }
+    
+    public boolean processIntroductionRequest(Request currentRequest) {
+        //need to check if we already made an introduction request to the same node before
+
+        if (this instanceof AND || this instanceof NOR){
+            IntroductionChannel intiatedChannel = intiateIntroChannel(currentRequest.getChannel(), this.getDownConsNodeSet(), null);
+            if (this.getDownConsNodeSet().size() > 0){
+                for (Node consNode : this.getDownConsNodeSet()){
+                    if (consNode instanceof RuleNode){
+                        ((RuleNode) consNode).processIntroductionRequest(new Request(intiatedChannel, this));
+                    }
+                }
+            }
+        }
+        else if (this instanceof AndOr || this instanceof Thresh){
+            NodeSet args = this.getDownAntArgNodeSet();
+            int attitude = currentRequest.getChannel().getAttitudeID();
+            Context context = ContextSet.getContext(currentRequest.getChannel().getContextName());
+            RII rii = new RII(currentRequest, args, null , context , attitude);
+            RIISet.addRII(rii);
+            //send requests to all consequents
+        }
+        else if(this instanceof AndEntail){
+         NodeSet ants = this.getDownAntArgNodeSet();
+         for(Node ant : ants) {
+            ant = applySubstitution(currentRequest.getChannel().getFilterSubstitutions(), ant);
+            if(ant.getDownCableSet().isEmpty()){
+                return false;
+            }
+         }  
+         NodeSet cons = this.getDownConsNodeSet();
+         int attitude = currentRequest.getChannel().getAttitudeID();
+         Context context = ContextSet.getContext(currentRequest.getChannel().getContextName());
+            RII rii = new RII(currentRequest, ants, cons , context , attitude);
+            RIISet.addRII(rii);
+            //send requests to all consequents
+        }
+        else if(this instanceof OrEntail){
+            NodeSet ants = this.getDownAntArgNodeSet();
+            NodeSet cons = this.getDownConsNodeSet();
+            MCII mcii = new MCII(); //creates a new empty MCII
+            for(Node ant : ants) {
+                ant = applySubstitution(currentRequest.getChannel().getFilterSubstitutions(), ant);
+                if(ant.getDownCableSet().isEmpty()){
+                    return false;
+                }
+            }  
+            for(Node ant : ants) {
+                Context context = ContextSet.getContext(currentRequest.getChannel().getContextName());
+                int attitude = currentRequest.getChannel().getAttitudeID();
+                RII rii = new RII(currentRequest, ants, cons , context , attitude);
+                RIISet riiSet = new RIISet();
+                riiSet.addRII(rii);
+                mcii.add(riiSet);
+                //send requests to all consequents
+            }  
+            MCIISet.addMCII(mcii);
+           }
     }
 
     /***
