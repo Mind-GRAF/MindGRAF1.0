@@ -9,7 +9,7 @@ public class Controller {
     private static ContextSet contextSet = new ContextSet(currContext);
     private static Hashtable<Integer, String> attitudeNames = new Hashtable<Integer, String>();
 
-    public String getPropositionAttitudename(Integer prop, Context c) {
+    public String getPropositionAttitudeName(Integer prop, Context c) {
         // get the key value from the attitudeNames hashtable
         System.out.println(c.getPropositionAttitude(prop));
         return attitudeNames.get(c.getPropositionAttitude(prop));
