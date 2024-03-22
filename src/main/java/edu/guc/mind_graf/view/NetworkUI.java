@@ -51,8 +51,8 @@ public class NetworkUI extends JFrame {
 	BufferedImage nodeImg = null;
 
 	public NetworkUI() throws IOException {
-		background = ImageIO.read(new File("src/resources/images/background.jpg"));
-		nodeImg = ImageIO.read(new File("src/resources/images/node.png"));
+		background = ImageIO.read(new File("src/main/resources/images/background.jpg"));
+		nodeImg = ImageIO.read(new File("src/main/resources/images/node.png"));
 		createdNodes = new HashMap<String, String>();
 		// Set up the UI
 		setTitle("Network UI");
