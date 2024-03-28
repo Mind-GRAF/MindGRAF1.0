@@ -639,7 +639,7 @@ public class PropositionNode extends Node {
         System.out.println("-------------------------\n");
         /* END - Helpful Prints */
         Scheduler.initiate();
-        String currentContextName = Controller.getCurrContext();
+        String currentContextName = Controller.getCurrContextName();
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter your desired attitude: ");
         String att = scanner.nextLine();
@@ -714,7 +714,7 @@ public class PropositionNode extends Node {
         System.out.println("-------------------------");
         /* END - Helpful Prints */
         Scheduler.initiate();
-        String currentContextName = Controller.getCurrContext();
+        String currentContextName = Controller.getCurrContextName();
 
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter your desired attitude: ");

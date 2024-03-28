@@ -11,6 +11,11 @@ public class Context {
     private String name;
     private Hashtable<Integer, BitSet> AttitudesBitset;
 
+    
+    public Context(String name, Hashtable<Integer, String> attitudeNames){
+        this.name=name;
+        //TODO Wael: set the attitude names
+    }
     public Integer getPropositionAttitude(Integer prop) {
 
         // loop through all the Integer keys of attitudesBitset
@@ -24,8 +29,12 @@ public class Context {
         throw new RuntimeException("PropositionNode is not in any attitude");
     }
     
-    public PropositionNodeSet getAllPropositionsInAnAttitude(int attitude) {
-        return this.attitudes.get(attitude);
+    public String getName() {
+        return name;
     }
+    
+//    public PropositionNodeSet getAllPropositionsInAnAttitude(int attitude) {
+//        return this.attitudes.get(attitude);
+//    }
 
 }
