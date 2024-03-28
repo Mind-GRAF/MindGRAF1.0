@@ -1,0 +1,85 @@
+/* ArithmeticExpression.jj */
+
+options {
+  // Generate the parser in a single class
+  static = true;
+}
+
+// Define the parser class
+PARSER_BEGIN(ArithmeticParser)
+public class ArithmeticParser {
+  public static void main(String[] args) throws ParseException {
+    // Instantiate the parser
+    ArithmeticParser parser = new ArithmeticParser(System.in);
+    
+    try {
+      // Start parsing
+      parser.Start();
+      System.out.println("Parsing successful!");
+    } catch (ParseException e) {
+      // Handle parsing errors
+      System.err.println("Parsing failed: " + e.getMessage());
+    }
+  }
+}
+PARSER_END(ArithmeticParser)
+
+// Define tokens
+SKIP:  { " " | "\t" | "\n" | "\r"}
+TOKEN :
+{
+  <NUMBER: (["0"-"9"])+>
+| <PLUS: "+">
+| <MINUS: "-">
+| <TIMES: "*">
+| <DIVIDE: "/">
+| <LPAREN: "(">
+| <RPAREN: ")">
+| <PRINT: "print">
+|< STRING:"\"" (~["\""])* "\"" >
+| <ADD: "ADD">
+
+}
+
+// Define the grammar
+void Start() :
+{}
+{
+  Command()
+}
+
+void Expression() :
+{}
+{
+  Term() ( "+" Term() | "-" Term() )*
+}
+
+void Term() :
+{}
+{
+  Factor() ( "" Factor() | "/" Factor() )
+}
+
+void Factor() :
+{}
+{
+  <NUMBER>
+| <LPAREN> Expression() <RPAREN>
+}
+
+void Command() throws ParseException :
+{
+    Token stringToken;
+}
+{
+    <ADD>
+    stringToken = <STRING>
+    // Execute action to print the string
+}
+
+
+void StringLiteral() :
+{}
+{
+    <STRING>
+}
