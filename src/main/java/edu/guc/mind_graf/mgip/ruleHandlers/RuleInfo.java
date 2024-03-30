@@ -3,6 +3,7 @@ package edu.guc.mind_graf.mgip.ruleHandlers;
 import java.util.Map;
 
 import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.nodes.FlagNode;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.set.FlagNodeSet;
 
@@ -79,20 +80,34 @@ public class RuleInfo {
         return true;
     }
 
+
+    // not handling the case of different signs (if i got reports of  the same substitution I'm assuming it's the same sign; otherwise, BR would've handled it)
     public RuleInfo combine(RuleInfo r) {
         if (!isCompatible(r))
             return null;
-        if(!this.fns.disjoint(r.getFns())){
-            
-        }
         int resPcount = this.pcount + r.getPcount();
         int resNcount = this.ncount + r.getNcount();
+        // if disjoint loop wouldn't start so checking if disjoint's useless
+        FlagNodeSet intersection = this.fns.intersection(r.getFns());
+        // if a node exists in both then it was counted twice, we want to count it once
+        for(FlagNode fn : intersection.getFlagNodes()){
+            if(fn.isFlag())
+                resPcount--;
+            else
+                resNcount--;
+        }
+        
         Substitutions resSubs = new Substitutions();
         resSubs.addSubs(this.subs);
-        resSubs.addSubs(r.getSubs()); //counting on that if the subs are not compatible, the method will not be called and that adding overwrites repeated nodes
+        resSubs.addSubs(r.getSubs()); //counting on that if the subs are not compatible, the method will not be called and that adding overwrites repeated nodes ==> a variable wouldn't exist twice in two different nodes
         FlagNodeSet resFns = this.fns.combine(r.getFns());
         RuleInfo result = new RuleInfo(resPcount, resNcount, resSubs, resFns);
         return result;
+    }
+
+    public boolean equals(Object o) {
+        RuleInfo ri = (RuleInfo) o;
+        return this.subs.equals(ri.getSubs()) && this.fns.equals(ri.getFns()) && this.pcount == ri.getPcount() && this.ncount == ri.getNcount();
     }
 
 }

@@ -6,10 +6,18 @@ public class Singleton extends SIndex {
 
     HashMap<Integer, RuleInfo> ruleInfoMap;
 
+    public Singleton() {
+        ruleInfoMap = new HashMap<>();
+    }
+
     @Override
-    protected RuleInfo insertIntoMap(RuleInfo ri, int hash) {
+    public RuleInfo insertIntoMap(RuleInfo ri, int hash) {
         ruleInfoMap.put(hash, ruleInfoMap.getOrDefault(hash, new RuleInfo()).combine(ri));
         return ruleInfoMap.get(hash);
+    }
+
+    public HashMap<Integer, RuleInfo> getRuleInfoMap() {
+        return ruleInfoMap;
     }
 
 }

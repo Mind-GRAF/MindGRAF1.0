@@ -59,6 +59,6 @@ public class FlagNodeSet{
         FlagNodeSet newFns = new FlagNodeSet();
         flagNodes.stream().filter(fn -> fns.contains(fn)).forEach(fn -> newFns.addFlagNode(fn));
         return newFns;
-    } // should retuen a flag node set of the common flag nodes between the two sets
+    } // should return a flag node set of the common flag nodes between the two sets
 
 }
