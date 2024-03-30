@@ -1,6 +1,7 @@
 package edu.guc.mind_graf.mgip.ruleHandlers;
 
 import java.util.Map;
+import java.util.Objects;
 
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.nodes.FlagNode;
@@ -13,7 +14,8 @@ public class RuleInfo {
     private int ncount;
     private Substitutions subs;
     private FlagNodeSet fns;
-    //dont have inference type since it should always be backward, will revise this if needed
+    // dont have inference type since it should always be backward, will revise this
+    // if needed
 
     public RuleInfo() {
         pcount = 0;
@@ -80,8 +82,9 @@ public class RuleInfo {
         return true;
     }
 
-
-    // not handling the case of different signs (if i got reports of  the same substitution I'm assuming it's the same sign; otherwise, BR would've handled it)
+    // not handling the case of different signs (if i got reports of the same
+    // substitution I'm assuming it's the same sign; otherwise, BR would've handled
+    // it)
     public RuleInfo combine(RuleInfo r) {
         if (!isCompatible(r))
             return null;
@@ -90,24 +93,35 @@ public class RuleInfo {
         // if disjoint loop wouldn't start so checking if disjoint's useless
         FlagNodeSet intersection = this.fns.intersection(r.getFns());
         // if a node exists in both then it was counted twice, we want to count it once
-        for(FlagNode fn : intersection.getFlagNodes()){
-            if(fn.isFlag())
+        for (FlagNode fn : intersection.getFlagNodes()) {
+            if (fn.isFlag())
                 resPcount--;
             else
                 resNcount--;
         }
-        
+
         Substitutions resSubs = new Substitutions();
         resSubs.addSubs(this.subs);
-        resSubs.addSubs(r.getSubs()); //counting on that if the subs are not compatible, the method will not be called and that adding overwrites repeated nodes ==> a variable wouldn't exist twice in two different nodes
+        resSubs.addSubs(r.getSubs()); // counting on that if the subs are not compatible, the method will not be
+                                      // called and that adding overwrites repeated nodes ==> a variable wouldn't
+                                      // exist twice in two different nodes
         FlagNodeSet resFns = this.fns.combine(r.getFns());
         RuleInfo result = new RuleInfo(resPcount, resNcount, resSubs, resFns);
         return result;
     }
 
-    public boolean equals(Object o) {
-        RuleInfo ri = (RuleInfo) o;
-        return this.subs.equals(ri.getSubs()) && this.fns.equals(ri.getFns()) && this.pcount == ri.getPcount() && this.ncount == ri.getNcount();
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        RuleInfo ri = (RuleInfo) obj;
+        return this.pcount == ri.getPcount() &&
+           this.ncount == ri.getNcount() &&
+           this.subs.equals(ri.getSubs())
+           && this.fns.equals(ri.getFns());
     }
 
 }

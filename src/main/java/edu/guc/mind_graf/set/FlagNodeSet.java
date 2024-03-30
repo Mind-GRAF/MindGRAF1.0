@@ -61,4 +61,19 @@ public class FlagNodeSet{
         return newFns;
     } // should return a flag node set of the common flag nodes between the two sets
 
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof FlagNodeSet){
+            FlagNodeSet fns = (FlagNodeSet) obj;
+            if(flagNodes.size() != fns.size())
+                return false;
+            for(FlagNode fn : flagNodes){
+                if(!fns.contains(fn))
+                    return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
 }

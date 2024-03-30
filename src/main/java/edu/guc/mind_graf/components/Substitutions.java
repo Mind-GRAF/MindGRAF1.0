@@ -123,4 +123,20 @@ public class Substitutions {
     public void setMap(Map<Node, Node> map) {
         this.map = map;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Substitutions) {
+            Substitutions other = (Substitutions) obj;
+            if (map.size() != other.size())
+                return false; 
+            for(Node var : map.keySet()) {
+                if (!other.contains(var) || !other.get(var).equals(map.get(var))) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
 }
