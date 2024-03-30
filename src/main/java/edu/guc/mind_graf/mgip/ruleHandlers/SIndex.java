@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.exceptions.InvalidRuleInfoException;
 import edu.guc.mind_graf.nodes.Node;
 
@@ -26,26 +27,22 @@ public abstract class SIndex extends RuleInfoHandler {
         this.commonVariables = commonVariables;
     }
 
-    protected int customHash(ArrayList<String> set) {
-        Collections.sort(set); // Sort the strings
-        return Objects.hash(set.toArray());
+    protected int customHash(Substitutions subs) {
+        int[] orderedArray = new int[commonVariables.size()];
+        int index = 0;
+        for(Node var : commonVariables){
+            orderedArray[index++] = subs.get(var).getId();
+        }
+        return Objects.hash(orderedArray);
     }
 
     @Override
     public void insertVariableRI(RuleInfo ri) throws InvalidRuleInfoException {
-        ArrayList<String> key = new ArrayList<>();
-        for(Node node : commonVariables){
-            String value = ri.getSubs().get(node).toString();
-            if(value != null)
-                key.add(value);
-            else
-                throw new InvalidRuleInfoException("Common Substitution not found in RuleInfo");
-        }
-        int hash = customHash(key);
+        int hash = customHash(ri.getSubs());
         insertIntoMap(ri, hash);
     }
 
-    protected abstract RuleInfo insertIntoMap(RuleInfo ri, int hash);
+    protected abstract void insertIntoMap(RuleInfo ri, int hash);
 
     @Override
     public void clear() {

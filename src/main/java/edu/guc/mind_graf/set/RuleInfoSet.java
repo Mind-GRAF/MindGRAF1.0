@@ -21,9 +21,20 @@ public class RuleInfoSet {
     }
 
     public RuleInfoSet combine(RuleInfo ri) {
+        boolean combined = false;
         for (RuleInfo r : ris) {
             r.combine(ri);
         }
+        return this;
+    }
+
+    public RuleInfoSet combineAdd(RuleInfo ri) {
+        for(RuleInfo r : ris) {
+            RuleInfo combined = r.combineAdd(ri);
+            if(combined != null)
+                ris.add(combined);
+        }
+        ris.add(ri);
         return this;
     }
 

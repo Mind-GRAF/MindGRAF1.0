@@ -86,6 +86,7 @@ public class RuleInfo {
     // substitution I'm assuming it's the same sign; otherwise, BR would've handled
     // it)
     public RuleInfo combine(RuleInfo r) {
+        System.out.println("running combine" + r + " and " + this);
         if (!isCompatible(r))
             return null;
         int resPcount = this.pcount + r.getPcount();
@@ -106,8 +107,11 @@ public class RuleInfo {
                                       // called and that adding overwrites repeated nodes ==> a variable wouldn't
                                       // exist twice in two different nodes
         FlagNodeSet resFns = this.fns.combine(r.getFns());
-        RuleInfo result = new RuleInfo(resPcount, resNcount, resSubs, resFns);
-        return result;
+        this.pcount = resPcount;
+        this.ncount = resNcount;
+        this.subs = resSubs;
+        this.fns = resFns;
+        return this;
     }
 
     public boolean equals(Object obj) {
@@ -124,4 +128,20 @@ public class RuleInfo {
            && this.fns.equals(ri.getFns());
     }
 
+    public RuleInfo combineAdd(RuleInfo ri) {
+        RuleInfo res = new RuleInfo();
+        res.combine(this);
+        res.combine(ri);
+        return res;
+    } //combines in new RuleInfo
+
+    @Override
+    public String toString() {
+        return "RuleInfo{" +
+                "pcount=" + pcount +
+                ", ncount=" + ncount +
+                ", subs=" + subs +
+                ", fns=" + fns +
+                '}';
+    }
 }

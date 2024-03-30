@@ -13,11 +13,9 @@ public class Linear extends SIndex{
     }
 
     @Override
-    protected RuleInfo insertIntoMap(RuleInfo ri, int hash) {
+    protected void insertIntoMap(RuleInfo ri, int hash) {
         //needs editing
-        RuleInfo res = new RuleInfo();
-        ruleInfoMap.put(hash, ruleInfoMap.getOrDefault(hash, new RuleInfoSet()).combine(ri));
-        return res; 
+        ruleInfoMap.put(hash, ruleInfoMap.getOrDefault(hash, new RuleInfoSet()).combineAdd(ri));
         
     }
     

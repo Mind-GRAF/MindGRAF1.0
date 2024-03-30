@@ -25,7 +25,9 @@ class SingletonTest {
         RuleInfo ri = new RuleInfo();
         int hash = 1;
 
-        RuleInfo result = singleton.insertIntoMap(ri, hash);
+        singleton.insertIntoMap(ri, hash);
+
+        RuleInfo result = singleton.getRuleInfoMap().get(hash);
 
         assertNotNull(result);
         assertEquals(ri, result);

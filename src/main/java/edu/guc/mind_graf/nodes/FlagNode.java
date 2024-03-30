@@ -42,5 +42,13 @@ public class FlagNode {
         // maybe throw exception here if nodes equal but flags different
         return this.node.equals(fn.getNode());
     }
-    
+
+    @Override
+    public String toString() {
+        return "FlagNode{" +
+                "node=" + node +
+                ", flag=" + flag +
+                ", support=" + support +
+                '}';
+    }
 }

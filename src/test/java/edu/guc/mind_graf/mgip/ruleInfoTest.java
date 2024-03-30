@@ -56,7 +56,8 @@ class RuleInfoTest {
         assertEquals(3, combinedRuleInfo.getSubs().size());
         assertNotNull(combinedRuleInfo.getFns());
 
-        subs1.add(X, Nemo);
+        ruleInfo1.getSubs().add(X, Nemo);
+
         combinedRuleInfo = ruleInfo1.combine(ruleInfo2);
         assertNull(combinedRuleInfo);
 

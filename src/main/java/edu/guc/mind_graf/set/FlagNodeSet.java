@@ -76,4 +76,10 @@ public class FlagNodeSet{
         return false;
     }
 
+    @Override
+    public String toString() {
+        return "FlagNodeSet{" +
+                "flagNodes=" + flagNodes +
+                '}';
+    }
 }
