@@ -48,6 +48,7 @@ public class Network {
 		relations = new HashMap<String, Relation>();
 		quantifiers.put("forall", "forall");
 		addBasicRelations();
+		addBasicNodes();
 	}
 
 	public void addBasicRelations() {
@@ -55,6 +56,10 @@ public class Network {
 		Network.createRelation("min", "individualnode", Adjustability.NONE, 1);
 		Network.createRelation("min", "individualnode", Adjustability.NONE, 1);
 		Network.createRelation("arg", "propositionnode", Adjustability.NONE, 1);
+	}
+
+	public void addBasicNodes(){
+
 	}
 
 	// first constructor for molecular nodes
