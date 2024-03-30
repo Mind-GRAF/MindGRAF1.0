@@ -47,8 +47,14 @@ public class Network {
 		propositionNodes = new HashMap<Integer, Node>();
 		relations = new HashMap<String, Relation>();
 		quantifiers.put("forall", "forall");
-		Relation relation = Network.createRelation("forall", "propositionnode",
-				Adjustability.EXPAND, 2);
+		addBasicRelations();
+	}
+
+	public void addBasicRelations() {
+		Network.createRelation("forall", "propositionnode", Adjustability.EXPAND, 2);
+		Network.createRelation("min", "individualnode", Adjustability.NONE, 1);
+		Network.createRelation("min", "individualnode", Adjustability.NONE, 1);
+		Network.createRelation("arg", "propositionnode", Adjustability.NONE, 1);
 	}
 
 	// first constructor for molecular nodes
@@ -67,7 +73,6 @@ public class Network {
 
 			switch (SemanticType.toLowerCase()) {
 				case "propositionnode":
-
 					node = new PropositionNode(downCableSet);
 					propositionNodes.put(node.getId(), node);
 					break;

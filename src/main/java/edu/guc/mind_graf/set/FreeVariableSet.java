@@ -3,7 +3,6 @@ package edu.guc.mind_graf.set;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Vector;
 import edu.guc.mind_graf.nodes.Node;
 
 public class FreeVariableSet implements Iterable<Node>, Serializable {
@@ -11,7 +10,6 @@ public class FreeVariableSet implements Iterable<Node>, Serializable {
 
     public FreeVariableSet() {
         freeVariables = new HashMap<String, Node>();
-        // TODO Auto-generated constructor stub
     }
 
     public void add(Node n) {
@@ -23,8 +21,8 @@ public class FreeVariableSet implements Iterable<Node>, Serializable {
         freeVariables.remove(n.getName());
     }
 
-    public void get(String name) {
-        freeVariables.get(name);
+    public Node get(String name) {
+        return freeVariables.get(name);
     }
 
     public void setFreeVariables(HashMap<String, Node> freeVariables) {
@@ -33,8 +31,7 @@ public class FreeVariableSet implements Iterable<Node>, Serializable {
 
     @Override
     public Iterator<Node> iterator() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'iterator'");
+        return freeVariables.values().iterator();
     }
 
 }

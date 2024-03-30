@@ -1,4 +1,4 @@
-package edu.guc.mind_graf.mgip;
+package edu.guc.mind_graf.mgip.reports;
 
 import java.util.ArrayList;
 import java.util.Arrays;
