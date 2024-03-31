@@ -1,6 +1,5 @@
 package edu.guc.mind_graf.mgip.ruleHandlers;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,18 +12,26 @@ import edu.guc.mind_graf.nodes.Node;
 
 public abstract class SIndex extends RuleInfoHandler {
 
-    private HashMap<Integer, Object> ruleInfoMap;
-
-    private Set<Node> commonVariables; 
+    private HashSet<Node> commonVariables;
 
     public SIndex() {
-        ruleInfoMap = new HashMap<>();
         commonVariables = new HashSet<>();
     }
 
-    public SIndex(Set<Node> commonVariables) {
-        ruleInfoMap = new HashMap<>();
+    public SIndex(HashSet<Node> commonVariables) {
         this.commonVariables = commonVariables;
+    }
+
+    public Set<Node> getCommonVariables() {
+        return Collections.unmodifiableSet(commonVariables);
+    }
+
+    public void setCommonVariables(HashSet<Node> commonVariables) {
+        this.commonVariables = commonVariables;
+    }
+
+    public SIndex createSIndex(HashSet<Node> commonVariables) {
+        return new Linear(commonVariables);
     }
 
     protected int customHash(Substitutions subs) {
@@ -33,7 +40,9 @@ public abstract class SIndex extends RuleInfoHandler {
         for(Node var : commonVariables){
             orderedArray[index++] = subs.get(var).getId();
         }
-        return Objects.hash(orderedArray);
+        //assuming ids wont be over 100
+        int hash = orderedArray[0] + orderedArray[1] * 100 + orderedArray[2] * 10000;
+        return hash;
     }
 
     @Override
@@ -42,11 +51,11 @@ public abstract class SIndex extends RuleInfoHandler {
         insertIntoMap(ri, hash);
     }
 
-    protected abstract void insertIntoMap(RuleInfo ri, int hash);
+    public abstract void insertIntoMap(RuleInfo ri, int hash);
 
     @Override
     public void clear() {
-        ruleInfoMap.clear();
+        commonVariables.clear();
     }
 
 }

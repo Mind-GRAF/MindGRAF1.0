@@ -42,4 +42,7 @@ public class RuleInfoSet {
         ris.clear();
     }
 
+    public int size() {
+        return ris.size();
+    }
 }

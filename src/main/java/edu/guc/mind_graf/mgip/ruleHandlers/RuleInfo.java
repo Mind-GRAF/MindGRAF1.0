@@ -86,7 +86,6 @@ public class RuleInfo {
     // substitution I'm assuming it's the same sign; otherwise, BR would've handled
     // it)
     public RuleInfo combine(RuleInfo r) {
-        System.out.println("running combine" + r + " and " + this);
         if (!isCompatible(r))
             return null;
         int resPcount = this.pcount + r.getPcount();
@@ -130,8 +129,8 @@ public class RuleInfo {
 
     public RuleInfo combineAdd(RuleInfo ri) {
         RuleInfo res = new RuleInfo();
-        res.combine(this);
-        res.combine(ri);
+        res = res.combine(this);
+        res = res.combine(ri);
         return res;
     } //combines in new RuleInfo
 

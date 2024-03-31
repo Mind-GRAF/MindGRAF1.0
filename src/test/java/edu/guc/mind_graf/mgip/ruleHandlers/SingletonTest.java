@@ -1,4 +1,4 @@
-package edu.guc.mind_graf.mgip;
+package edu.guc.mind_graf.mgip.ruleHandlers;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
