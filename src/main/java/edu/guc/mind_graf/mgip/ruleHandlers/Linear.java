@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import edu.guc.mind_graf.nodes.Node;
+import edu.guc.mind_graf.set.NodeSet;
+import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
 
 public class Linear extends SIndex{
@@ -21,7 +23,7 @@ public class Linear extends SIndex{
         ruleInfoMap = new HashMap<>();
     }
 
-    public Linear(HashSet<Node> commonVariables) {
+    public Linear(NodeSet commonVariables) {
         super(commonVariables);
         ruleInfoMap = new HashMap<>();
     }

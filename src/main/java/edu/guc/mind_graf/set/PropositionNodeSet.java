@@ -9,7 +9,7 @@ import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.PropositionNode;
 
-public class PropositionNodeSet implements Iterable<PropositionNode> {
+public class PropositionNodeSet implements Iterable<PropositionNode>{
 
     private HashSet<Integer> nodes;
     private boolean isFinal;
@@ -231,6 +231,23 @@ public class PropositionNodeSet implements Iterable<PropositionNode> {
     public Iterator<PropositionNode> iterator() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'iterator'");
+    }
+
+    public NodeSet getCommonVariables(){
+        NodeSet commonVariables = new NodeSet();
+        if(this.isEmpty()){
+            return commonVariables;
+        }
+        boolean first = true;
+        for (Node n : this.getNodes()){
+            if(first){
+                commonVariables = n.getFreeVariables();
+                first = false;
+            }
+            else
+                commonVariables = commonVariables.intersection(n.getFreeVariables());
+        }
+        return commonVariables;
     }
 
 }

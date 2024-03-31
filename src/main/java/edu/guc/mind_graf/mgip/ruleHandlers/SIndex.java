@@ -1,36 +1,33 @@
 package edu.guc.mind_graf.mgip.ruleHandlers;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.exceptions.InvalidRuleInfoException;
 import edu.guc.mind_graf.nodes.Node;
+import edu.guc.mind_graf.set.NodeSet;
+import edu.guc.mind_graf.set.PropositionNodeSet;
 
 public abstract class SIndex extends RuleInfoHandler {
 
-    private HashSet<Node> commonVariables;
+    private NodeSet commonVariables;
 
     public SIndex() {
-        commonVariables = new HashSet<>();
+        commonVariables = new NodeSet();
     }
 
-    public SIndex(HashSet<Node> commonVariables) {
+    public SIndex(NodeSet commonVariables) {
         this.commonVariables = commonVariables;
     }
 
-    public Set<Node> getCommonVariables() {
-        return Collections.unmodifiableSet(commonVariables);
+    public NodeSet getCommonVariables() {
+        return commonVariables;
     }
 
-    public void setCommonVariables(HashSet<Node> commonVariables) {
+    public void setCommonVariables(NodeSet commonVariables) {
         this.commonVariables = commonVariables;
     }
 
-    public SIndex createSIndex(HashSet<Node> commonVariables) {
+    public SIndex createSIndex(PropositionNodeSet antecedents) {
+        NodeSet commonVariables = antecedents.getCommonVariables();
         return new Linear(commonVariables);
     }
 
@@ -41,8 +38,7 @@ public abstract class SIndex extends RuleInfoHandler {
             orderedArray[index++] = subs.get(var).getId();
         }
         //assuming ids wont be over 100
-        int hash = orderedArray[0] + orderedArray[1] * 100 + orderedArray[2] * 10000;
-        return hash;
+        return orderedArray[0] + orderedArray[1] * 100 + orderedArray[2] * 10000;
     }
 
     @Override

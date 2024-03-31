@@ -137,4 +137,9 @@ public class NodeSet implements Iterable<Node> {
     public Iterator<Node> iterator() {
         return nodes.values().iterator();
     }
+
+    public void clear() {
+        if(!isFinal)
+            nodes.clear();
+    }
 }
