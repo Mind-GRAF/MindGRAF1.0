@@ -83,3 +83,6 @@ fabric.properties
 *.iml
 *.vcxproj
 *.sln
+
+# javac compilation
+*.class
