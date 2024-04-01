@@ -1,11 +1,14 @@
 package edu.guc.mind_graf.mgip.ruleHandlers;
 
+import edu.guc.mind_graf.cables.DownCable;
+import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.set.FlagNodeSet;
 import edu.guc.mind_graf.set.NodeSet;
+import edu.guc.mind_graf.set.PropositionNodeSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -19,16 +22,18 @@ class RuleHandlerTest {
     private SIndex lSIndex;
     private RuleInfo ruleInfo1;
     private RuleInfo ruleInfo2;
-    private RuleInfo ruleInfo3;
+    Node X;
+    Node Y;
+    Node Z;
 
     @BeforeEach
     void setUp() throws NoSuchTypeException {
 
         Network network = new Network();
 
-        Node X = Network.createVariableNode("X", "propositionnode");
-        Node Y = Network.createVariableNode("Y", "propositionnode");
-        Node Z = Network.createVariableNode("Z", "propositionnode");
+        X = Network.createVariableNode("X", "propositionnode");
+        Y = Network.createVariableNode("Y", "propositionnode");
+        Z = Network.createVariableNode("Z", "propositionnode");
 
         Node Nemo = Network.createNode("nemo", "propositionnode");
         Node Marlin = Network.createNode("marlin", "propositionnode");
@@ -93,8 +98,15 @@ class RuleHandlerTest {
     }
 
     @Test
-    void createSIndex() {
-
+    void createSIndex() throws NoSuchTypeException {
+        NodeSet args = new NodeSet();
+        args.add(X);
+        args.add(Y);
+        args.add(Z);
+        DownCable cable = new DownCable(Network.getRelations().get("arg"), args);
+        Node M1 = Network.createNode("propositionNode", new DownCableSet(cable));
+        SIndex result = sSIndex.createSIndex(new PropositionNodeSet(M1));
+        assertEquals(sSIndex.getCommonVariables(), result.getCommonVariables());
     }
 
     @Test
