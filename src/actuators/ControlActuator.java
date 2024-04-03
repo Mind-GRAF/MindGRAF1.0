@@ -3,5 +3,5 @@ package actuators;
 import nodes.ActNode;
 
 public interface ControlActuator {
-    void actOnNode(ActNode node, int AttitudeID);
+    void actOnNode(ActNode node);
 }

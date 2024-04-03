@@ -8,12 +8,10 @@ import nodes.ActNode;
 
 public class SNSequenceActuator implements ControlActuator{
 
-    //hwa ana mehtag akhod attitude id ka parameter?
-
     private static SNSequenceActuator actuator;
 
     @Override
-    public void actOnNode(ActNode node, int AttitudeID) {
+    public void actOnNode(ActNode node) {
         Stack<ActNode> acts = new Stack<>();
         DownCable next = node.getDownCableSet().get("obj" + 1);
         ActNode act;

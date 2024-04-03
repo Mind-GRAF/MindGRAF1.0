@@ -11,7 +11,7 @@ public class DoAllActuator implements ControlActuator{
     private static DoAllActuator actuator;
 
     @Override
-    public void actOnNode(ActNode node, int AttitudeID) {
+    public void actOnNode(ActNode node) {
         Random rand = new Random();
 		NodeSet acts = node.getDownCableSet().get("obj").getNodeSet();
 		NodeSet actsCopy = new NodeSet();

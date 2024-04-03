@@ -11,7 +11,7 @@ public class DoOneActuator implements ControlActuator{
     private static DoOneActuator actuator;
 
     @Override
-    public void actOnNode(ActNode node, int AttitudeID) {
+    public void actOnNode(ActNode node) {
         Random rand = new Random();
 		NodeSet possibleActs = node.getDownCableSet().get("obj").getNodeSet();
 		int actIndex = rand.nextInt(possibleActs.size());
