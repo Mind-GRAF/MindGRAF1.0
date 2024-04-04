@@ -1,0 +1,99 @@
+/* ArithmeticExpression.jj */
+
+options {
+  // Generate the parser in a single class
+  static = false;
+}
+
+// Define the parser class
+PARSER_BEGIN(MindGRAF_Parser)
+package edu.guc.mind_graf.parser;
+import edu.guc.mind_graf.network.Controller;
+import java.util.Hashtable;
+
+public class MindGRAF_Parser {
+      Controller controller = new Controller();
+  public static void main(String[] args) throws ParseException {
+    // Instantiate the parser
+    MindGRAF_Parser parser = new MindGRAF_Parser(System.in);
+    try {
+      // Start parsing
+      parser.Start();
+
+      System.out.println("Parsing successful!");
+    } catch (ParseException e) {
+      // Handle parsing errors
+      System.err.println("Parsing failed: " + e.getMessage());
+    }
+  }
+}
+PARSER_END(MindGRAF_Parser)
+
+// Define tokens
+SKIP:  {"\t" | "\n" | "\r"}
+TOKEN :
+{
+  <NUMBER: (["0"-"9"])+>
+| <PLUS: "+">
+| <MINUS: "-">
+| <TIMES: "*">
+| <DIVIDE: "/">
+| <LPAREN: "(">
+| <RPAREN: ")">
+| <PRINT: "print">
+| <currContext: "get-curr-context">
+| <ADD: "ADD">
+| <SPACE:" ">
+| <GetAttitudeNames: "get-attitudes">
+
+}
+
+// Define the grammar
+void Start() :
+{}
+{
+  Command()
+}
+
+void Expression() :
+{}
+{
+  Term() ( "+" Term() | "-" Term() )*
+}
+
+void Term() :
+{}
+{
+  Factor() ( "" Factor() | "/" Factor() )
+}
+
+void Factor() :
+{}
+{
+  <NUMBER>
+| <LPAREN> Expression() <RPAREN>
+}
+
+void Command() throws ParseException :
+{
+    Token stringToken;
+}
+{
+    (
+        <currContext>
+        { String s = Controller.getCurrContext();
+        System.out.println(s);}
+    |
+        <GetAttitudeNames>
+        { 
+            Hashtable<Integer, String> attitudeNames = Controller.getAttitudeNames();
+            System.out.println("List of attitude names:");
+
+         // Iterate over the attitude names and print them
+            for (String attitudeName : attitudeNames.values()) {
+               System.out.println(attitudeName);
+            }
+        }
+    )
+}
+
