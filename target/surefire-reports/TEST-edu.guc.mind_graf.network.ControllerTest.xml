@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="edu.guc.mind_graf.revision.RevisionTest" time="0.132" tests="1" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="edu.guc.mind_graf.network.ControllerTest" time="0.05" tests="1" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="21"/>
     <property name="sun.jnu.encoding" value="UTF-8"/>
@@ -12,7 +12,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="US"/>
     <property name="sun.boot.library.path" value="/home/nighthawk/.jdks/openjdk-21.0.1/lib"/>
-    <property name="sun.java.command" value="/home/nighthawk/Programming/thesis/MindGRAF1.0/target/surefire/surefirebooter-20240330135532896_3.jar /home/nighthawk/Programming/thesis/MindGRAF1.0/target/surefire 2024-03-30T13-55-32_737-jvmRun1 surefire-20240330135532896_1tmp surefire_0-20240330135532896_2tmp"/>
+    <property name="sun.java.command" value="/home/nighthawk/Programming/thesis/MindGRAF1.0/target/surefire/surefirebooter-20240328101416886_3.jar /home/nighthawk/Programming/thesis/MindGRAF1.0/target/surefire 2024-03-28T10-14-16_761-jvmRun1 surefire-20240328101416886_1tmp surefire_0-20240328101416886_2tmp"/>
     <property name="jdk.debug" value="release"/>
     <property name="surefire.test.class.path" value="/home/nighthawk/Programming/thesis/MindGRAF1.0/target/test-classes:/home/nighthawk/Programming/thesis/MindGRAF1.0/target/classes:/home/nighthawk/.m2/repository/org/junit/jupiter/junit-jupiter/5.10.2/junit-jupiter-5.10.2.jar:/home/nighthawk/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.10.2/junit-jupiter-api-5.10.2.jar:/home/nighthawk/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar:/home/nighthawk/.m2/repository/org/junit/platform/junit-platform-commons/1.10.2/junit-platform-commons-1.10.2.jar:/home/nighthawk/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/home/nighthawk/.m2/repository/org/junit/jupiter/junit-jupiter-params/5.10.2/junit-jupiter-params-5.10.2.jar:/home/nighthawk/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.10.2/junit-jupiter-engine-5.10.2.jar:/home/nighthawk/.m2/repository/org/junit/platform/junit-platform-engine/1.10.2/junit-platform-engine-1.10.2.jar:"/>
     <property name="sun.cpu.endian" value="little"/>
@@ -27,7 +27,7 @@
     <property name="line.separator" value="&#10;"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
-    <property name="surefire.real.class.path" value="/home/nighthawk/Programming/thesis/MindGRAF1.0/target/surefire/surefirebooter-20240330135532896_3.jar"/>
+    <property name="surefire.real.class.path" value="/home/nighthawk/Programming/thesis/MindGRAF1.0/target/surefire/surefirebooter-20240328101416886_3.jar"/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="java.runtime.version" value="21.0.1+12-29"/>
     <property name="user.name" value="nighthawk"/>
@@ -54,8 +54,10 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="65.0"/>
   </properties>
-  <testcase name="test1" classname="edu.guc.mind_graf.revision.RevisionTest" time="0.079">
-    <system-out><![CDATA[tests working
+  <testcase name="test1" classname="edu.guc.mind_graf.network.ControllerTest" time="0.046">
+    <system-out><![CDATA[Testing Controller
+Test 1 | uvbr false
+{clown-fish={clown-fish, BASE}, nemo={nemo, BASE}, aquatic={aquatic, BASE}}
 ]]></system-out>
   </testcase>
 </testsuite>

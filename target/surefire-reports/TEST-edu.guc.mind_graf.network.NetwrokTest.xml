@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="edu.guc.mind_graf.revision.RevisionTest" time="0.132" tests="1" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="edu.guc.mind_graf.network.NetwrokTest" time="0.057" tests="1" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="21"/>
     <property name="sun.jnu.encoding" value="UTF-8"/>
@@ -54,8 +54,18 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="65.0"/>
   </properties>
-  <testcase name="test1" classname="edu.guc.mind_graf.revision.RevisionTest" time="0.079">
-    <system-out><![CDATA[tests working
+  <testcase name="test1" classname="edu.guc.mind_graf.network.NetwrokTest" time="0.054">
+    <system-out><![CDATA[Testing Network
+Testing example 1: Who is Aquatic
+[]
+[]
+{nemo, BASE}
+{clown-fish, BASE}
+{aquatic, BASE}
+{X, VARIABLE}
+{M0, MOLECULAR, [downCable : {relation: mem, NodeSet :[nemo]}, downCable : {relation: class, NodeSet :[clown-fish]}]}
+{M1, MOLECULAR, [downCable : {relation: mem, NodeSet :[X]}, downCable : {relation: class, NodeSet :[clown-fish]}]}
+
 ]]></system-out>
   </testcase>
 </testsuite>

@@ -1,22 +1,28 @@
-package edu.guc.mind_graf.network;
+package edu.guc.mind_graf.context;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.Map;
 
-import edu.guc.mind_graf.context.Context;
+import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.set.ContextSet;
+import edu.guc.mind_graf.set.Set;
 
-public class Controller {
+public class ContextController {
     private static Context currContext;
     private static ContextSet contextSet;
-    private static Hashtable<Integer, String> attitudeNames = new Hashtable<Integer, String>();
+    private static Set<Integer, String> attitudeNames = new Set<>();
     private static Network network;
     private static boolean uvbrEnabled;
     
-    public static void setUp(Hashtable<Integer, String> attitudeNames, boolean uvbrEnabled){
+    
+    
+    private static ArrayList<ArrayList<Integer>> consistentAttitudes;
+    
+    public static void setUp(Set<Integer, String> attitudeNames, ArrayList<ArrayList<Integer>> consistentAttitudes, boolean uvbrEnabled){
         network = new Network();
-        Controller.attitudeNames = attitudeNames;
-        Controller.uvbrEnabled = uvbrEnabled;
+        ContextController.attitudeNames = attitudeNames;
+        ContextController.uvbrEnabled = uvbrEnabled;
+        ContextController.consistentAttitudes = consistentAttitudes;
         contextSet = new ContextSet();
         
     }
@@ -25,7 +31,7 @@ public class Controller {
         if(c == null){
             throw new RuntimeException("no such context exists");
         }
-        Controller.currContext = c;
+        ContextController.currContext = c;
     }
     
     public String getPropositionAttitudeName(Integer prop, Context c) {
@@ -49,22 +55,23 @@ public class Controller {
     public static ContextSet getContextSet() {
         return contextSet;
     }
-
-//    public static void setContextSet(ContextSet contextSet) {
-//        Controller.contextSet = contextSet;
-//    }
+    
+    public static ArrayList<ArrayList<Integer>> getConsistentAttitudes() {
+        return consistentAttitudes;
+    }
     
     public static void createNewContext(String name){
         if(contextSet.contains(name)){
             throw new RuntimeException("context Already Exists");
         }
-        Context c = new Context(name, Controller.attitudeNames);
+        Context c = new Context(name, ContextController.attitudeNames);
         contextSet.add(name,c);
     }
 
-    public static Hashtable<Integer, String> getAttitudeNames() {
+    public static Set<Integer, String> getAttitudeNames() {
         return attitudeNames;
     }
+
     
 
 }

@@ -4,22 +4,23 @@ import java.util.BitSet;
 import java.util.Hashtable;
 
 import edu.guc.mind_graf.set.PropositionNodeSet;
+import edu.guc.mind_graf.set.Set;
 
 public class Context {
 
     private Hashtable<Integer, PropositionNodeSet> attitudes;
     private String name;
-    private Hashtable<Integer, BitSet> AttitudesBitset;
+    private Set<Integer, BitSet> AttitudesBitset;
 
     
-    public Context(String name, Hashtable<Integer, String> attitudeNames){
+    public Context(String name, Set<Integer, String> attitudeNames){
         this.name=name;
         //TODO Wael: set the attitude names
     }
     public Integer getPropositionAttitude(Integer prop) {
 
         // loop through all the Integer keys of attitudesBitset
-        for (Integer key : this.AttitudesBitset.keySet()) {
+        for (Integer key : this.AttitudesBitset.getSet().keySet()) {
             // If the propositionNode is in the attitude then return the name of the
             // attitude
             if (this.AttitudesBitset.get(key).get(prop)) {

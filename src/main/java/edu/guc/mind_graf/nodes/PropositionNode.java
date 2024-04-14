@@ -14,7 +14,7 @@ import edu.guc.mind_graf.mgip.ReportType;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.matching.Match;
 import edu.guc.mind_graf.mgip.requests.*;
-import edu.guc.mind_graf.network.Controller;
+import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
@@ -639,7 +639,7 @@ public class PropositionNode extends Node {
         System.out.println("-------------------------\n");
         /* END - Helpful Prints */
         Scheduler.initiate();
-        String currentContextName = Controller.getCurrContextName();
+        String currentContextName = ContextController.getCurrContextName();
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter your desired attitude: ");
         String att = scanner.nextLine();
@@ -714,7 +714,7 @@ public class PropositionNode extends Node {
         System.out.println("-------------------------");
         /* END - Helpful Prints */
         Scheduler.initiate();
-        String currentContextName = Controller.getCurrContextName();
+        String currentContextName = ContextController.getCurrContextName();
 
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter your desired attitude: ");
