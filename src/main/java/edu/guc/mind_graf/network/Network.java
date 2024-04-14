@@ -629,59 +629,59 @@ public class Network {
 		// System.out.println(M4.substitute(substitutionArr));
 		// printNodes();
 		// =============================================================================================================
-		Node cs = createNode("cs", "propositionnode");
-		Node fun = createNode("fun", "propositionnode");
-		Node mary = createNode("mary", "propositionnode");
-		Node believe = createNode("believe", "propositionnode");
-		Node bob = createNode("bob", "propositionnode");
-		Node know = createNode("know", "propositionnode");
-
-		Relation agent = createRelation("agent", "", Adjustability.EXPAND, 2);
-		Relation act = createRelation("act", "", Adjustability.EXPAND, 2);
-		Relation obj = createRelation("obj", "", Adjustability.EXPAND, 2);
-		Relation prop = createRelation("prop", "", Adjustability.EXPAND, 2);
-
-		DownCable d1 = new DownCable(obj, new NodeSet(cs));
-		DownCable d2 = new DownCable(prop, new NodeSet(fun));
-
-		Node M1 = createNode("propositionnode", new DownCableSet(d1, d2));
-
-		DownCable d3 = new DownCable(obj, new NodeSet(M1));
-		DownCable d4 = new DownCable(act, new NodeSet(believe));
-		DownCable d5 = new DownCable(agent, new NodeSet(mary));
-
-		Node M2 = createNode("propositionnode", new DownCableSet(d3, d4, d5));
-
-		DownCable d6 = new DownCable(obj, new NodeSet(M2));
-		DownCable d7 = new DownCable(act, new NodeSet(know));
-		DownCable d8 = new DownCable(agent, new NodeSet(bob));
-
-		Node M3 = createNode("propositionnode", new DownCableSet(d6, d7, d8));
-
-		FUnitPath p1 = new FUnitPath(agent);
-		FUnitPath p2 = new FUnitPath(act);
-		FUnitPath p3 = new FUnitPath(obj);
-
-		ComposePath pCompose = new ComposePath(p2, p3);
-
-		FUnitPath pF4 = new FUnitPath(agent);
-		FUnitPath pF5 = new FUnitPath(act);
-		FUnitPath pF6 = new FUnitPath(obj);
-
-		ComposePath pCompose2 = new ComposePath(pF5, pF6);
-
-		LinkedList<Object[]> s = p3.follow(M3, new PathTrace(), new Context());
-		Path p4 = new KPlusPath(p3);
-		LinkedList<Object[]> s2 = p4.follow(M3, new PathTrace(), new Context());
-
-		for (Object[] object : s2) {
-			System.out.println(object[0]);
-		}
-
-		AndPath and = new AndPath(pCompose);
-		AndPath and2 = new AndPath(pCompose2);
-
-		NodeSet oss = new NodeSet();
+//		Node cs = createNode("cs", "propositionnode");
+//		Node fun = createNode("fun", "propositionnode");
+//		Node mary = createNode("mary", "propositionnode");
+//		Node believe = createNode("believe", "propositionnode");
+//		Node bob = createNode("bob", "propositionnode");
+//		Node know = createNode("know", "propositionnode");
+//
+//		Relation agent = createRelation("agent", "", Adjustability.EXPAND, 2);
+//		Relation act = createRelation("act", "", Adjustability.EXPAND, 2);
+//		Relation obj = createRelation("obj", "", Adjustability.EXPAND, 2);
+//		Relation prop = createRelation("prop", "", Adjustability.EXPAND, 2);
+//
+//		DownCable d1 = new DownCable(obj, new NodeSet(cs));
+//		DownCable d2 = new DownCable(prop, new NodeSet(fun));
+//
+//		Node M1 = createNode("propositionnode", new DownCableSet(d1, d2));
+//
+//		DownCable d3 = new DownCable(obj, new NodeSet(M1));
+//		DownCable d4 = new DownCable(act, new NodeSet(believe));
+//		DownCable d5 = new DownCable(agent, new NodeSet(mary));
+//
+//		Node M2 = createNode("propositionnode", new DownCableSet(d3, d4, d5));
+//
+//		DownCable d6 = new DownCable(obj, new NodeSet(M2));
+//		DownCable d7 = new DownCable(act, new NodeSet(know));
+//		DownCable d8 = new DownCable(agent, new NodeSet(bob));
+//
+//		Node M3 = createNode("propositionnode", new DownCableSet(d6, d7, d8));
+//
+//		FUnitPath p1 = new FUnitPath(agent);
+//		FUnitPath p2 = new FUnitPath(act);
+//		FUnitPath p3 = new FUnitPath(obj);
+//
+//		ComposePath pCompose = new ComposePath(p2, p3);
+//
+//		FUnitPath pF4 = new FUnitPath(agent);
+//		FUnitPath pF5 = new FUnitPath(act);
+//		FUnitPath pF6 = new FUnitPath(obj);
+//
+//		ComposePath pCompose2 = new ComposePath(pF5, pF6);
+//
+//		LinkedList<Object[]> s = p3.follow(M3, new PathTrace(), new Context());
+//		Path p4 = new KPlusPath(p3);
+//		LinkedList<Object[]> s2 = p4.follow(M3, new PathTrace(), new Context());
+//
+//		for (Object[] object : s2) {
+//			System.out.println(object[0]);
+//		}
+//
+//		AndPath and = new AndPath(pCompose);
+//		AndPath and2 = new AndPath(pCompose2);
+//
+//		NodeSet oss = new NodeSet();
 
 	}
 

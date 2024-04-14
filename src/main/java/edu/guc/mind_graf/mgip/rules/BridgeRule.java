@@ -1,8 +1,6 @@
 package edu.guc.mind_graf.mgip.rules;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.Scheduler;
@@ -16,6 +14,7 @@ import edu.guc.mind_graf.mgip.requests.MatchChannel;
 import edu.guc.mind_graf.mgip.requests.Request;
 import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
+import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.nodes.PropositionNode;
@@ -50,7 +49,7 @@ public class BridgeRule extends RuleNode {
         NodeSet argAntNodesToConsiderClose = removeAlreadyEstablishedChannels(argAntCloseToMe,
                 currentRequest,
                 unionSubs, false);
-        Context currContext = edu.guc.mind_graf.network.Controller.getContext(currentContextName);
+        Context currContext = ContextController.getContext(currentContextName);
         for (Node currentNode : argAntNodesToConsiderClose) {
             int currentNodeAttitude = currContext.getPropositionAttitude(currentNode.getId());
             Request newRequest = establishChannel(ChannelType.AntRule, currentNode, switchSubs, unionSubs,
@@ -68,7 +67,7 @@ public class BridgeRule extends RuleNode {
         NodeSet remainingAntArgNodeSet = removeAlreadyEstablishedChannels(antArgNodeSet,
                 currentRequest,
                 filterRuleSubs, false);
-        Context currContext = edu.guc.mind_graf.network.Controller.getContext(currentContext);
+        Context currContext = ContextController.getContext(currentContext);
         for (Node currentNode : remainingAntArgNodeSet) {
             int currentNodeAttitude = currContext.getPropositionAttitude(currentNode.getId());
             Request newRequest = establishChannel(ChannelType.AntRule, currentNode, switchRuleSubs, filterRuleSubs,
@@ -100,7 +99,7 @@ public class BridgeRule extends RuleNode {
                     NodeSet antArgNodesToConiderClose = removeAlreadyEstablishedChannels(antArgCloseToMe,
                             currentRequest,
                             filterRuleSubs, false);
-                    Context currContext = edu.guc.mind_graf.network.Controller.getContext(currentContext);
+                    Context currContext = ContextController.getContext(currentContext);
                     for (Node currentNode : antArgNodesToConiderClose) {
                         int currentNodeAttitude = currContext.getPropositionAttitude(currentNode.getId());
                         Request newRequest = establishChannel(ChannelType.AntRule, currentNode, switchRuleSubs,
@@ -259,7 +258,7 @@ public class BridgeRule extends RuleNode {
 
                         if (compatibilityCheck) {
                             Substitutions unionSubs = Substitutions.union(currentReportSubs, outConsChannelSubs);
-                            Context currContext = edu.guc.mind_graf.network.Controller.getContext(currentReportContextName);
+                            Context currContext = ContextController.getContext(currentReportContextName);
                             for (Node currentNode : remainingArgAntNodes) {
                                 int currentNodeAttitude = currContext.getPropositionAttitude(currentNode.getId());
                                 Request newRequest = establishChannel(ChannelType.AntRule, currentNode, switchSubs,
