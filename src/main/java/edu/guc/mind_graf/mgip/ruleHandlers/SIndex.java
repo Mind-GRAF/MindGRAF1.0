@@ -51,6 +51,16 @@ public abstract class SIndex extends RuleInfoHandler {
         return insertIntoMap(ri, hash);
     }
 
+    public RuleInfoSet insertVariableRI(RuleInfoSet ri) throws InvalidRuleInfoException {
+           RuleInfoSet allRuleInfos = new RuleInfoSet();
+            for(RuleInfo r : ri){
+                allRuleInfos.addAll(insertVariableRI(r));
+            }
+            return allRuleInfos;
+    }
+
     public abstract RuleInfoSet insertIntoMap(RuleInfo ri, int hash);
+
+    public abstract RuleInfoSet getAllRuleInfos();
 
 }

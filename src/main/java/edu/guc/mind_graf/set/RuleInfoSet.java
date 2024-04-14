@@ -44,6 +44,41 @@ public class RuleInfoSet implements Iterable<RuleInfo>{
         return newInfo;    // return only the ruleinfo affected by the addition
     }
 
+    public RuleInfoSet combineAdd(RuleInfoSet combineWith) {
+        RuleInfoSet newInfo = new RuleInfoSet();
+        HashSet combinedSet = new HashSet();
+        for(RuleInfo r1 : combineWith.getRIS()) {
+            for(RuleInfo r2 : this.ris) {
+                RuleInfo combined = r1.combine(r2);
+                if(combined != null) {
+                    newInfo.addRuleInfo(combined);
+                    combinedSet.add(r2);
+                    combinedSet.add(r1);
+                }
+            }
+        }
+        for(RuleInfo r : combineWith.getRIS()) {
+            if(!combinedSet.contains(r)) {
+                newInfo.addRuleInfo(r);
+            }
+        }
+        for(RuleInfo r : this.ris) {
+            if(!combinedSet.contains(r)) {
+                newInfo.addRuleInfo(r);
+            }
+        }
+        return newInfo;    // return set of rule infos that are a result of combining or have never been combined
+    }
+
+    public RuleInfoSet addAll(RuleInfoSet ris) {
+        RuleInfoSet result = new RuleInfoSet();
+        result.ris.addAll(this.ris);
+        result.ris.addAll(ris.getRIS());
+        return result;
+    }
+
+    public
+
     public void clear() {
         ris.clear();
     }

@@ -94,19 +94,20 @@ class PtreeNode {
         this.siblingIntersection = siblingIntersection;
     }
 
-    public void insertIntoNode(RuleInfo ri) throws InvalidRuleInfoException {
+    public RuleInfoSet insertIntoNode(RuleInfo ri, boolean isPropagating) throws InvalidRuleInfoException {
         RuleInfoSet newRuleInfoSet = sIndex.insertVariableRI(ri);
+        RuleInfoSet result = new RuleInfoSet();
         for(RuleInfo newRuleInfo : newRuleInfoSet){
-            if(newRuleInfo.getPcount() + newRuleInfo.getNcount() >= min){
+            if(newRuleInfo.getPcount() >= min && isPropagating){
                 if(parent != null) {
-
-                   // parent.insertIntoNode(ri);
+                    parent.insertIntoNode(newRuleInfo, true);
                 }
                 else{
-
+                    result.addRuleInfo(newRuleInfo);
                 }
             }
         }
+        return result;
     }
 
     @Override
@@ -131,6 +132,10 @@ public class Ptree extends RuleInfoHandler {
     private int minPcount; // minimum number of positive RIs needed to be sent
     private int minNcount; // minimum number of negative RIs needed to be sent
     // either minPcount or minNcount needs to be satisfied for propagation to start
+    private int pcount = 0;
+    private int ncount = 0;
+    private boolean isPropagating = false;
+    private HashMap <Integer, int[]> antecedentRIcount = new HashMap<>();
 
     public Ptree(){
         antLeafMap = new HashMap<>();
@@ -161,6 +166,7 @@ public class Ptree extends RuleInfoHandler {
     private HashMap <Node, HashSet<PtreeNode>> processAntecedents(PropositionNodeSet antecedents){
         HashMap <Node, HashSet<PtreeNode>> vpList = new HashMap<>();
         for(PropositionNode ant : antecedents){
+            antecedentRIcount.put(ant.getId(), new int[]{0, 0});
             NodeSet vars = ant.getFreeVariables();
             if(vars == null){
                 vars = ant.fetchFreeVariables();
@@ -246,9 +252,64 @@ public class Ptree extends RuleInfoHandler {
         }
         FlagNode fn = ri.getFns().getFlagNodes().iterator().next();
         Node n = fn.getNode();
-        antLeafMap.get(n.getId()).insertIntoNode(ri);
+
+        if(antecedentRIcount.containsKey(n.getId())){
+
+            int hash = n.getFreeVariablesHash();
+            RuleInfoSet mayInfer = varSetLeafMap.get(hash).insertIntoNode(ri, isPropagating);
+            if(mayInfer != null && mayInfer.size() > 0){
+                return mayInfer;
+            }
+
+            int[] count = antecedentRIcount.get(n.getId());
+            if(fn.isFlag()){
+                if(count[0] == 0)
+                    pcount++;
+                count[0]++;
+            }
+            else{
+                if(count[1] == 0)
+                    ncount++;
+                count[1]++;
+            }
+            if((count[0] >= minPcount || count[1] >= minNcount) && !isPropagating){
+                isPropagating = true;
+                return startPropagation();
+            }
+        }
+        else{
+            throw new InvalidRuleInfoException("RuleInfo should come from one of the antecedents of the tree");
+        }
 
         return null;
+    }
+
+    private RuleInfoSet startPropagation() throws InvalidRuleInfoException {
+        HashSet <PtreeNode> visited = new HashSet<>();
+        ArrayDeque <PtreeNode> queue = new ArrayDeque<>();
+        queue.addAll(varSetLeafMap.values());
+        RuleInfoSet rootRuleInfos = new RuleInfoSet();
+        while(!queue.isEmpty()){
+            PtreeNode p = queue.pollFirst();
+            if(!visited.contains(p)){
+                visited.add(p);
+                RuleInfoSet ris = new RuleInfoSet();
+                ris = ris.addAll(p.getSIndex().getAllRuleInfos());
+                if(p.getParent() != null){
+                    visited.add(p.getSibling());
+                    ris = ris.combineAdd(p.getSibling().getSIndex().getAllRuleInfos());
+                }
+                PtreeNode parent = p.getParent();
+                if(parent != null){
+                    parent.getSIndex().insertVariableRI(ris);
+                    queue.addLast(parent);
+                }
+                else{
+                    rootRuleInfos.addAll(p.getSIndex().getAllRuleInfos());
+                }
+            }
+        }
+        return rootRuleInfos;
     }
 
     public String BFS(){

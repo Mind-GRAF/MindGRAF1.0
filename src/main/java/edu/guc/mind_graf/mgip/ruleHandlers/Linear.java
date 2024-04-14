@@ -31,5 +31,14 @@ public class Linear extends SIndex{
         ruleInfoMap.put(hash, afterInsertion);
         return afterInsertion;
     }
-    
+
+    @Override
+    public RuleInfoSet getAllRuleInfos() {
+        RuleInfoSet allRuleInfos = new RuleInfoSet();
+        for (RuleInfoSet ris : ruleInfoMap.values()) {
+            allRuleInfos.addAll(ris);
+        }
+        return allRuleInfos;
+    }
+
 }

@@ -20,6 +20,15 @@ public class Singleton extends SIndex {
         return afterInsertion;
     }
 
+    @Override
+    public RuleInfoSet getAllRuleInfos() {
+        RuleInfoSet allRuleInfos = new RuleInfoSet();
+        for (RuleInfo ri : ruleInfoMap.values()) {
+            allRuleInfos.addRuleInfo(ri);
+        }
+        return allRuleInfos;
+    }
+
     public HashMap<Integer, RuleInfo> getRuleInfoMap() {
         return ruleInfoMap;
     }
