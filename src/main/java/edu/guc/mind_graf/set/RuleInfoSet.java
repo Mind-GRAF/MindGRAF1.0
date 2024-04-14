@@ -1,10 +1,12 @@
 package edu.guc.mind_graf.set;
 
 import java.util.HashSet;
+import java.util.Iterator;
 
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
+import edu.guc.mind_graf.nodes.PropositionNode;
 
-public class RuleInfoSet {
+public class RuleInfoSet implements Iterable<RuleInfo>{
     
     private HashSet<RuleInfo> ris;
 
@@ -29,13 +31,17 @@ public class RuleInfoSet {
     }
 
     public RuleInfoSet combineAdd(RuleInfo ri) {
+        RuleInfoSet newInfo = new RuleInfoSet();
         for(RuleInfo r : ris) {
             RuleInfo combined = r.combineAdd(ri);
-            if(combined != null)
+            if(combined != null) {
                 ris.add(combined);
+                newInfo.addRuleInfo(combined);
+            }
         }
         ris.add(ri);
-        return this;
+        newInfo.addRuleInfo(ri);
+        return newInfo;    // return only the ruleinfo affected by the addition
     }
 
     public void clear() {
@@ -44,5 +50,10 @@ public class RuleInfoSet {
 
     public int size() {
         return ris.size();
+    }
+
+    @Override
+    public Iterator<RuleInfo> iterator() {
+        return ris.iterator();
     }
 }

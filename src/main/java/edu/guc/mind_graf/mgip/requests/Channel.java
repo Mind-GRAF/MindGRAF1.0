@@ -36,7 +36,7 @@ public class Channel {
     public boolean testReportToSend(Report report) {
         System.out.println("Testing report to be sent:");
         boolean passTest = filterSubstitutions.filtertest(report.getSubstitutions());
-        if (passTest == true) {
+        if (passTest) {
             System.out.println("It passed the filter test");
         } else {
             System.out.println("It failed the filter test");

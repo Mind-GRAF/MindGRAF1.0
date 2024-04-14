@@ -2,29 +2,40 @@ package edu.guc.mind_graf.mgip.ruleHandlers;
 
 import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
+import edu.guc.mind_graf.caseFrames.Adjustability;
 import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.exceptions.InvalidRuleInfoException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.nodes.Node;
+import edu.guc.mind_graf.nodes.PropositionNode;
+import edu.guc.mind_graf.relations.Relation;
 import edu.guc.mind_graf.set.FlagNodeSet;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashSet;
+import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 class RuleHandlerTest {
+    Node X;
+    Node Y;
+    Node Z;
+    Node Nemo;
+    Node Marlin;
+    Node Dory;
+    Substitutions subs1;
+    Substitutions subs2;
     private Singleton singleton;
     private Linear linear;
     private SIndex sSIndex;
     private SIndex lSIndex;
     private RuleInfo ruleInfo1;
     private RuleInfo ruleInfo2;
-    Node X;
-    Node Y;
-    Node Z;
 
     @BeforeEach
     void setUp() throws NoSuchTypeException {
@@ -35,14 +46,14 @@ class RuleHandlerTest {
         Y = Network.createVariableNode("Y", "propositionnode");
         Z = Network.createVariableNode("Z", "propositionnode");
 
-        Node Nemo = Network.createNode("nemo", "propositionnode");
-        Node Marlin = Network.createNode("marlin", "propositionnode");
-        Node Dory = Network.createNode("dory", "propositionnode");
+        Nemo = Network.createNode("nemo", "propositionnode");
+        Marlin = Network.createNode("marlin", "propositionnode");
+        Dory = Network.createNode("dory", "propositionnode");
 
-        Substitutions subs1 = new Substitutions();
+        subs1 = new Substitutions();
         subs1.add(X, Dory);
         subs1.add(Y, Nemo);
-        Substitutions subs2 = new Substitutions();
+        subs2 = new Substitutions();
         subs2.add(X, Dory);
         subs2.add(Y, Marlin);
 
@@ -93,8 +104,8 @@ class RuleHandlerTest {
 
     @Test
     void getCommonVariables() {
-        assertEquals(2, linear.getCommonVariables().size());
-        assertEquals(3, singleton.getCommonVariables().size());
+        assertEquals(2, lSIndex.getCommonVariables().size());
+        assertEquals(3, sSIndex.getCommonVariables().size());
     }
 
     @Test
@@ -110,19 +121,55 @@ class RuleHandlerTest {
     }
 
     @Test
-    void customHash() {
+    void customHash() throws InvalidRuleInfoException {
+        assertEquals(linear.customHash(subs2), linear.customHash(subs1));
     }
 
     @Test
-    void insertVariableRI() {
+    void insertVariableRI() throws InvalidRuleInfoException {
+        ruleInfo1.getSubs().add(Z, Dory);
+        sSIndex.insertVariableRI(ruleInfo1);
     }
 
     @Test
-    void insertIntoMap() {
-    }
+    void constructPtree() throws NoSuchTypeException {
+        DownCable gMem = new DownCable(Network.getRelations().get("member"), new NodeSet(X));
+        Node government = Network.createNode("government", "propositionnode");
+        DownCable gov = new DownCable(Network.getRelations().get("class"), new NodeSet(government));
+        Node M0 = Network.createNode("propositionnode", new DownCableSet(gMem, gov));
 
-    @Test
-    void clear() {
+        DownCable cMem = new DownCable(Network.getRelations().get("member"), new NodeSet(Y));
+        Node civilian = Network.createNode("civilian", "propositionnode");
+        DownCable civ = new DownCable(Network.getRelations().get("class"), new NodeSet(civilian));
+        Node M1 = Network.createNode("propositionnode", new DownCableSet(cMem, civ));
+
+        DownCable coMem = new DownCable(Network.getRelations().get("member"), new NodeSet(Z));
+        Node country = Network.createNode("country", "propositionnode");
+        DownCable coun = new DownCable(Network.getRelations().get("class"), new NodeSet(country));
+        Node M2 = Network.createNode("propositionnode", new DownCableSet(coMem, coun));
+
+        Relation rule = Network.createRelation("rule", "",
+                Adjustability.EXPAND, 2);
+        Relation ruled = Network.createRelation("ruled", "",
+                Adjustability.EXPAND, 2);
+        DownCable ruling = new DownCable(rule, new NodeSet(X));
+        DownCable ruledC = new DownCable(ruled, new NodeSet(Z));
+        Node M3 = Network.createNode("propositionnode", new DownCableSet(ruling, ruledC));
+
+        Relation living = Network.createRelation("living", "",
+                Adjustability.EXPAND, 2);
+        Relation in = Network.createRelation("in", "",
+                Adjustability.EXPAND, 2);
+        DownCable livingC = new DownCable(living, new NodeSet(Y));
+        DownCable inC = new DownCable(in, new NodeSet(Z));
+        Node M4 = Network.createNode("propositionnode", new DownCableSet(livingC, inC));
+
+        Ptree testing = Ptree.constructPtree(new PropositionNodeSet(M0, M1, M2, M3, M4), 5, Integer.MAX_VALUE);
+        assertNotNull(testing);
+        assertNotNull(testing.getVarSetLeafMap());
+        assertEquals(5, testing.getVarSetLeafMap().keySet().size());
+        System.out.println(testing);
+
     }
 
 }

@@ -78,10 +78,8 @@ public class KStarPath extends Path {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof KStarPath && ((KStarPath) obj).getPath().equals(this.getPath()))
-			return true;
-		return false;
-	}
+        return obj instanceof KStarPath && ((KStarPath) obj).getPath().equals(this.getPath());
+    }
 
 	@Override
 	public Path converse() {

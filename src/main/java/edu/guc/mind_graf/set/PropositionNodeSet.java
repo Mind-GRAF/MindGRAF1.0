@@ -1,22 +1,19 @@
 package edu.guc.mind_graf.set;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.*;
 
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.PropositionNode;
 
-public class PropositionNodeSet implements Iterable<PropositionNode>{
+public class PropositionNodeSet implements Iterable<PropositionNode> {
 
     private HashSet<Integer> nodes;
     private boolean isFinal;
 
     // Empty constructor
     public PropositionNodeSet() {
-        nodes = new HashSet<Integer>();
+        nodes = new HashSet<>();
     }
 
     // Constructor using HashSet of Ids
@@ -28,8 +25,7 @@ public class PropositionNodeSet implements Iterable<PropositionNode>{
     // including Zero )
     public PropositionNodeSet(Integer... nodeIDs) {
         this.nodes = new HashSet<Integer>();
-        for (Integer id : nodeIDs)
-            this.nodes.add(id);
+        Collections.addAll(this.nodes, nodeIDs);
     }
 
     // Constructor with array of nodes
@@ -43,12 +39,11 @@ public class PropositionNodeSet implements Iterable<PropositionNode>{
     // Constructor using both hashSet and araity parameter
     public PropositionNodeSet(HashSet<Integer> list, Integer... nodeIDs) {
         this.nodes = list;
-        for (Integer id : nodeIDs)
-            this.nodes.add(id);
+        Collections.addAll(this.nodes, nodeIDs);
 
     }
 
-    // constructor taking the node itself and storing it's id ( Ariaty Parameter
+    // constructor taking the node itself and storing its id ( Ariaty Parameter
     // with variable number of nodes)
     public PropositionNodeSet(Node... nodes) {
         this.nodes = new HashSet<Integer>();
@@ -56,7 +51,7 @@ public class PropositionNodeSet implements Iterable<PropositionNode>{
             this.nodes.add(n.getId());
     }
 
-    // constructor taking a nodeset itself and storing it's id
+    // constructor taking a nodeset itself and storing its id
     public PropositionNodeSet(NodeSet nodeSet) {
         this.nodes = new HashSet<Integer>();
         for (Node n : nodeSet.getValues())
@@ -229,8 +224,19 @@ public class PropositionNodeSet implements Iterable<PropositionNode>{
 
     @Override
     public Iterator<PropositionNode> iterator() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'iterator'");
+        return new Iterator<>() {
+            private Iterator<Integer> iterator = nodes.iterator();
+
+            @Override
+            public boolean hasNext() {
+                return iterator.hasNext();
+            }
+
+            @Override
+            public PropositionNode next() {
+                return (PropositionNode) Network.getNodeById(iterator.next());
+            }
+        };
     }
 
     public NodeSet getCommonVariables(){

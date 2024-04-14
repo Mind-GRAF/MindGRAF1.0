@@ -63,8 +63,7 @@ public class FlagNodeSet{
 
     @Override
     public boolean equals(Object obj) {
-        if(obj instanceof FlagNodeSet){
-            FlagNodeSet fns = (FlagNodeSet) obj;
+        if(obj instanceof FlagNodeSet fns){
             if(flagNodes.size() != fns.size())
                 return false;
             for(FlagNode fn : flagNodes){

@@ -207,7 +207,6 @@ public class PropositionNode extends Node {
                 Channel channel = channelHashtable.get(channelId);
                 System.out.println("Channel ID: " + channel.getIdCount() + " & Channel Subs: "
                         + channel.getFilterSubstitutions().toString());
-                ;
                 // Print other channel properties as needed
             }
 
@@ -612,7 +611,7 @@ public class PropositionNode extends Node {
                 flag = knownInstances.addKnownInstance(report);
                 System.out.println(
                         "Report " + report.stringifyReport() + " was just added to " + this.getName() + "'s KIs");
-                if (flag == false) {
+                if (!flag) {
                     return report;
 
                 } else {
@@ -699,7 +698,7 @@ public class PropositionNode extends Node {
         getNodesToSendRequest(ChannelType.Matched, currentContextName,
                 currentattitudeID, null);
         System.out.println(Scheduler.schedule());
-        System.out.println(Scheduler.getBackwardAssertedReplyNodes().values().toString());
+        System.out.println(Scheduler.getBackwardAssertedReplyNodes().values());
 
     }
 
@@ -736,7 +735,7 @@ public class PropositionNode extends Node {
         getNodesToSendReport(ChannelType.Matched, currentContextName, currentAttitudeID, null, reportSign,
                 InferenceType.FORWARD);
         System.out.println(Scheduler.schedule());
-        System.out.println("*New Knowledge inferred: " + Scheduler.getForwardAssertedNodes().values().toString());
+        System.out.println("*New Knowledge inferred: " + Scheduler.getForwardAssertedNodes().values());
 
     }
 
@@ -770,7 +769,7 @@ public class PropositionNode extends Node {
         Substitutions reportSubstitutions = new Substitutions();
         PropositionNodeSet supportNodeSet = new PropositionNodeSet();
         if (this.supported(currentContext, currentAttitude)) {
-            supportNodeSet.add((PropositionNode) this);
+            supportNodeSet.add(this);
             Report NewReport = new Report(reportSubstitutions, supportNodeSet, currentAttitude, true,
                     InferenceType.BACKWARD, requesterNode);
             // if (((RuleNode) requesterNode).isForwardReport() == true) {

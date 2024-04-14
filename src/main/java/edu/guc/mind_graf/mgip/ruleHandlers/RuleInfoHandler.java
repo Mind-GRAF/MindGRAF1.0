@@ -1,10 +1,24 @@
 package edu.guc.mind_graf.mgip.ruleHandlers;
 
 import edu.guc.mind_graf.exceptions.InvalidRuleInfoException;
+import edu.guc.mind_graf.set.RuleInfoSet;
 
 public abstract class RuleInfoHandler {
 
-    private RuleInfo constantRI = new RuleInfo();
+    private final RuleInfo constantRI;
+    private int min;
+    public RuleInfoHandler() {
+        this.min = 0;
+        constantRI = new RuleInfo();
+    }
+
+    public int getMin() {
+        return min;
+    }
+
+    public void setMin(int min) {
+        this.min = min;
+    }
 
     public RuleInfo getConstantAntecedents() {
         return constantRI;
@@ -17,8 +31,6 @@ public abstract class RuleInfoHandler {
             insertVariableRI(ri);
     }
 
-    public abstract void insertVariableRI(RuleInfo ri) throws InvalidRuleInfoException;
-
-    public abstract void clear();
+    public abstract RuleInfoSet insertVariableRI(RuleInfo ri) throws InvalidRuleInfoException;
 
 }

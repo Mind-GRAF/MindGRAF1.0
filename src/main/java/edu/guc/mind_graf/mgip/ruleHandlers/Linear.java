@@ -1,11 +1,8 @@
 package edu.guc.mind_graf.mgip.ruleHandlers;
 
 import java.util.HashMap;
-import java.util.HashSet;
 
-import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.set.NodeSet;
-import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
 
 public class Linear extends SIndex{
@@ -29,10 +26,10 @@ public class Linear extends SIndex{
     }
 
     @Override
-    public void insertIntoMap(RuleInfo ri, int hash) {
-        //needs editing
-        ruleInfoMap.put(hash, ruleInfoMap.getOrDefault(hash, new RuleInfoSet()).combineAdd(ri));
-        
+    public RuleInfoSet insertIntoMap(RuleInfo ri, int hash) {
+        RuleInfoSet afterInsertion = ruleInfoMap.getOrDefault(hash, new RuleInfoSet()).combineAdd(ri);
+        ruleInfoMap.put(hash, afterInsertion);
+        return afterInsertion;
     }
     
 }

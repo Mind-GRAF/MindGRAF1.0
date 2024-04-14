@@ -54,7 +54,7 @@ public class BridgeRule extends RuleNode {
         for (Node currentNode : argAntNodesToConsiderClose) {
             int currentNodeAttitude = currContext.getPropositionAttitude(currentNode.getId());
             Request newRequest = establishChannel(ChannelType.AntRule, currentNode, switchSubs, unionSubs,
-                    currentContextName, currentNodeAttitude, -1, (PropositionNode) this);
+                    currentContextName, currentNodeAttitude, -1, this);
             Scheduler.addToLowQueue(newRequest);
         }
     }
@@ -72,7 +72,7 @@ public class BridgeRule extends RuleNode {
         for (Node currentNode : remainingAntArgNodeSet) {
             int currentNodeAttitude = currContext.getPropositionAttitude(currentNode.getId());
             Request newRequest = establishChannel(ChannelType.AntRule, currentNode, switchRuleSubs, filterRuleSubs,
-                    currentContext, currentNodeAttitude, -1, (PropositionNode) this);
+                    currentContext, currentNodeAttitude, -1, this);
             Scheduler.addToLowQueue(newRequest);
         }
 
@@ -105,14 +105,13 @@ public class BridgeRule extends RuleNode {
                         int currentNodeAttitude = currContext.getPropositionAttitude(currentNode.getId());
                         Request newRequest = establishChannel(ChannelType.AntRule, currentNode, switchRuleSubs,
                                 filterRuleSubs,
-                                currentContext, currentNodeAttitude, -1, (PropositionNode) this);
+                                currentContext, currentNodeAttitude, -1, this);
                         Scheduler.addToLowQueue(newRequest);
 
                     }
 
                 } else
                     super.grandparentMethodRequest(currentRequest);
-                ;
 
             } else {
                 boolean isNotBound = isOpenNodeNotBound(filterRuleSubs);
@@ -137,7 +136,6 @@ public class BridgeRule extends RuleNode {
 
                 }
                 super.grandparentMethodRequest(currentRequest);
-                return;
 
             }
 
@@ -164,7 +162,7 @@ public class BridgeRule extends RuleNode {
                 if (!this.isOpen()) {
                     /** Close Type Implementation */
                     if (assertedInContext) {
-                        if (this.isForwardReport() == false) {
+                        if (!this.isForwardReport()) {
                             this.setForwardReport(true);
                             requestAntecedentsNotAlreadyWorkingOn(tempRequest);
                         }
@@ -185,13 +183,13 @@ public class BridgeRule extends RuleNode {
                                 currentReportAttitudeID);
                         if (compatibilityCheck && supportCheck) {
                             if (notBound) {
-                                if (this.isForwardReport() == false) {
+                                if (!this.isForwardReport()) {
                                     this.setForwardReport(true);
                                     requestAntecedentsNotAlreadyWorkingOn(tempRequest, currentKnownInstance);
                                 }
 
                             } else {
-                                if (this.isForwardReport() == false) {
+                                if (!this.isForwardReport()) {
                                     this.setForwardReport(true);
                                     requestAntecedentsNotAlreadyWorkingOn(tempRequest);
                                 }
@@ -200,7 +198,7 @@ public class BridgeRule extends RuleNode {
 
                         }
                     }
-                    if (this.isForwardReport() == false) {
+                    if (!this.isForwardReport()) {
                         this.setForwardReport(true);
                         grandparentMethodRequest(tempRequest);
                     }

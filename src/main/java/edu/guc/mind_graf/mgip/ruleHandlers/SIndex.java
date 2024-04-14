@@ -5,6 +5,7 @@ import edu.guc.mind_graf.exceptions.InvalidRuleInfoException;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.PropositionNodeSet;
+import edu.guc.mind_graf.set.RuleInfoSet;
 
 public abstract class SIndex extends RuleInfoHandler {
 
@@ -31,27 +32,25 @@ public abstract class SIndex extends RuleInfoHandler {
         return new Linear(commonVariables);
     }
 
-    protected int customHash(Substitutions subs) {
-        int[] orderedArray = new int[commonVariables.size()];
-        int index = 0;
+    protected int customHash(Substitutions subs) throws InvalidRuleInfoException {
+        int hash = 0;
+        int factor = 1;
         for(Node var : commonVariables){
-            orderedArray[index++] = subs.get(var).getId();
+            if(subs.get(var) == null)
+                throw new InvalidRuleInfoException("substitution not in info");
+            hash += subs.get(var).getId()*factor; //consider checking for invalid subs here (if var not in subs, they're invalid)
+            factor *= 100;
         }
         //assuming ids wont be over 100
-        return orderedArray[0] + orderedArray[1] * 100 + orderedArray[2] * 10000;
+        return hash;
     }
 
     @Override
-    public void insertVariableRI(RuleInfo ri) throws InvalidRuleInfoException {
+    public RuleInfoSet insertVariableRI(RuleInfo ri) throws InvalidRuleInfoException {
         int hash = customHash(ri.getSubs());
-        insertIntoMap(ri, hash);
+        return insertIntoMap(ri, hash);
     }
 
-    public abstract void insertIntoMap(RuleInfo ri, int hash);
-
-    @Override
-    public void clear() {
-        commonVariables.clear();
-    }
+    public abstract RuleInfoSet insertIntoMap(RuleInfo ri, int hash);
 
 }

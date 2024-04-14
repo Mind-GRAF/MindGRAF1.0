@@ -34,4 +34,21 @@ public class FreeVariableSet implements Iterable<Node>, Serializable {
         return freeVariables.values().iterator();
     }
 
+    private String getFreeVariablesString() {
+        StringBuilder sb = new StringBuilder();
+        for (Node n : freeVariables.values()) {
+            sb.append(n.getName()).append(", ");
+        }
+        if(sb.length() > 1){
+            sb.deleteCharAt(sb.length() - 1);
+            sb.deleteCharAt(sb.length() - 1);
+        }
+        return sb.toString();
+    }
+
+    @Override
+    public String toString() {
+        return "FreeVariableSet{" + getFreeVariablesString() +
+                '}';
+    }
 }

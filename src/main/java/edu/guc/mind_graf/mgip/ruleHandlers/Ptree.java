@@ -1,14 +1,15 @@
 package edu.guc.mind_graf.mgip.ruleHandlers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import edu.guc.mind_graf.exceptions.InvalidRuleInfoException;
+import edu.guc.mind_graf.nodes.FlagNode;
 import edu.guc.mind_graf.nodes.Node;
+import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.set.FreeVariableSet;
 import edu.guc.mind_graf.set.NodeSet;
+import edu.guc.mind_graf.set.PropositionNodeSet;
+import edu.guc.mind_graf.set.RuleInfoSet;
 
 class PtreeNode {
 
@@ -17,19 +18,23 @@ class PtreeNode {
     private PtreeNode leftChild;
     private PtreeNode rightChild;
     private SIndex sIndex; // linear or singleton based on siblingIntersection
-    private Set<Integer> pats; // antecedents node stores info abt
-    private FreeVariableSet vars; // free vars in propositions node represents
-    private FreeVariableSet siblingIntersection; // shared vars between sibling and this node
+    //private Set<Integer> pats; // antecedents node stores info abt
+    private NodeSet vars; // free vars in propositions node represents
+    private FreeVariableSet siblingIntersection; // shared vars between sibling and this node  (parent.getCommonVariables)
+    private final int min = 0; // should initialize and consider moving
 
     public PtreeNode(PtreeNode parent, PtreeNode sibling, PtreeNode leftChild, PtreeNode rightChild, SIndex sIndex,
-            Set<Integer> pats, FreeVariableSet vars, FreeVariableSet siblingIntersection) {
+                     NodeSet vars, FreeVariableSet siblingIntersection) {
         this.parent = parent;
         this.sibling = sibling;
         this.leftChild = leftChild;
         this.rightChild = rightChild;
         this.sIndex = sIndex;
-        this.pats = pats;
-        this.vars = vars;
+        this.vars = new NodeSet();
+        for(Node var : vars){   // shalllow cloning so that changing in set would destroy nothing
+            this.vars.add(var);
+        }
+        vars.setIsFinal(true);
         this.siblingIntersection = siblingIntersection;
     }
 
@@ -65,27 +70,19 @@ class PtreeNode {
         this.rightChild = rightChild;
     }
 
-    public SIndex getsIndex() {
+    public SIndex getSIndex() {
         return sIndex;
     }
 
-    public void setsIndex(SIndex sIndex) {
+    public void setSIndex(SIndex sIndex) {
         this.sIndex = sIndex;
     }
 
-    public Set<Integer> getPats() {
-        return pats;
-    }
-
-    public void setPats(Set<Integer> pats) {
-        this.pats = pats;
-    }
-
-    public FreeVariableSet getVars() {
+    public NodeSet getVars() {
         return vars;
     }
 
-    public void setVars(FreeVariableSet vars) {
+    public void setVars(NodeSet vars) {
         this.vars = vars;
     }
 
@@ -97,56 +94,184 @@ class PtreeNode {
         this.siblingIntersection = siblingIntersection;
     }
 
-    public void insertIntoNode(RuleInfo ri){
+    public void insertIntoNode(RuleInfo ri) throws InvalidRuleInfoException {
+        RuleInfoSet newRuleInfoSet = sIndex.insertVariableRI(ri);
+        for(RuleInfo newRuleInfo : newRuleInfoSet){
+            if(newRuleInfo.getPcount() + newRuleInfo.getNcount() >= min){
+                if(parent != null) {
 
+                   // parent.insertIntoNode(ri);
+                }
+                else{
+
+                }
+            }
+        }
     }
 
+    @Override
+    public String toString() {
+        return "PtreeNode{" +
+                "has parent=" + (parent != null) +
+                ",has sibling=" + (sibling != null) +
+//                ", leftChild=" + leftChild +
+//                ", rightChild=" + rightChild +
+                ", sIndex=" + sIndex +
+                ", vars=" + vars +
+                ", siblingIntersection=" + siblingIntersection +
+                ", min=" + min +
+                '}';
+    }
 }
 
 public class Ptree extends RuleInfoHandler {
 
-    private PtreeNode root;
-    private NodeSet antecedents;
-    private NodeSet FreeVariableSet;
+    private final HashMap <Integer, PtreeNode> antLeafMap; // depricated
+    private final HashMap <Integer, PtreeNode> varSetLeafMap;
+    private int minPcount; // minimum number of positive RIs needed to be sent
+    private int minNcount; // minimum number of negative RIs needed to be sent
+    // either minPcount or minNcount needs to be satisfied for propagation to start
 
-    public HashMap<String, NodeSet> computePatternVariableList(){
-        HashMap <String, NodeSet> pvList = new HashMap<String, NodeSet>(); //map pattern node name to its nodeset of variables
-        for (Node n : antecedents){
-            NodeSet vars = n.getFreeVariables();
-            pvList.put(n.getName(), vars);
-        }
-        return pvList;
+    public Ptree(){
+        antLeafMap = new HashMap<>();
+        varSetLeafMap = new HashMap<>();
     }
 
-    public HashMap<String, List<String>> computeVariablePatternList(HashMap<String, NodeSet> pvList){
-        HashMap <String, List<String>> vpList = new HashMap<String, List<String>>(); //map variable name to its nodeset of patterns
-        for (String pattern : vpList.keySet()){
-            NodeSet vars = pvList.get(pattern);
-            for (Node n : vars){
-                if (vpList.containsKey(n.getName())){
-                    vpList.get(n.getName()).add(pattern);
-                }
-                else{
-                    List<String> ps = new ArrayList<String>();
-                    ps.add(pattern);
-                    vpList.put(n.getName(), ps);
-                }
+    public HashMap<Integer, PtreeNode> getVarSetLeafMap() {
+        return varSetLeafMap;
+    }
+
+    public Ptree (PropositionNodeSet antecedents, int minPcount, int minNcount){
+        this();
+        this.minPcount = minPcount;
+        this.minNcount = minNcount;
+        constructPtree(antecedents, minPcount, minNcount);
+    }
+
+    public static Ptree constructPtree(PropositionNodeSet antecedents, int minPcount, int minNcount){
+        Ptree ptree = new Ptree();
+        ptree.minPcount = minPcount;
+        ptree.minNcount = minNcount;
+        HashMap <Node, HashSet<PtreeNode>> vpList = ptree.processAntecedents(antecedents);
+        ArrayDeque <PtreeNode> pSequence = ptree.processVariables(vpList);
+        ptree.buildPtree(pSequence);
+        return ptree;
+    }
+
+    private HashMap <Node, HashSet<PtreeNode>> processAntecedents(PropositionNodeSet antecedents){
+        HashMap <Node, HashSet<PtreeNode>> vpList = new HashMap<>();
+        for(PropositionNode ant : antecedents){
+            NodeSet vars = ant.getFreeVariables();
+            if(vars == null){
+                vars = ant.fetchFreeVariables();
             }
-            
+            // insert in varSetLeafMap
+            int hash = ant.getFreeVariablesHash();
+            if(!varSetLeafMap.containsKey(hash)) {
+                Singleton sIndex = new Singleton();
+                varSetLeafMap.put(hash, new PtreeNode(null, null, null, null, sIndex, vars, null));
+            }
+            // insert in vpList
+            for(Node n : vars){
+                HashSet<PtreeNode> ps = vpList.getOrDefault(n, new HashSet<>());
+                ps.add(varSetLeafMap.get(hash));
+                vpList.put(n, ps);
+            }
         }
         return vpList;
     }
 
-    @Override
-    public void insertVariableRI(RuleInfo ri) throws InvalidRuleInfoException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'insertVariableRI'");
+    private ArrayDeque <PtreeNode> processVariables(HashMap <Node, HashSet<PtreeNode>> vpList){
+        HashSet <PtreeNode> processed = new HashSet<>();
+        ArrayDeque <PtreeNode> pSequence = new ArrayDeque<>(); // arraydeque cz that's the queue i could think of but any queue should work
+        for(Node var : vpList.keySet()){ // process each variable
+            HashSet<PtreeNode> ps = vpList.get(var);
+            for(PtreeNode p : ps){
+                if(!processed.contains(p)){
+                    pSequence.addLast(p); // insert to end of deque
+                    processed.add(p); // mark as processed
+                }
+            }
+        }
+        return pSequence;
+    }
+
+    private void buildPtree(ArrayDeque <PtreeNode> pSequence){
+        PtreeNode firstMismatched = null;
+        while(pSequence.size() > 1){ // would stop when only one node is left
+            PtreeNode p1 = pSequence.pollFirst();
+            PtreeNode p2 = pSequence.peekFirst();
+            NodeSet intersection = p1.getVars().intersection(p2.getVars());
+            if(intersection.size() == 0){
+                pSequence.addLast(p1);
+                if(firstMismatched == p1){ // if the first mismatched node is reached again, then the tree is complete, every node left in the pSequence is a disjoint tree
+                    break;
+                }
+                else if(firstMismatched == null){
+                    firstMismatched = p1;
+                }
+            }
+            else {
+                firstMismatched = null;
+                p2 = pSequence.pollFirst();
+                PtreeNode parent = matchSiblings(p1, p2, intersection);
+                pSequence.add(parent);
+            }
+        }
+    }
+
+    private PtreeNode matchSiblings(PtreeNode p1, PtreeNode p2, NodeSet intersection){
+        FreeVariableSet siblingIntersection = new FreeVariableSet();
+        for(Node n : intersection){
+            siblingIntersection.add(n);
+        }
+        p1.setSibling(p2);
+        p1.setSiblingIntersection(siblingIntersection);
+        p2.setSibling(p1);
+        p2.setSiblingIntersection(siblingIntersection);
+        // setup parent
+        SIndex sIndex = new Linear(intersection);
+        NodeSet vars = p1.getVars().union(p2.getVars());
+        PtreeNode parent = new PtreeNode(null, null, p1, p2, sIndex, vars, null);
+        p1.setParent(parent);
+        p2.setParent(parent);
+        return parent;
     }
 
     @Override
-    public void clear() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'clear'");
+    public RuleInfoSet insertVariableRI(RuleInfo ri) throws InvalidRuleInfoException {
+        // when inserting a rule info into the tree, it should only have one flag node (that of the antecedent that caused it to be sent)
+        if (ri.getFns().size() != 1){
+            throw new InvalidRuleInfoException("RuleInfo should only have one flag node when being inserted in tree");
+        }
+        FlagNode fn = ri.getFns().getFlagNodes().iterator().next();
+        Node n = fn.getNode();
+        antLeafMap.get(n.getId()).insertIntoNode(ri);
+
+        return null;
     }
 
+    public String BFS(){
+        StringBuilder sb = new StringBuilder();
+        ArrayDeque <PtreeNode> queue = new ArrayDeque<>();
+        queue.addAll(varSetLeafMap.values());
+        while(!queue.isEmpty()){
+            PtreeNode p = queue.pollFirst();
+            sb.append(p.toString());
+            sb.append("\n");
+            if(p.getParent() != null && !queue.contains(p.getParent())){
+                queue.addLast(p.getParent());
+            }
+        }
+        return sb.toString();
+    }
+
+    @Override
+    public String toString() {
+        return "Ptree{" +
+                "ptreeNodes=" + BFS() +
+                ", minPcount=" + minPcount +
+                ", minNcount=" + minNcount +
+                '}';
+    }
 }

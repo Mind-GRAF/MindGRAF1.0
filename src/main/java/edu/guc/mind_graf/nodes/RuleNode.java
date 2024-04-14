@@ -257,7 +257,6 @@ public class RuleNode extends PropositionNode {
 
                 }
                 super.processSingleRequests(currentRequest);
-                return;
 
             }
 
@@ -306,7 +305,7 @@ public class RuleNode extends PropositionNode {
                 if (!this.isOpen()) {
                     /** Close Type Implementation */
                     if (assertedInContext) {
-                        if (this.isForwardReport() == false) {
+                        if (!this.isForwardReport()) {
                             this.setForwardReport(true);
                             requestAntecedentsNotAlreadyWorkingOn(tempRequest);
                         }
@@ -333,13 +332,13 @@ public class RuleNode extends PropositionNode {
                                 currentReportAttitudeID);
                         if (compatibilityCheck && supportCheck) {
                             if (notBound) {
-                                if (this.isForwardReport() == false) {
+                                if (!this.isForwardReport()) {
                                     this.setForwardReport(true);
                                     requestAntecedentsNotAlreadyWorkingOn(tempRequest, currentKnownInstance);
                                     return;
                                 }
                             } else {
-                                if (this.isForwardReport() == false) {
+                                if (!this.isForwardReport()) {
                                     this.setForwardReport(true);
                                     requestAntecedentsNotAlreadyWorkingOn(tempRequest);
                                     return;
@@ -353,7 +352,7 @@ public class RuleNode extends PropositionNode {
                     // i removed the apply rule handler here because i call it only when the
                     // antecedents report back replying to my request thus whenever its a backward
                     // inference
-                    if (this.isForwardReport() == false) {
+                    if (!this.isForwardReport()) {
                         this.setForwardReport(true);
                         super.processSingleRequests(tempRequest);
 
