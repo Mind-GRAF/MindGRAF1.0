@@ -6,15 +6,15 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Scanner;
 
-import edu.guc.mind_graf.mgip.KnownInstance;
 import edu.guc.mind_graf.mgip.InferenceType;
-import edu.guc.mind_graf.mgip.KnownInstanceSet;
-import edu.guc.mind_graf.mgip.Report;
-import edu.guc.mind_graf.mgip.ReportType;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.matching.Match;
+import edu.guc.mind_graf.mgip.reports.KnownInstance;
+import edu.guc.mind_graf.mgip.reports.KnownInstanceSet;
+import edu.guc.mind_graf.mgip.reports.Report;
+import edu.guc.mind_graf.mgip.reports.ReportType;
 import edu.guc.mind_graf.mgip.requests.*;
-import edu.guc.mind_graf.network.Controller;
+import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
@@ -639,7 +639,7 @@ public class PropositionNode extends Node {
         System.out.println("-------------------------\n");
         /* END - Helpful Prints */
         Scheduler.initiate();
-        String currentContextName = Controller.getCurrContext();
+        String currentContextName = ContextController.getCurrContextName();
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter your desired attitude: ");
         String att = scanner.nextLine();
@@ -714,7 +714,7 @@ public class PropositionNode extends Node {
         System.out.println("-------------------------");
         /* END - Helpful Prints */
         Scheduler.initiate();
-        String currentContextName = Controller.getCurrContext();
+        String currentContextName = ContextController.getCurrContextName();
 
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter your desired attitude: ");

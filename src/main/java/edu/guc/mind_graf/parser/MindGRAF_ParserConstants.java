@@ -11,29 +11,49 @@ public interface MindGRAF_ParserConstants {
   /** End of File. */
   int EOF = 0;
   /** RegularExpression Id. */
-  int NUMBER = 4;
+  int NUMBER = 5;
   /** RegularExpression Id. */
-  int PLUS = 5;
+  int LPAREN = 6;
   /** RegularExpression Id. */
-  int MINUS = 6;
+  int LBRACE = 7;
   /** RegularExpression Id. */
-  int TIMES = 7;
+  int RBRACE = 8;
   /** RegularExpression Id. */
-  int DIVIDE = 8;
+  int RPAREN = 9;
   /** RegularExpression Id. */
-  int LPAREN = 9;
+  int PRINT = 10;
   /** RegularExpression Id. */
-  int RPAREN = 10;
+  int currContext = 11;
   /** RegularExpression Id. */
-  int PRINT = 11;
+  int DEFINE_CONTEXT = 12;
   /** RegularExpression Id. */
-  int currContext = 12;
+  int GetAttitudeNames = 13;
   /** RegularExpression Id. */
-  int ADD = 13;
+  int MODE1 = 14;
   /** RegularExpression Id. */
-  int SPACE = 14;
+  int MODE2 = 15;
   /** RegularExpression Id. */
-  int GetAttitudeNames = 15;
+  int MODE3 = 16;
+  /** RegularExpression Id. */
+  int N = 17;
+  /** RegularExpression Id. */
+  int IDENTIFIER = 18;
+  /** RegularExpression Id. */
+  int LETTER = 19;
+  /** RegularExpression Id. */
+  int DIGIT = 20;
+  /** RegularExpression Id. */
+  int WFF_NAME_LIST = 21;
+  /** RegularExpression Id. */
+  int WFF_NAME = 22;
+  /** RegularExpression Id. */
+  int CNAME = 23;
+  /** RegularExpression Id. */
+  int SET_ATTITUDES = 24;
+  /** RegularExpression Id. */
+  int ATTITUDE = 25;
+  /** RegularExpression Id. */
+  int ATTITUDE_SET = 26;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -44,19 +64,33 @@ public interface MindGRAF_ParserConstants {
     "\"\\t\"",
     "\"\\n\"",
     "\"\\r\"",
+    "\" \"",
     "<NUMBER>",
-    "\"+\"",
-    "\"-\"",
-    "\"*\"",
-    "\"/\"",
     "\"(\"",
+    "\"{\"",
+    "\"}\"",
     "\")\"",
     "\"print\"",
     "\"get-curr-context\"",
-    "\"ADD\"",
-    "\" \"",
+    "\"define-context\"",
     "\"get-attitudes\"",
+    "\"set-mode-1\"",
+    "\"set-mode-2\"",
+    "\"set-mode-3\"",
+    "<N>",
+    "<IDENTIFIER>",
+    "<LETTER>",
+    "<DIGIT>",
+    "<WFF_NAME_LIST>",
+    "<WFF_NAME>",
+    "<CNAME>",
+    "\"set-attitudes\"",
+    "<ATTITUDE>",
+    "<ATTITUDE_SET>",
+    "\"+\"",
+    "\"-\"",
     "\"\"",
+    "\"/\"",
   };
 
 }

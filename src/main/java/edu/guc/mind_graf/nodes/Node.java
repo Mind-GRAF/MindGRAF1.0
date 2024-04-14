@@ -14,6 +14,7 @@ import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.cables.UpCable;
 import edu.guc.mind_graf.cables.UpCableSet;
+import edu.guc.mind_graf.caseFrames.Adjustability;
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 
@@ -174,6 +175,16 @@ public abstract class Node {
 			}
 		}
 		return null;
+	}
+
+	public Node createNegation(Node negated) throws NoSuchTypeException {
+		NodeSet zeroNode = new NodeSet(Network.getBaseNodes().get("0"));
+		DownCable min = new DownCable(Network.getRelations().get("min"), zeroNode);
+		DownCable max = new DownCable(Network.getRelations().get("max"), zeroNode);
+		NodeSet negatedSet = new NodeSet(negated);
+		DownCable arg = new DownCable(Network.getRelations().get("arg"), negatedSet);
+		DownCableSet negationDownCableSet = new DownCableSet(min, max, arg);
+		return Network.createNode("rulenode", negationDownCableSet);
 	}
 
 	public boolean isFree(Node Node) {

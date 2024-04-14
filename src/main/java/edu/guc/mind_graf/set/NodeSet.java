@@ -8,7 +8,7 @@ import edu.guc.mind_graf.nodes.Node;
 
 public class NodeSet implements Iterable<Node> {
     private HashMap<String, Node> nodes;
-    private boolean isFinal;
+    private boolean isFinal; 
 
     public NodeSet() {
         nodes = new HashMap<String, Node>();

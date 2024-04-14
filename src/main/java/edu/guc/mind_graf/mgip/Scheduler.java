@@ -5,6 +5,7 @@ import java.util.Hashtable;
 import java.util.Queue;
 import java.util.Stack;
 
+import edu.guc.mind_graf.mgip.reports.Report;
 import edu.guc.mind_graf.mgip.requests.Channel;
 import edu.guc.mind_graf.mgip.requests.Request;
 import edu.guc.mind_graf.nodes.ActNode;

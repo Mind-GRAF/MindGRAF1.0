@@ -1,32 +1,32 @@
 package edu.guc.mind_graf.components;
 
 public class CustomConstructor {
-	private String name ; 
-	private Class<?>[] constructorParams; 
+	private String name;
+	private Class<?>[] constructorParams;
 	private Object[] constructorArgs;
-	public CustomConstructor(String name , Class<?>[] constructorParams, String[] constructorArgs) {
-		this.name = name ; 
+
+	public CustomConstructor(String name, Class<?>[] constructorParams, String[] constructorArgs) {
+		this.name = name;
 		this.constructorArgs = constructorArgs;
 		this.constructorParams = constructorParams;
 	}
-	
-	public  String constructorToString(){
+
+	public String constructorToString() {
 		String Params = "";
 		String Args = "";
 		for (int i = 0; i < constructorArgs.length; i++) {
-			Params+= constructorParams[i].getSimpleName() + " " + constructorArgs[i] + 
-					(i == constructorArgs.length -1 ? " " : ",") ;  
+			Params += constructorParams[i].getSimpleName() + " " + constructorArgs[i] +
+					(i == constructorArgs.length - 1 ? " " : ",");
 		}
-		int k = 0  ;
+		int k = 0;
 		for (Object object : constructorArgs) {
-			Args += object + (k == constructorArgs.length -1 ? " " : ",") ; 
+			Args += object + (k == constructorArgs.length - 1 ? " " : ",");
 			k++;
 		}
-		String result = 
-		"\n" + " public " + name + "("
-		+Params +  ")" + "{" + "\n" + "super("
-		+Args + ");" + "\n" + "}";
-		return result ; 
+		String result = "\n" + " public " + name + "("
+				+ Params + ")" + "{" + "\n" + "super("
+				+ Args + ");" + "\n" + "}";
+		return result;
 	}
 
 	public String getName() {

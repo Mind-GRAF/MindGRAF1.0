@@ -8,11 +8,15 @@ options {
 // Define the parser class
 PARSER_BEGIN(MindGRAF_Parser)
 package edu.guc.mind_graf.parser;
-import edu.guc.mind_graf.network.Controller;
+import edu.guc.mind_graf.context.ContextController;
+import edu.guc.mind_graf.set.Set;
 import java.util.Hashtable;
+import java.util.HashMap;
+
 
 public class MindGRAF_Parser {
-      Controller controller = new Controller();
+      private ContextController controller = new ContextController();
+      private int mode = 1;
   public static void main(String[] args) throws ParseException {
     // Instantiate the parser
     MindGRAF_Parser parser = new MindGRAF_Parser(System.in);
@@ -30,21 +34,33 @@ public class MindGRAF_Parser {
 PARSER_END(MindGRAF_Parser)
 
 // Define tokens
-SKIP:  {"\t" | "\n" | "\r"}
+SKIP:  {"\t" | "\n" | "\r"|" "}
 TOKEN :
 {
   <NUMBER: (["0"-"9"])+>
-| <PLUS: "+">
-| <MINUS: "-">
-| <TIMES: "*">
-| <DIVIDE: "/">
 | <LPAREN: "(">
+| <LBRACE: "{">
+| <RBRACE: "}">
 | <RPAREN: ")">
 | <PRINT: "print">
 | <currContext: "get-curr-context">
-| <ADD: "ADD">
-| <SPACE:" ">
+| <DEFINE_CONTEXT: "define-context">
 | <GetAttitudeNames: "get-attitudes">
+| <MODE1: "set-mode-1">
+| <MODE2: "set-mode-2">
+| <MODE3: "set-mode-3">
+| <N:"N"|"n">
+|< #IDENTIFIER: <LETTER> (<LETTER>|<DIGIT>)* >
+|< #LETTER: ["_","a"-"z","A"-"Z"] >
+|< #DIGIT: ["0"-"9"] >
+| <WFF_NAME_LIST: (<WFF_NAME>((" ")*","(" ")*<WFF_NAME>)*)>
+| <WFF_NAME: "WFF"(<DIGIT>)+>
+| <CNAME: (["a"-"z", "A"-"Z", "_"])(["a"-"z", "A"-"Z", "0"-"9", "_"])+>
+| <SET_ATTITUDES: "set-attitudes">
+| <ATTITUDE: (["a"-"z", "A"-"Z", "_"])(["a"-"z", "A"-"Z", "0"-"9", "_"])+>
+| <ATTITUDE_SET: (<ATTITUDE>((" ")*","(" ")*<ATTITUDE>)*)>
+
+
 
 }
 
@@ -77,23 +93,138 @@ void Factor() :
 void Command() throws ParseException :
 {
     Token stringToken;
+     Token t = null;
+        Token wffNameList = null;
+       Token attitudeSet = null;
 }
-{
+{ 
     (
         <currContext>
-        { String s = Controller.getCurrContext();
-        System.out.println(s);}
+        {
+         try {
+        String s = ContextController.getCurrContextName();
+        System.out.println(s);
+      } catch (Exception e) {
+        System.out.println("No Current Context");
+      }
+
+        }
     |
         <GetAttitudeNames>
         { 
-            Hashtable<Integer, String> attitudeNames = Controller.getAttitudeNames();
+        HashMap<String, Integer> attitudeNames = ContextController.getAttitudes().getSet();
             System.out.println("List of attitude names:");
 
-         // Iterate over the attitude names and print them
-            for (String attitudeName : attitudeNames.values()) {
-               System.out.println(attitudeName);
-            }
+          // Iterate over the attitude names and print them
+        for (String key : attitudeNames.keySet()) {
+          System.out.println(key);
         }
+        }
+    | <MODE1>
+    {
+      mode = 1;
+       System.out.println("Operating in mode 1 (Default)");
+      System.out.println(mode);
+
+    } 
+    | <MODE2>
+    {
+      mode = 2;
+      System.out.println("Operating in mode 2");
+      System.out.println(mode);
+
+    }
+    | <MODE3>
+    {
+      mode = 3;
+      System.out.println("Operating in mode 3");
+      System.out.println(mode);
+
+
+    }
+    |<DEFINE_CONTEXT>
+     
+   (
+             stringToken=<CNAME> ("(" wffNameList =<WFF_NAME_LIST> ")" "(" attitudeSet =<ATTITUDE_SET> ")")?
+            { 
+                
+                                String cname = stringToken.image;
+                // Check if both WFF_NAME_LIST and ATTITUDE_SET were provided
+                if (wffNameList != null && attitudeSet != null) {
+                    // Check if their lengths are equal
+                    String[] wffList = wffNameList.image.substring(0).split(",");
+                String[] attitudes = attitudeSet.image.substring(0).split(",");
+                    if (wffList.length != attitudes.length) {
+                        throw new ParseException("WFF_NAME_LIST and ATTITUDE_SET must have the same length.");
+                    }
+                    
+                    // Check if each attitude in ATTITUDE_SET is in the initial set
+                    for (String attitude : attitudes) {
+                        if (!ContextController.getAttitudes().getSet().containsKey(attitude)) {
+                            throw new ParseException("Invalid attitude in ATTITUDE_SET: " + attitude);
+                        }
+                    }
+                 System.out.println("context " + cname + " is defined.");
+
+                }
+                else{
+                   System.out.println("context " + cname + " is defined.");
+
+                }
+            } 
+        )
+    )}
+
+void Setup() throws ParseException :
+{
+    Token attitudeSetToken;
+    HashMap<String, Integer> hash = new HashMap<String, Integer>();
+    controller.getAttitudes().setSet(hash);
+}
+{
+    (
+        <SET_ATTITUDES> <LBRACE> attitudeSetToken = <ATTITUDE_SET> <RBRACE>
+        {
+            // Extract the string representation of the token
+            String attitudeSet = attitudeSetToken.image;
+
+            // Manipulate the string to extract individual attitudes
+            String[] attitudes = attitudeSet.substring(0).split(",");
+
+           // Process each individual attitude
+        for (int i = 0; i < attitudes.length; i++) {
+          // Trim any leading or trailing spaces
+          String trimmedAttitude = attitudes[i].trim();
+          if(trimmedAttitude.toLowerCase().equals("belief"))
+          hash.put( trimmedAttitude,i + 1);
+          // Perform further operations on the individual attitudes
+          System.out.println("Attitude: " + trimmedAttitude);
+        }
+        // Pass the attitudes to the controller
+        controller.getAttitudes().setSet(hash);
+        hash.put("Belief", 0);
+        }
+    |
+       ( <N>
+        {
+            System.out.println("User chose not to enter attitudes.");
+            System.out.println();
+            hash.put("Belief",0);
+            // Handle the case where the user chooses not to enter attitudes
+        }
+       )
     )
 }
 
+
+
+/*void Command1() throws ParseException :
+{
+    Token stringToken;
+}
+{
+    <PRINT>
+    stringToken = <STRING>
+    // Execute action to print the string
+    {System.out.println("Printing: " + stringToken.image);}
+}*/

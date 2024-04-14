@@ -1,6 +1,5 @@
 package edu.guc.mind_graf.network;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,8 +47,23 @@ public class Network {
 		propositionNodes = new HashMap<Integer, Node>();
 		relations = new HashMap<String, Relation>();
 		quantifiers.put("forall", "forall");
-		Relation relation = Network.createRelation("forall", "propositionnode",
-				Adjustability.EXPAND, 2);
+		addBasicRelations();
+		try{
+			addBasicNodes();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+
+	public void addBasicRelations() {
+		Network.createRelation("forall", "propositionnode", Adjustability.EXPAND, 2);
+		Network.createRelation("min", "individualnode", Adjustability.NONE, 1);
+		Network.createRelation("min", "individualnode", Adjustability.NONE, 1);
+		Network.createRelation("arg", "propositionnode", Adjustability.NONE, 1);
+	}
+
+	public void addBasicNodes() throws NoSuchTypeException {
+		Network.createNode("0", "individualNode");
 	}
 
 	// first constructor for molecular nodes
@@ -67,63 +81,62 @@ public class Network {
 						.get(downCablesKey).containsKey(molecularKey)))) {
 
 			switch (SemanticType.toLowerCase()) {
-			case "propositionnode":
+				case "propositionnode":
+					node = new PropositionNode(downCableSet);
+					propositionNodes.put(node.getId(), node);
+					break;
 
-				node = new PropositionNode(downCableSet);
-				propositionNodes.put(node.getId(), node);
-				break;
+				case "actnode":
+					node = new ActNode(downCableSet);
+					break;
+				case "individualnode":
+					node = new IndividualNode(downCableSet);
+					break;
+				case "rulenode":
+					node = new RuleNode(downCableSet);
+					break;
+				default:
+					if (userDefinedClasses.containsKey(SemanticType)) {
+						CustomClass customClass = userDefinedClasses
+								.get(SemanticType);
+						Class<?> createdClass = customClass.getNewClass();
+						try {
+							node = (Node) customClass.createInstance(createdClass,
+									downCableSet);
+						} catch (InstantiationException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							return null;
+						} catch (IllegalAccessException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							return null;
+						} catch (IllegalArgumentException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							return null;
+						} catch (InvocationTargetException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							return null;
+						} catch (NoSuchMethodException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							return null;
+						} catch (SecurityException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							return null;
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							return null;
+						}
 
-			case "actnode":
-				node = new ActNode(downCableSet);
-				break;
-			case "individualnode":
-				node = new IndividualNode(downCableSet);
-				break;
-			case "rulenode":
-				node = new RuleNode(downCableSet);
-				break;
-			default:
-				if (userDefinedClasses.containsKey(SemanticType)) {
-					CustomClass customClass = userDefinedClasses
-							.get(SemanticType);
-					Class<?> createdClass = customClass.getNewClass();
-					try {
-						node = (Node) customClass.createInstance(createdClass,
-								downCableSet);
-					} catch (InstantiationException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-						return null;
-					} catch (IllegalAccessException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-						return null;
-					} catch (IllegalArgumentException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-						return null;
-					} catch (InvocationTargetException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-						return null;
-					} catch (NoSuchMethodException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-						return null;
-					} catch (SecurityException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-						return null;
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-						return null;
+					} else {
+						throw new NoSuchTypeException(
+								"No such Semantic Type, do you want to create a new one ?");
 					}
-
-				} else {
-					throw new NoSuchTypeException(
-							"No such Semantic Type, do you want to create a new one ?");
-				}
 			}
 
 			node.fetchFreeVariables();
@@ -165,61 +178,61 @@ public class Network {
 			throws NoSuchTypeException {
 		Node node;
 		switch (SemanticType.toLowerCase()) {
-		case "propositionnode":
-			node = new PropositionNode(name, false);
-			propositionNodes.put(node.getId(), node);
-			break;
-		case "actnode":
-			node = new ActNode(name, false);
-			break;
-		case "individualnode":
-			node = new IndividualNode(name, false);
-			break;
-		case "rulenode":
-			node = new RuleNode(name, false);
-			break;
-		default:
-			if (userDefinedClasses.containsKey(SemanticType)) {
-				CustomClass customClass = userDefinedClasses.get(SemanticType);
-				Class<?> createdClass = customClass.getNewClass();
-				try {
-					node = (Node) customClass.createInstance(createdClass,
-							name, false);
-				} catch (InstantiationException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					return null;
-				} catch (IllegalAccessException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					return null;
-				} catch (IllegalArgumentException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					return null;
-				} catch (InvocationTargetException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					return null;
-				} catch (NoSuchMethodException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					return null;
-				} catch (SecurityException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					return null;
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					return null;
+			case "propositionnode":
+				node = new PropositionNode(name, false);
+				propositionNodes.put(node.getId(), node);
+				break;
+			case "actnode":
+				node = new ActNode(name, false);
+				break;
+			case "individualnode":
+				node = new IndividualNode(name, false);
+				break;
+			case "rulenode":
+				node = new RuleNode(name, false);
+				break;
+			default:
+				if (userDefinedClasses.containsKey(SemanticType)) {
+					CustomClass customClass = userDefinedClasses.get(SemanticType);
+					Class<?> createdClass = customClass.getNewClass();
+					try {
+						node = (Node) customClass.createInstance(createdClass,
+								name, false);
+					} catch (InstantiationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						return null;
+					} catch (IllegalAccessException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						return null;
+					} catch (IllegalArgumentException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						return null;
+					} catch (InvocationTargetException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						return null;
+					} catch (NoSuchMethodException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						return null;
+					} catch (SecurityException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						return null;
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						return null;
 
+					}
+
+				} else {
+					throw new NoSuchTypeException(
+							"No such Semantic Type, do you want to create a new one ?");
 				}
-
-			} else {
-				throw new NoSuchTypeException(
-						"No such Semantic Type, do you want to create a new one ?");
-			}
 		}
 		if (node != null) {
 			if (nodes.containsKey(node.getId()))
@@ -237,60 +250,60 @@ public class Network {
 			throws NoSuchTypeException {
 		Node node;
 		switch (SemanticType.toLowerCase()) {
-		case "propositionnode":
-			node = new PropositionNode(name, true);
-			propositionNodes.put(node.getId(), node);
-			break;
-		case "actnode":
-			node = new ActNode(name, true);
-			break;
-		case "individualnode":
-			node = new IndividualNode(name, true);
-			break;
-		case "rulenode":
-			node = new RuleNode(name, true);
-			break;
-		default:
-			if (userDefinedClasses.containsKey(SemanticType)) {
-				CustomClass customClass = userDefinedClasses.get(SemanticType);
-				Class<?> createdClass = customClass.getNewClass();
-				try {
-					node = (Node) customClass.createInstance(createdClass,
-							name, true);
-				} catch (InstantiationException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					return null;
-				} catch (IllegalAccessException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					return null;
-				} catch (IllegalArgumentException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					return null;
-				} catch (InvocationTargetException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					return null;
-				} catch (NoSuchMethodException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					return null;
-				} catch (SecurityException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					return null;
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					return null;
-				}
+			case "propositionnode":
+				node = new PropositionNode(name, true);
+				propositionNodes.put(node.getId(), node);
+				break;
+			case "actnode":
+				node = new ActNode(name, true);
+				break;
+			case "individualnode":
+				node = new IndividualNode(name, true);
+				break;
+			case "rulenode":
+				node = new RuleNode(name, true);
+				break;
+			default:
+				if (userDefinedClasses.containsKey(SemanticType)) {
+					CustomClass customClass = userDefinedClasses.get(SemanticType);
+					Class<?> createdClass = customClass.getNewClass();
+					try {
+						node = (Node) customClass.createInstance(createdClass,
+								name, true);
+					} catch (InstantiationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						return null;
+					} catch (IllegalAccessException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						return null;
+					} catch (IllegalArgumentException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						return null;
+					} catch (InvocationTargetException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						return null;
+					} catch (NoSuchMethodException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						return null;
+					} catch (SecurityException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						return null;
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						return null;
+					}
 
-			} else {
-				throw new NoSuchTypeException(
-						"No such Semantic Type, do you want to create a new one ?");
-			}
+				} else {
+					throw new NoSuchTypeException(
+							"No such Semantic Type, do you want to create a new one ?");
+				}
 		}
 		if (node != null) {
 			if (nodes.containsKey(node.getId()))
@@ -616,59 +629,59 @@ public class Network {
 		// System.out.println(M4.substitute(substitutionArr));
 		// printNodes();
 		// =============================================================================================================
-		Node cs = createNode("cs", "propositionnode");
-		Node fun = createNode("fun", "propositionnode");
-		Node mary = createNode("mary", "propositionnode");
-		Node believe = createNode("believe", "propositionnode");
-		Node bob = createNode("bob", "propositionnode");
-		Node know = createNode("know", "propositionnode");
-
-		Relation agent = createRelation("agent", "", Adjustability.EXPAND, 2);
-		Relation act = createRelation("act", "", Adjustability.EXPAND, 2);
-		Relation obj = createRelation("obj", "", Adjustability.EXPAND, 2);
-		Relation prop = createRelation("prop", "", Adjustability.EXPAND, 2);
-
-		DownCable d1 = new DownCable(obj, new NodeSet(cs));
-		DownCable d2 = new DownCable(prop, new NodeSet(fun));
-
-		Node M1 = createNode("propositionnode", new DownCableSet(d1, d2));
-
-		DownCable d3 = new DownCable(obj, new NodeSet(M1));
-		DownCable d4 = new DownCable(act, new NodeSet(believe));
-		DownCable d5 = new DownCable(agent, new NodeSet(mary));
-
-		Node M2 = createNode("propositionnode", new DownCableSet(d3, d4, d5));
-
-		DownCable d6 = new DownCable(obj, new NodeSet(M2));
-		DownCable d7 = new DownCable(act, new NodeSet(know));
-		DownCable d8 = new DownCable(agent, new NodeSet(bob));
-
-		Node M3 = createNode("propositionnode", new DownCableSet(d6, d7, d8));
-
-		FUnitPath p1 = new FUnitPath(agent);
-		FUnitPath p2 = new FUnitPath(act);
-		FUnitPath p3 = new FUnitPath(obj);
-
-		ComposePath pCompose = new ComposePath(p2, p3);
-
-		FUnitPath pF4 = new FUnitPath(agent);
-		FUnitPath pF5 = new FUnitPath(act);
-		FUnitPath pF6 = new FUnitPath(obj);
-
-		ComposePath pCompose2 = new ComposePath(pF5, pF6);
-
-		LinkedList<Object[]> s = p3.follow(M3, new PathTrace(), new Context());
-		Path p4 = new KPlusPath(p3);
-		LinkedList<Object[]> s2 = p4.follow(M3, new PathTrace(), new Context());
-
-		for (Object[] object : s2) {
-			System.out.println(object[0]);
-		}
-
-		AndPath and = new AndPath(pCompose);
-		AndPath and2 = new AndPath(pCompose2);
-
-		NodeSet oss = new NodeSet();
+//		Node cs = createNode("cs", "propositionnode");
+//		Node fun = createNode("fun", "propositionnode");
+//		Node mary = createNode("mary", "propositionnode");
+//		Node believe = createNode("believe", "propositionnode");
+//		Node bob = createNode("bob", "propositionnode");
+//		Node know = createNode("know", "propositionnode");
+//
+//		Relation agent = createRelation("agent", "", Adjustability.EXPAND, 2);
+//		Relation act = createRelation("act", "", Adjustability.EXPAND, 2);
+//		Relation obj = createRelation("obj", "", Adjustability.EXPAND, 2);
+//		Relation prop = createRelation("prop", "", Adjustability.EXPAND, 2);
+//
+//		DownCable d1 = new DownCable(obj, new NodeSet(cs));
+//		DownCable d2 = new DownCable(prop, new NodeSet(fun));
+//
+//		Node M1 = createNode("propositionnode", new DownCableSet(d1, d2));
+//
+//		DownCable d3 = new DownCable(obj, new NodeSet(M1));
+//		DownCable d4 = new DownCable(act, new NodeSet(believe));
+//		DownCable d5 = new DownCable(agent, new NodeSet(mary));
+//
+//		Node M2 = createNode("propositionnode", new DownCableSet(d3, d4, d5));
+//
+//		DownCable d6 = new DownCable(obj, new NodeSet(M2));
+//		DownCable d7 = new DownCable(act, new NodeSet(know));
+//		DownCable d8 = new DownCable(agent, new NodeSet(bob));
+//
+//		Node M3 = createNode("propositionnode", new DownCableSet(d6, d7, d8));
+//
+//		FUnitPath p1 = new FUnitPath(agent);
+//		FUnitPath p2 = new FUnitPath(act);
+//		FUnitPath p3 = new FUnitPath(obj);
+//
+//		ComposePath pCompose = new ComposePath(p2, p3);
+//
+//		FUnitPath pF4 = new FUnitPath(agent);
+//		FUnitPath pF5 = new FUnitPath(act);
+//		FUnitPath pF6 = new FUnitPath(obj);
+//
+//		ComposePath pCompose2 = new ComposePath(pF5, pF6);
+//
+//		LinkedList<Object[]> s = p3.follow(M3, new PathTrace(), new Context());
+//		Path p4 = new KPlusPath(p3);
+//		LinkedList<Object[]> s2 = p4.follow(M3, new PathTrace(), new Context());
+//
+//		for (Object[] object : s2) {
+//			System.out.println(object[0]);
+//		}
+//
+//		AndPath and = new AndPath(pCompose);
+//		AndPath and2 = new AndPath(pCompose2);
+//
+//		NodeSet oss = new NodeSet();
 
 	}
 
