@@ -1,6 +1,5 @@
 package edu.guc.mind_graf.paths;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.context.Context;

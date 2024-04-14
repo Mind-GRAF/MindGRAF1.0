@@ -1,8 +1,8 @@
 package edu.guc.mind_graf.mgip.requests;
 
 import edu.guc.mind_graf.components.Substitutions;
-import edu.guc.mind_graf.mgip.Report;
 import edu.guc.mind_graf.mgip.Scheduler;
+import edu.guc.mind_graf.mgip.reports.Report;
 import edu.guc.mind_graf.nodes.Node;
 
 public class Channel {

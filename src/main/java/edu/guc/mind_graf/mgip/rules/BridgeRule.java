@@ -3,10 +3,10 @@ package edu.guc.mind_graf.mgip.rules;
 import java.util.Collection;
 
 import edu.guc.mind_graf.mgip.InferenceType;
-import edu.guc.mind_graf.mgip.KnownInstance;
-import edu.guc.mind_graf.mgip.Report;
-import edu.guc.mind_graf.mgip.ReportType;
 import edu.guc.mind_graf.mgip.Scheduler;
+import edu.guc.mind_graf.mgip.reports.KnownInstance;
+import edu.guc.mind_graf.mgip.reports.Report;
+import edu.guc.mind_graf.mgip.reports.ReportType;
 import edu.guc.mind_graf.mgip.requests.AntecedentToRuleChannel;
 import edu.guc.mind_graf.mgip.requests.Channel;
 import edu.guc.mind_graf.mgip.requests.ChannelType;
