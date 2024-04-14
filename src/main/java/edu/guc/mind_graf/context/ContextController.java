@@ -1,7 +1,6 @@
 package edu.guc.mind_graf.context;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.set.ContextSet;
@@ -10,7 +9,7 @@ import edu.guc.mind_graf.set.Set;
 public class ContextController {
     private static Context currContext;
     private static ContextSet contextSet;
-    private static Set<Integer, String> attitudeNames = new Set<>();
+    private static Set<String,Integer> attitudes = new Set<>();
     private static Network network;
     private static boolean uvbrEnabled;
     
@@ -18,9 +17,9 @@ public class ContextController {
     
     private static ArrayList<ArrayList<Integer>> consistentAttitudes;
     
-    public static void setUp(Set<Integer, String> attitudeNames, ArrayList<ArrayList<Integer>> consistentAttitudes, boolean uvbrEnabled){
+    public static void setUp(Set<String,Integer> attitudeNames, ArrayList<ArrayList<Integer>> consistentAttitudes, boolean uvbrEnabled){
         network = new Network();
-        ContextController.attitudeNames = attitudeNames;
+        ContextController.attitudes = attitudeNames;
         ContextController.uvbrEnabled = uvbrEnabled;
         ContextController.consistentAttitudes = consistentAttitudes;
         contextSet = new ContextSet();
@@ -34,10 +33,8 @@ public class ContextController {
         ContextController.currContext = c;
     }
     
-    public String getPropositionAttitudeName(Integer prop, Context c) {
-        // get the key value from the attitudeNames hashtable
-        System.out.println(c.getPropositionAttitude(prop));
-        return attitudeNames.get(c.getPropositionAttitude(prop));
+    public int getAttitudeNumber(String attitudeName) {
+        return attitudes.get(attitudeName);
     }
 
     public static Context getContext(String contextName) {
@@ -64,12 +61,12 @@ public class ContextController {
         if(contextSet.contains(name)){
             throw new RuntimeException("context Already Exists");
         }
-        Context c = new Context(name, ContextController.attitudeNames);
+        Context c = new Context(name, ContextController.attitudes);
         contextSet.add(name,c);
     }
 
-    public static Set<Integer, String> getAttitudeNames() {
-        return attitudeNames;
+    public static Set<String,Integer> getAttitudes() {
+        return attitudes;
     }
 
     

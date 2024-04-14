@@ -13,7 +13,7 @@ public class Context {
     private Set<Integer, BitSet> AttitudesBitset;
 
     
-    public Context(String name, Set<Integer, String> attitudeNames){
+    public Context(String name, Set<String,Integer> attitudeNames){
         this.name=name;
         //TODO Wael: set the attitude names
     }

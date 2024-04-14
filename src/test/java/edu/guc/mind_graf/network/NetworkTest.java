@@ -4,7 +4,6 @@ import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.caseFrames.Adjustability;
 import edu.guc.mind_graf.context.ContextController;
-import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.relations.Relation;
 import edu.guc.mind_graf.set.NodeSet;
@@ -13,24 +12,23 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 
-class NetwrokTest {
+class NetworkTest {
 	Network n;
 	
 	@BeforeEach
 	void setUp() {
 		n = new Network();
 		System.out.println("Testing Network");
-		Set<Integer,String> attitudeNames = new Set<>();
-		attitudeNames.add(0, "beliefs");
-		attitudeNames.add(1, "obligations");
+		Set<String,Integer> attitudeNames = new Set<>();
+		attitudeNames.add( "beliefs",0);
+		attitudeNames.add("obligations",1);
 		
 		ArrayList<ArrayList<Integer>> consistentAttitudes = new ArrayList<>();
-		consistentAttitudes.add((ArrayList<Integer>) List.of(0));
-		consistentAttitudes.add((ArrayList<Integer>) List.of(1));
-		consistentAttitudes.add((ArrayList<Integer>) List.of(0,1));
+		consistentAttitudes.add(new ArrayList<>(List.of(0)));
+		consistentAttitudes.add(new ArrayList<>(List.of(1)));
+		consistentAttitudes.add(new ArrayList<>(List.of(0,1)));
 		
 		ContextController.setUp(attitudeNames,consistentAttitudes ,false);
 		ContextController.createNewContext("guc");
