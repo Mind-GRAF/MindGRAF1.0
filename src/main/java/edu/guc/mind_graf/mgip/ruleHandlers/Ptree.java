@@ -31,7 +31,7 @@ class PtreeNode {
         this.rightChild = rightChild;
         this.sIndex = sIndex;
         this.vars = new NodeSet();
-        for(Node var : vars){   // shalllow cloning so that changing in set would destroy nothing
+        for(Node var : vars){   // shallow cloning so that changing in set would destroy nothing
             this.vars.add(var);
         }
         vars.setIsFinal(true);
@@ -127,6 +127,10 @@ class PtreeNode {
     public void setMin(int min) {
         this.min = min;
     }
+
+    public int getMin() {
+        return min;
+    }
 }
 
 public class Ptree extends RuleInfoHandler {
@@ -152,20 +156,17 @@ public class Ptree extends RuleInfoHandler {
 
     public static Ptree constructPtree(PropositionNodeSet antecedents, int minPcount, int minNcount, int ptreeNodeMin){
         Ptree ptree = new Ptree(minPcount, minNcount);
-        HashMap <Node, HashSet<PtreeNode>> vpList = ptree.processAntecedents(antecedents);
+        HashMap <Node, HashSet<PtreeNode>> vpList = ptree.processAntecedents(antecedents, ptreeNodeMin);
         ArrayDeque <PtreeNode> pSequence = ptree.processVariables(vpList);
-        ptree.buildPtree(pSequence);
+        ptree.buildPtree(pSequence, ptreeNodeMin);
         return ptree;
     }
 
-    private HashMap <Node, HashSet<PtreeNode>> processAntecedents(PropositionNodeSet antecedents){
+    private HashMap <Node, HashSet<PtreeNode>> processAntecedents(PropositionNodeSet antecedents, int ptreeNodeMin){
         HashMap <Node, HashSet<PtreeNode>> vpList = new HashMap<>();
         for(PropositionNode ant : antecedents){
             antecedentRIcount.put(ant.getId(), new int[]{0, 0});
             NodeSet vars = ant.getFreeVariables();
-//            if(vars == null){   // unnecessary
-//                vars = ant.fetchFreeVariables();
-//            }
             // insert in varSetLeafMap
             int hash = ant.getFreeVariablesHash();
             if(!varSetLeafMap.containsKey(hash)) {
@@ -178,6 +179,11 @@ public class Ptree extends RuleInfoHandler {
                 ps.add(varSetLeafMap.get(hash));
                 vpList.put(n, ps);
             }
+            // setting the min of each leaf
+            if(ptreeNodeMin < 2)
+                varSetLeafMap.get(hash).setMin(ptreeNodeMin);
+            else
+                varSetLeafMap.get(hash).setMin(varSetLeafMap.get(hash).getMin() + 1);
         }
         return vpList;
     }
@@ -197,7 +203,7 @@ public class Ptree extends RuleInfoHandler {
         return pSequence;
     }
 
-    private void buildPtree(ArrayDeque <PtreeNode> pSequence){
+    private void buildPtree(ArrayDeque <PtreeNode> pSequence, int ptreeNodeMin){
         PtreeNode firstMismatched = null;
         while(pSequence.size() > 1){ // would stop when only one node is left
             PtreeNode p1 = pSequence.pollFirst();
@@ -216,6 +222,10 @@ public class Ptree extends RuleInfoHandler {
                 firstMismatched = null;
                 p2 = pSequence.pollFirst();
                 PtreeNode parent = matchSiblings(p1, p2, intersection);
+                if(ptreeNodeMin < 2) // it's not andentail, 2 is for andentail
+                    parent.setMin(ptreeNodeMin);
+                else
+                    parent.setMin(p1.getMin() + p2.getMin());
                 pSequence.add(parent);
             }
         }
@@ -330,18 +340,5 @@ public class Ptree extends RuleInfoHandler {
                 ", minNcount=" + minNcount +
                 '}';
     }
-
-    void setPtreeNodeMin(int min){
-        ArrayDeque <PtreeNode> queue = new ArrayDeque<>();
-        queue.addAll(varSetLeafMap.values());
-        while(!queue.isEmpty()){
-            PtreeNode p = queue.pollFirst();
-            p.setMin(min);
-            if(p.getParent() != null && !queue.contains(p.getParent())){
-                queue.addLast(p.getParent());
-            }
-        }
-    }
-
 
 }

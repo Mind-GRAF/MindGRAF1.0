@@ -20,7 +20,7 @@ public class AndOr extends RuleNode {
         arg = downcableSet.get("arg").getNodeSet();
         PropositionNodeSet antecedents = RuleInfoHandler.getVariableAntecedents(arg);
         int cAnt = arg.size() - antecedents.size();
-        this.ruleInfoHandler = Ptree.constructPtree(antecedents, Math.max(0, max - cAnt), Math.max(0, arg.size() - min - cAnt));
+        this.ruleInfoHandler = Ptree.constructPtree(antecedents, Math.max(0, max - cAnt), Math.max(0, arg.size() - min - cAnt), 0);
     }
 
 }
