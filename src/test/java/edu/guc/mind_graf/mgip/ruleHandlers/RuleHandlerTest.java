@@ -164,9 +164,7 @@ class RuleHandlerTest {
         DownCable inC = new DownCable(in, new NodeSet(Z));
         Node M4 = Network.createNode("propositionnode", new DownCableSet(livingC, inC));
 
-        Ptree testing = Ptree.constructPtree(new NodeSet(M0, M1, M2, M3, M4));
-        testing.setMinPcount(5);
-        testing.setMinNcount(Integer.MAX_VALUE);
+        Ptree testing = Ptree.constructPtree(new PropositionNodeSet(M0, M1, M2, M3, M4), 5, Integer.MAX_VALUE);
         assertNotNull(testing);
         assertNotNull(testing.getVarSetLeafMap());
         assertEquals(5, testing.getVarSetLeafMap().keySet().size());

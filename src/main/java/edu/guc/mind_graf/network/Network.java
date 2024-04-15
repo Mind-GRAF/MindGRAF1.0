@@ -56,6 +56,9 @@ public class Network {
 		Network.createRelation("min", "individualnode", Adjustability.NONE, 1);
 		Network.createRelation("min", "individualnode", Adjustability.NONE, 1);
 		Network.createRelation("arg", "propositionnode", Adjustability.NONE, 1);
+		Network.createRelation("object", "", Adjustability.EXPAND, 2);
+		Network.createRelation("member", "", Adjustability.EXPAND, 2);
+		Network.createRelation("class", "", Adjustability.EXPAND, 2);
 	}
 
 	public void addBasicNodes(){

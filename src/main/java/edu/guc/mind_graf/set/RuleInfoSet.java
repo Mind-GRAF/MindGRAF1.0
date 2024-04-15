@@ -77,8 +77,6 @@ public class RuleInfoSet implements Iterable<RuleInfo>{
         return result;
     }
 
-    public
-
     public void clear() {
         ris.clear();
     }
