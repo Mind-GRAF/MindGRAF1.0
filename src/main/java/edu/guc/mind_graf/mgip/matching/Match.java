@@ -50,4 +50,13 @@ public class Match {
     public void setMatchType(int matchType) {
         this.matchType = matchType;
     }
+
+    public boolean isDuplicate(Match other) {
+        return this != other && node.equals(other.node) && matchType == other.matchType
+                && filterSubs.equals(other.filterSubs) && switchSubs.equals(other.switchSubs);
+    }
+
+    public Match clone() {
+        return new Match(filterSubs.clone(), switchSubs.clone(), node, matchType);
+    }
 }

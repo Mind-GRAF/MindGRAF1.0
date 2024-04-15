@@ -123,4 +123,17 @@ public class Substitutions {
     public void setMap(Map<Node, Node> map) {
         this.map = map;
     }
+
+    public boolean equals(Substitutions otherSubs) {
+        return map.equals(otherSubs.map);
+    }
+
+    public Substitutions clone() {
+        Substitutions clone = new Substitutions();
+        for (Node var : map.keySet()) {
+            Node value = map.get(var);
+            clone.add(var, value);
+        }
+        return clone;
+    }
 }

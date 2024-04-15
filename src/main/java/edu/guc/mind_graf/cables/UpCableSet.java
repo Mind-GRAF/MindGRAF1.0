@@ -98,4 +98,8 @@ public class UpCableSet {
 		return result;
 	}
 
+	public Object[] keySet() {
+		return upCables.keySet().toArray();
+	}
+
 }

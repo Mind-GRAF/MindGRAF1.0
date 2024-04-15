@@ -23,6 +23,8 @@ import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.exceptions.CannotRemoveNodeException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.exceptions.NodeNotInNetworkException;
+import edu.guc.mind_graf.mgip.matching.Match;
+import edu.guc.mind_graf.mgip.matching.Matcher;
 import edu.guc.mind_graf.nodes.ActNode;
 import edu.guc.mind_graf.nodes.IndividualNode;
 import edu.guc.mind_graf.nodes.MolecularType;
@@ -682,6 +684,28 @@ public class Network {
 //		AndPath and2 = new AndPath(pCompose2);
 //
 //		NodeSet oss = new NodeSet();
+
+		Node cs = createNode("cs", "propositionnode");
+		Node phy = createNode("phy", "propositionnode");
+		Node fun = createNode("fun", "propositionnode");
+		Node var1 = createVariableNode("var1", "propositionnode");
+		Node var2 = createVariableNode("var2", "propositionnode");
+		Node var3 = createVariableNode("var3", "propositionnode");
+
+		Relation obj = createRelation("obj", "", Adjustability.EXPAND, 1);
+		Relation prop = createRelation("prop", "", Adjustability.NONE, 0);
+
+		DownCable d1 = new DownCable(obj, new NodeSet(cs, phy));
+		DownCable d2 = new DownCable(prop, new NodeSet(fun));
+
+		DownCable d3 = new DownCable(obj, new NodeSet(var1));
+
+		Node M0 = createNode("propositionnode", new DownCableSet(d1, d2));
+		Node M1 = createNode("propositionnode", new DownCableSet(d3, d2));
+
+		ArrayList<Match> matchList = Matcher.match(M1);
+
+		System.out.println("aa");
 
 	}
 
