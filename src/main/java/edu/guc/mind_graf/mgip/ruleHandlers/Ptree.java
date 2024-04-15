@@ -341,4 +341,18 @@ public class Ptree extends RuleInfoHandler {
                 '}';
     }
 
+    public ArrayList<PtreeNode> arrayOfNodes(){  //for testing
+        ArrayList<PtreeNode> arr = new ArrayList<>();
+        ArrayDeque <PtreeNode> queue = new ArrayDeque<>();
+        queue.addAll(varSetLeafMap.values());
+        while(!queue.isEmpty()){
+            PtreeNode p = queue.pollFirst();
+            arr.add(p);
+            if(p.getParent() != null && !queue.contains(p.getParent())){
+                queue.addLast(p.getParent());
+            }
+        }
+        return arr;
+    }
+
 }
