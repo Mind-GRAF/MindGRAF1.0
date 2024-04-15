@@ -21,7 +21,7 @@ class PtreeNode {
     //private Set<Integer> pats; // antecedents node stores info abt
     private NodeSet vars; // free vars in propositions node represents
     private FreeVariableSet siblingIntersection; // shared vars between sibling and this node  (parent.getCommonVariables)
-    private final int min = 0; // should initialize and consider moving
+    private int min = 0; // should initialize and consider moving
 
     public PtreeNode(PtreeNode parent, PtreeNode sibling, PtreeNode leftChild, PtreeNode rightChild, SIndex sIndex,
                      NodeSet vars, FreeVariableSet siblingIntersection) {
@@ -127,7 +127,6 @@ class PtreeNode {
 
 public class Ptree extends RuleInfoHandler {
 
-    private final HashMap <Integer, PtreeNode> antLeafMap; // depricated
     private final HashMap <Integer, PtreeNode> varSetLeafMap;
     private int minPcount; // minimum number of positive RIs needed to be sent
     private int minNcount; // minimum number of negative RIs needed to be sent
@@ -137,26 +136,18 @@ public class Ptree extends RuleInfoHandler {
     private boolean isPropagating = false;
     private HashMap <Integer, int[]> antecedentRIcount = new HashMap<>();
 
-    public Ptree(){
-        antLeafMap = new HashMap<>();
-        varSetLeafMap = new HashMap<>();
-    }
-
     public HashMap<Integer, PtreeNode> getVarSetLeafMap() {
         return varSetLeafMap;
     }
 
-    public Ptree (PropositionNodeSet antecedents, int minPcount, int minNcount){
-        this();
+    public Ptree (int minPcount, int minNcount){ // should edit: shouldn't have constructors I don't need/want
+        varSetLeafMap = new HashMap<>();
         this.minPcount = minPcount;
         this.minNcount = minNcount;
-        constructPtree(antecedents, minPcount, minNcount);
     }
 
     public static Ptree constructPtree(PropositionNodeSet antecedents, int minPcount, int minNcount){
-        Ptree ptree = new Ptree();
-        ptree.minPcount = minPcount;
-        ptree.minNcount = minNcount;
+        Ptree ptree = new Ptree(minPcount, minNcount);
         HashMap <Node, HashSet<PtreeNode>> vpList = ptree.processAntecedents(antecedents);
         ArrayDeque <PtreeNode> pSequence = ptree.processVariables(vpList);
         ptree.buildPtree(pSequence);
@@ -168,9 +159,9 @@ public class Ptree extends RuleInfoHandler {
         for(PropositionNode ant : antecedents){
             antecedentRIcount.put(ant.getId(), new int[]{0, 0});
             NodeSet vars = ant.getFreeVariables();
-            if(vars == null){
-                vars = ant.fetchFreeVariables();
-            }
+//            if(vars == null){   // unnecessary
+//                vars = ant.fetchFreeVariables();
+//            }
             // insert in varSetLeafMap
             int hash = ant.getFreeVariablesHash();
             if(!varSetLeafMap.containsKey(hash)) {
@@ -335,4 +326,5 @@ public class Ptree extends RuleInfoHandler {
                 ", minNcount=" + minNcount +
                 '}';
     }
+
 }

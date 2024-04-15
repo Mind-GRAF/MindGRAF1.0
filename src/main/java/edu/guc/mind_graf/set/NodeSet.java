@@ -142,4 +142,10 @@ public class NodeSet implements Iterable<Node> {
         if(!isFinal)
             nodes.clear();
     }
+
+    public int getIntValue() {
+        if(this.getNames().size() != 1)
+            throw new IllegalArgumentException("NodeSet doesn't represent a number");
+        return Integer.parseInt(this.getNames().get(0));
+    }
 }

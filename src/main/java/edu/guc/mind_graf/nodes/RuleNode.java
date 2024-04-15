@@ -13,6 +13,7 @@ import edu.guc.mind_graf.mgip.requests.ChannelSet;
 import edu.guc.mind_graf.mgip.requests.ChannelType;
 import edu.guc.mind_graf.mgip.requests.MatchChannel;
 import edu.guc.mind_graf.mgip.requests.Request;
+import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfoHandler;
 import edu.guc.mind_graf.mgip.rules.AndOr;
 import edu.guc.mind_graf.mgip.rules.Thresh;
 import edu.guc.mind_graf.network.Network;
@@ -24,6 +25,7 @@ import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 
 public class RuleNode extends PropositionNode {
     private boolean forwardReport;
+    protected RuleInfoHandler ruleInfoHandler;
 
     public RuleNode(String name, Boolean isVariable) {
         super(name, isVariable);
@@ -35,7 +37,6 @@ public class RuleNode extends PropositionNode {
         super(downCableSet);
         this.name = "P" + (Network.MolecularCount);
         this.forwardReport = false;
-
         // TODO Auto-generated constructor stub
     }
 

@@ -1,23 +1,17 @@
 package edu.guc.mind_graf.mgip.ruleHandlers;
 
 import edu.guc.mind_graf.exceptions.InvalidRuleInfoException;
+import edu.guc.mind_graf.nodes.Node;
+import edu.guc.mind_graf.set.NodeSet;
+import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
 
 public abstract class RuleInfoHandler {
 
-    private final RuleInfo constantRI;
-    private int min;
+    private RuleInfo constantRI;
+
     public RuleInfoHandler() {
-        this.min = 0;
         constantRI = new RuleInfo();
-    }
-
-    public int getMin() {
-        return min;
-    }
-
-    public void setMin(int min) {
-        this.min = min;
     }
 
     public RuleInfo getConstantAntecedents() {
@@ -29,6 +23,15 @@ public abstract class RuleInfoHandler {
             constantRI.combine(ri); // editeable depending on all possible cases
         else
             insertVariableRI(ri);
+    }
+
+    public static PropositionNodeSet getVariableAntecedents(NodeSet allAntecedents) {
+        PropositionNodeSet antecedents = new PropositionNodeSet();
+        for(Node n : allAntecedents){   // only want the antecedents with free variables, other antecedents will be handled by the constant RI
+            if(n.isOpen())
+                antecedents.add(n);
+        }
+        return antecedents;
     }
 
     public abstract RuleInfoSet insertVariableRI(RuleInfo ri) throws InvalidRuleInfoException;
