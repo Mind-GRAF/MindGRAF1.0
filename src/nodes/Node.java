@@ -257,13 +257,13 @@ public abstract class Node {
 		LinkedList<Node> pathTrace = new LinkedList<Node>();
 		return this.substituteHelper(this, substitutions, builtNodes, pathTrace);
 	}
-	//My applySub Method (Mostafa)
-	public Node applySubstitution(Substitutions substitutions, Node node)
-			throws NoSuchTypeException {
-		HashMap<String, Node> builtNodes = new HashMap<String, Node>();
-		LinkedList<Node> pathTrace = new LinkedList<Node>();
-		return substituteHelper(node, substitutions, builtNodes, pathTrace);
-	}
+	// //My applySub Method (Mostafa)
+	// public Node applySubstitution(Substitutions substitutions, Node node)
+	// 		throws NoSuchTypeException {
+	// 	HashMap<String, Node> builtNodes = new HashMap<String, Node>();
+	// 	LinkedList<Node> pathTrace = new LinkedList<Node>();
+	// 	return substituteHelper(node, substitutions, builtNodes, pathTrace);
+	// }
 
 	private Node substituteHelper(Node parent,
 			Substitutions substitutions,

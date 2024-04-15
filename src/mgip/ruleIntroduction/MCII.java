@@ -1,24 +1,34 @@
 package mgip.ruleIntroduction;
 
-import set.RIISet;
-
 public class MCII {
-    RIISet riiSet;
-    int RIIsCount;
-    boolean isSufficent;
+    private RII rii;
+    private int RIIsSetCount;
+    private boolean isSufficent;
 
     public MCII() {
-
+        rii = null;
+        RIIsSetCount = 0;
+        isSufficent = false;
     }
 
-    public MCII(RIISet riiSet) {
-        this.riiSet = riiSet;
-        RIIsCount = 0;
-        this.isSufficent = false;
+    public void add(RII rii) {
+        RIIsSetCount +=1;
     }
 
-    public void add(RIISet riiSet) {
-        riiSet.add(riiSet);
-        RIIsCount++;
+    public void setSufficent() {
+        this.isSufficent = true;
     }
+
+    public boolean isSufficent() {
+        return this.isSufficent;
+    }
+
+    public int getRIIsSetCount() {
+        return this.RIIsSetCount;
+    }
+
+    public RII getRII() {
+        return this.rii;
+    }
+
 }

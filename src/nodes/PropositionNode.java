@@ -157,6 +157,12 @@ public class PropositionNode extends Node {
                         attitudeId,
                         requesterNode);
                 break;
+            case Introduction:
+                newChannel = new IntroductionChannel(switchSubstitutions,
+                        filterSubstitutions, contextName,
+                        attitudeId,
+                        requesterNode);
+                break;
             default:
                 newChannel = new ActChannel(switchSubstitutions,
                         filterSubstitutions, contextName,

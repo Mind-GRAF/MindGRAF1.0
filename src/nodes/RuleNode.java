@@ -1,6 +1,8 @@
 package nodes;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 
 import mgip.KnownInstance;
 import mgip.InferenceType;
@@ -19,10 +21,14 @@ import mgip.ruleIntroduction.RII;
 import mgip.rules.AndOr;
 import mgip.rules.Thresh;
 import network.Network;
+import set.CombinationSet;
 import set.ContextSet;
 import set.MCIISet;
 import set.NodeSet;
+import set.CombinationSet;
 import set.RIISet;
+import set.Set;
+import support.Support;
 import cables.DownCable;
 import cables.DownCableSet;
 import components.Substitutions;
@@ -208,23 +214,17 @@ public class RuleNode extends PropositionNode {
             // TODO: handle exception
         }
     }
-
-    protected IntroductionChannel intiateIntroChannel(Channel channel, NodeSet consNodeSet, NodeSet antArgNodeSet) {
-        // implementation of the method intiateIntroChannel
-        IntroductionChannel introChannel = new IntroductionChannel();
-        introChannel.setContextName(channel.getContextName());
-        introChannel.setAttitudeID(channel.getAttitudeID());
-        introChannel.setFilterSubstitutions(channel.getFilterSubstitutions());
-        introChannel.setSwitcherSubstitutions(channel.getSwitcherSubstitutions());
-        introChannel.setRequesterNode(this);
-        return introChannel;
-    }
     
     public boolean processIntroductionRequest(Request currentRequest) {
         //need to check if we already made an introduction request to the same node before
+        String currContextName = currentRequest.getChannel().getContextName();
+        int attitude = currentRequest.getChannel().getAttitudeID();
+        Substitutions filterSubs = currentRequest.getChannel().getFilterSubstitutions();
+        Substitutions switchSubs = currentRequest.getChannel().getSwitcherSubstitutions();
 
         if (this instanceof AND || this instanceof NOR){
             IntroductionChannel intiatedChannel = intiateIntroChannel(currentRequest.getChannel(), this.getDownConsNodeSet(), null);
+            IntroductionChannel intiatedChannel1 = establishChannel(ChannelType.Introduction, this, switchSubs, filterSubs, currContextName, attitude, -1, this)
             if (this.getDownConsNodeSet().size() > 0){
                 for (Node consNode : this.getDownConsNodeSet()){
                     if (consNode instanceof RuleNode){
@@ -235,48 +235,105 @@ public class RuleNode extends PropositionNode {
         }
         else if (this instanceof AndOr || this instanceof Thresh){
             NodeSet args = this.getDownAntArgNodeSet();
-            int attitude = currentRequest.getChannel().getAttitudeID();
-            Context context = ContextSet.getContext(currentRequest.getChannel().getContextName());
-            RII rii = new RII(currentRequest, args, null , context , attitude);
+            Context newContext = new Context(currContextName,attitude,args);
+            RII rii = new RII(currentRequest, null, args , newContext , attitude);
             RIISet.addRII(rii);
-            //send requests to all consequents
+            sendRequestsToNodeSet(args, currentRequest,newContext);//installing introduction channels and sending requests
         }
         else if(this instanceof AndEntail){
          NodeSet ants = this.getDownAntArgNodeSet();
          for(Node ant : ants) {
-            ant = applySubstitution(currentRequest.getChannel().getFilterSubstitutions(), ant);
-            if(ant.getDownCableSet().isEmpty()){
+            ant = ant.applySubstitution(currentRequest.getChannel().getFilterSubstitutions());
+            if(isFree(ant)){
                 return false;
             }
          }  
          NodeSet cons = this.getDownConsNodeSet();
-         int attitude = currentRequest.getChannel().getAttitudeID();
-         Context context = ContextSet.getContext(currentRequest.getChannel().getContextName());
-            RII rii = new RII(currentRequest, ants, cons , context , attitude);
-            RIISet.addRII(rii);
-            //send requests to all consequents
+         Context newContext = new Context(currContextName,attitude,ants);//clone of the current context in addition to the assumed antecedents
+         RII rii = new RII(currentRequest, ants, cons , newContext , attitude);
+         RIISet.addRII(rii);
+         sendRequestsToNodeSet(cons, currentRequest, newContext);//installing introduction channels and sending requests
         }
-        else if(this instanceof OrEntail){
+        else if(this instanceof OrEntail || this instanceof NumEntail){
             NodeSet ants = this.getDownAntArgNodeSet();
             NodeSet cons = this.getDownConsNodeSet();
             MCII mcii = new MCII(); //creates a new empty MCII
             for(Node ant : ants) {
-                ant = applySubstitution(currentRequest.getChannel().getFilterSubstitutions(), ant);
-                if(ant.getDownCableSet().isEmpty()){
+                ant = ant.applySubstitution(currentRequest.getChannel().getFilterSubstitutions());
+                if(isFree(ant)){
                     return false;
                 }
-            }  
+            }
+            if (this instanceof NumEntail){
+                int i = this.getMin(); //Gets value of i from the NumEntail node
+                List<NodeSet> combinations = CombinationSet.generateAntecedentCombinations(ants, i);
+                for (NodeSet combination : combinations) {
+                    Context newContext = new Context(currContextName, attitude,combination);
+                    RII rii = new RII(currentRequest, combination, cons , newContext , attitude);
+                    RIISet.addRII(rii);
+                    mcii.add(rii);
+                    this.sendRequestsToNodeSet(cons, filterSubs, switchSubs, newContext.getContextName(), attitude, ChannelType.RuleCons, this);
+                }
+            }
+            else{//It's an OrEntail node
             for(Node ant : ants) {
-                Context context = ContextSet.getContext(currentRequest.getChannel().getContextName());
-                int attitude = currentRequest.getChannel().getAttitudeID();
-                RII rii = new RII(currentRequest, ants, cons , context , attitude);
+                Context newContext = new Context(currContextName,attitude, ant);
+                RII rii = new RII(currentRequest, ants, cons , newContext , attitude);
                 RIISet riiSet = new RIISet();
                 riiSet.addRII(rii);
                 mcii.add(riiSet);
-                //send requests to all consequents
-            }  
-            MCIISet.addMCII(mcii);
-           }
+                sendRequestToNodeSet(cons, currentRequest, newContext); //send requests to all consequents
+                }  
+            }
+           }  
+    }
+
+    public static void processIntroductionReport()
+    {
+        
+    }
+
+    public static boolean filterSupports(Report rep, RII rii)
+    {
+        if(rep.getSupport().isSubset(rii.getContext()) && rii.getContext().checkNodesPresent(rep.getSupport())){  //get context proposition nodes
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+    public static void introductionHandler(RII rii)
+    {
+        if(this instanceof AndOr)
+        {
+            if( (rii.getPosCount() >= min) || (rii.getNegCount() > rii.getConqArgNodes().size() - max)){
+                rii.setSufficent();
+                Support sup = combineSupport(rii);
+                //Build an instance of the rule using the substitutions found in the original request.
+                //send a report declaring this instance in the context of the original request having the support Sup.
+                
+        }
+    }
+
+    public static Support combineSupport(RII rii)
+    { //Return Sup of the rule instance
+        Support sup = new Support();
+        for(rep : rii.getReportSet())
+        {
+            sup = sup.union(rep.getSupport());
+        }
+        sup = sup - rii.getAntNodes();
+        return sup;
+    }
+
+    public static Support combineSupport(MCII mcii)
+    { //Return Sup of the rule instance
+        Support sup = new Support();
+        for(RII rii : mcii.getRII())
+        {
+            sup = sup.union(combineSupport(rii));
+        }
+        return sup;
     }
 
     /***

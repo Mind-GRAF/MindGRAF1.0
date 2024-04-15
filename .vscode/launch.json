@@ -6,6 +6,13 @@
   "configurations": [
     {
       "type": "java",
+      "name": "NetworkUI",
+      "request": "launch",
+      "mainClass": "view.NetworkUI",
+      "projectName": "MindGraf"
+    },
+    {
+      "type": "java",
       "name": "ChannelPairSet",
       "request": "launch",
       "mainClass": "mindG.mgip.requests.ChannelPairSet",
