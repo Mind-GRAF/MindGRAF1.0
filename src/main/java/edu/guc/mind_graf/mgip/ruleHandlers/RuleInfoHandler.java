@@ -20,7 +20,7 @@ public abstract class RuleInfoHandler {
 
     public void insertRI(RuleInfo ri) throws InvalidRuleInfoException {
         if (ri.getSubs() == null || ri.getSubs().size() == 0)
-            constantRI.combine(ri); // editeable depending on all possible cases
+            constantRI.combine(ri); // editable depending on all possible cases
         else
             insertVariableRI(ri);
     }
