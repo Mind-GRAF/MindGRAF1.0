@@ -1,5 +1,8 @@
 "# MindGRAF1.0" 
 
+## System Requirments
+java verison 21 - https://www.oracle.com/java/technologies/downloads/#jdk21-mac
+
 ## steps for creating a Node
     !! DO NOT CREATE NODES DIRECTLY FROM THE CONSTRUCTOR !! 
     !! YOU MUST USE THE NETWORK CLASS FOR CREATING NODES !!
