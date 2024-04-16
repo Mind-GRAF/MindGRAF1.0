@@ -121,7 +121,7 @@ public class MatcherTest {
     }
 
     @Test
-    void nodeBasedReduceType1() {
+    void wireBasedReduceType1() {
         try {
             Node cs = Network.createNode("cs", "propositionnode");
             Node phy = Network.createNode("phy", "propositionnode");
@@ -168,7 +168,7 @@ public class MatcherTest {
     }
 
     @Test
-    void nodeBasedReduceType2() {
+    void wireBasedReduceType2() {
         try {
             Node cs = Network.createNode("cs", "propositionnode");
             Node phy = Network.createNode("phy", "propositionnode");
@@ -245,7 +245,7 @@ public class MatcherTest {
     }
 
     @Test
-    void nodeBasedExpandType1() {
+    void wireBasedExpandType1() {
         try {
             Node cs = Network.createNode("cs", "propositionnode");
             Node phy = Network.createNode("phy", "propositionnode");
@@ -322,7 +322,7 @@ public class MatcherTest {
     }
 
     @Test
-    void nodeBasedExpandType2() {
+    void wireBasedExpandType2() {
         try {
             Node cs = Network.createNode("cs", "propositionnode");
             Node phy = Network.createNode("phy", "propositionnode");
