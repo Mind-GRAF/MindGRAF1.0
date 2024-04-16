@@ -42,10 +42,9 @@ public class MatcherTest {
     }
 
     @Test
-    void nodeBasedExact() {
-        Node cs;
+    void nodeBasedNone() {
         try {
-            cs = Network.createNode("cs", "propositionnode");
+            Node cs = Network.createNode("cs", "propositionnode");
             Node phy = Network.createNode("phy", "propositionnode");
             Node fun = Network.createNode("fun", "propositionnode");
             Node var1 = Network.createVariableNode("var1", "propositionnode");
@@ -83,8 +82,8 @@ public class MatcherTest {
             for (Match m : matchList) {
                 assertTrue(m.getFilterSubs().getMap().isEmpty());
                 assertTrue(Substitutions.testContains(switchSubs, m.getSwitchSubs()));
-                assertEquals(m.getNode(), M0);
-                assertEquals(m.getMatchType(), matchType);
+                assertEquals(M0, m.getNode());
+                assertEquals(matchType, m.getMatchType());
             }
         } catch (NoSuchTypeException e) {
             // TODO Auto-generated catch block
@@ -93,10 +92,9 @@ public class MatcherTest {
     }
 
     @Test
-    void nodeBasedExactEmpty() {
-        Node cs;
+    void nodeBasedNoneEmpty() {
         try {
-            cs = Network.createNode("cs", "propositionnode");
+            Node cs = Network.createNode("cs", "propositionnode");
             Node phy = Network.createNode("phy", "propositionnode");
             Node math = Network.createNode("math", "propositionnode");
             Node fun = Network.createNode("fun", "propositionnode");
@@ -124,9 +122,8 @@ public class MatcherTest {
 
     @Test
     void nodeBasedReduceType1() {
-        Node cs;
         try {
-            cs = Network.createNode("cs", "propositionnode");
+            Node cs = Network.createNode("cs", "propositionnode");
             Node phy = Network.createNode("phy", "propositionnode");
             Node fun = Network.createNode("fun", "propositionnode");
             Node var1 = Network.createVariableNode("var1", "propositionnode");
@@ -161,8 +158,8 @@ public class MatcherTest {
             for (Match m : matchList) {
                 assertTrue(m.getFilterSubs().getMap().isEmpty());
                 assertTrue(Substitutions.testContains(switchSubs, m.getSwitchSubs()));
-                assertEquals(m.getNode(), M0);
-                assertEquals(m.getMatchType(), matchType);
+                assertEquals(M0, m.getNode());
+                assertEquals(matchType, m.getMatchType());
             }
         } catch (NoSuchTypeException e) {
             // TODO Auto-generated catch block
@@ -172,9 +169,8 @@ public class MatcherTest {
 
     @Test
     void nodeBasedReduceType2() {
-        Node cs;
         try {
-            cs = Network.createNode("cs", "propositionnode");
+            Node cs = Network.createNode("cs", "propositionnode");
             Node phy = Network.createNode("phy", "propositionnode");
             Node fun = Network.createNode("fun", "propositionnode");
             Node var1 = Network.createVariableNode("var1", "propositionnode");
@@ -239,8 +235,8 @@ public class MatcherTest {
             for (Match m : matchList) {
                 assertTrue(m.getFilterSubs().getMap().isEmpty());
                 assertTrue(Substitutions.testContains(switchSubs, m.getSwitchSubs()));
-                assertEquals(m.getNode(), M0);
-                assertEquals(m.getMatchType(), matchType);
+                assertEquals(M0, m.getNode());
+                assertEquals(matchType, m.getMatchType());
             }
         } catch (NoSuchTypeException e) {
             // TODO Auto-generated catch block
@@ -250,9 +246,8 @@ public class MatcherTest {
 
     @Test
     void nodeBasedExpandType1() {
-        Node cs;
         try {
-            cs = Network.createNode("cs", "propositionnode");
+            Node cs = Network.createNode("cs", "propositionnode");
             Node phy = Network.createNode("phy", "propositionnode");
             Node fun = Network.createNode("fun", "propositionnode");
             Node var1 = Network.createVariableNode("var1", "propositionnode");
@@ -317,8 +312,8 @@ public class MatcherTest {
             for (Match m : matchList) {
                 assertTrue(m.getFilterSubs().getMap().isEmpty());
                 assertTrue(Substitutions.testContains(switchSubs, m.getSwitchSubs()));
-                assertEquals(m.getNode(), M0);
-                assertEquals(m.getMatchType(), matchType);
+                assertEquals(M0, m.getNode());
+                assertEquals(matchType, m.getMatchType());
             }
         } catch (NoSuchTypeException e) {
             // TODO Auto-generated catch block
@@ -328,9 +323,8 @@ public class MatcherTest {
 
     @Test
     void nodeBasedExpandType2() {
-        Node cs;
         try {
-            cs = Network.createNode("cs", "propositionnode");
+            Node cs = Network.createNode("cs", "propositionnode");
             Node phy = Network.createNode("phy", "propositionnode");
             Node fun = Network.createNode("fun", "propositionnode");
             Node var1 = Network.createVariableNode("var1", "propositionnode");
@@ -365,9 +359,105 @@ public class MatcherTest {
             for (Match m : matchList) {
                 assertTrue(m.getFilterSubs().getMap().isEmpty());
                 assertTrue(Substitutions.testContains(switchSubs, m.getSwitchSubs()));
-                assertEquals(m.getNode(), M0);
-                assertEquals(m.getMatchType(), matchType);
+                assertEquals(M0, m.getNode());
+                assertEquals(matchType, m.getMatchType());
             }
+        } catch (NoSuchTypeException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    void uvbrCheckVarTerm() {
+        try {
+            Node cs = Network.createNode("cs", "propositionnode");
+            Node fun = Network.createNode("fun", "propositionnode");
+            Node var1 = Network.createVariableNode("var1", "propositionnode");
+            Node var2 = Network.createVariableNode("var2", "propositionnode");
+
+            Relation obj = Network.createRelation("obj", "", Adjustability.NONE, 0);
+            Relation prop = Network.createRelation("prop", "", Adjustability.NONE, 0);
+
+            DownCable d1 = new DownCable(obj, new NodeSet(cs, var1));
+            DownCable d2 = new DownCable(prop, new NodeSet(fun));
+
+            DownCable d3 = new DownCable(obj, new NodeSet(cs, var2));
+
+            Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2));
+            Node M1 = Network.createNode("propositionnode", new DownCableSet(d3, d2));
+
+            List<Match> matchList = Matcher.match(M1);
+
+            assertEquals(1, matchList.size());
+
+            Substitutions filter = new Substitutions();
+            filter.add(var1, var2);
+
+            List<Substitutions> filterSubs = new ArrayList<>();
+            filterSubs.add(filter);
+
+            int matchType = 0;
+
+            assertTrue(Substitutions.testContains(filterSubs, matchList.get(0).getFilterSubs()));
+            assertTrue(matchList.get(0).getSwitchSubs().getMap().isEmpty());
+            assertEquals(M0, matchList.get(0).getNode());
+            assertEquals(matchType, matchList.get(0).getMatchType());
+        } catch (NoSuchTypeException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    void uvbrCheckVarVar() {
+        try {
+            Node cs = Network.createNode("cs", "propositionnode");
+            Node fun = Network.createNode("fun", "propositionnode");
+            Node var1 = Network.createVariableNode("var1", "propositionnode");
+            Node var2 = Network.createVariableNode("var2", "propositionnode");
+
+            Relation obj = Network.createRelation("obj", "", Adjustability.NONE, 0);
+            Relation prop = Network.createRelation("prop", "", Adjustability.NONE, 0);
+
+            DownCable d1 = new DownCable(obj, new NodeSet(cs, cs));
+            DownCable d2 = new DownCable(prop, new NodeSet(fun));
+
+            DownCable d3 = new DownCable(obj, new NodeSet(var1, var2));
+
+            Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2));
+            Node M1 = Network.createNode("propositionnode", new DownCableSet(d3, d2));
+
+            List<Match> matchList = Matcher.match(M1);
+
+            assertEquals(0, matchList.size());
+        } catch (NoSuchTypeException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    void occursCheck() {
+        try {
+            Node cs = Network.createNode("cs", "propositionnode");
+            Node fun = Network.createNode("fun", "propositionnode");
+            Node var1 = Network.createVariableNode("var1", "propositionnode");
+
+            Relation obj = Network.createRelation("obj", "", Adjustability.NONE, 0);
+            Relation prop = Network.createRelation("prop", "", Adjustability.NONE, 0);
+
+            DownCable d1 = new DownCable(obj, new NodeSet(cs, var1));
+            DownCable d2 = new DownCable(prop, new NodeSet(fun));
+
+            DownCable d3 = new DownCable(obj, new NodeSet(var1, var1));
+
+            Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2));
+            Node M1 = Network.createNode("propositionnode", new DownCableSet(d3, d2));
+
+            List<Match> matchList = Matcher.match(M1);
+
+            assertEquals(0, matchList.size());
         } catch (NoSuchTypeException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

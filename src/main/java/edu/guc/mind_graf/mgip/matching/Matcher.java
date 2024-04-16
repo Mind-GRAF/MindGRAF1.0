@@ -18,8 +18,6 @@ import edu.guc.mind_graf.set.NodeSet;
 /*
 TODO:
 
-Test (UVBR, Occur-Check)
-
 path based inference
 Test (PBI)
 
@@ -29,7 +27,7 @@ change the uvbr constant to uvbr in Network
 
 public class Matcher {
     static ArrayList<Match> matchList;
-    static boolean uvbr;
+    static boolean uvbr = true;
 
     // static Context context = Network.getGlobalContext();
     // public static List<Match> match(Node queryNode, Context context) {
@@ -46,9 +44,13 @@ public class Matcher {
                 if (node.equals(queryNode))
                     continue;
                 Match match = new Match(new Substitutions(), new Substitutions(), node, 0);
-                if (node.getSyntacticType() == Syntactic.VARIABLE)
+                if (node.getSyntacticType() == Syntactic.VARIABLE) {
                     match.getFilterSubs().add(node, queryNode);
-                else
+                } else if (node.getSyntacticType() == Syntactic.MOLECULAR) {
+                    if (!occursCheck(queryNode, node, match)) {
+                        match.getSwitchSubs().add(queryNode, node);
+                    }
+                } else
                     match.getSwitchSubs().add(queryNode, node);
                 matchList.add(match);
             }
@@ -167,12 +169,12 @@ public class Matcher {
             matchList.remove(match);
             return false;
         }
-        if (queryNode.getSyntacticType() == Syntactic.VARIABLE)
-            if (!uvbr || (uvbr && !uvbrTrap(queryNode, node, match.getSwitchSubs())))
+        if (node.getSyntacticType() != Syntactic.VARIABLE)
+            if (!uvbr || (uvbr && !uvbrTrap(queryNode, node)))
                 match.getSwitchSubs().add(queryNode, node);
             else
                 matchList.remove(match);
-        else if (!uvbr || (uvbr && !uvbrTrap(node, queryNode, match.getFilterSubs())))
+        else if (!uvbr || (uvbr && !uvbrTrap(node, queryNode)))
             match.getFilterSubs().add(node, queryNode);
         else {
             matchList.remove(match);
@@ -276,7 +278,7 @@ public class Matcher {
         return newList;
     }
 
-    private static boolean uvbrTrap(Node term, Node value, Substitutions subs) {
+    private static boolean uvbrTrap(Node term, Node value) {
         NodeSet parents = term.getDirectParents();
         for (Node parent : parents.getValues()) {
             for (Cable cable : parent.getDownCableSet().getValues()) {
