@@ -8,19 +8,22 @@ import java.util.List;
 import edu.guc.mind_graf.cables.Cable;
 import edu.guc.mind_graf.caseFrames.Adjustability;
 import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.Syntactic;
 import edu.guc.mind_graf.relations.Relation;
+import edu.guc.mind_graf.set.NodeSet;
 
 /*
 TODO:
 
-UVBR TRAP
-Tests (UVBR, Occur-Check)
+Test (UVBR, Occur-Check)
 
 path based inference
-Tests (PBI)
+Test (PBI)
+
+change the uvbr constant to uvbr in Network
 
 */
 
@@ -28,7 +31,15 @@ public class Matcher {
     static ArrayList<Match> matchList;
     static boolean uvbr;
 
-    public static ArrayList<Match> match(Node queryNode) {
+    // static Context context = Network.getGlobalContext();
+    // public static List<Match> match(Node queryNode, Context context) {
+    // Matcher.context = context;
+    // List<Match> list = match(queryNode);
+    // context = Network.getGlobalContext();
+    // return list;
+    // }
+
+    public static List<Match> match(Node queryNode) {
         matchList = new ArrayList<>();
         if (queryNode.getSyntacticType() == Syntactic.VARIABLE) {
             for (Node node : Network.getNodes().values()) {
@@ -265,27 +276,27 @@ public class Matcher {
         return newList;
     }
 
-    private static boolean uvbrTrap(Node var, Node value, Substitutions subs) {
-        // NodeSet parents = var.getDirectParents();
-        // for (Node parent : parents.getValues()) {
-        // for (Cable cable : parent.getDownCableSet().getValues()) {
-        // if (cable.getNodeSet().contains(var)) {
-        // for (Node node : cable.getNodeSet().getValues()) {
-        // if (node.getSyntacticType() == Syntactic.VARIABLE) {
-        // if (node.equals(var))
-        // continue;
-        // if (node.getName().equals(var.getName())) {
-        // return true;
-        // }
-        // }
-        // if (node.getSyntacticType() == value.getSyntacticType()
-        // && node.getName().equals(value.getName())) {
-        // return true;
-        // }
-        // }
-        // }
-        // }
-        // }
+    private static boolean uvbrTrap(Node term, Node value, Substitutions subs) {
+        NodeSet parents = term.getDirectParents();
+        for (Node parent : parents.getValues()) {
+            for (Cable cable : parent.getDownCableSet().getValues()) {
+                if (cable.getNodeSet().contains(term)) {
+                    for (Node node : cable.getNodeSet().getValues()) {
+                        if (node.getSyntacticType() == Syntactic.VARIABLE) {
+                            if (node.equals(term))
+                                continue;
+                            if (node.getName().equals(term.getName())) {
+                                return true;
+                            }
+                        }
+                        if (node.getSyntacticType() == value.getSyntacticType()
+                                && node.getName().equals(value.getName())) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
         return false;
     }
 

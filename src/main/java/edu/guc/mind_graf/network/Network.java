@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 
 import edu.guc.mind_graf.paths.AndPath;
 import edu.guc.mind_graf.paths.ComposePath;
@@ -701,7 +702,7 @@ public class Network {
 		Node M0 = createNode("propositionnode", new DownCableSet(d1, d2));
 		Node M1 = createNode("propositionnode", new DownCableSet(d3, d2));
 
-		ArrayList<Match> matchList = Matcher.match(M1);
+		List<Match> matchList = Matcher.match(M1);
 
 		System.out.println("aa");
 
