@@ -16,12 +16,11 @@ import edu.guc.mind_graf.relations.Relation;
 /*
 TODO:
 
-Tests
-
 UVBR TRAP
-path based inference
+Tests (UVBR, Occur-Check)
 
-Tests
+path based inference
+Tests (PBI)
 
 */
 
@@ -105,7 +104,7 @@ public class Matcher {
                                     queryNodePermutation,
                                     nodePermutation,
                                     Network.getRelations().get(downRelation),
-                                    tempMatch))
+                                    tempMatch) != null)
                                 tempMatchList.add(tempMatch);
                         }
                     }
@@ -132,7 +131,7 @@ public class Matcher {
                                     queryNodePermutation,
                                     nodePermutation,
                                     Network.getRelations().get(upRelation),
-                                    tempMatch))
+                                    tempMatch) != null)
                                 tempMatchList.add(tempMatch);
                         }
                     }
@@ -171,18 +170,18 @@ public class Matcher {
         return true;
     }
 
-    private static boolean unifyMolecular(List<Node> queryNodeList, List<Node> nodeList, Relation relation,
+    private static Match unifyMolecular(List<Node> queryNodeList, List<Node> nodeList, Relation relation,
             Match match) {
         if (queryNodeList.size() != nodeList.size()) {
             // wire based inference
             if (relation.getAdjust() == Adjustability.NONE)
-                return false;
+                return null;
             int cableSize = queryNodeList.size();
             int cSize = nodeList.size();
             if (relation.getAdjust() == Adjustability.EXPAND) {
                 if (cableSize < cSize) {
                     if (match.getMatchType() == 1)
-                        return false;
+                        return null;
                     match.setMatchType(2);
                 } else
                     match.setMatchType(1);
@@ -190,7 +189,7 @@ public class Matcher {
             if (relation.getAdjust() == Adjustability.REDUCE) {
                 if (cableSize > cSize) {
                     if (match.getMatchType() == 1)
-                        return false;
+                        return null;
                     match.setMatchType(2);
                 } else
                     match.setMatchType(1);
@@ -204,16 +203,17 @@ public class Matcher {
                 nonUnifiedNodes.remove(n);
                 if (unify(queryNode, n, match)) {
                     isUnified = true;
-                } else {
-                    matchList.add(match);
                 }
+                // else {
+                // matchList.add(match);
+                // }
             }
             if (!isUnified) {
                 if (relation.getAdjust() == Adjustability.NONE)
-                    return false;
+                    return null;
                 else if (relation.getAdjust() == Adjustability.EXPAND) {
                     if (match.getMatchType() == 2)
-                        return false;
+                        return null;
                     else {
                         match.setMatchType(1);
                         if (queryNode.getSyntacticType() == Syntactic.VARIABLE)
@@ -221,7 +221,7 @@ public class Matcher {
                     }
                 } else if (relation.getAdjust() == Adjustability.REDUCE) {
                     if (match.getMatchType() == 1)
-                        return false;
+                        return null;
                     else {
                         match.setMatchType(2);
                         if (queryNode.getSyntacticType() == Syntactic.VARIABLE)
@@ -234,22 +234,22 @@ public class Matcher {
         }
         for (Node n : nonUnifiedNodes) {
             if (relation.getAdjust() == Adjustability.NONE)
-                return false;
+                return null;
             else if (relation.getAdjust() == Adjustability.EXPAND) {
                 if (match.getMatchType() == 1)
-                    return false;
+                    return null;
                 else
                     match.setMatchType(2);
             } else if (relation.getAdjust() == Adjustability.REDUCE) {
                 if (match.getMatchType() == 2)
-                    return false;
+                    return null;
                 else
                     match.setMatchType(1);
             } else if (n.getSyntacticType() == Syntactic.VARIABLE) {
                 match.getFilterSubs().add(n, null);
             }
         }
-        return true;
+        return match;
     }
 
     private static List<Match> removeDuplicates(List<Match> list) {

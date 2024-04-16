@@ -1,6 +1,7 @@
 package edu.guc.mind_graf.components;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import edu.guc.mind_graf.nodes.Node;
@@ -135,5 +136,14 @@ public class Substitutions {
             clone.add(var, value);
         }
         return clone;
+    }
+
+    public static boolean testContains(List<Substitutions> list, Substitutions subs) {
+        for (Substitutions s : list) {
+            if (s.equals(subs))
+                return true;
+        }
+        return false;
+
     }
 }
