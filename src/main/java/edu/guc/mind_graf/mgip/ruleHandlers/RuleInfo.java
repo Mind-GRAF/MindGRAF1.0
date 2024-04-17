@@ -7,6 +7,8 @@ import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.nodes.FlagNode;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.set.FlagNodeSet;
+import edu.guc.mind_graf.set.FreeVariableSet;
+import edu.guc.mind_graf.set.NodeSet;
 
 public class RuleInfo {
 
@@ -86,6 +88,7 @@ public class RuleInfo {
     // substitution I'm assuming it's the same sign; otherwise, BR would've handled
     // it)
     public RuleInfo combine(RuleInfo r) {
+        RuleInfo res = new RuleInfo();
         if (!isCompatible(r))
             return null;
         int resPcount = this.pcount + r.getPcount();
@@ -106,11 +109,11 @@ public class RuleInfo {
                                       // called and that adding overwrites repeated nodes ==> a variable wouldn't
                                       // exist twice in two different nodes
         FlagNodeSet resFns = this.fns.combine(r.getFns());
-        this.pcount = resPcount;
-        this.ncount = resNcount;
-        this.subs = resSubs;
-        this.fns = resFns;
-        return this;
+        res.pcount = resPcount;
+        res.ncount = resNcount;
+        res.subs = resSubs;
+        res.fns = resFns;
+        return res;
     }
 
     public boolean equals(Object obj) {
@@ -143,4 +146,25 @@ public class RuleInfo {
                 ", fns=" + fns +
                 '}';
     }
+
+    public RuleInfo addNullSubs(FreeVariableSet ns){
+        RuleInfo ruleInfoWithNulls = clone();
+        for(Node n : ns.getFreeVariables()){
+            if(!ruleInfoWithNulls.getSubs().contains(n)){
+                ruleInfoWithNulls.getSubs().add(n, null);
+            }
+        }
+        return this;
+
+    }
+
+    public RuleInfo clone(){
+        RuleInfo ri = new RuleInfo();
+        ri.setPcount(this.pcount);
+        ri.setNcount(this.ncount);
+        ri.setSubs(this.subs.clone());
+        ri.setFns(this.fns.clone());
+        return ri;
+    }
+
 }

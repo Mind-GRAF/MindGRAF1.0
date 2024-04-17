@@ -139,4 +139,12 @@ public class Substitutions {
         }
         return false;
     }
+
+    public Substitutions clone() {
+        Substitutions copy = new Substitutions();
+        for (Node var : map.keySet()) {
+            copy.add(var, map.get(var));
+        }
+        return copy;
+    }
 }

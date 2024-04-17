@@ -15,20 +15,15 @@ class PtreeNode {
 
     private PtreeNode parent; // important for upward traversal (propagation of RIs)
     private PtreeNode sibling; // important for combining RIs
-    private PtreeNode leftChild;
-    private PtreeNode rightChild;
     private SIndex sIndex; // linear or singleton based on siblingIntersection
     //private Set<Integer> pats; // antecedents node stores info abt
     private NodeSet vars; // free vars in propositions node represents
     private FreeVariableSet siblingIntersection; // shared vars between sibling and this node  (parent.getCommonVariables)
-    private int min = 0; // should initialize and consider moving
 
     public PtreeNode(PtreeNode parent, PtreeNode sibling, PtreeNode leftChild, PtreeNode rightChild, SIndex sIndex,
                      NodeSet vars, FreeVariableSet siblingIntersection) {
         this.parent = parent;
         this.sibling = sibling;
-        this.leftChild = leftChild;
-        this.rightChild = rightChild;
         this.sIndex = sIndex;
         this.vars = new NodeSet();
         for(Node var : vars){   // shallow cloning so that changing in set would destroy nothing
@@ -52,22 +47,6 @@ class PtreeNode {
 
     public void setSibling(PtreeNode sibling) {
         this.sibling = sibling;
-    }
-
-    public PtreeNode getLeftChild() {
-        return leftChild;
-    }
-
-    public void setLeftChild(PtreeNode leftChild) {
-        this.leftChild = leftChild;
-    }
-
-    public PtreeNode getRightChild() {
-        return rightChild;
-    }
-
-    public void setRightChild(PtreeNode rightChild) {
-        this.rightChild = rightChild;
     }
 
     public SIndex getSIndex() {
@@ -96,18 +75,40 @@ class PtreeNode {
 
     public RuleInfoSet insertIntoNode(RuleInfo ri, boolean isPropagating) throws InvalidRuleInfoException {
         RuleInfoSet newRuleInfoSet = sIndex.insertVariableRI(ri);
+        System.out.println("Inserted into " + this + " " + newRuleInfoSet);
         RuleInfoSet result = new RuleInfoSet();
+        if(newRuleInfoSet == null || newRuleInfoSet.size() == 0)
+            return result;
         for(RuleInfo newRuleInfo : newRuleInfoSet){
-            if(newRuleInfo.getPcount() >= min && isPropagating){
+            if(newRuleInfo.getPcount() >= sIndex.getMin() && isPropagating){
                 if(parent != null) {
-                    parent.insertIntoNode(newRuleInfo, true);
-                }
-                else{
+                    RuleInfoSet combinedWithSibling = combineWithSibling(newRuleInfo);
+                    if(combinedWithSibling.size() > 0)
+                        parent.insertIntoNode(combinedWithSibling, true);
+                    else {
+                        parent.insertIntoNode(newRuleInfo.addNullSubs(siblingIntersection), true);
+                    }
+                } else{
                     result.addRuleInfo(newRuleInfo);
                 }
             }
         }
         return result;
+    }
+
+    void insertIntoNode(RuleInfoSet ris, boolean isPropagating) throws InvalidRuleInfoException{
+        for(RuleInfo ri: ris)
+            insertIntoNode(ri, isPropagating);
+    }
+
+    private RuleInfoSet combineWithSibling(RuleInfo newRI) {
+        RuleInfoSet allRuleInfos = new RuleInfoSet();
+        for(RuleInfo ri: sibling.getSIndex().getAllRuleInfos()){
+            RuleInfo combined = newRI.combine(ri);
+            if(combined != null)
+                allRuleInfos.addRuleInfo(combined);
+        }
+        return allRuleInfos;
     }
 
     @Override
@@ -120,16 +121,16 @@ class PtreeNode {
                 ", sIndex=" + sIndex +
                 ", vars=" + vars +
                 ", siblingIntersection=" + siblingIntersection +
-                ", min=" + min +
+                ", min=" + sIndex.getMin() +
                 '}';
     }
 
     public void setMin(int min) {
-        this.min = min;
+        sIndex.setMin(min);
     }
 
     public int getMin() {
-        return min;
+        return sIndex.getMin();
     }
 }
 
@@ -139,10 +140,10 @@ public class Ptree extends RuleInfoHandler {
     private int minPcount; // minimum number of positive RIs needed to be sent
     private int minNcount; // minimum number of negative RIs needed to be sent
     // either minPcount or minNcount needs to be satisfied for propagation to start
-    private int pcount = 0;
-    private int ncount = 0;
+    private int pcount = 0; // number of antecedents that reported positively
+    private int ncount = 0; // number of antecedents that reported negatively
     private boolean isPropagating = false;
-    private HashMap <Integer, int[]> antecedentRIcount = new HashMap<>();
+    private HashMap <Integer, int[]> antecedentRIcount = new HashMap<>(); // keeps track of how many positive/negative report was received from each antecedent
 
     public HashMap<Integer, PtreeNode> getVarSetLeafMap() {
         return varSetLeafMap;
@@ -170,7 +171,7 @@ public class Ptree extends RuleInfoHandler {
             // insert in varSetLeafMap
             int hash = ant.getFreeVariablesHash();
             if(!varSetLeafMap.containsKey(hash)) {
-                Singleton sIndex = new Singleton();
+                Singleton sIndex = new Singleton(ant.getFreeVariables());
                 varSetLeafMap.put(hash, new PtreeNode(null, null, null, null, sIndex, vars, null));
             }
             // insert in vpList
@@ -241,9 +242,9 @@ public class Ptree extends RuleInfoHandler {
         p2.setSibling(p1);
         p2.setSiblingIntersection(siblingIntersection);
         // setup parent
-        SIndex sIndex = new Linear(intersection);
+        SIndex parentSIndex = new Linear(intersection);
         NodeSet vars = p1.getVars().union(p2.getVars());
-        PtreeNode parent = new PtreeNode(null, null, p1, p2, sIndex, vars, null);
+        PtreeNode parent = new PtreeNode(null, null, p1, p2, parentSIndex, vars, null);
         p1.setParent(parent);
         p2.setParent(parent);
         return parent;
@@ -260,13 +261,7 @@ public class Ptree extends RuleInfoHandler {
 
         if(antecedentRIcount.containsKey(n.getId())){
 
-            int hash = n.getFreeVariablesHash();
-            RuleInfoSet mayInfer = varSetLeafMap.get(hash).insertIntoNode(ri, isPropagating);
-            if(mayInfer != null && mayInfer.size() > 0){
-                return mayInfer;
-            }
-
-            int[] count = antecedentRIcount.get(n.getId());
+            int[] count = antecedentRIcount.get(n.getId());  // till the end of the else is really unnecessary after start of propagation but code was moved up bcz it's nice info to keep track of. could move down for after return since it's usually unnecessary info later
             if(fn.isFlag()){
                 if(count[0] == 0)
                     pcount++;
@@ -277,7 +272,16 @@ public class Ptree extends RuleInfoHandler {
                     ncount++;
                 count[1]++;
             }
-            if((count[0] >= minPcount || count[1] >= minNcount) && !isPropagating){
+
+            int hash = n.getFreeVariablesHash();
+            System.out.println("We are propagateing? " + isPropagating);
+            RuleInfoSet mayInfer = varSetLeafMap.get(hash).insertIntoNode(ri, isPropagating);
+            if(mayInfer != null && mayInfer.size() > 0){
+                System.out.println("We may infer " + mayInfer);
+                return mayInfer;
+            }
+
+            if((pcount >= minPcount || ncount >= minNcount) && !isPropagating){
                 isPropagating = true;
                 return startPropagation();
             }
@@ -300,17 +304,15 @@ public class Ptree extends RuleInfoHandler {
                 visited.add(p);
                 RuleInfoSet ris = new RuleInfoSet();
                 ris = ris.addAll(p.getSIndex().getAllRuleInfos());
-                if(p.getParent() != null){
-                    visited.add(p.getSibling());
-                    ris = ris.combineAdd(p.getSibling().getSIndex().getAllRuleInfos());
-                }
                 PtreeNode parent = p.getParent();
                 if(parent != null){
+                    visited.add(p.getSibling());
+                    ris = ris.combineAdd(p.getSibling().getSIndex().getAllRuleInfos());
                     parent.getSIndex().insertVariableRI(ris);
                     queue.addLast(parent);
                 }
                 else{
-                    rootRuleInfos.addAll(p.getSIndex().getAllRuleInfos());
+                    rootRuleInfos = rootRuleInfos.addAll(p.getSIndex().getAllRuleInfos());
                 }
             }
         }

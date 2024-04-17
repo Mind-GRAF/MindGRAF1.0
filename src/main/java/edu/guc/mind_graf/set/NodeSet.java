@@ -129,8 +129,15 @@ public class NodeSet implements Iterable<Node> {
         return result;
     }
 
-    public boolean equals(NodeSet n) {
-        return this.getNames().equals(n.getNames());
+    public boolean equals(Object n) {
+        NodeSet ns = (NodeSet) n;// changed because it makes more sense this way
+        if(this.size() != ns.size())
+            return false;
+        for(Node node : this.nodes.values()){
+            if(!ns.contains(node))
+                return false;
+        }
+        return true;
     }
 
     @Override

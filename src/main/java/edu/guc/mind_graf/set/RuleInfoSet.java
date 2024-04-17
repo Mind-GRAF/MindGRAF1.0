@@ -11,7 +11,7 @@ public class RuleInfoSet implements Iterable<RuleInfo>{
     private HashSet<RuleInfo> ris;
 
     public RuleInfoSet() {
-        ris = new HashSet<RuleInfo>();
+        ris = new HashSet<>();
     }
 
     public HashSet<RuleInfo> getRIS() {
@@ -32,15 +32,19 @@ public class RuleInfoSet implements Iterable<RuleInfo>{
 
     public RuleInfoSet combineAdd(RuleInfo ri) {
         RuleInfoSet newInfo = new RuleInfoSet();
+        HashSet<RuleInfo> newRIS = new HashSet<>();
         for(RuleInfo r : ris) {
             RuleInfo combined = r.combineAdd(ri);
             if(combined != null) {
-                ris.add(combined);
+                newRIS.add(combined);
                 newInfo.addRuleInfo(combined);
             }
+            newRIS.add(r);
         }
-        ris.add(ri);
-        newInfo.addRuleInfo(ri);
+        newRIS.add(ri);
+        ris = newRIS;
+        if(newInfo.size() == 0) // may want to remove this line depending on should the parent get the ruleinfo even if it combined with something already?
+            newInfo.addRuleInfo(ri);
         return newInfo;    // return only the ruleinfo affected by the addition
     }
 
@@ -89,4 +93,14 @@ public class RuleInfoSet implements Iterable<RuleInfo>{
     public Iterator<RuleInfo> iterator() {
         return ris.iterator();
     }
+
+    @Override
+    public String toString() {
+        String res = "";
+        for(RuleInfo ri : ris) {
+            res += ri.toString() + " ";
+        }
+        return res;
+    }
+
 }

@@ -46,7 +46,7 @@ public class FlagNode {
     @Override
     public String toString() {
         return "FlagNode{" +
-                "node=" + node +
+                "node=" + node.getName() +
                 ", flag=" + flag +
                 ", support=" + support +
                 '}';

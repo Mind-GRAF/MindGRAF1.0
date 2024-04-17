@@ -11,6 +11,8 @@ public abstract class SIndex extends RuleInfoHandler {
 
     private NodeSet commonVariables;
 
+    protected int min;
+
     public SIndex() {
         commonVariables = new NodeSet();
     }
@@ -54,7 +56,10 @@ public abstract class SIndex extends RuleInfoHandler {
     public RuleInfoSet insertVariableRI(RuleInfoSet ri) throws InvalidRuleInfoException {
            RuleInfoSet allRuleInfos = new RuleInfoSet();
             for(RuleInfo r : ri){
-                allRuleInfos.addAll(insertVariableRI(r));
+                RuleInfoSet inserted = insertVariableRI(r);
+                if(inserted != null && inserted.size() != 0) {
+                    allRuleInfos = allRuleInfos.addAll(inserted);
+                }
             }
             return allRuleInfos;
     }
@@ -63,4 +68,11 @@ public abstract class SIndex extends RuleInfoHandler {
 
     public abstract RuleInfoSet getAllRuleInfos();
 
+    public int getMin() {
+        return min;
+    }
+
+    public void setMin(int min) {
+        this.min = min;
+    }
 }

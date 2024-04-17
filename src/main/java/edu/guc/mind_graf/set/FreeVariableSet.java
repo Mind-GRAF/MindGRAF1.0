@@ -1,12 +1,17 @@
 package edu.guc.mind_graf.set;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import edu.guc.mind_graf.nodes.Node;
 
 public class FreeVariableSet implements Iterable<Node>, Serializable {
     private HashMap<String, Node> freeVariables;
+
+    public Collection<Node> getFreeVariables() {
+        return freeVariables.values();
+    }
 
     public FreeVariableSet() {
         freeVariables = new HashMap<String, Node>();

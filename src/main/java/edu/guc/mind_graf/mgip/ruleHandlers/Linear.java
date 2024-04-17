@@ -27,8 +27,11 @@ public class Linear extends SIndex{
 
     @Override
     public RuleInfoSet insertIntoMap(RuleInfo ri, int hash) {
-        RuleInfoSet afterInsertion = ruleInfoMap.getOrDefault(hash, new RuleInfoSet()).combineAdd(ri);
-        ruleInfoMap.put(hash, afterInsertion);
+        if(ri.getPcount() < min)
+            return null;   // basically dont insert
+        RuleInfoSet insertInto = ruleInfoMap.getOrDefault(hash, new RuleInfoSet());
+        RuleInfoSet afterInsertion = insertInto.combineAdd(ri);
+        ruleInfoMap.put(hash, insertInto);
         return afterInsertion;
     }
 
@@ -36,7 +39,7 @@ public class Linear extends SIndex{
     public RuleInfoSet getAllRuleInfos() {
         RuleInfoSet allRuleInfos = new RuleInfoSet();
         for (RuleInfoSet ris : ruleInfoMap.values()) {
-            allRuleInfos.addAll(ris);
+            allRuleInfos = allRuleInfos.addAll(ris);
         }
         return allRuleInfos;
     }

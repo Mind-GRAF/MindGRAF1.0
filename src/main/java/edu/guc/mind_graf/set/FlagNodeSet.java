@@ -12,6 +12,12 @@ public class FlagNodeSet{
         flagNodes = new HashSet<FlagNode>();
     }
 
+    public FlagNodeSet(FlagNode... fns) {
+        this.flagNodes = new HashSet<>();
+        for (FlagNode n : fns)
+            this.flagNodes.add(n);
+    }
+
     public HashSet<FlagNode> getFlagNodes() {
         return flagNodes;
     }
@@ -77,8 +83,17 @@ public class FlagNodeSet{
 
     @Override
     public String toString() {
-        return "FlagNodeSet{" +
-                "flagNodes=" + flagNodes +
-                '}';
+        String s = "FlagNodeSet{ ";
+        for(FlagNode fn : flagNodes){
+            s += fn + " ";
+        }
+        s += "}";
+        return s;
+    }
+
+    public FlagNodeSet clone() {
+        FlagNodeSet newFns = new FlagNodeSet();
+        newFns.addFlagNodes(this);
+        return newFns;
     }
 }
