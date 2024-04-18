@@ -1,8 +1,18 @@
 package nodes;
 
+import mgip.Scheduler;
 import mgip.requests.Channel;
 import mgip.requests.ChannelSet;
+import mgip.requests.MatchChannel;
+import network.Network;
+import set.NodeSet;
+import relations.*;
+
+import java.util.ArrayList;
+
 import cables.DownCableSet;
+import caseFrames.Adjustability;
+import caseFrames.CaseFrame;
 
 public class ActNode extends Node {
 

@@ -11,7 +11,7 @@ public class AttitudeActuator{
 
     public void actOnNode(ActNode node, int AttitudeID) {
         PropositionNode p = (PropositionNode) node.getDownCableSet().get("obj").getNodeSet().getNode(0);
-        //TODO: Assert the proposition node p with the attitude ID to assert it to a certain set in the context
+        //TODO: Add the proposition node p with the attitude ID to assert it to a certain set in the context
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
