@@ -1,9 +1,11 @@
 package edu.guc.mind_graf.set;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
+import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.PropositionNode;
 
 public class RuleInfoSet implements Iterable<RuleInfo>{
@@ -12,6 +14,12 @@ public class RuleInfoSet implements Iterable<RuleInfo>{
 
     public RuleInfoSet() {
         ris = new HashSet<>();
+    }
+
+    public RuleInfoSet(RuleInfo... ruleInfos) {
+        this.ris = new HashSet<>();
+        for (RuleInfo r : ruleInfos)
+            this.ris.add(r);
     }
 
     public HashSet<RuleInfo> getRIS() {
@@ -77,7 +85,8 @@ public class RuleInfoSet implements Iterable<RuleInfo>{
     public RuleInfoSet addAll(RuleInfoSet ris) {
         RuleInfoSet result = new RuleInfoSet();
         result.ris.addAll(this.ris);
-        result.ris.addAll(ris.getRIS());
+        if(ris != null)
+            result.ris.addAll(ris.getRIS());
         return result;
     }
 
@@ -101,6 +110,20 @@ public class RuleInfoSet implements Iterable<RuleInfo>{
             res += ri.toString() + " ";
         }
         return res;
+    }
+
+    public RuleInfoSet combineDisjointSets(RuleInfoSet combineWith){
+        RuleInfoSet result = new RuleInfoSet();
+        for(RuleInfo ofSet1 : this){
+            for(RuleInfo ofSet2 : this){
+                result.addRuleInfo(ofSet1.combine(ofSet2));
+            }
+        }
+        return result;
+    }
+
+    public void removeRuleInfo(RuleInfo toRemove){
+        ris.remove(toRemove);
     }
 
 }

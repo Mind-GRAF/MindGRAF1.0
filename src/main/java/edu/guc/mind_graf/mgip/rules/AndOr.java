@@ -6,6 +6,7 @@ import edu.guc.mind_graf.nodes.RuleNode;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.PropositionNodeSet;
+import edu.guc.mind_graf.set.RuleInfoSet;
 
 public class AndOr extends RuleNode {
 

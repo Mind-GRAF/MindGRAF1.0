@@ -11,129 +11,6 @@ import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
 
-class PtreeNode {
-
-    private PtreeNode parent; // important for upward traversal (propagation of RIs)
-    private PtreeNode sibling; // important for combining RIs
-    private SIndex sIndex; // linear or singleton based on siblingIntersection
-    //private Set<Integer> pats; // antecedents node stores info abt
-    private NodeSet vars; // free vars in propositions node represents
-    private FreeVariableSet siblingIntersection; // shared vars between sibling and this node  (parent.getCommonVariables)
-
-    public PtreeNode(PtreeNode parent, PtreeNode sibling, PtreeNode leftChild, PtreeNode rightChild, SIndex sIndex,
-                     NodeSet vars, FreeVariableSet siblingIntersection) {
-        this.parent = parent;
-        this.sibling = sibling;
-        this.sIndex = sIndex;
-        this.vars = new NodeSet();
-        for(Node var : vars){   // shallow cloning so that changing in set would destroy nothing
-            this.vars.add(var);
-        }
-        vars.setIsFinal(true);
-        this.siblingIntersection = siblingIntersection;
-    }
-
-    public PtreeNode getParent() {
-        return parent;
-    }
-
-    public void setParent(PtreeNode parent) {
-        this.parent = parent;
-    }
-
-    public PtreeNode getSibling() {
-        return sibling;
-    }
-
-    public void setSibling(PtreeNode sibling) {
-        this.sibling = sibling;
-    }
-
-    public SIndex getSIndex() {
-        return sIndex;
-    }
-
-    public void setSIndex(SIndex sIndex) {
-        this.sIndex = sIndex;
-    }
-
-    public NodeSet getVars() {
-        return vars;
-    }
-
-    public void setVars(NodeSet vars) {
-        this.vars = vars;
-    }
-
-    public FreeVariableSet getSiblingIntersection() {
-        return siblingIntersection;
-    }
-
-    public void setSiblingIntersection(FreeVariableSet siblingIntersection) {
-        this.siblingIntersection = siblingIntersection;
-    }
-
-    public RuleInfoSet insertIntoNode(RuleInfo ri, boolean isPropagating) throws InvalidRuleInfoException {
-        RuleInfoSet newRuleInfoSet = sIndex.insertVariableRI(ri);
-        System.out.println("Inserted into " + this + " " + newRuleInfoSet);
-        RuleInfoSet result = new RuleInfoSet();
-        if(newRuleInfoSet == null || newRuleInfoSet.size() == 0)
-            return result;
-        for(RuleInfo newRuleInfo : newRuleInfoSet){
-            if(newRuleInfo.getPcount() >= sIndex.getMin() && isPropagating){
-                if(parent != null) {
-                    RuleInfoSet combinedWithSibling = combineWithSibling(newRuleInfo);
-                    if(combinedWithSibling.size() > 0)
-                        parent.insertIntoNode(combinedWithSibling, true);
-                    else {
-                        parent.insertIntoNode(newRuleInfo.addNullSubs(siblingIntersection), true);
-                    }
-                } else{
-                    result.addRuleInfo(newRuleInfo);
-                }
-            }
-        }
-        return result;
-    }
-
-    void insertIntoNode(RuleInfoSet ris, boolean isPropagating) throws InvalidRuleInfoException{
-        for(RuleInfo ri: ris)
-            insertIntoNode(ri, isPropagating);
-    }
-
-    private RuleInfoSet combineWithSibling(RuleInfo newRI) {
-        RuleInfoSet allRuleInfos = new RuleInfoSet();
-        for(RuleInfo ri: sibling.getSIndex().getAllRuleInfos()){
-            RuleInfo combined = newRI.combine(ri);
-            if(combined != null)
-                allRuleInfos.addRuleInfo(combined);
-        }
-        return allRuleInfos;
-    }
-
-    @Override
-    public String toString() {
-        return "PtreeNode{" +
-                "has parent=" + (parent != null) +
-                ",has sibling=" + (sibling != null) +
-//                ", leftChild=" + leftChild +
-//                ", rightChild=" + rightChild +
-                ", sIndex=" + sIndex +
-                ", vars=" + vars +
-                ", siblingIntersection=" + siblingIntersection +
-                ", min=" + sIndex.getMin() +
-                '}';
-    }
-
-    public void setMin(int min) {
-        sIndex.setMin(min);
-    }
-
-    public int getMin() {
-        return sIndex.getMin();
-    }
-}
-
 public class Ptree extends RuleInfoHandler {
 
     private final HashMap <Integer, PtreeNode> varSetLeafMap;
@@ -144,6 +21,7 @@ public class Ptree extends RuleInfoHandler {
     private int ncount = 0; // number of antecedents that reported negatively
     private boolean isPropagating = false;
     private HashMap <Integer, int[]> antecedentRIcount = new HashMap<>(); // keeps track of how many positive/negative report was received from each antecedent
+    ArrayDeque <PtreeNode> roots;
 
     public HashMap<Integer, PtreeNode> getVarSetLeafMap() {
         return varSetLeafMap;
@@ -160,6 +38,7 @@ public class Ptree extends RuleInfoHandler {
         HashMap <Node, HashSet<PtreeNode>> vpList = ptree.processAntecedents(antecedents, ptreeNodeMin);
         ArrayDeque <PtreeNode> pSequence = ptree.processVariables(vpList);
         ptree.buildPtree(pSequence, ptreeNodeMin);
+        ptree.roots = pSequence;
         return ptree;
     }
 
@@ -274,10 +153,8 @@ public class Ptree extends RuleInfoHandler {
             }
 
             int hash = n.getFreeVariablesHash();
-            System.out.println("We are propagateing? " + isPropagating);
             RuleInfoSet mayInfer = varSetLeafMap.get(hash).insertIntoNode(ri, isPropagating);
             if(mayInfer != null && mayInfer.size() > 0){
-                System.out.println("We may infer " + mayInfer);
                 return mayInfer;
             }
 
@@ -357,4 +234,11 @@ public class Ptree extends RuleInfoHandler {
         return arr;
     }
 
+    public ArrayDeque<PtreeNode> getRoots() {
+        return roots;
+    }
+
+    public void setRoots(ArrayDeque<PtreeNode> roots) {
+        this.roots = roots;
+    }
 }

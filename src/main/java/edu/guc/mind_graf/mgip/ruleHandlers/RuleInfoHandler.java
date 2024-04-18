@@ -18,11 +18,12 @@ public abstract class RuleInfoHandler {
         return constantRI;
     }
 
-    public void insertRI(RuleInfo ri) throws InvalidRuleInfoException {
-        if (ri.getSubs() == null || ri.getSubs().size() == 0)
-            constantRI.combine(ri); // editable depending on all possible cases
+    public RuleInfoSet insertRI(RuleInfo ri) throws InvalidRuleInfoException {
+        if (ri.getSubs() == null || ri.getSubs().size() == 0) {
+            return new RuleInfoSet(constantRI.combine(ri)); // editable depending on all possible cases
+        }
         else
-            insertVariableRI(ri);
+            return insertVariableRI(ri);
     }
 
     public static PropositionNodeSet getVariableAntecedents(NodeSet allAntecedents) {
@@ -35,5 +36,7 @@ public abstract class RuleInfoHandler {
     }
 
     public abstract RuleInfoSet insertVariableRI(RuleInfo ri) throws InvalidRuleInfoException;
+
+
 
 }

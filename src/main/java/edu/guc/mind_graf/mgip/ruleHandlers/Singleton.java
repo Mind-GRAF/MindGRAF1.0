@@ -24,7 +24,6 @@ public class Singleton extends SIndex {
         if(combined == null)
             return null;
         ruleInfoMap.put(hash, combined);
-        System.out.println("With hash " + hash + " inserted " + combined);
         RuleInfoSet afterInsertion = new RuleInfoSet();
         afterInsertion.addRuleInfo(ruleInfoMap.get(hash));
         return afterInsertion;

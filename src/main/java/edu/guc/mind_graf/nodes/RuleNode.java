@@ -2,6 +2,7 @@ package edu.guc.mind_graf.nodes;
 
 import java.util.Collection;
 
+import edu.guc.mind_graf.exceptions.InvalidRuleInfoException;
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.reports.KnownInstance;
@@ -13,15 +14,18 @@ import edu.guc.mind_graf.mgip.requests.ChannelSet;
 import edu.guc.mind_graf.mgip.requests.ChannelType;
 import edu.guc.mind_graf.mgip.requests.MatchChannel;
 import edu.guc.mind_graf.mgip.requests.Request;
+import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfoHandler;
 import edu.guc.mind_graf.mgip.rules.AndOr;
 import edu.guc.mind_graf.mgip.rules.Thresh;
 import edu.guc.mind_graf.network.Network;
+import edu.guc.mind_graf.set.FlagNodeSet;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
+import edu.guc.mind_graf.set.RuleInfoSet;
 
 public class RuleNode extends PropositionNode {
     private boolean forwardReport;
@@ -40,7 +44,7 @@ public class RuleNode extends PropositionNode {
         // TODO Auto-generated constructor stub
     }
 
-    public void applyRuleHandler(Report report, RuleNode ruleNode) {
+    public void applyRuleHandler(Report report) {
         // if (this.isForwardReport() == true) {
         // this.setForwardReport(false);
         // report.setInferenceType(InferenceType.FORWARD);
@@ -51,6 +55,15 @@ public class RuleNode extends PropositionNode {
         // for (Channel outChnl : outgoingChannels)
         // sendReport(report, outChnl);
         // }
+
+        try{
+            RuleInfoSet inserted = ruleInfoHandler.insertRI(RuleInfo.createRuleInfo(report));
+            if(inserted != null && inserted.size() > 0){
+
+            }
+        } catch (Exception e){
+            // TODO
+        }
 
         // TODO Sara
 
@@ -361,7 +374,7 @@ public class RuleNode extends PropositionNode {
                 }
             } else {
                 /** Backward Inference */
-                applyRuleHandler(currentReport, this);
+                applyRuleHandler(currentReport);
 
             }
         } else {

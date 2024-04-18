@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.mgip.reports.Report;
 import edu.guc.mind_graf.nodes.FlagNode;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.set.FlagNodeSet;
@@ -31,6 +32,17 @@ public class RuleInfo {
         this.ncount = ncount;
         this.subs = subs;
         this.fns = fns;
+    }
+
+    public static RuleInfo createRuleInfo(Report report){
+        int pcount = 0;
+        int ncount = 0;
+        if(report.isSign())
+            pcount++;
+        else
+            ncount++;
+        FlagNode reporter = new FlagNode(report.getReporterNode(), report.isSign(), report.getSupport());
+        return new RuleInfo(pcount, ncount, report.getSubstitutions(), new FlagNodeSet(reporter));
     }
 
     public FlagNodeSet getFns() {

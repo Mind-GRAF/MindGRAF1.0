@@ -15,9 +15,10 @@ public class Report {
     private int attitude;
     private String contextName;
     private ReportType reportType;
+    private Node reporterNode;
 
     public Report(Substitutions substitution, PropositionNodeSet suppt, int attitudeid,
-            boolean sign, InferenceType inference, Node requesterNode) {
+                  boolean sign, InferenceType inference, Node requesterNode) {
         this.substitutions = substitution;
         this.attitude = attitudeid;
         this.support = suppt;
@@ -138,6 +139,15 @@ public class Report {
 
     public void setInferenceType(InferenceType inferenceType) {
         this.inferenceType = inferenceType;
+    }
+
+
+    public Node getReporterNode() {
+        return reporterNode;
+    }
+
+    public void setReporterNode(Node reporterNode) {
+        this.reporterNode = reporterNode;
     }
 
 }
