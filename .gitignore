@@ -86,3 +86,6 @@ fabric.properties
 
 # javac compilation
 *.class
+
+/target/
+/bin/

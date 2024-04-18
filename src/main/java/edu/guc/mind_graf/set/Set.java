@@ -39,6 +39,10 @@ public class Set<K, V> {
     public void add(Map.Entry<K, V> e) {
         set.put(e.getKey(), e.getValue());
     }
+    
+    public V get(K k){
+        return set.get(k);
+    }
 
     public boolean remove(Object o) {
         try {
