@@ -420,13 +420,14 @@ public class MatcherTest {
             Relation obj = Network.createRelation("obj", "", Adjustability.NONE, 0);
             Relation prop = Network.createRelation("prop", "", Adjustability.NONE, 0);
 
-            DownCable d1 = new DownCable(obj, new NodeSet(cs, cs));
-            DownCable d2 = new DownCable(prop, new NodeSet(fun));
+            DownCable d1 = new DownCable(obj, new NodeSet(var1));
+            DownCable d2 = new DownCable(prop, new NodeSet(cs));
 
-            DownCable d3 = new DownCable(obj, new NodeSet(var1, var2));
+            DownCable d3 = new DownCable(obj, new NodeSet(var2));
+            DownCable d4 = new DownCable(prop, new NodeSet(var1));
 
             Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2));
-            Node M1 = Network.createNode("propositionnode", new DownCableSet(d3, d2));
+            Node M1 = Network.createNode("propositionnode", new DownCableSet(d3, d4));
 
             List<Match> matchList = Matcher.match(M1);
 
@@ -440,22 +441,26 @@ public class MatcherTest {
     @Test
     void occursCheck() {
         try {
-            Node cs = Network.createNode("cs", "propositionnode");
-            Node fun = Network.createNode("fun", "propositionnode");
             Node var1 = Network.createVariableNode("var1", "propositionnode");
 
             Relation obj = Network.createRelation("obj", "", Adjustability.NONE, 0);
             Relation prop = Network.createRelation("prop", "", Adjustability.NONE, 0);
+            Relation father = Network.createRelation("father", "", Adjustability.NONE, 0);
 
-            DownCable d1 = new DownCable(obj, new NodeSet(cs, var1));
-            DownCable d2 = new DownCable(prop, new NodeSet(fun));
+            DownCable d1 = new DownCable(obj, new NodeSet(var1));
 
-            DownCable d3 = new DownCable(obj, new NodeSet(var1, var1));
+            DownCable d2 = new DownCable(prop, new NodeSet(var1));
+            Node M0 = Network.createNode("propositionnode", new DownCableSet(d2));
 
-            Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2));
-            Node M1 = Network.createNode("propositionnode", new DownCableSet(d3, d2));
+            DownCable molecularCable = new DownCable(father, new NodeSet(M0));
 
-            List<Match> matchList = Matcher.match(M1);
+            DownCable d3 = new DownCable(obj, new NodeSet(var1));
+            DownCable d4 = new DownCable(father, new NodeSet(var1));
+
+            Node M1 = Network.createNode("propositionnode", new DownCableSet(d1, molecularCable));
+            Node M2 = Network.createNode("propositionnode", new DownCableSet(d3, d4));
+
+            List<Match> matchList = Matcher.match(M2);
 
             assertEquals(0, matchList.size());
         } catch (NoSuchTypeException e) {
