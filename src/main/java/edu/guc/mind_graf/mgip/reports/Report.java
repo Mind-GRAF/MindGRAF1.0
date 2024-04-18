@@ -150,4 +150,8 @@ public class Report {
         this.reporterNode = reporterNode;
     }
 
+    public boolean anySupportSupportedInAttitude(Integer integer) {
+        // TODO
+        return true;
+    }
 }

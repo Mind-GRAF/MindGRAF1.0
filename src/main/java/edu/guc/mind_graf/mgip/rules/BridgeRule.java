@@ -20,6 +20,7 @@ import edu.guc.mind_graf.mgip.ruleHandlers.Ptree;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfoHandler;
 import edu.guc.mind_graf.nodes.Node;
+import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.nodes.RuleNode;
 import edu.guc.mind_graf.cables.DownCableSet;
@@ -29,7 +30,7 @@ import edu.guc.mind_graf.set.RuleInfoSet;
 
 public class BridgeRule extends RuleNode {
 
-    private HashMap<Integer, NodeSet> ant;
+    private HashMap <Node, Integer> antToAttitude;
     private NodeSet cq;
     private int cAnt;
 
@@ -39,29 +40,30 @@ public class BridgeRule extends RuleNode {
         for(DownCable downCable : downCableSet){
             if(downCable.getRelation().getName().contains("-ant")){ // assuming all antecedents of a bridge rule would be of the form 1-ant where 1 is the attitude id
                 int attitude =  Integer.parseInt(downCable.getRelation().getName().split("-")[0]);
-                NodeSet antecedent = ant.getOrDefault(attitude, new NodeSet());
-                downCable.getNodeSet().addAllTo(antecedent);
+                for(Node nodeAnt : downCable.getNodeSet()){
+                    antToAttitude.put(nodeAnt, attitude);
+                }
             }
         }
         PropositionNodeSet antecedents = new PropositionNodeSet();
-        int totalSize = 0;
-        for(NodeSet set : ant.values()){
-            totalSize += set.size();
-            RuleInfoHandler.getVariableAntecedents(set).addAllTo(antecedents);
+        for(Node antNode : antToAttitude.keySet()){
+            if(antNode.isOpen())
+                antecedents.add(antNode);
         }
-        cAnt = totalSize - antecedents.size();
+        cAnt = antToAttitude.keySet().size() - antecedents.size();
         this.ruleInfoHandler = Ptree.constructPtree(antecedents, antecedents.size(), Integer.MAX_VALUE, 2);
     }
 
     public void applyRuleHandler(Report report) {
+        if(report.anySupportSupportedInAttitude(antToAttitude.get(report.getReporterNode()))) {
+            try {
+                RuleInfoSet inserted = ruleInfoHandler.insertRI(RuleInfo.createRuleInfo(report));
+                if (inserted != null && inserted.size() > 0) {
 
-        try{
-            RuleInfoSet inserted = ruleInfoHandler.insertRI(RuleInfo.createRuleInfo(report));
-            if(inserted != null && inserted.size() > 0){
-
+                }
+            } catch (Exception e) {
+                // TODO
             }
-        } catch (Exception e){
-            // TODO
         }
     }
 
