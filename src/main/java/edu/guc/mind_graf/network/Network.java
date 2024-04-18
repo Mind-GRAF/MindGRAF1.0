@@ -5,6 +5,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+import edu.guc.mind_graf.mgip.rules.AndEntailment;
+import edu.guc.mind_graf.mgip.rules.AndOr;
+import edu.guc.mind_graf.mgip.rules.OrEntailment;
+import edu.guc.mind_graf.mgip.rules.Thresh;
 import edu.guc.mind_graf.paths.AndPath;
 import edu.guc.mind_graf.paths.ComposePath;
 import edu.guc.mind_graf.paths.FUnitPath;
@@ -97,6 +101,18 @@ public class Network {
 					break;
 				case "rulenode":
 					node = new RuleNode(downCableSet);
+					break;
+				case "andor":
+					node = new AndOr(downCableSet);
+					break;
+				case "andentailment":
+					node = new AndEntailment(downCableSet);
+					break;
+				case "orentailment":
+					node = new OrEntailment(downCableSet);
+					break;
+				case "thresh":
+					node = new Thresh(downCableSet);
 					break;
 				default:
 					if (userDefinedClasses.containsKey(SemanticType)) {

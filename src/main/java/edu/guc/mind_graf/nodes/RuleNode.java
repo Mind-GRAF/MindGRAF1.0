@@ -65,8 +65,6 @@ public class RuleNode extends PropositionNode {
             // TODO
         }
 
-        // TODO Sara
-
     }
 
     /***
