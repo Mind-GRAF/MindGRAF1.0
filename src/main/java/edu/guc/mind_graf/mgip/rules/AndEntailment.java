@@ -27,20 +27,6 @@ public class AndEntailment extends RuleNode {
         this.ruleInfoHandler = Ptree.constructPtree(antecedents, antecedents.size(), Integer.MAX_VALUE, 2);
     }
 
-    public RuleInfoSet tryToInfer(){
-
-        // otherwise we can infer and we'll combine everything with everything and infer them all
-        RuleInfoSet inferred = new RuleInfoSet(this.ruleInfoHandler.getConstantAntecedents());
-        for(PtreeNode root : ((Ptree) this.ruleInfoHandler).getRoots()){
-            inferred = inferred.combineDisjointSets(root.getSIndex().getAllRuleInfos());
-        }
-        for(RuleInfo ruleInfo : inferred){
-            if(ruleInfo.getPcount() < ant.size())
-                inferred.removeRuleInfo(ruleInfo);
-        }
-        return inferred;
-    }
-
     public boolean mayTryToInfer() {
         if(cAnt < this.ruleInfoHandler.getConstantAntecedents().getPcount())
             return false;
