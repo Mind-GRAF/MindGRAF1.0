@@ -2,11 +2,13 @@ package edu.guc.mind_graf.context;
 
 import java.util.BitSet;
 import java.util.Hashtable;
+import java.util.Map;
 
+import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.Set;
 
-public class Context {
+public class Context implements Cloneable{
 
     private Hashtable<Integer, PropositionNodeSet> attitudes;
     private String name;
@@ -15,8 +17,18 @@ public class Context {
     
     public Context(String name, Set<String,Integer> attitudeNames){
         this.name=name;
-        //TODO Wael: set the attitude names
+        for(Map.Entry<String,Integer> entry: attitudeNames.getSet().entrySet()){
+            attitudes.put(entry.getValue(), new PropositionNodeSet());
+        }
     }
+    
+    public Context copyContext(Context c, int attitudeId, PropositionNodeSet NodeSet) {
+        Context newContext = c.clone();
+        newContext.attitudes.get(attitudeId).union(NodeSet);
+        //TODO check consistency
+        return newContext;
+    }
+    
     public Integer getPropositionAttitude(Integer prop) {
 
         // loop through all the Integer keys of attitudesBitset
@@ -37,5 +49,31 @@ public class Context {
 //    public PropositionNodeSet getAllPropositionsInAnAttitude(int attitude) {
 //        return this.attitudes.get(attitude);
 //    }
-
+    public static boolean isAsserted(Context c, int attitudeNumber, PropositionNode node) {
+        if(c.attitudes.get(attitudeNumber).contains(node)){
+            return true;
+        }else{
+            // TODO : call the isAsserted method of the supports
+            return true;
+        }
+    }
+    
+    public static void addToContext(Context c, int attitudeNumber, PropositionNode node) {
+        c.attitudes.get(attitudeNumber).add(node);
+    }
+    
+    public static void removeFromContext(Context c, int attitudeNumber, PropositionNode node) {
+        c.attitudes.get(attitudeNumber).remove(node);
+    }
+    
+    @Override
+    public Context clone() {
+        Context clone = new Context(this.name+" copy",ContextController.getAttitudes() );
+        for( Map.Entry<Integer,PropositionNodeSet> entry: this.attitudes.entrySet()){
+                clone.attitudes.put(entry.getKey(), entry.getValue().clone());
+        }
+        //TODO wael: clone bitsets
+        return clone;
+    }
+    
 }

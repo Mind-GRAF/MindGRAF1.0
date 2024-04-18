@@ -3,6 +3,7 @@ package edu.guc.mind_graf.context;
 import java.util.ArrayList;
 
 import edu.guc.mind_graf.network.Network;
+import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.set.ContextSet;
 import edu.guc.mind_graf.set.Set;
 
@@ -69,6 +70,16 @@ public class ContextController {
         return attitudes;
     }
 
+    public static void addToContext(String contextName, int attitudeNumber, int nodeId) {
+        Context c = ContextController.getContext(contextName);
+        PropositionNode n = (PropositionNode) Network.getNodeById(nodeId);
+       Context.addToContext(c,attitudeNumber, n);
+    }
     
+    public static void removeFromContext(String contextName, int attitudeNumber, int nodeId) {
+        Context c = ContextController.getContext(contextName);
+        PropositionNode n = (PropositionNode) Network.getNodeById(nodeId);
+        Context.removeFromContext(c,attitudeNumber, n);
+    }
 
 }
