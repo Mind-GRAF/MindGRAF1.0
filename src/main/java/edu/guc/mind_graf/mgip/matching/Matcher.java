@@ -350,11 +350,14 @@ public class Matcher {
         NodeSet parents = term.getDirectParents();
         for (Node parent : parents.getValues()) {
             for (Cable cable : parent.getDownCableSet().getValues()) {
+                boolean foundOneInstance = false;
                 for (Node node : cable.getNodeSet().getValues()) {
                     if (node.getSyntacticType() == Syntactic.VARIABLE) {
-                        if (node == term)
+                        if (!foundOneInstance && node == term) {
+                            foundOneInstance = true;
                             continue;
-                        if (node.getName().equals(term.getName())
+                        }
+                        if (node == term
                                 || substitute(node, subs).getName().equals(value.getName())) {
                             return true;
                         }
