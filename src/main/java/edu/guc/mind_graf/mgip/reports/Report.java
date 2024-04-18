@@ -18,13 +18,14 @@ public class Report {
     private Node reporterNode;
 
     public Report(Substitutions substitution, PropositionNodeSet suppt, int attitudeid,
-                  boolean sign, InferenceType inference, Node requesterNode) {
+                  boolean sign, InferenceType inference, Node requesterNode, Node reporterNode) {
         this.substitutions = substitution;
         this.attitude = attitudeid;
         this.support = suppt;
         this.requesterNode = requesterNode;
         this.sign = sign;
         this.inferenceType = inference;
+        this.reporterNode = reporterNode;
     }
 
     public String stringifyReport() {
