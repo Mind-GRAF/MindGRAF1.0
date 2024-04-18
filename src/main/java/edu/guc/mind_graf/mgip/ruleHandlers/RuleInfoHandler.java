@@ -39,7 +39,7 @@ public abstract class RuleInfoHandler {
 
     public abstract RuleInfoSet getAllRuleInfos();
 
-    public RuleInfoSet getInferrablRuleInfos() {
+    public RuleInfoSet getInferrableRuleInfos() {
         RuleInfoSet result = new RuleInfoSet();
         for (RuleInfo r : getAllRuleInfos()) {
             result.addRuleInfo(r.combine(this.getConstantAntecedents()));

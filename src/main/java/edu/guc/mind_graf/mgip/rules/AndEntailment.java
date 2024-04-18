@@ -40,7 +40,7 @@ public class AndEntailment extends RuleNode {
     public RuleInfoSet[] mayInfer() {
         RuleInfoSet[] inferrable = {new RuleInfoSet()};  // at index 0 the set of positively inferred, at index 1 the set of negatively inferred
         if(mayTryToInfer()) {
-            for (RuleInfo ri : ruleInfoHandler.getInferrablRuleInfos()) {
+            for (RuleInfo ri : ruleInfoHandler.getInferrableRuleInfos()) {
                 if (ri.getPcount() == ant.size())
                     inferrable[0].addRuleInfo(ri);
             }
