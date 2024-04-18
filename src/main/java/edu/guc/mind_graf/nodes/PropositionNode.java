@@ -356,7 +356,7 @@ public class PropositionNode extends Node {
      * Helper method responsible for establishing channels between this current node
      * and each of the NodeSet to further request instances with the given inputs
      * 
-     * @param ns            NodeSet to be sent to
+     * @param //ns            NodeSet to be sent to
      * @param filterSubs    Substitutions to be passed
      * @param switchSubs
      * @param contextName   latest request context

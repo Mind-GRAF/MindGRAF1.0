@@ -1,9 +1,9 @@
 package edu.guc.mind_graf.mgip.rules;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashMap;
 
+import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.reports.KnownInstance;
@@ -16,28 +16,56 @@ import edu.guc.mind_graf.mgip.requests.MatchChannel;
 import edu.guc.mind_graf.mgip.requests.Request;
 import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
+import edu.guc.mind_graf.mgip.ruleHandlers.Ptree;
+import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
+import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfoHandler;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.set.NodeSet;
-import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.nodes.RuleNode;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.set.PropositionNodeSet;
+import edu.guc.mind_graf.set.RuleInfoSet;
+
 public class BridgeRule extends RuleNode {
 
-    public BridgeRule(String name, Boolean isVariable) {
-        super(name, isVariable);
-        // TODO Auto-generated constructor stub
-    }
+    private HashMap<Integer, NodeSet> ant;
+    private NodeSet cq;
+    private int cAnt;
 
     public BridgeRule(DownCableSet downCableSet) {
         super(downCableSet);
-
+        cq = downCableSet.get("cq").getNodeSet();
+        for(DownCable downCable : downCableSet){
+            if(downCable.getRelation().getName().contains("-ant")){ // assuming all antecedents of a bridge rule would be of the form 1-ant where 1 is the attitude id
+                int attitude =  Integer.parseInt(downCable.getRelation().getName().split("-")[0]);
+                NodeSet antecedent = ant.getOrDefault(attitude, new NodeSet());
+                downCable.getNodeSet().addAllTo(antecedent);
+            }
+        }
+        PropositionNodeSet antecedents = new PropositionNodeSet();
+        int totalSize = 0;
+        for(NodeSet set : ant.values()){
+            totalSize += set.size();
+            RuleInfoHandler.getVariableAntecedents(set).addAllTo(antecedents);
+        }
+        cAnt = totalSize - antecedents.size();
+        this.ruleInfoHandler = Ptree.constructPtree(antecedents, antecedents.size(), Integer.MAX_VALUE, 2);
     }
 
-    public static void applyRuleHandler(Report report, BridgeRule node) {
-        // TODO Ossama
+    public void applyRuleHandler(Report report) {
 
+        try{
+            RuleInfoSet inserted = ruleInfoHandler.insertRI(RuleInfo.createRuleInfo(report));
+            if(inserted != null && inserted.size() > 0){
+
+            }
+        } catch (Exception e){
+            // TODO
+        }
     }
+
+
 
     protected void requestAntecedentsNotAlreadyWorkingOn(Request currentRequest, KnownInstance knownInstance) {
         Channel currentChannel = currentRequest.getChannel();
@@ -205,7 +233,7 @@ public class BridgeRule extends RuleNode {
                 }
             } else {
                 /** Backward Inference */
-                applyRuleHandler(currentReport, this);
+                applyRuleHandler(currentReport);
 
             }
         } else {

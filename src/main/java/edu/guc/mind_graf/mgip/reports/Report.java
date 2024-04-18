@@ -42,8 +42,8 @@ public class Report {
      * this method checks if the nodes that helped in creating the report are
      * supported in the attitude in the context belonging to the report
      * 
-     * @param reportContextName
-     * @param reportAttitudeID
+     * @param //reportContextName
+     * @param //reportAttitudeID
      */
     public boolean anySupportSupportedInAttitudeContext(String ChnlContextName, int ChnlAttitudeID) {
         // int[] supportIds = support.getProps();

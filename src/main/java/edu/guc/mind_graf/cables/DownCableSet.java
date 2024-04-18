@@ -2,10 +2,11 @@ package edu.guc.mind_graf.cables;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import edu.guc.mind_graf.nodes.Node;
 
-public class DownCableSet {
+public class DownCableSet implements Iterable<DownCable>{
 	private final HashMap<String, DownCable> downCables;
 
 	public DownCableSet(HashMap<String, DownCable> cables) {
@@ -97,5 +98,10 @@ public class DownCableSet {
 			counter++;
 		}
 		return result;
+	}
+
+	@Override
+	public Iterator<DownCable> iterator() {
+		return downCables.values().iterator();
 	}
 }
