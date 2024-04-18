@@ -2,10 +2,12 @@ package edu.guc.mind_graf.mgip.rules;
 
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.mgip.ruleHandlers.Ptree;
+import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfoHandler;
 import edu.guc.mind_graf.nodes.RuleNode;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.PropositionNodeSet;
+import edu.guc.mind_graf.set.RuleInfoSet;
 
 public class NumEntailment extends RuleNode {
 
@@ -21,6 +23,15 @@ public class NumEntailment extends RuleNode {
         PropositionNodeSet antecedents = RuleInfoHandler.getVariableAntecedents(ant);
         int cAnt = ant.size() - antecedents.size();
         this.ruleInfoHandler = Ptree.constructPtree(antecedents, Math.max(0, i - cAnt), Integer.MAX_VALUE, 1);
+    }
+
+    public RuleInfoSet[] mayInfer() {
+        RuleInfoSet[] inferrable = {new RuleInfoSet()};  // at index 0 the set of positively inferred, at index 1 the set of negatively inferred
+        for(RuleInfo ri : ruleInfoHandler.getInferrablRuleInfos()) {
+            if(ri.getPcount() >= i)
+                inferrable[0].addRuleInfo(ri);
+        }
+        return inferrable;
     }
 
 }

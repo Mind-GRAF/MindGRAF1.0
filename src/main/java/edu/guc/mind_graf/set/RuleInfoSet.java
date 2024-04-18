@@ -126,4 +126,8 @@ public class RuleInfoSet implements Iterable<RuleInfo>{
         ris.remove(toRemove);
     }
 
+    public boolean isEmpty(){
+        return ris.isEmpty();
+    }
+
 }

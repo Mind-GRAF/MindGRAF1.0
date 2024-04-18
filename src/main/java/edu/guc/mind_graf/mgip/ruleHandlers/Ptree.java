@@ -241,4 +241,13 @@ public class Ptree extends RuleInfoHandler {
     public void setRoots(ArrayDeque<PtreeNode> roots) {
         this.roots = roots;
     }
+
+    public RuleInfoSet getAllRuleInfos() {
+        RuleInfoSet allRuleInfos = new RuleInfoSet();
+        for (PtreeNode root : getRoots()) {
+            allRuleInfos = allRuleInfos.combineDisjointSets(root.getSIndex().getAllRuleInfos());
+        }
+        return allRuleInfos;
+    }
+
 }

@@ -1,6 +1,7 @@
 package edu.guc.mind_graf.mgip.rules;
 
 import edu.guc.mind_graf.mgip.ruleHandlers.Ptree;
+import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfoHandler;
 import edu.guc.mind_graf.nodes.RuleNode;
 import edu.guc.mind_graf.cables.DownCableSet;
@@ -22,6 +23,17 @@ public class AndOr extends RuleNode {
         PropositionNodeSet antecedents = RuleInfoHandler.getVariableAntecedents(arg);
         int cAnt = arg.size() - antecedents.size();
         this.ruleInfoHandler = Ptree.constructPtree(antecedents, Math.max(0, max - cAnt), Math.max(0, arg.size() - min - cAnt), 0);
+    }
+
+    public RuleInfoSet[] mayInfer() {
+        RuleInfoSet[] inferrable = {new RuleInfoSet(), new RuleInfoSet()};  // at index 0 the set of positively inferred, at index 1 the set of negatively inferred
+        for(RuleInfo ri : ruleInfoHandler.getInferrablRuleInfos()) {
+            if(ri.getPcount() == max)
+                inferrable[1].addRuleInfo(ri);
+            else if(ri.getNcount() == (arg.size() - min))
+                inferrable[0].addRuleInfo(ri);
+        }
+        return inferrable;
     }
 
 }

@@ -28,8 +28,7 @@ public class AndEntailment extends RuleNode {
     }
 
     public RuleInfoSet tryToInfer(){
-        if(cAnt < this.ruleInfoHandler.getConstantAntecedents().getPcount())
-            return null;
+
         // otherwise we can infer and we'll combine everything with everything and infer them all
         RuleInfoSet inferred = new RuleInfoSet(this.ruleInfoHandler.getConstantAntecedents());
         for(PtreeNode root : ((Ptree) this.ruleInfoHandler).getRoots()){
@@ -40,6 +39,27 @@ public class AndEntailment extends RuleNode {
                 inferred.removeRuleInfo(ruleInfo);
         }
         return inferred;
+    }
+
+    public boolean mayTryToInfer() {
+        if(cAnt < this.ruleInfoHandler.getConstantAntecedents().getPcount())
+            return false;
+        for(PtreeNode root : ((Ptree)ruleInfoHandler).getRoots()) {
+            if(root.getSIndex().getAllRuleInfos().isEmpty())  // maybe should also check pcount of roots?
+                return false;
+        }
+        return true;
+    }
+
+    public RuleInfoSet[] mayInfer() {
+        RuleInfoSet[] inferrable = {new RuleInfoSet()};  // at index 0 the set of positively inferred, at index 1 the set of negatively inferred
+        if(mayTryToInfer()) {
+            for (RuleInfo ri : ruleInfoHandler.getInferrablRuleInfos()) {
+                if (ri.getPcount() == ant.size())
+                    inferrable[0].addRuleInfo(ri);
+            }
+        }
+        return inferrable;
     }
 
 }

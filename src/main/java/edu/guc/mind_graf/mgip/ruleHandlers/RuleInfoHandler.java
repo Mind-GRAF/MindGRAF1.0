@@ -37,6 +37,16 @@ public abstract class RuleInfoHandler {
 
     public abstract RuleInfoSet insertVariableRI(RuleInfo ri) throws InvalidRuleInfoException;
 
+    public abstract RuleInfoSet getAllRuleInfos();
 
+    public RuleInfoSet getInferrablRuleInfos() {
+        RuleInfoSet result = new RuleInfoSet();
+        for (RuleInfo r : getAllRuleInfos()) {
+            result.addRuleInfo(r.combine(this.getConstantAntecedents()));
+        }
+        if(result.isEmpty())
+            result.addRuleInfo(this.getConstantAntecedents());
+        return result;
+    }
 
 }
