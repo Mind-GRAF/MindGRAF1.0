@@ -2,7 +2,6 @@ package edu.guc.mind_graf.mgip.rules;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 
 import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.mgip.InferenceType;
@@ -16,12 +15,12 @@ import edu.guc.mind_graf.mgip.requests.ChannelType;
 import edu.guc.mind_graf.mgip.requests.MatchChannel;
 import edu.guc.mind_graf.mgip.requests.Request;
 import edu.guc.mind_graf.mgip.ruleHandlers.Ptree;
+import edu.guc.mind_graf.mgip.ruleHandlers.PtreeNode;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.nodes.Node;
-import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.nodes.RuleNode;
 import edu.guc.mind_graf.cables.DownCableSet;
@@ -55,12 +54,33 @@ public class BridgeRule extends RuleNode {
         this.ruleInfoHandler = Ptree.constructPtree(antecedents, antecedents.size(), Integer.MAX_VALUE, 2);
     }
 
+    public boolean mayTryToInfer() {
+        if(cAnt < this.ruleInfoHandler.getConstantAntecedents().getPcount())
+            return false;
+        for(PtreeNode root : ((Ptree)ruleInfoHandler).getRoots()) {
+            if(root.getSIndex().getAllRuleInfos().isEmpty())  // maybe should also check pcount of roots?
+                return false;
+        }
+        return true;
+    }
+
+    public RuleInfoSet[] mayInfer() {
+        RuleInfoSet[] inferrable = {new RuleInfoSet()};  // at index 0 the set of positively inferred, at index 1 the set of negatively inferred
+        if(mayTryToInfer()) {
+            for (RuleInfo ri : ruleInfoHandler.getInferrablRuleInfos()) {
+                if (ri.getPcount() == antToAttitude.size())
+                    inferrable[0].addRuleInfo(ri);
+            }
+        }
+        return inferrable;
+    }
+
     public void applyRuleHandler(Report report) {
         if(report.anySupportSupportedInAttitude(antToAttitude.get(report.getReporterNode()))) {
             try {
                 RuleInfoSet inserted = ruleInfoHandler.insertRI(RuleInfo.createRuleInfo(report));
                 if (inserted != null && inserted.size() > 0) {
-
+                
                 }
             } catch (Exception e) {
                 // TODO
