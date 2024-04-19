@@ -119,7 +119,7 @@ public class PtreeNode {
                 ",has sibling=" + (sibling != null) +
 //                ", leftChild=" + leftChild +
 //                ", rightChild=" + rightChild +
-                ", sIndex=" + sIndex +
+                ", sIndex=" + (sIndex instanceof Singleton ? "Singleton" : "Linear") +
                 ", vars=" + vars +
                 ", siblingIntersection=" + siblingIntersection +
                 ", min=" + sIndex.getMin() +
