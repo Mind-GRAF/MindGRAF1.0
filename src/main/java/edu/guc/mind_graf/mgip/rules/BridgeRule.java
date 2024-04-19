@@ -77,14 +77,7 @@ public class BridgeRule extends RuleNode {
 
     public void applyRuleHandler(Report report) {
         if(report.anySupportSupportedInAttitude(antToAttitude.get(report.getReporterNode()))) {
-            try {
-                RuleInfoSet inserted = ruleInfoHandler.insertRI(RuleInfo.createRuleInfo(report));
-                if (inserted != null && inserted.size() > 0) {
-                
-                }
-            } catch (Exception e) {
-                // TODO
-            }
+            super.applyRuleHandler(report);
         }
     }
 

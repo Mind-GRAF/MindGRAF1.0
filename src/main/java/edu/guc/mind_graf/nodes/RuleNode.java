@@ -61,7 +61,7 @@ public class RuleNode extends PropositionNode {
             RuleInfoSet inserted = ruleInfoHandler.insertRI(RuleInfo.createRuleInfo(report));
             if(inserted != null && inserted.size() > 0){
                 RuleInfoSet[] mayInfer = mayInfer();
-                Collection<Channel> outgoingRuleConsChannels = getOutgoingRuleConsequentChannels();
+                Collection<Channel> outgoingRuleConsChannels = getOutgoingRuleConsequentChannels(); // should filter channels
                 for(int i = 0; i < 2; i++){
                     for(RuleInfo ri : mayInfer[i]) {
                         PropositionNodeSet supports = new PropositionNodeSet();   // probably wrong (maybe should make new support of the flag nodes and rule node
@@ -70,14 +70,14 @@ public class RuleNode extends PropositionNode {
                         }
                         Report newReport = new Report(ri.getSubs(), supports, report.getAttitude(),
                                 (i == 0), InferenceType.FORWARD, null, this);
+                        for(Channel ch : outgoingRuleConsChannels){
+                            sendReport(newReport, ch);
+                        }
                     }
-                }
-                for(Channel ch : outgoingRuleConsChannels){
-                    sendReport(report, ch);
                 }
             }
         } catch (Exception e){
-            // TODO
+
         }
 
     }
