@@ -257,7 +257,6 @@ public class BridgeRule extends RuleNode {
             } else {
                 /** Backward Inference */
                 applyRuleHandler(currentReport);
-
             }
         } else {
             /** Not AntecedentToRule Channel */

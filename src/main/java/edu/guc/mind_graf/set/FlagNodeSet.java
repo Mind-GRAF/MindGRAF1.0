@@ -1,10 +1,11 @@
 package edu.guc.mind_graf.set;
 
 import java.util.HashSet;
+import java.util.Iterator;
 
 import edu.guc.mind_graf.nodes.FlagNode;
 
-public class FlagNodeSet{
+public class FlagNodeSet implements Iterable<FlagNode>{
 
     private HashSet<FlagNode> flagNodes;
 
@@ -95,5 +96,10 @@ public class FlagNodeSet{
         FlagNodeSet newFns = new FlagNodeSet();
         newFns.addFlagNodes(this);
         return newFns;
+    }
+
+    @Override
+    public Iterator<FlagNode> iterator() {
+        return flagNodes.iterator();
     }
 }

@@ -25,6 +25,7 @@ import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
+import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
 
 public class RuleNode extends PropositionNode {
@@ -59,12 +60,30 @@ public class RuleNode extends PropositionNode {
         try{
             RuleInfoSet inserted = ruleInfoHandler.insertRI(RuleInfo.createRuleInfo(report));
             if(inserted != null && inserted.size() > 0){
-
+                RuleInfoSet[] mayInfer = mayInfer();
+                Collection<Channel> outgoingRuleConsChannels = getOutgoingRuleConsequentChannels();
+                for(int i = 0; i < 2; i++){
+                    for(RuleInfo ri : mayInfer[i]) {
+                        PropositionNodeSet supports = new PropositionNodeSet();   // probably wrong (maybe should make new support of the flag nodes and rule node
+                        for (FlagNode fn : ri.getFns()) {
+                            supports.add(fn.getNode());
+                        }
+                        Report newReport = new Report(ri.getSubs(), supports, report.getAttitude(),
+                                (i == 0), InferenceType.FORWARD, null, this);
+                    }
+                }
+                for(Channel ch : outgoingRuleConsChannels){
+                    sendReport(report, ch);
+                }
             }
         } catch (Exception e){
             // TODO
         }
 
+    }
+
+    public RuleInfoSet[] mayInfer() {
+        return null; // either abstract rulenode or think of cases where the rule node is not one of the 5 connectives
     }
 
     /***
@@ -373,7 +392,6 @@ public class RuleNode extends PropositionNode {
             } else {
                 /** Backward Inference */
                 applyRuleHandler(currentReport);
-
             }
         } else {
             Substitutions switchSubs = new Substitutions();

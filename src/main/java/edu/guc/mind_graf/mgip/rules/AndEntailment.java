@@ -1,16 +1,23 @@
 package edu.guc.mind_graf.mgip.rules;
 
 import edu.guc.mind_graf.cables.DownCableSet;
+import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.mgip.InferenceType;
+import edu.guc.mind_graf.mgip.reports.Report;
+import edu.guc.mind_graf.mgip.requests.Channel;
 import edu.guc.mind_graf.mgip.ruleHandlers.Ptree;
 import edu.guc.mind_graf.mgip.ruleHandlers.PtreeNode;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfoHandler;
+import edu.guc.mind_graf.nodes.FlagNode;
+import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.RuleNode;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
 
 import java.util.ArrayDeque;
+import java.util.Collection;
 
 public class AndEntailment extends RuleNode {
 
@@ -38,7 +45,7 @@ public class AndEntailment extends RuleNode {
     }
 
     public RuleInfoSet[] mayInfer() {
-        RuleInfoSet[] inferrable = {new RuleInfoSet()};  // at index 0 the set of positively inferred, at index 1 the set of negatively inferred
+        RuleInfoSet[] inferrable = {new RuleInfoSet(), new RuleInfoSet()};  // at index 0 the set of positively inferred, at index 1 the set of negatively inferred
         if(mayTryToInfer()) {
             for (RuleInfo ri : ruleInfoHandler.getInferrableRuleInfos()) {
                 if (ri.getPcount() == ant.size())
@@ -47,5 +54,11 @@ public class AndEntailment extends RuleNode {
         }
         return inferrable;
     }
+
+    public void sendInferredReports(RuleInfoSet inferred){
+        Collection<Channel> outgoingRuleConsChannels = getOutgoingRuleConsequentChannels();
+
+    }
+
 
 }
