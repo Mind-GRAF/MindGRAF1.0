@@ -2,6 +2,7 @@ package nodes;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Scanner;
@@ -15,19 +16,25 @@ import mgip.Scheduler;
 import mgip.matching.Match;
 import mgip.requests.*;
 import network.Controller;
+import network.Network;
 import set.NodeSet;
 import cables.DownCable;
 import cables.DownCableSet;
 import cables.UpCable;
 import exceptions.NoSuchTypeException;
 import set.PropositionNodeSet;
+import support.Support;
 import components.Substitutions;
+import context.Context;
 
 public class PropositionNode extends Node {
     protected ChannelSet outgoingChannels;
     protected ChannelSet forwardChannels;
     protected KnownInstanceSet knownInstances;
     protected boolean forwardDone;
+    protected Support support;
+    protected PropositionNodeSet justificationSupportDependents;
+    protected PropositionNodeSet assumptionSupportDependents;
 
     public PropositionNode(String name, Boolean isVariable) {
         super(name, isVariable);
@@ -36,6 +43,9 @@ public class PropositionNode extends Node {
         forwardChannels = new ChannelSet();
         forwardDone = false;
         knownInstances = new KnownInstanceSet();
+        support = new Support(this.getId());
+        justificationSupportDependents = new PropositionNodeSet();
+        assumptionSupportDependents = new PropositionNodeSet();
     }
 
     public PropositionNode(DownCableSet downCableSet) {
@@ -45,7 +55,33 @@ public class PropositionNode extends Node {
         forwardChannels = new ChannelSet();
         forwardDone = false;
         knownInstances = new KnownInstanceSet();
+        support = new Support(this.getId());
+        justificationSupportDependents = new PropositionNodeSet();
+        assumptionSupportDependents = new PropositionNodeSet();
     }
+    
+    /**
+	 * @return the support
+	 */
+	public Support getSupport() {
+		return support;
+	}
+
+    /**
+	 * @return the justificationSupportDependents
+	 */
+	public PropositionNodeSet getJustificationSupportDependents() {
+		return justificationSupportDependents;
+	}
+
+	/**
+	 * @return the assumptionSupportDependents
+	 */
+	public PropositionNodeSet getAssumptionSupportDependents() {
+		return assumptionSupportDependents;
+	}
+	
+
 
     /***
      * Method getting the NodeSet that this current node is considered a consequent
@@ -291,11 +327,48 @@ public class PropositionNode extends Node {
      */
 
     public boolean supported(String desiredContextName, int desiredAttitudeID) {
-        return true;
+        boolean supported = false;
+        Context desiredContext = Network.getContexts().get(desiredContextName);
+        
+    	for(HashMap<Integer, PropositionNodeSet> currSupport : this.support.getAssumptionSupport().get(desiredAttitudeID)) {
+    		for(Integer key : currSupport.keySet()) {
+    			if(currSupport.get(key).isSubset(desiredContext.getAttitudeProps(key))) {
+    				supported = true;
+    			}
+    			else {
+    				supported = false;
+    				break;
+    			}
+    		}
+    		if(supported == true) {
+    			return supported;
+    		}
+    	}
+    	
+    	return supported;
 
     }
-    // TODO Ahmed
+    
+    public void setHyp(String desiredContextName, int attitude) {
+    	Context desiredContext = Network.getContexts().get(desiredContextName);
+    	desiredContext.getAttitudeProps(attitude).add(this.getId());
+    	this.support.setHyp(attitude);
+    }
 
+    public void removeNodeFromOtherNodesSupport() {
+    	HashMap<Integer, Node> networkPropositions = Network.getPropositionNodes();
+		int[] assumptionDependents = this.getAssumptionSupportDependents().getProps();
+		for(int i = 0; i < assumptionDependents.length ; i++) {
+			PropositionNode dependent = (PropositionNode)networkPropositions.get(assumptionDependents[i]);
+			dependent.getSupport().removeNodeFromAssumptions(this.getId());
+		}
+		int[] justificationDependents = this.getJustificationSupportDependents().getProps();
+		for(int i = 0; i < justificationDependents.length ; i++) {
+			PropositionNode dependent = (PropositionNode)networkPropositions.get(justificationDependents[i]);
+			dependent.getSupport().removeNodeFromJustifications(this.getId());
+		}
+    }
+    
     /***
      * Helper method responsible for establishing channels between this current node
      * and each of the non matching ones of the NodeSet to further reports
@@ -568,8 +641,8 @@ public class PropositionNode extends Node {
 
     /***
      * Checking if this node instance contains not yet bound free variables
-     * This method is implemented to check if this node represents a ”who”, ”where”,
-     * ”which” question, asking for bindings of a specific a specific set of
+     * This method is implemented to check if this node represents a â€�whoâ€�, â€�whereâ€�,
+     * â€�whichâ€� question, asking for bindings of a specific a specific set of
      * variables, in other
      * words, to state whether this PropositionNode has atleast one free variable
      * which

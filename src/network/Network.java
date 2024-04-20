@@ -36,6 +36,7 @@ public class Network {
 	private static HashMap<String, Node> baseNodes;
 	private static HashMap<String, Relation> relations;
 	private static HashMap<Integer, Node> propositionNodes;
+	private static HashMap<String, Context> Contexts;
 	public static HashMap<String, String> quantifiers = new HashMap<String, String>();
 	public static HashMap<String, CustomClass> userDefinedClasses = new HashMap<String, CustomClass>();
 	public static int MolecularCount;
@@ -404,6 +405,10 @@ public class Network {
 
 	public static HashMap<Integer, Node> getPropositionNodes() {
 		return propositionNodes;
+	}
+	
+	public static HashMap<String, Context> getContexts() {
+		return Contexts;
 	}
 
 	public static void setQuantifiers(HashMap<String, String> quantifiers) {
