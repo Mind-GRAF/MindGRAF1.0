@@ -120,7 +120,7 @@ public class Matcher {
                 && node.getSyntacticType() == Syntactic.MOLECULAR) {
             pathBasedInference(queryNode, node, match.clone());
             Object[] downRelationList = queryNode.getDownCableSet().keySet();
-            Object[] upRelationList = queryNode.getUpCableSet().keySet();
+            // Object[] upRelationList = queryNode.getUpCableSet().keySet();
             List<Match> molecularMatchList = new ArrayList<>();
             molecularMatchList.add(match);
             boolean nullCables = true;
@@ -294,43 +294,95 @@ public class Matcher {
     }
 
     private static void pathBasedInference(Node queryNode, Node node, Match match) {
-        for (Cable downCable : node.getDownCableSet().getValues()) {
+        for (Cable downCable : queryNode.getDownCableSet().getValues()) {
             Relation relation = downCable.getRelation();
             Path path = relation.getPath();
-            if (path != null) {
-                if (path instanceof FUnitPath) {
-
-                } else if (path instanceof BUnitPath) {
-
-                } else if (path instanceof AndPath) {
-
-                } else if (path instanceof OrPath) {
-
-                } else if (path instanceof BangPath) {
-
-                } else if (path instanceof EmptyPath) {
-
-                } else if (path instanceof ComposePath) {
-
-                } else if (path instanceof ConversePath) {
-
-                } else if (path instanceof DomainRestrictPath) {
-
-                } else if (path instanceof IrreflexiveRestrictPath) {
-
-                } else if (path instanceof KPlusPath) {
-
-                } else if (path instanceof KStarPath) {
-
-                } else if (path instanceof RangeRestrictPath) {
-
-                } else if (path instanceof CFResBUnitPath) {
-
-                } else if (path instanceof CFResFUnitPath) {
-
+            if (path != null && passPathFirstCheck(queryNode, node, match, path)) {
+                PathTrace pathTrace = new PathTrace();
+                LinkedList<Object[]> listOfNodeList = path.follow(node, pathTrace, context);
+                if (listOfNodeList == null || listOfNodeList.isEmpty()) {
+                    return;
+                } else {
+                    for (Object[] nodeList : listOfNodeList) {
+                        for (Object n : nodeList) {
+                            Node node1 = (Node) n;
+                            Match m = match.clone();
+                            if (unify(queryNode, node1, m)) {
+                                matchList.add(m);
+                                // matchList.getSupports().add(pathTrace.getSupports());
+                            }
+                        }
+                    }
                 }
             }
         }
+    }
+
+    private static boolean passPathFirstCheck(Node queryNode, Node node, Match match, Path path) {
+        if (path instanceof FUnitPath) {
+            return node.getDownCable(((FUnitPath) path).getRelation().getName()) != null;
+        } else if (path instanceof BUnitPath) {
+            return node.getUpCable(((BUnitPath) path).getRelation().getName()) != null;
+        } else if (path instanceof CFResFUnitPath) {
+            return node.getDownCable(((CFResFUnitPath) path).getRelation().getName()) != null;
+        } else if (path instanceof CFResBUnitPath) {
+            return node.getUpCable(((CFResBUnitPath) path).getRelation().getName()) != null;
+        } else if (path instanceof EmptyPath) {
+            return true;
+        } else if (path instanceof BangPath) {
+            return true;
+        } else if (path instanceof AndPath) {
+            for (Path p : ((AndPath) path).getPaths()) {
+                if (!passPathFirstCheck(queryNode, node, match, p)) {
+                    return false;
+                }
+            }
+        } else if (path instanceof OrPath) {
+            for (Path p : ((OrPath) path).getPaths()) {
+                if (passPathFirstCheck(queryNode, node, match, p)) {
+                    return true;
+                }
+            }
+            return false;
+        } else if (path instanceof ComposePath) {
+            for (Path p : ((ComposePath) path).getPaths()) {
+                if (passPathFirstCheck(queryNode, node, match, p)) {
+                    return true;
+                }
+            }
+            return false;
+        } else if (path instanceof ConversePath) {
+            return passPathFirstCheck(queryNode, node, match, ((ConversePath) path).getPath().converse());
+        } else if (path instanceof IrreflexiveRestrictPath) {
+            return passPathFirstCheck(queryNode, node, match, ((IrreflexiveRestrictPath) path).getPath());
+        } else if (path instanceof DomainRestrictPath) {
+            return passPathFirstCheck(queryNode, node, match, ((DomainRestrictPath) path).getP())
+                    && passPathFirstCheck(queryNode, node, match, ((DomainRestrictPath) path).getQ());
+        } else if (path instanceof RangeRestrictPath) {
+            return passPathFirstCheck(queryNode, node, match, ((RangeRestrictPath) path).getP());
+            // if (!passPathFirstCheck(queryNode, node, match, ((RangeRestrictPath)
+            // path).getP()))
+            // return false;
+            // LinkedList<Object[]> listOfNodeList = ((RangeRestrictPath)
+            // path).getP().follow(node, new PathTrace(),
+            // context);
+            // if (listOfNodeList == null || listOfNodeList.isEmpty())
+            // return false;
+            // for (Object[] nodeList : listOfNodeList) {
+            // for (Object n : nodeList) {
+            // Node node1 = (Node) n;
+            // if (passPathFirstCheck(queryNode, node1, match, ((RangeRestrictPath)
+            // path).getQ()))
+            // return true;
+            // }
+            // }
+            // return false;
+        } else if (path instanceof KPlusPath) {
+            return passPathFirstCheck(queryNode, node, match, ((KPlusPath) path).getPath());
+        } else if (path instanceof KStarPath) {
+            return true;
+        }
+        return true;
     }
 
     private static List<Match> removeDuplicates(List<Match> list) {
