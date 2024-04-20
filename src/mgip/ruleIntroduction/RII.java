@@ -1,6 +1,7 @@
 package mgip.ruleIntroduction;
 
 import context.Context;
+import mgip.Report;
 import mgip.requests.AntecedentToRuleChannel;
 import mgip.requests.Request;
 import mgip.requests.RuleToConsequentChannel;
@@ -28,10 +29,6 @@ public class RII {
         this.posCount = 0;
         this.negCount = 0;
         this.isSufficent = false;
-    }
-
-    public void setReportSet(ReportSet reportSet) {
-        this.reportSet = reportSet;
     }
 
     public void addPosReport() {
@@ -81,5 +78,20 @@ public class RII {
     public ReportSet getReportSet() {
         return this.reportSet;
     }
+
+    public void update(Report report) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'update'");
+    }
+
+    // private RII findMatchingRII(Report report) {
+    //     // Option 2: Searching within the rule node (assuming a List<RII> riiList exists within the rule node)
+    //     for (RII rii : rule.getRiiList()) {
+    //         if (rii.getContext().equals(report.getContext())) {
+    //             return rii;
+    //         }
+    //     }
+    //     return null; // No matching RII found
+    // }
 
 }

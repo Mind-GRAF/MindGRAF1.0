@@ -6,6 +6,13 @@
   "configurations": [
     {
       "type": "java",
+      "name": "CombinationSet",
+      "request": "launch",
+      "mainClass": "set.CombinationSet",
+      "projectName": "MindGraf"
+    },
+    {
+      "type": "java",
       "name": "NetworkUI",
       "request": "launch",
       "mainClass": "view.NetworkUI",

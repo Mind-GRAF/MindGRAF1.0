@@ -128,6 +128,9 @@ public class Report {
             case RuleCons:
                 this.setReportType(ReportType.RuleCons);
                 break;
+            case Introduction:
+                this.setReportType(ReportType.Introduction);
+                break;
             default:
                 // handle error or do nothing
                 break;

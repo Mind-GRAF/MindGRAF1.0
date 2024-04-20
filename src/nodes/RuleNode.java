@@ -18,15 +18,13 @@ import mgip.ReportType;
 import mgip.requests.Request;
 import mgip.ruleIntroduction.MCII;
 import mgip.ruleIntroduction.RII;
-import mgip.rules.AndOr;
-import mgip.rules.Thresh;
+import mgip.rules.*;
 import network.Network;
 import set.CombinationSet;
 import set.ContextSet;
 import set.MCIISet;
 import set.NodeSet;
 import set.CombinationSet;
-import set.RIISet;
 import set.Set;
 import support.Support;
 import cables.DownCable;
@@ -221,25 +219,34 @@ public class RuleNode extends PropositionNode {
         int attitude = currentRequest.getChannel().getAttitudeID();
         Substitutions filterSubs = currentRequest.getChannel().getFilterSubstitutions();
         Substitutions switchSubs = currentRequest.getChannel().getSwitcherSubstitutions();
-
-        if (this instanceof AND || this instanceof NOR){
-            IntroductionChannel intiatedChannel = intiateIntroChannel(currentRequest.getChannel(), this.getDownConsNodeSet(), null);
-            IntroductionChannel intiatedChannel1 = establishChannel(ChannelType.Introduction, this, switchSubs, filterSubs, currContextName, attitude, -1, this)
+        Context currContext = getContext(currContextName);
+        System.out.println("Current Request: " + currentRequest + " Current Context: " + currContextName + 
+        " Attitude: " + attitude + " Filter Subs: " + filterSubs + " Switch Subs: " + switchSubs + 
+        " Requester Node: " + currentRequest.getChannel().getRequesterNode().getName()+"/n");
+        
+        if (this instanceof And || this instanceof Nor){
             if (this.getDownConsNodeSet().size() > 0){
                 for (Node consNode : this.getDownConsNodeSet()){
-                    if (consNode instanceof RuleNode){
-                        ((RuleNode) consNode).processIntroductionRequest(new Request(intiatedChannel, this));
+                    if (isFree(consNode)){
+                        return false;}
+                    else{
+                        sendRequestsToNodeSet(getDownAntArgNodeSet(), currentRequest, currContext);
                     }
                 }
-            }
         }
+    }
         else if (this instanceof AndOr || this instanceof Thresh){
             NodeSet args = this.getDownAntArgNodeSet();
             Context newContext = new Context(currContextName,attitude,args);
+            System.out.println("New Context: " + newContext.getContextName()+ "Modified Attitude: " + attitude + "Assumed Args: " + args+"/n");
+            IntroductionChannel intiatedChannel = initiateIntroChannel(currentRequest.getChannel(), this, newContext.getContextName());
+            System.out.println("Initiated Channel in Context: " + intiatedChannel.getContextName()+" Attitude: "+intiatedChannel.getAttitudeID()+" with Rule: "+intiatedChannel.getRequesterNode().getName()+" Filter Subs: "+intiatedChannel.getFilterSubstitutions()+" Switch Subs: "+intiatedChannel.getSwitcherSubstitutions() + " Requester Node: "+intiatedChannel.getRequesterNode().getName()+"/n");
             RII rii = new RII(currentRequest, null, args , newContext , attitude);
-            RIISet.addRII(rii);
-            sendRequestsToNodeSet(args, currentRequest,newContext);//installing introduction channels and sending requests
+            System.out.println("RII of new Context: " + rii.getContext().getContextName()+" Attitude: "+rii.getAttitudeID()+" Request: "+rii.getRequest().getChannel().getRequesterNode().getName()+" Antecedents: "+rii.getAntNodes()+" Consequents: "+rii.getConqArgNodes()+"/n");
+            sendRequestsToNodeSet(args, currentRequest,newContext);// sending requests
+            System.out.println("Sent Requests to NodeSet: "+args+" in Context:"+newContext+" with current request: "+currentRequest+"/n");
         }
+        //Check if all the nodes are bound by a quantifier
         else if(this instanceof AndEntail){
          NodeSet ants = this.getDownAntArgNodeSet();
          for(Node ant : ants) {
@@ -247,11 +254,11 @@ public class RuleNode extends PropositionNode {
             if(isFree(ant)){
                 return false;
             }
-         }  
-         NodeSet cons = this.getDownConsNodeSet();
-         Context newContext = new Context(currContextName,attitude,ants);//clone of the current context in addition to the assumed antecedents
+        }  
+        NodeSet cons = this.getDownConsNodeSet();
+        Context newContext = new Context(currContextName,attitude,ants);//clone of the current context in addition to the assumed antecedents
+        boolean validContext = newContext.checkValidity(ants);
          RII rii = new RII(currentRequest, ants, cons , newContext , attitude);
-         RIISet.addRII(rii);
          sendRequestsToNodeSet(cons, currentRequest, newContext);//installing introduction channels and sending requests
         }
         else if(this instanceof OrEntail || this instanceof NumEntail){
@@ -266,31 +273,72 @@ public class RuleNode extends PropositionNode {
             }
             if (this instanceof NumEntail){
                 int i = this.getMin(); //Gets value of i from the NumEntail node
-                List<NodeSet> combinations = CombinationSet.generateAntecedentCombinations(ants, i);
+                List<NodeSet> combinations = CombinationSet.generateCombinations(ants, i);
                 for (NodeSet combination : combinations) {
-                    Context newContext = new Context(currContextName, attitude,combination);
+                    Context newContext = new Context(currContextName, attitude, combination);
                     RII rii = new RII(currentRequest, combination, cons , newContext , attitude);
-                    RIISet.addRII(rii);
-                    mcii.add(rii);
-                    this.sendRequestsToNodeSet(cons, filterSubs, switchSubs, newContext.getContextName(), attitude, ChannelType.RuleCons, this);
+                    mcii.addRII(rii);
+                    sendRequestsToNodeSet(cons, filterSubs, switchSubs, newContext.getContextName(), attitude, ChannelType.RuleCons, this);
                 }
             }
             else{//It's an OrEntail node
             for(Node ant : ants) {
-                Context newContext = new Context(currContextName,attitude, ant);
+                Context newContext = new Context(currContextName, attitude, ant);
                 RII rii = new RII(currentRequest, ants, cons , newContext , attitude);
-                RIISet riiSet = new RIISet();
-                riiSet.addRII(rii);
-                mcii.add(riiSet);
-                sendRequestToNodeSet(cons, currentRequest, newContext); //send requests to all consequents
+                mcii.addRII(rii);
+                sendRequestsToNodeSet(cons, currentRequest, newContext); //send requests to all consequents
                 }  
             }
            }  
     }
 
+
+    private Context getContext(String currContextName) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getContext'");
+    }
+
+    public void sendRequestsToNodeSet(NodeSet nodeSet, Request currentRequest, Context newContext) {
+        for (Node node : nodeSet) {
+            // Create a new IntroductionChannel based on the current request's channel
+            IntroductionChannel introChannel = initiateIntroChannel(currentRequest.getChannel(), this, newContext.getContextName());
+            
+            Request request = new Request(introChannel, this);
+
+            Scheduler.getLowQueue().add(request);
+        }
+    }
+
+    public void processReport(Report report) {
+        // Find matching RII based on report information (rule, context, etc.)
+        RII rii = findMatchingRII(report);
+    
+        if (rii != null && rii.isSufficent()== false) {
+            // Check report compatibility and support
+            if (report.isCompatible(introductionChannel) && report.isRelevantForRule(rii.getRule())) {
+                // Update RII
+                rii.update(report);
+    
+                // Check if rule can be introduced or negated
+                if (rii.isSufficent() == true) {
+                    // Create introduction report with appropriate sign and combined support
+                    Report introductionReport = createIntroductionReport(rii);
+    
+                    // Handle introduction/negation (assert, store, etc.)
+                    // ...
+                }
+            }
+        }
+    }
+
     public static void processIntroductionReport()
     {
-        
+        Report reportHasTurn = Scheduler.getHighQueue().poll();
+        if (reportHasTurn.getReportType() == ReportType.Introduction)
+        try {
+            //Procssing the report
+        } catch (Exception e) {
+        }
     }
 
     public static boolean filterSupports(Report rep, RII rii)
@@ -318,22 +366,18 @@ public class RuleNode extends PropositionNode {
     public static Support combineSupport(RII rii)
     { //Return Sup of the rule instance
         Support sup = new Support();
-        for(rep : rii.getReportSet())
-        {
-            sup = sup.union(rep.getSupport());
-        }
-        sup = sup - rii.getAntNodes();
         return sup;
     }
 
     public static Support combineSupport(MCII mcii)
     { //Return Sup of the rule instance
-        Support sup = new Support();
-        for(RII rii : mcii.getRII())
-        {
-            sup = sup.union(combineSupport(rii));
-        }
-        return sup;
+        return combineSupport(mcii.getRii(0));
+        
+    }
+
+    public static IntroductionChannel initiateIntroChannel(Channel channel, RuleNode rule, String contextName) {
+        IntroductionChannel introChannel = new IntroductionChannel(channel.getSwitcherSubstitutions(), channel.getFilterSubstitutions(), contextName, channel.getAttitudeID(), rule);
+        return introChannel;
     }
 
     /***

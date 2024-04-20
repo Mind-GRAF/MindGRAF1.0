@@ -14,6 +14,18 @@ public class Context {
     private Hashtable<Integer, BitSet> AttitudesBitset;
     private NodeSet suppSet;
 
+    public Context(String currContextName, int attitude, NodeSet assumptions) {
+        //TODO Auto-generated constructor stub
+    }
+
+    public Context(String currContextName, int attitude, Node orAssumption) {
+        //TODO Auto-generated constructor stub
+    }
+
+    public Context() {
+        //TODO Auto-generated constructor stub
+    }
+
     public Integer getPropositionAttitude(Integer prop) {
 
         // loop through all the Integer keys of attitudesBitset
@@ -38,6 +50,11 @@ public class Context {
             }
         }
         return true;
+    }
+
+    public boolean checkValidity(NodeSet assumedNodes) {
+        //Check for the negation of any of the given nodes in that context.
+        throw new UnsupportedOperationException("Unimplemented method 'checkValidity'");
     }
 
 }

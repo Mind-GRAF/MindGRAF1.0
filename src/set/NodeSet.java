@@ -18,6 +18,12 @@ public class NodeSet implements Iterable<Node> {
         this.nodes = nodes;
     }
 
+    public NodeSet(NodeSet nodeSet) {
+        this.nodes = new HashMap<String, Node>();
+        for (Node n : nodeSet.getValues())
+            this.nodes.put(n.getName(), n);
+    }
+
     public NodeSet(Node... nodes) {
         this.nodes = new HashMap<String, Node>();
         for (Node n : nodes)
@@ -140,6 +146,12 @@ public class NodeSet implements Iterable<Node> {
 
     public boolean equals(NodeSet n) {
         return this.getNames().equals(n.getNames());
+    }
+
+    public void addAll(NodeSet nodeSet) {
+        if (!isFinal)
+            for (Node n : nodeSet.getValues())
+                this.add(n);
     }
 
     @Override

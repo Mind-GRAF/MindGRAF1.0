@@ -1,34 +1,40 @@
 package mgip.ruleIntroduction;
 
+import java.util.ArrayList;
+
 public class MCII {
-    private RII rii;
-    private int RIIsSetCount;
-    private boolean isSufficent;
+    ArrayList<RII> riiList; //Each RII object represents a context
+    int RIICount;
+    boolean isSufficent;
 
     public MCII() {
-        rii = null;
-        RIIsSetCount = 0;
+        riiList = new ArrayList<>();
+        RIICount = 0;
         isSufficent = false;
     }
 
-    public void add(RII rii) {
-        RIIsSetCount +=1;
+    public void addRII(RII rii) {
+        riiList.add(rii);
+        RIICount++;
+    }
+
+    public boolean getSufficent() {
+        return isSufficent;
     }
 
     public void setSufficent() {
-        this.isSufficent = true;
+        isSufficent = true;
     }
 
-    public boolean isSufficent() {
-        return this.isSufficent;
+    public ArrayList<RII> getRIIList() {
+        return riiList;
     }
 
-    public int getRIIsSetCount() {
-        return this.RIIsSetCount;
+    public int getRIICount() {
+        return RIICount;
     }
 
-    public RII getRII() {
-        return this.rii;
+    public RII getRii(int index){
+        return riiList.get(index);
     }
-
 }
