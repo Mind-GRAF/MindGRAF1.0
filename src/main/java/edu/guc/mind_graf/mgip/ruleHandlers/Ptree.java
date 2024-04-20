@@ -180,7 +180,7 @@ public class Ptree extends RuleInfoHandler {
             if(!visited.contains(p)){
                 visited.add(p);
                 RuleInfoSet ris = new RuleInfoSet();
-                ris = ris.addAll(p.getSIndex().getAllRuleInfos());
+                ris = ris.union(p.getSIndex().getAllRuleInfos());
                 PtreeNode parent = p.getParent();
                 if(parent != null){
                     visited.add(p.getSibling());
@@ -189,7 +189,7 @@ public class Ptree extends RuleInfoHandler {
                     queue.addLast(parent);
                 }
                 else{
-                    rootRuleInfos = rootRuleInfos.addAll(p.getSIndex().getAllRuleInfos());
+                    rootRuleInfos = rootRuleInfos.union(p.getSIndex().getAllRuleInfos());
                 }
             }
         }

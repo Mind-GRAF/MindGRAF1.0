@@ -39,7 +39,7 @@ public class Linear extends SIndex{
     public RuleInfoSet getAllRuleInfos() {
         RuleInfoSet allRuleInfos = new RuleInfoSet();
         for (RuleInfoSet ris : ruleInfoMap.values()) {
-            allRuleInfos = allRuleInfos.addAll(ris);
+            allRuleInfos = allRuleInfos.union(ris);
         }
         return allRuleInfos;
     }

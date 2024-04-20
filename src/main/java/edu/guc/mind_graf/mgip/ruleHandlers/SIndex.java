@@ -58,7 +58,7 @@ public abstract class SIndex extends RuleInfoHandler {
             for(RuleInfo r : ri){
                 RuleInfoSet inserted = insertVariableRI(r);
                 if(inserted != null && inserted.size() != 0) {
-                    allRuleInfos = allRuleInfos.addAll(inserted);
+                    allRuleInfos = allRuleInfos.union(inserted);
                 }
             }
             return allRuleInfos;

@@ -99,9 +99,9 @@ public class Network {
 				case "individualnode":
 					node = new IndividualNode(downCableSet);
 					break;
-				case "rulenode":
-					node = new RuleNode(downCableSet);
-					break;
+//				case "rulenode":
+//					node = new RuleNode(downCableSet);
+//					break;
 				case "andor":
 					node = new AndOr(downCableSet);
 					break;
@@ -207,9 +207,9 @@ public class Network {
 			case "individualnode":
 				node = new IndividualNode(name, false);
 				break;
-			case "rulenode":
-				node = new RuleNode(name, false);
-				break;
+//			case "rulenode":
+//				node = new RuleNode(name, false);
+//				break;
 			default:
 				if (userDefinedClasses.containsKey(SemanticType)) {
 					CustomClass customClass = userDefinedClasses.get(SemanticType);
@@ -279,9 +279,9 @@ public class Network {
 			case "individualnode":
 				node = new IndividualNode(name, true);
 				break;
-			case "rulenode":
-				node = new RuleNode(name, true);
-				break;
+//			case "rulenode":
+//				node = new RuleNode(name, true);
+//				break;
 			default:
 				if (userDefinedClasses.containsKey(SemanticType)) {
 					CustomClass customClass = userDefinedClasses.get(SemanticType);

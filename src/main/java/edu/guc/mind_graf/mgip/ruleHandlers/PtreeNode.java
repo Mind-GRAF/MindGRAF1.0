@@ -78,10 +78,10 @@ public class PtreeNode {
                 if(parent != null) {
                     RuleInfoSet combinedWithSibling = combineWithSibling(newRuleInfo);
                     if(combinedWithSibling.size() > 0) {
-                        result = result.addAll(parent.insertIntoNode(combinedWithSibling, true));
+                        result = result.union(parent.insertIntoNode(combinedWithSibling, true));
                     }
                     else {
-                        result = result.addAll(parent.insertIntoNode(newRuleInfo.addNullSubs(siblingIntersection), true));
+                        result = result.union(parent.insertIntoNode(newRuleInfo.addNullSubs(siblingIntersection), true));
                     }
                 } else{
                     result.addRuleInfo(newRuleInfo);
@@ -96,7 +96,7 @@ public class PtreeNode {
         for(RuleInfo ri: ris) {
             RuleInfoSet inserted = insertIntoNode(ri, isPropagating);
             if(inserted != null){
-                result = result.addAll(inserted);
+                result = result.union(inserted);
             }
         }
         return result;

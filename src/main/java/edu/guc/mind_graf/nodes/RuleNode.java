@@ -2,7 +2,6 @@ package edu.guc.mind_graf.nodes;
 
 import java.util.Collection;
 
-import edu.guc.mind_graf.exceptions.InvalidRuleInfoException;
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.reports.KnownInstance;
@@ -19,7 +18,6 @@ import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfoHandler;
 import edu.guc.mind_graf.mgip.rules.AndOr;
 import edu.guc.mind_graf.mgip.rules.Thresh;
 import edu.guc.mind_graf.network.Network;
-import edu.guc.mind_graf.set.FlagNodeSet;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
@@ -28,15 +26,15 @@ import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
 
-public class RuleNode extends PropositionNode {
+public abstract class RuleNode extends PropositionNode {
     private boolean forwardReport;
     protected RuleInfoHandler ruleInfoHandler;
 
-    public RuleNode(String name, Boolean isVariable) {
-        super(name, isVariable);
-        this.forwardReport = false;
-        // TODO Auto-generated constructor stub
-    }
+//    public RuleNode(String name, Boolean isVariable) {
+//        super(name, isVariable);
+//        this.forwardReport = false;
+//        // TODO Auto-generated constructor stub
+//    }
 
     public RuleNode(DownCableSet downCableSet) {
         super(downCableSet);

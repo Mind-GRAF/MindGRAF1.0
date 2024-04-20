@@ -55,10 +55,4 @@ public class AndEntailment extends RuleNode {
         return inferrable;
     }
 
-    public void sendInferredReports(RuleInfoSet inferred){
-        Collection<Channel> outgoingRuleConsChannels = getOutgoingRuleConsequentChannels();
-
-    }
-
-
 }

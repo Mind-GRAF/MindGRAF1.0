@@ -82,7 +82,7 @@ public class RuleInfoSet implements Iterable<RuleInfo>{
         return newInfo;    // return set of rule infos that are a result of combining or have never been combined
     }
 
-    public RuleInfoSet addAll(RuleInfoSet ris) {
+    public RuleInfoSet union(RuleInfoSet ris) {
         RuleInfoSet result = new RuleInfoSet();
         result.ris.addAll(this.ris);
         if(ris != null)
