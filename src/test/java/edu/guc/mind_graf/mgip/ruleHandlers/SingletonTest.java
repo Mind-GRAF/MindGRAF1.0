@@ -27,10 +27,6 @@ class SingletonTest {
         Y = Network.createVariableNode("Y", "propositionnode");
     }
 
-    @AfterEach
-    void tearDown() {
-    }
-
     @Test
     public void testInsertIntoMap() {
         NodeSet commonVariables = new NodeSet(X, Y);

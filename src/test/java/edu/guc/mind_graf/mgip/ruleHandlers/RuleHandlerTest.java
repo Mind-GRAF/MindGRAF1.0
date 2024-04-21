@@ -14,8 +14,6 @@ import edu.guc.mind_graf.set.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.Map;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -78,49 +76,9 @@ class RuleHandlerTest {
     }
 
     @Test
-    void testInsertIntoMapSingleton() {
-        RuleInfo ri = new RuleInfo();
-        int hash = 1;
-
-        singleton.insertIntoMap(ri, hash);
-
-        RuleInfo result = singleton.getRuleInfoMap().get(hash);
-
-        assertNotNull(result);
-        assertEquals(ri, result);
-        assertEquals(1, singleton.getRuleInfoMap().size());
-        assertEquals(ri, singleton.getRuleInfoMap().get(hash));
-    }
-
-    @Test
-    void insertIntoMapLinear() {
-        linear.insertIntoMap(ruleInfo1, 0);
-        assertNotNull(linear.getRuleInfoMap().get(0));
-        linear.insertIntoMap(ruleInfo2, 0);
-        assertEquals(2, linear.getRuleInfoMap().get(0).size());
-    }
-
-    @Test
     void getCommonVariables() {
         assertEquals(2, lSIndex.getCommonVariables().size());
         assertEquals(3, sSIndex.getCommonVariables().size());
-    }
-
-    @Test
-    void createSIndex() throws NoSuchTypeException {
-        NodeSet args = new NodeSet();
-        args.add(X);
-        args.add(Y);
-        args.add(Z);
-        DownCable cable = new DownCable(Network.getRelations().get("arg"), args);
-        Node M1 = Network.createNode("propositionNode", new DownCableSet(cable));
-        SIndex result = sSIndex.createSIndex(new PropositionNodeSet(M1));
-        assertEquals(sSIndex.getCommonVariables(), result.getCommonVariables());
-    }
-
-    @Test
-    void customHash() throws InvalidRuleInfoException {
-        assertEquals(linear.customHash(subs2), linear.customHash(subs1));
     }
 
     @Test

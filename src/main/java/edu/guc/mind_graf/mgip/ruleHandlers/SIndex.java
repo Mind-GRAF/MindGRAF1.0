@@ -4,7 +4,6 @@ import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.exceptions.InvalidRuleInfoException;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.set.NodeSet;
-import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
 
 public abstract class SIndex extends RuleInfoHandler {
@@ -29,18 +28,21 @@ public abstract class SIndex extends RuleInfoHandler {
         this.commonVariables = commonVariables;
     }
 
-    public SIndex createSIndex(PropositionNodeSet antecedents) {
-        NodeSet commonVariables = antecedents.getCommonVariables();
-        return new Linear(commonVariables);
-    }
+//    public SIndex createSIndex(PropositionNodeSet antecedents) {
+//        NodeSet commonVariables = antecedents.getCommonVariables();
+//        return new Linear(commonVariables);
+//    }
 
     protected int customHash(Substitutions subs) throws InvalidRuleInfoException {
         int hash = 0;
         int factor = 1;
         for(Node var : commonVariables){
-            if(subs.get(var) == null)
+            if(!subs.containsVar(var))
                 throw new InvalidRuleInfoException("substitution not in info");
-            hash += subs.get(var).getId()*factor; //consider checking for invalid subs here (if var not in subs, they're invalid)
+            if(subs.get(var) == null)
+                hash += 99*factor;
+            else
+                hash += subs.get(var).getId()*factor; //consider checking for invalid subs here (if var not in subs, they're invalid)
             factor *= 100;
         }
         //assuming ids wont be over 100
@@ -57,7 +59,7 @@ public abstract class SIndex extends RuleInfoHandler {
            RuleInfoSet allRuleInfos = new RuleInfoSet();
             for(RuleInfo r : ri){
                 RuleInfoSet inserted = insertVariableRI(r);
-                if(inserted != null && inserted.size() != 0) {
+                if(inserted != null && !inserted.isEmpty()){
                     allRuleInfos = allRuleInfos.union(inserted);
                 }
             }
@@ -73,4 +75,5 @@ public abstract class SIndex extends RuleInfoHandler {
     public void setMin(int min) {
         this.min = min;
     }
+
 }

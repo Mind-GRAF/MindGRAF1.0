@@ -156,4 +156,8 @@ public class Substitutions {
         }
         return true;
     }
+
+    public boolean containsVar(Node var) {
+        return map.containsKey(var);
+    }
 }
