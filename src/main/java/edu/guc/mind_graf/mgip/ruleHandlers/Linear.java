@@ -6,13 +6,6 @@ import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
 
 public class Linear extends SIndex{
-    public HashMap<Integer, RuleInfoSet> getRuleInfoMap() {
-        return ruleInfoMap;
-    }
-
-    public void setRuleInfoMap(HashMap<Integer, RuleInfoSet> ruleInfoMap) {
-        this.ruleInfoMap = ruleInfoMap;
-    }
 
     HashMap<Integer, RuleInfoSet> ruleInfoMap;
 
@@ -42,6 +35,10 @@ public class Linear extends SIndex{
             allRuleInfos = allRuleInfos.union(ris);
         }
         return allRuleInfos;
+    }
+
+    public HashMap<Integer, RuleInfoSet> getRuleInfoMap() {
+        return ruleInfoMap;
     }
 
 }

@@ -39,7 +39,7 @@ class RuleInfoSetTest {
         ruleInfoSet.combine(ruleInfo3);
         assertEquals(2, ruleInfoSet.size());
         for(RuleInfo ruleInfo : ruleInfoSet) {
-            assertFalse(ruleInfo.equals(ruleInfo1));
+            assertNotEquals(ruleInfo, ruleInfo1);
         }
     }
 
