@@ -17,6 +17,13 @@ public class FreeVariableSet implements Iterable<Node>, Serializable {
         freeVariables = new HashMap<String, Node>();
     }
 
+    public FreeVariableSet(Node... nodes) {
+        freeVariables = new HashMap<String, Node>();
+        for (Node n : nodes) {
+            freeVariables.put(n.getName(), n);
+        }
+    }
+
     public void add(Node n) {
         if (n.isVariable())
             freeVariables.put(n.getName(), n);
