@@ -10,7 +10,7 @@ import edu.guc.mind_graf.set.Set;
 
 public class Context implements Cloneable{
 
-    private Hashtable<Integer, PropositionNodeSet> attitudes;
+    private Hashtable<Integer, PropositionNodeSet[]> attitudes;
     private String name;
     private Set<Integer, BitSet> AttitudesBitset;
 
@@ -18,16 +18,20 @@ public class Context implements Cloneable{
     public Context(String name, Set<String,Integer> attitudeNames){
         this.name=name;
         for(Map.Entry<String,Integer> entry: attitudeNames.getSet().entrySet()){
-            attitudes.put(entry.getValue(), new PropositionNodeSet());
+            PropositionNodeSet[] attitudeNodeSet = new PropositionNodeSet[2];
+            attitudeNodeSet[0] = new PropositionNodeSet();
+            attitudeNodeSet[1] = new PropositionNodeSet();
+            
+            attitudes.put(entry.getValue(),  attitudeNodeSet);
         }
     }
     
-    public Context copyContext(Context c, int attitudeId, PropositionNodeSet NodeSet) {
-        Context newContext = c.clone();
-        newContext.attitudes.get(attitudeId).union(NodeSet);
-        //TODO check consistency
-        return newContext;
-    }
+//    public Context copyContext(Context c, int attitudeId, PropositionNodeSet NodeSet) {
+//        Context newContext = c.clone();
+//        newContext.attitudes.get(attitudeId).union(NodeSet);
+//        //TODO check consistency
+//        return newContext;
+//    }
     
     public Integer getPropositionAttitude(Integer prop) {
 
@@ -46,34 +50,22 @@ public class Context implements Cloneable{
         return name;
     }
     
-//    public PropositionNodeSet getAllPropositionsInAnAttitude(int attitude) {
-//        return this.attitudes.get(attitude);
+    public static void addHypothesisToContext(Context c, int attitudeNumber, PropositionNode node) {
+        c.attitudes.get(attitudeNumber)[0].add(node);
+    }
+    
+    public static void removeHypothesisFromContext(Context c, int attitudeNumber, PropositionNode node) {
+        c.attitudes.get(attitudeNumber)[0]  .remove(node);
+    }
+    
+//    @Override
+//    public Context clone() {
+//        Context clone = new Context(this.name+" copy",ContextController.getAttitudes() );
+//        for( Map.Entry<Integer,PropositionNodeSet> entry: this.attitudes.entrySet()){
+//                clone.attitudes.put(entry.getKey(), entry.getValue().clone());
+//        }
+//        //TODO wael: clone bitsets
+//        return clone;
 //    }
-    public static boolean isAsserted(Context c, int attitudeNumber, PropositionNode node) {
-        if(c.attitudes.get(attitudeNumber).contains(node)){
-            return true;
-        }else{
-            // TODO : call the isAsserted method of the supports
-            return true;
-        }
-    }
-    
-    public static void addToContext(Context c, int attitudeNumber, PropositionNode node) {
-        c.attitudes.get(attitudeNumber).add(node);
-    }
-    
-    public static void removeFromContext(Context c, int attitudeNumber, PropositionNode node) {
-        c.attitudes.get(attitudeNumber).remove(node);
-    }
-    
-    @Override
-    public Context clone() {
-        Context clone = new Context(this.name+" copy",ContextController.getAttitudes() );
-        for( Map.Entry<Integer,PropositionNodeSet> entry: this.attitudes.entrySet()){
-                clone.attitudes.put(entry.getKey(), entry.getValue().clone());
-        }
-        //TODO wael: clone bitsets
-        return clone;
-    }
     
 }

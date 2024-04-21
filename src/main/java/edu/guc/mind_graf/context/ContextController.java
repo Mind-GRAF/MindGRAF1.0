@@ -73,13 +73,13 @@ public class ContextController {
     public static void addToContext(String contextName, int attitudeNumber, int nodeId) {
         Context c = ContextController.getContext(contextName);
         PropositionNode n = (PropositionNode) Network.getNodeById(nodeId);
-       Context.addToContext(c,attitudeNumber, n);
+       Context.addHypothesisToContext(c,attitudeNumber, n);
     }
     
     public static void removeFromContext(String contextName, int attitudeNumber, int nodeId) {
         Context c = ContextController.getContext(contextName);
         PropositionNode n = (PropositionNode) Network.getNodeById(nodeId);
-        Context.removeFromContext(c,attitudeNumber, n);
+        Context.removeHypothesisFromContext(c,attitudeNumber, n);
     }
 
 }
