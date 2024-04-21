@@ -27,7 +27,8 @@ public class AndOr extends RuleNode {
 
     public RuleInfoSet[] mayInfer() {
         RuleInfoSet[] inferrable = {new RuleInfoSet(), new RuleInfoSet()};  // at index 0 the set of positively inferred, at index 1 the set of negatively inferred
-        for(RuleInfo ri : ruleInfoHandler.getInferrableRuleInfos()) {
+//        for(RuleInfo ri : ruleInfoHandler.getInferrableRuleInfos()) {
+        for(RuleInfo ri : this.getRootRuleInfos()){
             if(ri.getPcount() == max)
                 inferrable[1].addRuleInfo(ri);
             else if(ri.getNcount() == (arg.size() - min))

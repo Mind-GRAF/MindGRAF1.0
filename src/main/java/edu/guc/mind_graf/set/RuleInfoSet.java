@@ -130,4 +130,14 @@ public class RuleInfoSet implements Iterable<RuleInfo>{
         return ris.isEmpty();
     }
 
+    public void addRootRuleInfo(RuleInfoSet inserted) {
+        for(RuleInfo rInserted : inserted){
+            for(RuleInfo rRoot : ris){
+                if(rInserted.getSubs().isDisjoint(rRoot.getSubs())){
+                    ris.add(rInserted.combine(rRoot));
+                }
+            }
+            ris.add(rInserted);
+        }
+    }
 }

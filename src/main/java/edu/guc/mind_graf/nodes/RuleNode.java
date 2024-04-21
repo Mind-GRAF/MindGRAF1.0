@@ -29,6 +29,7 @@ import edu.guc.mind_graf.set.RuleInfoSet;
 public abstract class RuleNode extends PropositionNode {
     private boolean forwardReport;
     protected RuleInfoHandler ruleInfoHandler;
+    protected RuleInfoSet rootRuleInfos;
 
 //    public RuleNode(String name, Boolean isVariable) {
 //        super(name, isVariable);
@@ -57,6 +58,7 @@ public abstract class RuleNode extends PropositionNode {
 
         try{
             RuleInfoSet inserted = ruleInfoHandler.insertRI(RuleInfo.createRuleInfo(report));
+            rootRuleInfos.addRootRuleInfo(inserted);
             if(inserted != null && inserted.size() > 0){
                 RuleInfoSet[] mayInfer = mayInfer();
                 Collection<Channel> outgoingRuleConsChannels = getOutgoingRuleConsequentChannels(); // should filter channels
@@ -80,9 +82,7 @@ public abstract class RuleNode extends PropositionNode {
 
     }
 
-    public RuleInfoSet[] mayInfer() {
-        return null; // either abstract rulenode or think of cases where the rule node is not one of the 5 connectives
-    }
+    public abstract RuleInfoSet[] mayInfer();
 
     /***
      * this method gets all the consequents and arguments that this node is a rule
@@ -475,6 +475,14 @@ public abstract class RuleNode extends PropositionNode {
 
     public void setForwardReport(boolean forwardReport) {
         this.forwardReport = forwardReport;
+    }
+
+    public RuleInfoSet getRootRuleInfos() {
+        return rootRuleInfos;
+    }
+
+    public void setRootRuleInfos(RuleInfoSet rootRuleInfos) {
+        this.rootRuleInfos = rootRuleInfos;
     }
 
 }

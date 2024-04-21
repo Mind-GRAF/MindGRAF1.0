@@ -27,7 +27,8 @@ public class Thresh extends RuleNode {
 
     public RuleInfoSet[] mayInfer() {
         RuleInfoSet[] inferrable = {new RuleInfoSet(), new RuleInfoSet()};  // at index 0 the set of positively inferred, at index 1 the set of negatively inferred
-        for(RuleInfo ri : ruleInfoHandler.getInferrableRuleInfos()) {
+//        for(RuleInfo ri : ruleInfoHandler.getInferrableRuleInfos()) {
+        for(RuleInfo ri : this.getRootRuleInfos()){
             if(ri.getPcount() == thresh - 1 && ri.getNcount() == arg.size() - threshmax)
                 inferrable[1].addRuleInfo(ri);
             else if(ri.getPcount() == thresh && ri.getNcount() == (arg.size() - threshmax - 1))

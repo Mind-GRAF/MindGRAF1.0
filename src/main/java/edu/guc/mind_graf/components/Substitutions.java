@@ -147,4 +147,13 @@ public class Substitutions {
         }
         return copy;
     }
+
+    public boolean isDisjoint(Substitutions otherSubs) {
+        for (Node var : map.keySet()) {
+            if (otherSubs.contains(var)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
