@@ -30,12 +30,16 @@ public class RuleInfoSet implements Iterable<RuleInfo>{
         ris.add(ri);
     }
 
-    public RuleInfoSet combine(RuleInfo ri) {
-        boolean combined = false;
+    public void combine(RuleInfo ri) {
+        HashSet<RuleInfo> result = new HashSet<>();
         for (RuleInfo r : ris) {
-            r.combine(ri);
+            RuleInfo combined = r.combine(ri);
+            if(combined != null)
+                result.add(combined);
+            else
+                result.add(r);
         }
-        return this;
+        this.ris = result;
     }
 
     public RuleInfoSet combineAdd(RuleInfo ri) {
