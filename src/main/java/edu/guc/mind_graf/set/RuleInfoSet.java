@@ -42,7 +42,7 @@ public class RuleInfoSet implements Iterable<RuleInfo>{
         RuleInfoSet newInfo = new RuleInfoSet();
         HashSet<RuleInfo> newRIS = new HashSet<>();
         for(RuleInfo r : ris) {
-            RuleInfo combined = r.combineAdd(ri);
+            RuleInfo combined = r.combine(ri);
             if(combined != null) {
                 newRIS.add(combined);
                 newInfo.addRuleInfo(combined);

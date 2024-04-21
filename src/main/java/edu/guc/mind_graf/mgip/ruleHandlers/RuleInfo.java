@@ -142,12 +142,12 @@ public class RuleInfo {
            && this.fns.equals(ri.getFns());
     }
 
-    public RuleInfo combineAdd(RuleInfo ri) {
-        RuleInfo res = new RuleInfo();
-        res = res.combine(this);
-        res = res.combine(ri);
-        return res;
-    } //combines in new RuleInfo
+//    public RuleInfo combineAdd(RuleInfo ri) {
+//        RuleInfo res = new RuleInfo();
+//        res = res.combine(this);
+//        res = res.combine(ri);
+//        return res;
+//    } //combines in new RuleInfo
 
     @Override
     public String toString() {
@@ -166,7 +166,7 @@ public class RuleInfo {
                 ruleInfoWithNulls.getSubs().add(n, null);
             }
         }
-        return this;
+        return ruleInfoWithNulls;
 
     }
 

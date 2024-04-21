@@ -1,5 +1,8 @@
 package edu.guc.mind_graf.mgip.ruleHandlers;
 
+import edu.guc.mind_graf.set.FreeVariableSet;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import edu.guc.mind_graf.components.Substitutions;
@@ -13,6 +16,22 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class RuleInfoTest {
 
+    Network network;
+    Node X;
+    Node Y;
+    Node Z;
+
+
+    @BeforeEach
+    void setUp() throws NoSuchTypeException {
+        network = new Network();
+
+        // Create some variable nodes for testing
+        X = Network.createVariableNode("X", "propositionnode");
+        Y = Network.createVariableNode("Y", "propositionnode");
+        Z = Network.createVariableNode("Z", "propositionnode");
+    }
+
     @Test
     void testEmptyConstructor() {
         RuleInfo ruleInfo = new RuleInfo();
@@ -24,13 +43,6 @@ class RuleInfoTest {
 
     @Test
     void testCombine() throws NoSuchTypeException {
-
-        Network network = new Network();
-
-        // Create some variable nodes for testing
-        Node Z = Network.createVariableNode("Z", "propositionnode");
-        Node Y = Network.createVariableNode("Y", "propositionnode");
-        Node X = Network.createVariableNode("X", "propositionnode");
 
         Node Nemo = Network.createNode("nemo", "propositionnode");
         Node Marlin = Network.createNode("marlin", "propositionnode");
@@ -63,4 +75,43 @@ class RuleInfoTest {
 
     }
 
+    @Test
+    public void testEquals() {
+        RuleInfo ruleInfo1 = new RuleInfo(2, 1, new Substitutions(), new FlagNodeSet());
+        RuleInfo ruleInfo2 = new RuleInfo(2, 1, new Substitutions(), new FlagNodeSet());
+
+        assertTrue(ruleInfo1.equals(ruleInfo2));
+    }
+
+    @Test
+    public void testNotEquals() {
+        RuleInfo ruleInfo1 = new RuleInfo(2, 1, new Substitutions(), new FlagNodeSet());
+        RuleInfo ruleInfo2 = new RuleInfo(3, 1, new Substitutions(), new FlagNodeSet());
+
+        assertFalse(ruleInfo1.equals(ruleInfo2));
+    }
+
+    @Test
+    public void testAddNullSubs() {
+        RuleInfo ruleInfo1 = new RuleInfo(2, 1, new Substitutions(), new FlagNodeSet());
+        FreeVariableSet freeVariables = new FreeVariableSet();
+        freeVariables.add(X);
+        freeVariables.add(Y);
+
+        RuleInfo result = ruleInfo1.addNullSubs(freeVariables);
+        assertEquals(2, result.getSubs().size());
+        assertTrue(result.getSubs().contains(X));
+        assertTrue(result.getSubs().contains(Y));
+    }
+
+    @Test
+    void testClone() {
+        RuleInfo ruleInfo1 = new RuleInfo(2, 1, new Substitutions(), new FlagNodeSet());
+        RuleInfo result = ruleInfo1.clone();
+
+        assertEquals(ruleInfo1.getPcount(), result.getPcount());
+        assertEquals(ruleInfo1.getNcount(), result.getNcount());
+        assertEquals(ruleInfo1.getSubs(), result.getSubs());
+        assertEquals(ruleInfo1.getFns(), result.getFns());
+    }
 }
