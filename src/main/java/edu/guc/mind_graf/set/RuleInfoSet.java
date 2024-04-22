@@ -144,4 +144,8 @@ public class RuleInfoSet implements Iterable<RuleInfo>{
             ris.add(rInserted);
         }
     }
+
+    public boolean contains(RuleInfo ri) {
+        return ris.contains(ri);
+    }
 }
