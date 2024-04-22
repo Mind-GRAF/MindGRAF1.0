@@ -485,4 +485,8 @@ public abstract class RuleNode extends PropositionNode {
         this.rootRuleInfos = rootRuleInfos;
     }
 
+    public RuleInfoHandler getRuleInfoHandler() {
+        return ruleInfoHandler;
+    }
+
 }
