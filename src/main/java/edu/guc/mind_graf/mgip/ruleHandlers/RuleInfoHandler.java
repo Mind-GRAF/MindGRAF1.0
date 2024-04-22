@@ -20,7 +20,8 @@ public abstract class RuleInfoHandler {
 
     public RuleInfoSet insertRI(RuleInfo ri) throws InvalidRuleInfoException {
         if (ri.getSubs() == null || ri.getSubs().size() == 0) {
-            return new RuleInfoSet(constantRI.combine(ri)); // editable depending on all possible cases
+            constantRI = constantRI.combine(ri);
+            return new RuleInfoSet(constantRI); // editable depending on all possible cases
         }
         else
             return insertVariableRI(ri);
@@ -39,14 +40,14 @@ public abstract class RuleInfoHandler {
 
     public abstract RuleInfoSet getAllRuleInfos();
 
-    public RuleInfoSet getInferrableRuleInfos() {
-        RuleInfoSet result = new RuleInfoSet();
-        for (RuleInfo r : getAllRuleInfos()) {
-            result.addRuleInfo(r.combine(this.getConstantAntecedents()));
-        }
-        if(result.isEmpty())
-            result.addRuleInfo(this.getConstantAntecedents());
-        return result;
-    }
+//    public RuleInfoSet getInferrableRuleInfos() {
+//        RuleInfoSet result = new RuleInfoSet();
+//        for (RuleInfo r : getAllRuleInfos()) {
+//            result.addRuleInfo(r.combine(this.getConstantAntecedents()));
+//        }
+//        if(result.isEmpty())
+//            result.addRuleInfo(this.getConstantAntecedents());
+//        return result;
+//    }
 
 }

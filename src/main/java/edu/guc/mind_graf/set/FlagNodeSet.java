@@ -102,4 +102,8 @@ public class FlagNodeSet implements Iterable<FlagNode>{
     public Iterator<FlagNode> iterator() {
         return flagNodes.iterator();
     }
+
+    public boolean isEmpty() {
+        return flagNodes.isEmpty();
+    }
 }

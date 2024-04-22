@@ -160,4 +160,8 @@ public class Substitutions {
     public boolean containsVar(Node var) {
         return map.containsKey(var);
     }
+
+    public boolean isEmpty() {
+        return map.isEmpty();
+    }
 }
