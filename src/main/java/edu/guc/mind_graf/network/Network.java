@@ -64,6 +64,10 @@ public class Network {
 		Network.createRelation("object", "", Adjustability.EXPAND, 2);
 		Network.createRelation("member", "", Adjustability.EXPAND, 2);
 		Network.createRelation("class", "", Adjustability.EXPAND, 2);
+		Network.createRelation("i", "individualnode", Adjustability.EXPAND, 2);
+		Network.createRelation("cq", "propositionnode", Adjustability.EXPAND, 2);
+		Network.createRelation("ant", "propositionnode", Adjustability.EXPAND, 2);
+		Network.createRelation("&ant", "propositionnode", Adjustability.EXPAND, 2);
 	}
 
 	public void addBasicNodes() throws NoSuchTypeException {
@@ -113,6 +117,10 @@ public class Network {
 					break;
 				case "thresh":
 					node = new Thresh(downCableSet);
+					propositionNodes.put(node.getId(), node);
+					break;
+				case "numentailment":
+					node = new NumEntailment(downCableSet);
 					propositionNodes.put(node.getId(), node);
 					break;
 				case "bridgerule":
