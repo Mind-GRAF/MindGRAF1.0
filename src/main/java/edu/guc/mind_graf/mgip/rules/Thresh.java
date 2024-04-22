@@ -31,7 +31,7 @@ public class Thresh extends RuleNode {
         for(RuleInfo ri : this.getRootRuleInfos()){
             if(ri.getPcount() == thresh - 1 && ri.getNcount() == arg.size() - threshmax)
                 inferrable[1].addRuleInfo(ri);
-            else if(ri.getPcount() == thresh && ri.getNcount() == (arg.size() - threshmax - 1))
+            else if(ri.getPcount() >= thresh && ri.getNcount() >= (arg.size() - threshmax - 1))
                 inferrable[0].addRuleInfo(ri);
         }
         return inferrable;

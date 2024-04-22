@@ -68,6 +68,8 @@ public class Network {
 		Network.createRelation("cq", "propositionnode", Adjustability.EXPAND, 2);
 		Network.createRelation("ant", "propositionnode", Adjustability.EXPAND, 2);
 		Network.createRelation("&ant", "propositionnode", Adjustability.EXPAND, 2);
+		Network.createRelation("thresh", "propositionnode", Adjustability.EXPAND, 2);
+		Network.createRelation("threshmax", "propositionnode", Adjustability.EXPAND, 2);
 	}
 
 	public void addBasicNodes() throws NoSuchTypeException {
