@@ -182,13 +182,12 @@ public class Ptree extends RuleInfoHandler {
                 RuleInfoSet ris = new RuleInfoSet();
                 ris = ris.union(p.getSIndex().getAllRuleInfos());
                 PtreeNode parent = p.getParent();
-                if(parent != null){
-                    visited.add(p.getSibling());
+                if(parent != null && visited.contains(p.getSibling())){
                     ris = ris.combineAdd(p.getSibling().getSIndex().getAllRuleInfos());
                     parent.getSIndex().insertVariableRI(ris);
                     queue.addLast(parent);
                 }
-                else{
+                else if(parent == null){
                     rootRuleInfos = rootRuleInfos.union(p.getSIndex().getAllRuleInfos());
                 }
             }
@@ -223,12 +222,15 @@ public class Ptree extends RuleInfoHandler {
     public ArrayList<PtreeNode> arrayOfNodes(){  //for testing
         ArrayList<PtreeNode> arr = new ArrayList<>();
         ArrayDeque <PtreeNode> queue = new ArrayDeque<>();
+        HashSet<PtreeNode> addedToQueue = new HashSet<>();
         queue.addAll(varSetLeafMap.values());
+        addedToQueue.addAll(varSetLeafMap.values());
         while(!queue.isEmpty()){
             PtreeNode p = queue.pollFirst();
             arr.add(p);
-            if(p.getParent() != null && !queue.contains(p.getParent())){
+            if(p.getParent() != null && !addedToQueue.contains(p.getParent())){
                 queue.addLast(p.getParent());
+                addedToQueue.add(p.getParent());
             }
         }
         return arr;

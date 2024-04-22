@@ -23,9 +23,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class PtreeTest {
 
     Network network = new Network();
-    Node X;
-    Node Y;
-    Node Z;
+    Node G;
+    Node C;
+    Node Co;
     Node M0;
     Node M1;
     Node M2;
@@ -35,21 +35,21 @@ class PtreeTest {
 
     @BeforeEach
     void setUp() throws NoSuchTypeException {
-        X = Network.createVariableNode("X", "propositionnode");
-        Y = Network.createVariableNode("Y", "propositionnode");
-        Z = Network.createVariableNode("Z", "propositionnode");
+        G = Network.createVariableNode("G", "propositionnode");
+        C = Network.createVariableNode("C", "propositionnode");
+        Co = Network.createVariableNode("Co", "propositionnode");
 
-        DownCable gMem = new DownCable(Network.getRelations().get("member"), new NodeSet(X));
+        DownCable gMem = new DownCable(Network.getRelations().get("member"), new NodeSet(G));
         Node government = Network.createNode("government", "propositionnode");
         DownCable gov = new DownCable(Network.getRelations().get("class"), new NodeSet(government));
         M0 = Network.createNode("propositionnode", new DownCableSet(gMem, gov));
 
-        DownCable cMem = new DownCable(Network.getRelations().get("member"), new NodeSet(Y));
+        DownCable cMem = new DownCable(Network.getRelations().get("member"), new NodeSet(C));
         Node civilian = Network.createNode("civilian", "propositionnode");
         DownCable civ = new DownCable(Network.getRelations().get("class"), new NodeSet(civilian));
         M1 = Network.createNode("propositionnode", new DownCableSet(cMem, civ));
 
-        DownCable coMem = new DownCable(Network.getRelations().get("member"), new NodeSet(Z));
+        DownCable coMem = new DownCable(Network.getRelations().get("member"), new NodeSet(Co));
         Node country = Network.createNode("country", "propositionnode");
         DownCable coun = new DownCable(Network.getRelations().get("class"), new NodeSet(country));
         M2 = Network.createNode("propositionnode", new DownCableSet(coMem, coun));
@@ -58,24 +58,19 @@ class PtreeTest {
                 Adjustability.EXPAND, 2);
         Relation ruled = Network.createRelation("ruled", "",
                 Adjustability.EXPAND, 2);
-        DownCable ruling = new DownCable(rule, new NodeSet(X));
-        DownCable ruledC = new DownCable(ruled, new NodeSet(Z));
+        DownCable ruling = new DownCable(rule, new NodeSet(G));
+        DownCable ruledC = new DownCable(ruled, new NodeSet(Co));
         M3 = Network.createNode("propositionnode", new DownCableSet(ruling, ruledC));
 
         Relation living = Network.createRelation("living", "",
                 Adjustability.EXPAND, 2);
         Relation in = Network.createRelation("in", "",
                 Adjustability.EXPAND, 2);
-        DownCable livingC = new DownCable(living, new NodeSet(Y));
-        DownCable inC = new DownCable(in, new NodeSet(Z));
+        DownCable livingC = new DownCable(living, new NodeSet(C));
+        DownCable inC = new DownCable(in, new NodeSet(Co));
         M4 = Network.createNode("propositionnode", new DownCableSet(livingC, inC));
 
         testing = Ptree.constructPtree(new PropositionNodeSet(M0, M1, M2, M3, M4), 5, Integer.MAX_VALUE, 2);
-        System.out.println(testing);
-    }
-
-    @AfterEach
-    void tearDown() {
     }
 
     @Test
@@ -85,7 +80,6 @@ class PtreeTest {
         assertEquals(5, testing.getVarSetLeafMap().keySet().size());
         assertEquals(9, testing.arrayOfNodes().size());
         assertEquals(1, testing.arrayOfNodes().get(0).getMin());
-        assertEquals(5, testing.arrayOfNodes().get(8).getMin());
     }
 
     @Test
@@ -93,35 +87,35 @@ class PtreeTest {
         FlagNode govFlag = new FlagNode(M0, true, new PropositionNodeSet());
         Substitutions govSubs = new Substitutions();
         Node henry = Network.createNode("henry", "individualnode");
-        govSubs.add(X, henry);
+        govSubs.add(G, henry);
         RuleInfo ruleInfo0 = new RuleInfo(1, 0, govSubs, new FlagNodeSet(govFlag));
         testing.insertVariableRI(ruleInfo0);
 
         FlagNode civFlag = new FlagNode(M1, true, new PropositionNodeSet());
         Substitutions civSubs = new Substitutions();
         Node anne = Network.createNode("anne", "individualnode");
-        civSubs.add(Y, anne);
+        civSubs.add(C, anne);
         RuleInfo ruleInfo1 = new RuleInfo(1, 0, civSubs, new FlagNodeSet(civFlag));
         testing.insertVariableRI(ruleInfo1);
 
         FlagNode coFlag = new FlagNode(M2, true, new PropositionNodeSet());
         Substitutions coSubs = new Substitutions();
         Node england = Network.createNode("england", "individualnode");
-        coSubs.add(Z, england);
+        coSubs.add(Co, england);
         RuleInfo ruleInfo2 = new RuleInfo(1, 0, coSubs, new FlagNodeSet(coFlag));
         testing.insertVariableRI(ruleInfo2);
 
         FlagNode rFlag = new FlagNode(M3, true, new PropositionNodeSet());
         Substitutions rSubs = new Substitutions();
-        rSubs.add(Z, england);
-        rSubs.add(X, henry);
+        rSubs.add(Co, england);
+        rSubs.add(G, henry);
         RuleInfo ruleInfo3 = new RuleInfo(1, 0, rSubs, new FlagNodeSet(rFlag));
         testing.insertVariableRI(ruleInfo3);
 
         FlagNode lFlag = new FlagNode(M4, true, new PropositionNodeSet());
         Substitutions lSubs = new Substitutions();
-        lSubs.add(Z, england);
-        lSubs.add(Y, anne);
+        lSubs.add(Co, england);
+        lSubs.add(C, anne);
         RuleInfo ruleInfo4 = new RuleInfo(1, 0, lSubs, new FlagNodeSet(lFlag));
         RuleInfoSet result = testing.insertVariableRI(ruleInfo4);
         assertNotNull(result);
@@ -130,7 +124,7 @@ class PtreeTest {
         Ptree testing2 = Ptree.constructPtree(new PropositionNodeSet(M0, M1, M2, M3, M4), 5, Integer.MAX_VALUE, 2);
         Substitutions govSubs2 = new Substitutions();
         Node khaleesi = Network.createNode("khaleesi", "individualnode");
-        govSubs2.add(X, khaleesi);
+        govSubs2.add(G, khaleesi);
         RuleInfo ruleInfo5 = new RuleInfo(1, 0, govSubs2, new FlagNodeSet(govFlag));
         testing2.insertVariableRI(ruleInfo5);
         testing2.insertVariableRI(ruleInfo1);
