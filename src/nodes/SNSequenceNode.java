@@ -1,17 +1,17 @@
-package actuators;
+package nodes;
 
 import java.util.Stack;
 
 import cables.DownCable;
 import mgip.Scheduler;
-import nodes.ActNode;
 
-public class SNSequenceActuator implements ControlActuator{
+public class SNSequenceNode extends ActNode {
 
-    private static SNSequenceActuator actuator;
+    public SNSequenceNode(String name, Boolean isVariable) {
+        super(name, isVariable);
+    }
 
-    @Override
-    public void actOnNode(ActNode node) {
+    public void runActuator(ActNode node) {
         Stack<ActNode> acts = new Stack<>();
         DownCable next = node.getDownCableSet().get("obj" + 1);
         ActNode act;
@@ -26,11 +26,4 @@ public class SNSequenceActuator implements ControlActuator{
         }
     }
 
-    public static SNSequenceActuator init() {
-        if(actuator == null) {
-            actuator = new SNSequenceActuator();
-        }
-        return actuator;
-    }
-    
 }
