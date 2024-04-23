@@ -9,18 +9,43 @@ options {
 PARSER_BEGIN(MindGRAF_Parser)
 package edu.guc.mind_graf.parser;
 import edu.guc.mind_graf.context.ContextController;
-import edu.guc.mind_graf.set.Set;
-import java.util.Hashtable;
+import java.util.ArrayList;
 import java.util.HashMap;
-
+import edu.guc.mind_graf.set.NodeSet;
+import edu.guc.mind_graf.set.Set;
+import edu.guc.mind_graf.cables.DownCable;
+import edu.guc.mind_graf.cables.DownCableSet;
+import edu.guc.mind_graf.caseFrames.Adjustability;
+import java.util.Collection;
+import edu.guc.mind_graf.exceptions.NoSuchTypeException;
+import edu.guc.mind_graf.nodes.Node;
+import edu.guc.mind_graf.relations.Relation;
 
 public class MindGRAF_Parser {
       private ContextController controller = new ContextController();
       private int mode = 1;
+      static boolean uvbrEnabled;
+   
+    
+      //setting the attitudes 
+      private static int attitudeNumber = 1;
+      private static HashMap<String, Integer> initialAttitudes = new HashMap<String, Integer>();
+
+     //setting the consistent attitudes
+      private static ArrayList<ArrayList<Integer>> consisAttitudeLists = new ArrayList<ArrayList<Integer>>();
+      private  static ArrayList<Integer> consisAttitudeList = new ArrayList<Integer>();
+      private static int currConsisAttitude;
+      
+      //mode1 creation of nodes
+      private static  ArrayList<String> NodesNames = new ArrayList<String>();
+      private static boolean isVariable;
+
+        @SuppressWarnings("static-access")
+
   public static void main(String[] args) throws ParseException {
     // Instantiate the parser
     MindGRAF_Parser parser = new MindGRAF_Parser(System.in);
-    try {
+   /* try {
       // Start parsing
       parser.Start();
 
@@ -28,67 +53,119 @@ public class MindGRAF_Parser {
     } catch (ParseException e) {
       // Handle parsing errors
       System.err.println("Parsing failed: " + e.getMessage());
-    }
+    }*/
   }
 }
+
+
 PARSER_END(MindGRAF_Parser)
 
 // Define tokens
 SKIP:  {"\t" | "\n" | "\r"|" "}
 TOKEN :
-{
+{ 
   <NUMBER: (["0"-"9"])+>
-| <LPAREN: "(">
-| <LBRACE: "{">
-| <RBRACE: "}">
-| <RPAREN: ")">
-| <PRINT: "print">
 | <currContext: "get-curr-context">
-| <DEFINE_CONTEXT: "define-context">
 | <GetAttitudeNames: "get-attitudes">
 | <MODE1: "set-mode-1">
 | <MODE2: "set-mode-2">
 | <MODE3: "set-mode-3">
 | <N:"N"|"n">
+| <BOOL:"true"|"false">
 |< #IDENTIFIER: <LETTER> (<LETTER>|<DIGIT>)* >
 |< #LETTER: ["_","a"-"z","A"-"Z"] >
 |< #DIGIT: ["0"-"9"] >
-| <WFF_NAME_LIST: (<WFF_NAME>((" ")*","(" ")*<WFF_NAME>)*)>
+| <VARIABLE: "?">
 | <WFF_NAME: "WFF"(<DIGIT>)+>
-| <CNAME: (["a"-"z", "A"-"Z", "_"])(["a"-"z", "A"-"Z", "0"-"9", "_"])+>
-| <SET_ATTITUDES: "set-attitudes">
-| <ATTITUDE: (["a"-"z", "A"-"Z", "_"])(["a"-"z", "A"-"Z", "0"-"9", "_"])+>
-| <ATTITUDE_SET: (<ATTITUDE>((" ")*","(" ")*<ATTITUDE>)*)>
+| <STRING: (["a"-"z", "A"-"Z"])+ (["a"-"z", "A"-"Z", "0"-"9", "_"])*>
+| <PREDICATE_NAME_BRACKET: ((["a"-"z", "A"-"Z"])+ (["a"-"z", "A"-"Z", "0"-"9", "_"])*"(")>
+
+
 
 
 
 }
 
 // Define the grammar
-void Start() :
-{}
+
+void Predicate() : {
+  Token num;
+  Token predicateName;
+}
 {
-  Command()
+  predicateName=<PREDICATE_NAME_BRACKET>( num  = <NUMBER>",")? Arguments()")"
+  {
+  String predName = predicateName.image.trim().toLowerCase();
+  predName = predName.substring(0,predName.length()-1);    if (mode == 1) {
+      HashMap<String, DownCable> cableSet = new HashMap<String, DownCable>();
+      try {
+        Node n = controller.getNetwork().createNode(predName, "propositionnode");
+        Relation r = controller.getNetwork().createRelation("r", "propositionnode",
+            Adjustability.EXPAND, 2);
+        DownCable c = new DownCable(r, new NodeSet(n));
+        cableSet.put(r.getName(), c);
+
+        for (int i = 0; i < NodesNames.size(); i++) {
+          String nodeName = NodesNames.get(i);
+          Node node;
+          if(nodeName.charAt(nodeName.length() - 1)=='?')
+            node = controller.getNetwork().createVariableNode(nodeName, "propositionnode");
+          else
+            node = controller.getNetwork().createNode(nodeName, "propositionnode");
+          Relation relation = controller.getNetwork().createRelation("a" + (i + 1), "propositionnode",
+              Adjustability.EXPAND, 2);
+          DownCable cable = new DownCable(relation, new NodeSet(node));
+          cableSet.put(relation.getName(), cable);
+        }
+        NodesNames.clear();
+        DownCableSet dcSet = new DownCableSet(cableSet);
+
+        //printing
+        controller.getNetwork().createNode("propositionnode", dcSet);
+        HashMap<String,HashMap<String, Node>>  allNodes = controller.getNetwork().getMolecularNodes();
+        for(HashMap<String,Node> oneNode :allNodes.values() ){
+            for(Node molec : oneNode.values()){
+              DownCableSet set = molec.getDownCableSet();
+              Collection<DownCable> allCables = set.getValues();
+              for(DownCable someCable : allCables)
+              {
+                System.out.println("Relation: "+someCable.getRelation());
+               Collection<Node> nodeset =  someCable.getNodeSet().getValues();
+               for(Node someNode : nodeset){
+                System.out.println("Node Name: "+someNode.getName());
+               }
+              }
+            }
+        }
+      } catch (NoSuchTypeException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+
+
+    }
+  }
 }
 
-void Expression() :
-{}
+void Arguments() : {}
 {
-  Term() ( "+" Term() | "-" Term() )*
+  Argument() ("," Argument())*
 }
 
-void Term() :
-{}
+void Argument() : 
+{Token Argument;
+Token var=null;}
 {
-  Factor() ( "" Factor() | "/" Factor() )
+  Argument=<STRING>(var=<VARIABLE>)?
+  {
+    String argString = Argument.image.trim().toLowerCase();
+  if(var!=null)
+  argString +='?';
+  NodesNames.add(argString);
+
+  }
 }
 
-void Factor() :
-{}
-{
-  <NUMBER>
-| <LPAREN> Expression() <RPAREN>
-}
 
 void Command() throws ParseException :
 {
@@ -142,79 +219,171 @@ void Command() throws ParseException :
 
 
     }
-    |<DEFINE_CONTEXT>
-     
-   (
-             stringToken=<CNAME> ("(" wffNameList =<WFF_NAME_LIST> ")" "(" attitudeSet =<ATTITUDE_SET> ")")?
-            { 
-                
-                                String cname = stringToken.image;
-                // Check if both WFF_NAME_LIST and ATTITUDE_SET were provided
-                if (wffNameList != null && attitudeSet != null) {
-                    // Check if their lengths are equal
-                    String[] wffList = wffNameList.image.substring(0).split(",");
-                String[] attitudes = attitudeSet.image.substring(0).split(",");
-                    if (wffList.length != attitudes.length) {
-                        throw new ParseException("WFF_NAME_LIST and ATTITUDE_SET must have the same length.");
-                    }
-                    
-                    // Check if each attitude in ATTITUDE_SET is in the initial set
-                    for (String attitude : attitudes) {
-                        if (!ContextController.getAttitudes().getSet().containsKey(attitude)) {
-                            throw new ParseException("Invalid attitude in ATTITUDE_SET: " + attitude);
-                        }
-                    }
-                 System.out.println("context " + cname + " is defined.");
+    |("define-context " stringToken=<STRING>)defineContext()
+    )
+    |(
+      "add-to-context" Predicate() 
+    )
+    }
 
-                }
-                else{
-                   System.out.println("context " + cname + " is defined.");
+void UVBR() throws ParseException :
+{ 
+  Token value;
+}
+{
+  (
+    "set-uvbr" value=<BOOL>
+    {
+      String boolValue = value.image.trim().toLowerCase();
+      if (boolValue.equals("true")) {
+          uvbrEnabled=true;
+      } else if (boolValue.equals("false")) {
+          uvbrEnabled=false;
+      } 
+      System.out.println("UVBR is set to "+uvbrEnabled);
+      Set attitudeNames = new Set();
+      attitudeNames.setSet(initialAttitudes);
+      controller.setUp(attitudeNames,consisAttitudeLists,uvbrEnabled);
 
-                }
-            } 
-        )
-    )}
+      System.out.print("uvbr: "+controller.isUvbrEnabled());
+      System.out.println("consis attitudes:" );
+      for(ArrayList<Integer> i : controller.getConsistentAttitudes())
+     { System.out.println("SET " + i+1);
+      for( Integer x : i)
+        System.out.print(x+" ");}
+         System.out.print("attitudeNumbers");
+      for(String key : controller.getAttitudes().getSet().keySet())
+        System.out.println(key+": " +controller.getAttitudeNumber(key));
+    }
+       
+  )
+}
+
+
+  
+
 
 void Setup() throws ParseException :
 {
     Token attitudeSetToken;
     HashMap<String, Integer> hash = new HashMap<String, Integer>();
-    controller.getAttitudes().setSet(hash);
+    //controller.getAttitudes().setSet(hash);
+    initialAttitudes.put("belief",0);
 }
 {
-    (
-        <SET_ATTITUDES> <LBRACE> attitudeSetToken = <ATTITUDE_SET> <RBRACE>
-        {
-            // Extract the string representation of the token
-            String attitudeSet = attitudeSetToken.image;
+   "set-attitudes" "{"attitude()(","attitude())*"}"
+   {
 
-            // Manipulate the string to extract individual attitudes
-            String[] attitudes = attitudeSet.substring(0).split(",");
+    System.out.println("Attitudes Defined:");
+    for(String key : initialAttitudes.keySet()){
+    System.out.println(key);
+   }
+   
 
-           // Process each individual attitude
-        for (int i = 0; i < attitudes.length; i++) {
-          // Trim any leading or trailing spaces
-          String trimmedAttitude = attitudes[i].trim();
-          if(trimmedAttitude.toLowerCase().equals("belief"))
-          hash.put( trimmedAttitude,i + 1);
-          // Perform further operations on the individual attitudes
-          System.out.println("Attitude: " + trimmedAttitude);
-        }
-        // Pass the attitudes to the controller
-        controller.getAttitudes().setSet(hash);
-        hash.put("Belief", 0);
-        }
-    |
-       ( <N>
-        {
-            System.out.println("User chose not to enter attitudes.");
-            System.out.println();
-            hash.put("Belief",0);
-            // Handle the case where the user chooses not to enter attitudes
-        }
-       )
-    )
+   }
+
 }
+
+void defineContext() throws ParseException :
+{
+  
+}
+{("{"wffAttitudeSet()(","wffAttitudeSet())*"}")
+{
+
+}
+   
+}
+
+void wffAttitudeSet() throws ParseException :
+{}
+{
+"{"<WFF_NAME>","<STRING>"}"
+}
+
+void attitude() throws ParseException :
+{Token attitude;
+}
+{
+attitude=<STRING>
+{
+String a = attitude.image.trim().toLowerCase();
+if(initialAttitudes.containsKey(a))
+throw new ParseException("duplicate attitudes");
+initialAttitudes.put(a,attitudeNumber);
+attitudeNumber++;
+}
+}
+
+void consistentAttitudes() throws ParseException : 
+{}
+{
+   "set-consistent-attitudes " (consisAttitudeList())+
+   {
+
+    for (ArrayList<Integer> list : consisAttitudeLists) {
+            for (Integer num : list) {
+                System.out.print(num + " ");
+            }
+            System.out.println(); // Move to the next line after printing each inner list
+        }
+   }
+
+   
+
+}
+
+
+void consisAttitudeList() throws ParseException :
+{
+  Token attitude;
+}
+{
+("{"OneAttitudeInConsisList()(","OneAttitudeInConsisList())*"}")
+{
+  ArrayList<Integer> finalConsisList = new ArrayList<Integer>();
+  for(int i = 0;i<consisAttitudeList.size();i++){
+    finalConsisList.add(consisAttitudeList.get(i));
+  }
+
+consisAttitudeLists.add(finalConsisList);
+consisAttitudeList.clear();
+
+                System.out.println("now printing all contents:");
+
+    for (ArrayList<Integer> list : consisAttitudeLists) {
+            for (Integer num : list) {
+                System.out.print(num + " ");
+            }
+            System.out.println(); // Move to the next line after printing each inner list
+        }
+System.out.print(consisAttitudeList.size()+" the size..");
+System.out.println(consisAttitudeList.size()+" the size..");
+System.out.println(finalConsisList.size()+" the size of the final list");
+
+}
+
+
+
+}
+
+void OneAttitudeInConsisList() throws ParseException :
+{
+  Token attitude;
+}
+{
+attitude=<STRING>
+{
+  String s = attitude.image.trim().toLowerCase();
+  if(!initialAttitudes.containsKey(s))
+    throw new ParseException("Not in initially Defined Attitudes");
+  currConsisAttitude = initialAttitudes.get(s);
+  consisAttitudeList.add(currConsisAttitude);
+ 
+
+}
+}
+
 
 
 

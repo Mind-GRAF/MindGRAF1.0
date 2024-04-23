@@ -13,47 +13,33 @@ public interface MindGRAF_ParserConstants {
   /** RegularExpression Id. */
   int NUMBER = 5;
   /** RegularExpression Id. */
-  int LPAREN = 6;
+  int currContext = 6;
   /** RegularExpression Id. */
-  int LBRACE = 7;
+  int GetAttitudeNames = 7;
   /** RegularExpression Id. */
-  int RBRACE = 8;
+  int MODE1 = 8;
   /** RegularExpression Id. */
-  int RPAREN = 9;
+  int MODE2 = 9;
   /** RegularExpression Id. */
-  int PRINT = 10;
+  int MODE3 = 10;
   /** RegularExpression Id. */
-  int currContext = 11;
+  int N = 11;
   /** RegularExpression Id. */
-  int DEFINE_CONTEXT = 12;
+  int BOOL = 12;
   /** RegularExpression Id. */
-  int GetAttitudeNames = 13;
+  int IDENTIFIER = 13;
   /** RegularExpression Id. */
-  int MODE1 = 14;
+  int LETTER = 14;
   /** RegularExpression Id. */
-  int MODE2 = 15;
+  int DIGIT = 15;
   /** RegularExpression Id. */
-  int MODE3 = 16;
+  int VARIABLE = 16;
   /** RegularExpression Id. */
-  int N = 17;
+  int WFF_NAME = 17;
   /** RegularExpression Id. */
-  int IDENTIFIER = 18;
+  int STRING = 18;
   /** RegularExpression Id. */
-  int LETTER = 19;
-  /** RegularExpression Id. */
-  int DIGIT = 20;
-  /** RegularExpression Id. */
-  int WFF_NAME_LIST = 21;
-  /** RegularExpression Id. */
-  int WFF_NAME = 22;
-  /** RegularExpression Id. */
-  int CNAME = 23;
-  /** RegularExpression Id. */
-  int SET_ATTITUDES = 24;
-  /** RegularExpression Id. */
-  int ATTITUDE = 25;
-  /** RegularExpression Id. */
-  int ATTITUDE_SET = 26;
+  int PREDICATE_NAME_BRACKET = 19;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -66,31 +52,29 @@ public interface MindGRAF_ParserConstants {
     "\"\\r\"",
     "\" \"",
     "<NUMBER>",
-    "\"(\"",
-    "\"{\"",
-    "\"}\"",
-    "\")\"",
-    "\"print\"",
     "\"get-curr-context\"",
-    "\"define-context\"",
     "\"get-attitudes\"",
     "\"set-mode-1\"",
     "\"set-mode-2\"",
     "\"set-mode-3\"",
     "<N>",
+    "<BOOL>",
     "<IDENTIFIER>",
     "<LETTER>",
     "<DIGIT>",
-    "<WFF_NAME_LIST>",
+    "\"?\"",
     "<WFF_NAME>",
-    "<CNAME>",
+    "<STRING>",
+    "<PREDICATE_NAME_BRACKET>",
+    "\",\"",
+    "\")\"",
+    "\"define-context \"",
+    "\"add-to-context\"",
+    "\"set-uvbr\"",
     "\"set-attitudes\"",
-    "<ATTITUDE>",
-    "<ATTITUDE_SET>",
-    "\"+\"",
-    "\"-\"",
-    "\"\"",
-    "\"/\"",
+    "\"{\"",
+    "\"}\"",
+    "\"set-consistent-attitudes \"",
   };
 
 }
