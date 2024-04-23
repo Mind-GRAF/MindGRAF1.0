@@ -20,7 +20,7 @@ public class OrEntailment  extends RuleNode {
     }
 
     public RuleInfoSet[] mayInfer() {
-        RuleInfoSet[] inferrable = {new RuleInfoSet()};  // at index 0 the set of positively inferred, at index 1 the set of negatively inferred
+        RuleInfoSet[] inferrable = {new RuleInfoSet(), new RuleInfoSet()};  // at index 0 the set of positively inferred, at index 1 the set of negatively inferred
         if(((Orentailhandler)this.ruleInfoHandler).getUsedToInfer().getPcount() > 0) {
             inferrable[0].addRuleInfo(((Orentailhandler)this.ruleInfoHandler).getUsedToInfer());
         }
