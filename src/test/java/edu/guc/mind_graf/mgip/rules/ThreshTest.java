@@ -26,14 +26,14 @@ class ThreshTest {
         Node X = Network.createVariableNode("X", "propositionnode");
         Node one = Network.createNode("1", "individualnode");
         Node three = Network.createNode("3", "individualnode");
-        Node idealistec = Network.createNode("Idealistic", "individualnode");
+        Node idealistic = Network.createNode("Idealistic", "individualnode");
         Node moral = Network.createNode("Moral", "individualnode");
         Node brave = Network.createNode("Brave", "individualnode");
 
         DownCable iMember = new DownCable(Network.getRelations().get("member"), new NodeSet(X));
         DownCable mMember = new DownCable(Network.getRelations().get("member"), new NodeSet(X));
         DownCable bMember = new DownCable(Network.getRelations().get("member"), new NodeSet(X));
-        DownCable iClass = new DownCable(Network.getRelations().get("class"), new NodeSet(idealistec));
+        DownCable iClass = new DownCable(Network.getRelations().get("class"), new NodeSet(idealistic));
         DownCable mClass = new DownCable(Network.getRelations().get("class"), new NodeSet(moral));
         DownCable bClass = new DownCable(Network.getRelations().get("class"), new NodeSet(brave));
         Node M0 = Network.createNode("propositionnode", new DownCableSet(iMember, iClass));

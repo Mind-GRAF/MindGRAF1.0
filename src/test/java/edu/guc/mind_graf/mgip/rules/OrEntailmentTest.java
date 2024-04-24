@@ -23,7 +23,6 @@ class OrEntailmentTest {
     @Test
     void mayInfer() throws NoSuchTypeException, InvalidRuleInfoException {
         Network network = new Network();
-        Node one = Network.createNode("1", "propositionnode");
 
         Node Patroclus = Network.createNode("Patroclus", "propositionnode");
         Node Achilles = Network.createNode("Achilles", "propositionnode");
