@@ -16,8 +16,6 @@ import edu.guc.mind_graf.nodes.Syntactic;
 import edu.guc.mind_graf.paths.AndPath;
 import edu.guc.mind_graf.paths.BUnitPath;
 import edu.guc.mind_graf.paths.BangPath;
-import edu.guc.mind_graf.paths.CFResBUnitPath;
-import edu.guc.mind_graf.paths.CFResFUnitPath;
 import edu.guc.mind_graf.paths.ComposePath;
 import edu.guc.mind_graf.paths.ConversePath;
 import edu.guc.mind_graf.paths.DomainRestrictPath;
@@ -60,7 +58,7 @@ public class Matcher {
         matchList = new ArrayList<>();
         if (queryNode.getSyntacticType() == Syntactic.VARIABLE) {
             for (Node node : Network.getNodes().values()) {
-                if (node.equals(queryNode))
+                if (node.equals(queryNode) || !queryNode.getClass().isAssignableFrom(node.getClass()))
                     continue;
                 Match match = new Match(new Substitutions(), new Substitutions(), node, 0);
                 if (node.getSyntacticType() == Syntactic.VARIABLE) {
@@ -78,7 +76,7 @@ public class Matcher {
 
         if (queryNode.getSyntacticType() == Syntactic.BASE) {
             for (Node node : Network.getNodes().values()) {
-                if (node.equals(queryNode))
+                if (node.equals(queryNode) || !queryNode.getClass().isAssignableFrom(node.getClass()))
                     continue;
                 if (node.getSyntacticType() == Syntactic.VARIABLE) {
                     Match match = new Match(new Substitutions(), new Substitutions(), node, 0);
@@ -108,6 +106,10 @@ public class Matcher {
     }
 
     private static boolean unify(Node queryNode, Node node, Match match) {
+        if(!queryNode.getClass().isAssignableFrom(node.getClass())){
+            matchList.remove(match);
+            return false;
+        }
         if (queryNode.getSyntacticType() == Syntactic.BASE && node.getSyntacticType() == Syntactic.BASE) {
             if (!queryNode.getName().equals(node.getName())) {
                 matchList.remove(match);
@@ -120,7 +122,6 @@ public class Matcher {
                 && node.getSyntacticType() == Syntactic.MOLECULAR) {
             pathBasedInference(queryNode, node, match.clone());
             Object[] downRelationList = queryNode.getDownCableSet().keySet();
-            // Object[] upRelationList = queryNode.getUpCableSet().keySet();
             List<Match> molecularMatchList = new ArrayList<>();
             molecularMatchList.add(match);
             boolean nullCables = true;
@@ -156,27 +157,6 @@ public class Matcher {
             if (!nullCables) {
                 matchList.addAll(molecularMatchList);
             }
-            // for (Object upRelation : upRelationList) {
-            // List<Match> tempMatchList = new ArrayList<>();
-            // Cable cable = node.getUpCableSet().get((String) upRelation);
-            // List<List<Node>> nodePermutations =
-            // getAllPermutations(cable.getNodeSet().getValues());
-            // for (List<Node> nodePermutation : nodePermutations) {
-            // List<List<Node>> queryNodePermutations = getAllPermutations(
-            // queryNode.getUpCableSet().get((String) upRelation).getNodeSet().getValues());
-            // for (List<Node> queryNodePermutation : queryNodePermutations) {
-            // for (Match molecularMatch : molecularMatchList) {
-            // Match tempMatch = molecularMatch.clone();
-            // if (unifyMolecular(
-            // queryNodePermutation,
-            // nodePermutation,
-            // Network.getRelations().get(upRelation),
-            // tempMatch) != null)
-            // tempMatchList.add(tempMatch);
-            // }
-            // }
-            // }
-            // }
             matchList.remove(match);
         }
         return true;
