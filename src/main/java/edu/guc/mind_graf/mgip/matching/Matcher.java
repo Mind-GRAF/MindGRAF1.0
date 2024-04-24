@@ -319,18 +319,12 @@ public class Matcher {
     }
 
     private static boolean passPathFirstCheck(Node queryNode, Node node, Match match, Path path) {
-        if (path instanceof FUnitPath) {
+        if (path instanceof EmptyPath || path instanceof BangPath || path instanceof KStarPath) {
+            return true;
+        } else if (path instanceof FUnitPath) {
             return node.getDownCable(((FUnitPath) path).getRelation().getName()) != null;
         } else if (path instanceof BUnitPath) {
             return node.getUpCable(((BUnitPath) path).getRelation().getName()) != null;
-        } else if (path instanceof CFResFUnitPath) {
-            return node.getDownCable(((CFResFUnitPath) path).getRelation().getName()) != null;
-        } else if (path instanceof CFResBUnitPath) {
-            return node.getUpCable(((CFResBUnitPath) path).getRelation().getName()) != null;
-        } else if (path instanceof EmptyPath) {
-            return true;
-        } else if (path instanceof BangPath) {
-            return true;
         } else if (path instanceof AndPath) {
             for (Path p : ((AndPath) path).getPaths()) {
                 if (!passPathFirstCheck(queryNode, node, match, p)) {
@@ -344,12 +338,8 @@ public class Matcher {
                 }
             }
             return false;
-        } else if (path instanceof ComposePath) {
-            for (Path p : ((ComposePath) path).getPaths()) {
-                if (passPathFirstCheck(queryNode, node, match, p)) {
-                    return true;
-                }
-            }
+        } else if (path instanceof ComposePath
+                && !passPathFirstCheck(queryNode, node, match, ((ComposePath) path).getPaths().getFirst())) {
             return false;
         } else if (path instanceof ConversePath) {
             return passPathFirstCheck(queryNode, node, match, ((ConversePath) path).getPath().converse());
@@ -360,27 +350,8 @@ public class Matcher {
                     && passPathFirstCheck(queryNode, node, match, ((DomainRestrictPath) path).getQ());
         } else if (path instanceof RangeRestrictPath) {
             return passPathFirstCheck(queryNode, node, match, ((RangeRestrictPath) path).getP());
-            // if (!passPathFirstCheck(queryNode, node, match, ((RangeRestrictPath)
-            // path).getP()))
-            // return false;
-            // LinkedList<Object[]> listOfNodeList = ((RangeRestrictPath)
-            // path).getP().follow(node, new PathTrace(),
-            // context);
-            // if (listOfNodeList == null || listOfNodeList.isEmpty())
-            // return false;
-            // for (Object[] nodeList : listOfNodeList) {
-            // for (Object n : nodeList) {
-            // Node node1 = (Node) n;
-            // if (passPathFirstCheck(queryNode, node1, match, ((RangeRestrictPath)
-            // path).getQ()))
-            // return true;
-            // }
-            // }
-            // return false;
         } else if (path instanceof KPlusPath) {
             return passPathFirstCheck(queryNode, node, match, ((KPlusPath) path).getPath());
-        } else if (path instanceof KStarPath) {
-            return true;
         }
         return true;
     }
