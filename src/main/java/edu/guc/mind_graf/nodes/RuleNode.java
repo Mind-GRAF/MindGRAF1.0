@@ -13,6 +13,8 @@ import edu.guc.mind_graf.mgip.requests.ChannelSet;
 import edu.guc.mind_graf.mgip.requests.ChannelType;
 import edu.guc.mind_graf.mgip.requests.MatchChannel;
 import edu.guc.mind_graf.mgip.requests.Request;
+import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
+import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfoHandler;
 import edu.guc.mind_graf.mgip.rules.AndOr;
 import edu.guc.mind_graf.mgip.rules.Thresh;
 import edu.guc.mind_graf.network.Network;
@@ -21,25 +23,28 @@ import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
+import edu.guc.mind_graf.set.PropositionNodeSet;
+import edu.guc.mind_graf.set.RuleInfoSet;
 
-public class RuleNode extends PropositionNode {
+public abstract class RuleNode extends PropositionNode {
     private boolean forwardReport;
+    protected RuleInfoHandler ruleInfoHandler;
+    protected RuleInfoSet rootRuleInfos;
 
-    public RuleNode(String name, Boolean isVariable) {
-        super(name, isVariable);
-        this.forwardReport = false;
-        // TODO Auto-generated constructor stub
-    }
+//    public RuleNode(String name, Boolean isVariable) {
+//        super(name, isVariable);
+//        this.forwardReport = false;
+//        // TODO Auto-generated constructor stub
+//    }
 
     public RuleNode(DownCableSet downCableSet) {
         super(downCableSet);
         this.name = "P" + (Network.MolecularCount);
         this.forwardReport = false;
-
-        // TODO Auto-generated constructor stub
+        rootRuleInfos = new RuleInfoSet();
     }
 
-    public void applyRuleHandler(Report report, RuleNode ruleNode) {
+    public void applyRuleHandler(Report report) {
         // if (this.isForwardReport() == true) {
         // this.setForwardReport(false);
         // report.setInferenceType(InferenceType.FORWARD);
@@ -48,12 +53,40 @@ public class RuleNode extends PropositionNode {
 
         // } else {
         // for (Channel outChnl : outgoingChannels)
-        // sendReport(report, outChnl);
+        // putInferenceReportOnQueue(report, outChnl);
         // }
 
-        // TODO Sara
+        try{
+            RuleInfoSet inserted = ruleInfoHandler.insertRI(RuleInfo.createRuleInfo(report));
+            rootRuleInfos.addRootRuleInfo(inserted);
+            if(inserted != null && inserted.size() > 0){
+                RuleInfoSet[] mayInfer = mayInfer();
+                sendInferenceReports(mayInfer, report.getAttitude());
+            }
+        } catch (Exception e){
+
+        }
 
     }
+
+    public abstract RuleInfoSet[] mayInfer();
+
+    public void sendInferenceReports(RuleInfoSet[] inferrable, int attitude) {
+         for (int i = 0; i < inferrable.length; i++) {
+             for(RuleInfo ri : inferrable[i]) {
+                 PropositionNodeSet supports = new PropositionNodeSet();   // probably wrong (maybe should make new support of the flag nodes and rule node
+                 for (FlagNode fn : ri.getFns()) {
+                     supports.add(fn.getNode());
+                 }
+                 supports.add(this);
+                 Report newReport = new Report(ri.getSubs() == null ? new Substitutions() : ri.getSubs(), supports, attitude,
+                         (i == 0), InferenceType.FORWARD, null, this);
+                 putInferenceReportOnQueue(newReport);
+             }
+         }
+    }
+
+    public abstract void putInferenceReportOnQueue(Report report);
 
     /***
      * this method gets all the consequents and arguments that this node is a rule
@@ -257,7 +290,6 @@ public class RuleNode extends PropositionNode {
 
                 }
                 super.processSingleRequests(currentRequest);
-                return;
 
             }
 
@@ -306,7 +338,7 @@ public class RuleNode extends PropositionNode {
                 if (!this.isOpen()) {
                     /** Close Type Implementation */
                     if (assertedInContext) {
-                        if (this.isForwardReport() == false) {
+                        if (!this.isForwardReport()) {
                             this.setForwardReport(true);
                             requestAntecedentsNotAlreadyWorkingOn(tempRequest);
                         }
@@ -333,13 +365,13 @@ public class RuleNode extends PropositionNode {
                                 currentReportAttitudeID);
                         if (compatibilityCheck && supportCheck) {
                             if (notBound) {
-                                if (this.isForwardReport() == false) {
+                                if (!this.isForwardReport()) {
                                     this.setForwardReport(true);
                                     requestAntecedentsNotAlreadyWorkingOn(tempRequest, currentKnownInstance);
                                     return;
                                 }
                             } else {
-                                if (this.isForwardReport() == false) {
+                                if (!this.isForwardReport()) {
                                     this.setForwardReport(true);
                                     requestAntecedentsNotAlreadyWorkingOn(tempRequest);
                                     return;
@@ -353,7 +385,7 @@ public class RuleNode extends PropositionNode {
                     // i removed the apply rule handler here because i call it only when the
                     // antecedents report back replying to my request thus whenever its a backward
                     // inference
-                    if (this.isForwardReport() == false) {
+                    if (!this.isForwardReport()) {
                         this.setForwardReport(true);
                         super.processSingleRequests(tempRequest);
 
@@ -361,8 +393,7 @@ public class RuleNode extends PropositionNode {
                 }
             } else {
                 /** Backward Inference */
-                applyRuleHandler(currentReport, this);
-
+                applyRuleHandler(currentReport);
             }
         } else {
             Substitutions switchSubs = new Substitutions();
@@ -448,6 +479,18 @@ public class RuleNode extends PropositionNode {
 
     public void setForwardReport(boolean forwardReport) {
         this.forwardReport = forwardReport;
+    }
+
+    public RuleInfoSet getRootRuleInfos() {
+        return rootRuleInfos;
+    }
+
+    public void setRootRuleInfos(RuleInfoSet rootRuleInfos) {
+        this.rootRuleInfos = rootRuleInfos;
+    }
+
+    public RuleInfoHandler getRuleInfoHandler() {
+        return ruleInfoHandler;
     }
 
 }

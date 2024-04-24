@@ -1,10 +1,15 @@
 package edu.guc.mind_graf.mgip.ruleHandlers;
 
 import java.util.Map;
+import java.util.Objects;
 
 import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.mgip.reports.Report;
+import edu.guc.mind_graf.nodes.FlagNode;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.set.FlagNodeSet;
+import edu.guc.mind_graf.set.FreeVariableSet;
+import edu.guc.mind_graf.set.NodeSet;
 
 public class RuleInfo {
 
@@ -12,7 +17,8 @@ public class RuleInfo {
     private int ncount;
     private Substitutions subs;
     private FlagNodeSet fns;
-    //dont have inference type since it should always be backward, will revise this if needed
+    // dont have inference type since it should always be backward, will revise this
+    // if needed
 
     public RuleInfo() {
         pcount = 0;
@@ -26,6 +32,17 @@ public class RuleInfo {
         this.ncount = ncount;
         this.subs = subs;
         this.fns = fns;
+    }
+
+    public static RuleInfo createRuleInfo(Report report){
+        int pcount = 0;
+        int ncount = 0;
+        if(report.isSign())
+            pcount++;
+        else
+            ncount++;
+        FlagNode reporter = new FlagNode(report.getReporterNode(), report.isSign(), report.getSupport());
+        return new RuleInfo(pcount, ncount, report.getSubstitutions(), new FlagNodeSet(reporter));
     }
 
     public FlagNodeSet getFns() {
@@ -79,20 +96,87 @@ public class RuleInfo {
         return true;
     }
 
+    // not handling the case of different signs (if i got reports of the same
+    // substitution I'm assuming it's the same sign; otherwise, BR would've handled
+    // it)
     public RuleInfo combine(RuleInfo r) {
+        RuleInfo res = new RuleInfo();
         if (!isCompatible(r))
             return null;
-        if(!this.fns.disjoint(r.getFns())){
-            
-        }
         int resPcount = this.pcount + r.getPcount();
         int resNcount = this.ncount + r.getNcount();
+        // if disjoint loop wouldn't start so checking if disjoint's useless
+        FlagNodeSet intersection = this.fns.intersection(r.getFns());
+        // if a node exists in both then it was counted twice, we want to count it once
+        for (FlagNode fn : intersection.getFlagNodes()) {
+            if (fn.isFlag())
+                resPcount--;
+            else
+                resNcount--;
+        }
+
         Substitutions resSubs = new Substitutions();
         resSubs.addSubs(this.subs);
-        resSubs.addSubs(r.getSubs()); //counting on that if the subs are not compatible, the method will not be called and that adding overwrites repeated nodes
+        resSubs.addSubs(r.getSubs()); // counting on that if the subs are not compatible, the method will not be
+                                      // called and that adding overwrites repeated nodes ==> a variable wouldn't
+                                      // exist twice in two different nodes
         FlagNodeSet resFns = this.fns.combine(r.getFns());
-        RuleInfo result = new RuleInfo(resPcount, resNcount, resSubs, resFns);
-        return result;
+        res.pcount = resPcount;
+        res.ncount = resNcount;
+        res.subs = resSubs;
+        res.fns = resFns;
+        return res;
+    }
+
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        RuleInfo ri = (RuleInfo) obj;
+        return this.pcount == ri.getPcount() &&
+           this.ncount == ri.getNcount() &&
+           this.subs.equals(ri.getSubs())
+           && this.fns.equals(ri.getFns());
+    }
+
+//    public RuleInfo combineAdd(RuleInfo ri) {
+//        RuleInfo res = new RuleInfo();
+//        res = res.combine(this);
+//        res = res.combine(ri);
+//        return res;
+//    } //combines in new RuleInfo
+
+    @Override
+    public String toString() {
+        return "RuleInfo{" +
+                "pcount=" + pcount +
+                ", ncount=" + ncount +
+                ", subs=" + subs +
+                ", fns=" + fns +
+                '}';
+    }
+
+    public RuleInfo addNullSubs(FreeVariableSet ns){
+        RuleInfo ruleInfoWithNulls = clone();
+        for(Node n : ns.getFreeVariables()){
+            if(!ruleInfoWithNulls.getSubs().contains(n)){
+                ruleInfoWithNulls.getSubs().add(n, null);
+            }
+        }
+        return ruleInfoWithNulls;
+
+    }
+
+    public RuleInfo clone(){
+        RuleInfo ri = new RuleInfo();
+        ri.setPcount(this.pcount);
+        ri.setNcount(this.ncount);
+        ri.setSubs(this.subs.clone());
+        ri.setFns(this.fns.clone());
+        return ri;
     }
 
 }

@@ -1,6 +1,7 @@
 package edu.guc.mind_graf.set;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import edu.guc.mind_graf.nodes.Node;
@@ -8,8 +9,19 @@ import edu.guc.mind_graf.nodes.Node;
 public class FreeVariableSet implements Iterable<Node>, Serializable {
     private HashMap<String, Node> freeVariables;
 
+    public Collection<Node> getFreeVariables() {
+        return freeVariables.values();
+    }
+
     public FreeVariableSet() {
         freeVariables = new HashMap<String, Node>();
+    }
+
+    public FreeVariableSet(Node... nodes) {
+        freeVariables = new HashMap<String, Node>();
+        for (Node n : nodes) {
+            freeVariables.put(n.getName(), n);
+        }
     }
 
     public void add(Node n) {
@@ -34,4 +46,21 @@ public class FreeVariableSet implements Iterable<Node>, Serializable {
         return freeVariables.values().iterator();
     }
 
+    private String getFreeVariablesString() {
+        StringBuilder sb = new StringBuilder();
+        for (Node n : freeVariables.values()) {
+            sb.append(n.getName()).append(", ");
+        }
+        if(sb.length() > 1){
+            sb.deleteCharAt(sb.length() - 1);
+            sb.deleteCharAt(sb.length() - 1);
+        }
+        return sb.toString();
+    }
+
+    @Override
+    public String toString() {
+        return "FreeVariableSet{" + getFreeVariablesString() +
+                '}';
+    }
 }

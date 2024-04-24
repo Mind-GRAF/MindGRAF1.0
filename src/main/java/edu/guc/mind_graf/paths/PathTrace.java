@@ -70,8 +70,7 @@ public class PathTrace {
 
 	public boolean equals(PathTrace p) {
 		if (p.getPath().equals(this.getPath()))
-			if (p.getSupports().equals(this.getSupports()))
-				return true;
+            return p.getSupports().equals(this.getSupports());
 		return false;
 	}
 }
