@@ -4,10 +4,11 @@ import java.util.BitSet;
 import java.util.Hashtable;
 
 import set.PropositionNodeSet;
+import support.Pair;
 
 public class Context {
 
-    private Hashtable<Integer, PropositionNodeSet> attitudes;
+    private Hashtable<Integer, Pair<PropositionNodeSet,PropositionNodeSet>> attitudes;
     private String name;
     private Hashtable<Integer, BitSet> AttitudesBitset;
 
@@ -24,7 +25,7 @@ public class Context {
         throw new RuntimeException("PropositionNode is not in any attitude");
     }
     
-    public PropositionNodeSet getAttitudeProps(int attitudeID){
+    public Pair<PropositionNodeSet,PropositionNodeSet> getAttitudeProps(int attitudeID){
     	return this.attitudes.get(attitudeID);
     }
 

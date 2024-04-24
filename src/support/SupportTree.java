@@ -5,7 +5,7 @@ import java.util.HashMap;
 
 public class SupportTree {
 	private int nodeID;
-	private ArrayList<HashMap<Integer, ArrayList<SupportTree>>> children;
+	private ArrayList<HashMap<Integer, Pair<ArrayList<SupportTree>,ArrayList<SupportTree>>>> children;
 	
 	public SupportTree(int nodeID) {
 		this.nodeID = nodeID;
@@ -22,7 +22,7 @@ public class SupportTree {
 	/**
 	 * @return the children
 	 */
-	public ArrayList<HashMap<Integer, ArrayList<SupportTree>>> getChildren() {
+	public ArrayList<HashMap<Integer, Pair<ArrayList<SupportTree>,ArrayList<SupportTree>>>> getChildren() {
 		return this.children;
 	}
 
@@ -36,7 +36,7 @@ public class SupportTree {
 	/**
 	 * @param children the children to set
 	 */
-	public void setChildren(ArrayList<HashMap<Integer, ArrayList<SupportTree>>> children) {
+	public void setChildren(ArrayList<HashMap<Integer, Pair<ArrayList<SupportTree>,ArrayList<SupportTree>>>> children) {
 		this.children = children;
 	}
 	

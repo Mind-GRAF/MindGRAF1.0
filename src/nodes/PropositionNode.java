@@ -23,6 +23,7 @@ import cables.DownCableSet;
 import cables.UpCable;
 import exceptions.NoSuchTypeException;
 import set.PropositionNodeSet;
+import support.Pair;
 import support.Support;
 import components.Substitutions;
 import context.Context;
@@ -330,9 +331,9 @@ public class PropositionNode extends Node {
         boolean supported = false;
         Context desiredContext = Network.getContexts().get(desiredContextName);
         
-    	for(HashMap<Integer, PropositionNodeSet> currSupport : this.support.getAssumptionSupport().get(desiredAttitudeID)) {
+    	for(HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>> currSupport : this.support.getAssumptionSupport().getFirst().get(desiredAttitudeID)) {
     		for(Integer key : currSupport.keySet()) {
-    			if(currSupport.get(key).isSubset(desiredContext.getAttitudeProps(key))) {
+    			if(currSupport.get(key).getFirst().isSubset(desiredContext.getAttitudeProps(key).getFirst()) && currSupport.get(key).getSecond().isSubset(desiredContext.getAttitudeProps(key).getSecond())) {
     				supported = true;
     			}
     			else {
@@ -351,7 +352,7 @@ public class PropositionNode extends Node {
     
     public void setHyp(String desiredContextName, int attitude) {
     	Context desiredContext = Network.getContexts().get(desiredContextName);
-    	desiredContext.getAttitudeProps(attitude).add(this.getId());
+    	desiredContext.getAttitudeProps(attitude).getSecond().add(this.getId());
     	this.support.setHyp(attitude);
     }
 
@@ -366,6 +367,20 @@ public class PropositionNode extends Node {
 		for(int i = 0; i < justificationDependents.length ; i++) {
 			PropositionNode dependent = (PropositionNode)networkPropositions.get(justificationDependents[i]);
 			dependent.getSupport().removeNodeFromJustifications(this.getId());
+		}
+    }
+
+    public void ForgetNodeFromOtherNodesSupport() {
+    	HashMap<Integer, Node> networkPropositions = Network.getPropositionNodes();
+		int[] assumptionDependents = this.getAssumptionSupportDependents().getProps();
+		for(int i = 0; i < assumptionDependents.length ; i++) {
+			PropositionNode dependent = (PropositionNode)networkPropositions.get(assumptionDependents[i]);
+			dependent.getSupport().ForgetNodeFromAssumptions(this.getId());
+		}
+		int[] justificationDependents = this.getJustificationSupportDependents().getProps();
+		for(int i = 0; i < justificationDependents.length ; i++) {
+			PropositionNode dependent = (PropositionNode)networkPropositions.get(justificationDependents[i]);
+			dependent.getSupport().ForgetNodeFromJustifications(this.getId());
 		}
     }
     
