@@ -1,9 +1,12 @@
 package edu.guc.mind_graf.mgip.rules;
 
 import edu.guc.mind_graf.cables.DownCableSet;
+import edu.guc.mind_graf.mgip.Scheduler;
+import edu.guc.mind_graf.mgip.reports.Report;
 import edu.guc.mind_graf.mgip.ruleHandlers.Ptree;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfoHandler;
+import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.RuleNode;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.PropositionNodeSet;
@@ -35,6 +38,15 @@ public class Thresh extends RuleNode {
                 inferrable[0].addRuleInfo(ri);
         }
         return inferrable;
+    }
+
+    public void putInferenceReportOnQueue(Report report) {
+        for(Node node : arg) {
+            if(!report.getSupport().contains(node)) {
+                report.setRequesterNode(node);
+                Scheduler.addToHighQueue(report);
+            }
+        }
     }
 
 }

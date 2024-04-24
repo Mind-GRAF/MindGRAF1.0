@@ -1,9 +1,12 @@
 package edu.guc.mind_graf.mgip.rules;
 
 import edu.guc.mind_graf.cables.DownCableSet;
+import edu.guc.mind_graf.mgip.Scheduler;
+import edu.guc.mind_graf.mgip.reports.Report;
 import edu.guc.mind_graf.mgip.ruleHandlers.Ptree;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfoHandler;
+import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.RuleNode;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.PropositionNodeSet;
@@ -26,13 +29,20 @@ public class NumEntailment extends RuleNode {
     }
 
     public RuleInfoSet[] mayInfer() {
-        RuleInfoSet[] inferrable = {new RuleInfoSet(), new RuleInfoSet()};  // at index 0 the set of positively inferred, at index 1 the set of negatively inferred
+        RuleInfoSet[] inferrable = {new RuleInfoSet()};  // at index 0 the set of positively inferred, at index 1 the set of negatively inferred
         //       for(RuleInfo ri : ruleInfoHandler.getInferrableRuleInfos()) {
         for(RuleInfo ri : this.getRootRuleInfos()){
             if(ri.getPcount() >= i)
                 inferrable[0].addRuleInfo(ri);
         }
         return inferrable;
+    }
+
+    public void putInferenceReportOnQueue(Report report) {
+        for(Node node : cq) {
+            report.setRequesterNode(node);
+        }
+        Scheduler.addToHighQueue(report);
     }
 
 }

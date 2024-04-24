@@ -56,7 +56,7 @@ public class PropositionNode extends Node {
      */
     public NodeSet getUpConsDomRuleNodeSet() {
         NodeSet ret = new NodeSet();
-        UpCable consequentCable = this.getUpCableSet().get("consequent");
+        UpCable consequentCable = this.getUpCableSet().get("cq");
         UpCable argsCable = this.getUpCableSet().get("args");
         if (argsCable != null) {
             argsCable.getNodeSet().addAllTo(ret);
@@ -184,7 +184,6 @@ public class PropositionNode extends Node {
 
             } else {
                 ((PropositionNode) targetNode).addToOutgoingChannels(newChannel);
-
             }
             return newRequest;
         }

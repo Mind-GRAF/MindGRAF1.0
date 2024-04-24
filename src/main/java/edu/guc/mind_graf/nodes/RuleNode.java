@@ -41,7 +41,7 @@ public abstract class RuleNode extends PropositionNode {
         super(downCableSet);
         this.name = "P" + (Network.MolecularCount);
         this.forwardReport = false;
-        // TODO Auto-generated constructor stub
+        rootRuleInfos = new RuleInfoSet();
     }
 
     public void applyRuleHandler(Report report) {
@@ -53,7 +53,7 @@ public abstract class RuleNode extends PropositionNode {
 
         // } else {
         // for (Channel outChnl : outgoingChannels)
-        // sendReport(report, outChnl);
+        // putInferenceReportOnQueue(report, outChnl);
         // }
 
         try{
@@ -61,20 +61,7 @@ public abstract class RuleNode extends PropositionNode {
             rootRuleInfos.addRootRuleInfo(inserted);
             if(inserted != null && inserted.size() > 0){
                 RuleInfoSet[] mayInfer = mayInfer();
-                Collection<Channel> outgoingRuleConsChannels = getOutgoingRuleConsequentChannels(); // should filter channels
-                for(int i = 0; i < 2; i++){
-                    for(RuleInfo ri : mayInfer[i]) {
-                        PropositionNodeSet supports = new PropositionNodeSet();   // probably wrong (maybe should make new support of the flag nodes and rule node
-                        for (FlagNode fn : ri.getFns()) {
-                            supports.add(fn.getNode());
-                        }
-                        Report newReport = new Report(ri.getSubs(), supports, report.getAttitude(),
-                                (i == 0), InferenceType.FORWARD, null, this);
-                        for(Channel ch : outgoingRuleConsChannels){
-                            sendReport(newReport, ch);
-                        }
-                    }
-                }
+                sendInferenceReports(mayInfer, report.getAttitude());
             }
         } catch (Exception e){
 
@@ -83,6 +70,23 @@ public abstract class RuleNode extends PropositionNode {
     }
 
     public abstract RuleInfoSet[] mayInfer();
+
+    public void sendInferenceReports(RuleInfoSet[] inferrable, int attitude) {
+         for (int i = 0; i < inferrable.length; i++) {
+             for(RuleInfo ri : inferrable[i]) {
+                 PropositionNodeSet supports = new PropositionNodeSet();   // probably wrong (maybe should make new support of the flag nodes and rule node
+                 for (FlagNode fn : ri.getFns()) {
+                     supports.add(fn.getNode());
+                 }
+                 supports.add(this);
+                 Report newReport = new Report(ri.getSubs() == null ? new Substitutions() : ri.getSubs(), supports, attitude,
+                         (i == 0), InferenceType.FORWARD, null, this);
+                 putInferenceReportOnQueue(newReport);
+             }
+         }
+    }
+
+    public abstract void putInferenceReportOnQueue(Report report);
 
     /***
      * this method gets all the consequents and arguments that this node is a rule

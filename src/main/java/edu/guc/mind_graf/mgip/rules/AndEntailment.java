@@ -3,6 +3,7 @@ package edu.guc.mind_graf.mgip.rules;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.mgip.InferenceType;
+import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.reports.Report;
 import edu.guc.mind_graf.mgip.requests.Channel;
 import edu.guc.mind_graf.mgip.ruleHandlers.Ptree;
@@ -45,7 +46,7 @@ public class AndEntailment extends RuleNode {
     }
 
     public RuleInfoSet[] mayInfer() {
-        RuleInfoSet[] inferrable = {new RuleInfoSet(), new RuleInfoSet()};  // at index 0 the set of positively inferred, at index 1 the set of negatively inferred
+        RuleInfoSet[] inferrable = {new RuleInfoSet()};  // at index 0 the set of positively inferred, at index 1 the set of negatively inferred
         if(mayTryToInfer()) {
 //            for (RuleInfo ri : ruleInfoHandler.getInferrableRuleInfos()) {
             for(RuleInfo ri : this.getRootRuleInfos()){
@@ -54,6 +55,13 @@ public class AndEntailment extends RuleNode {
             }
         }
         return inferrable;
+    }
+
+    public void putInferenceReportOnQueue(Report report) {
+        for(Node node : cq) {
+            report.setRequesterNode(node);
+            Scheduler.addToHighQueue(report);
+        }
     }
 
 }

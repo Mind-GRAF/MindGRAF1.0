@@ -2,6 +2,7 @@ package edu.guc.mind_graf.mgip.rules;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 
 import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.mgip.InferenceType;
@@ -31,17 +32,24 @@ import edu.guc.mind_graf.set.RuleInfoSet;
 public class BridgeRule extends RuleNode {
 
     private HashMap <Node, Integer> antToAttitude;
-    private NodeSet cq;
+    private  HashMap <Node, Integer> cqToAttitude;
     private int cAnt;
 
     public BridgeRule(DownCableSet downCableSet) {
         super(downCableSet);
-        cq = downCableSet.get("cq").getNodeSet();
+        antToAttitude = new HashMap<>();
+        cqToAttitude = new HashMap<>();
         for(DownCable downCable : downCableSet){
             if(downCable.getRelation().getName().contains("-ant")){ // assuming all antecedents of a bridge rule would be of the form 1-ant where 1 is the attitude id
                 int attitude =  Integer.parseInt(downCable.getRelation().getName().split("-")[0]);
                 for(Node nodeAnt : downCable.getNodeSet()){
                     antToAttitude.put(nodeAnt, attitude);
+                }
+            }
+            else if(downCable.getRelation().getName().contains("-cq")){ // assuming all consequents of a bridge rule would be of the form 1-cq where 1 is the attitude id
+                int attitude =  Integer.parseInt(downCable.getRelation().getName().split("-")[0]);
+                for(Node nodeCq : downCable.getNodeSet()){
+                    cqToAttitude.put(nodeCq, attitude);
                 }
             }
         }
@@ -58,8 +66,9 @@ public class BridgeRule extends RuleNode {
         if(cAnt < this.ruleInfoHandler.getConstantAntecedents().getPcount())
             return false;
         for(PtreeNode root : ((Ptree)ruleInfoHandler).getRoots()) {
-            if(root.getSIndex().getAllRuleInfos().isEmpty())  // maybe should also check pcount of roots?
+            if(root.getSIndex().getAllRuleInfos().isEmpty()) {  // maybe should also check pcount of roots?
                 return false;
+            }
         }
         return true;
     }
@@ -79,6 +88,14 @@ public class BridgeRule extends RuleNode {
     public void applyRuleHandler(Report report) {
         if(report.anySupportSupportedInAttitude(antToAttitude.get(report.getReporterNode()))) {
             super.applyRuleHandler(report);
+        }
+    }
+
+    public void putInferenceReportOnQueue(Report report) {
+        for(Node node : cqToAttitude.keySet()) {
+            report.setAttitude(cqToAttitude.get(node));
+            report.setRequesterNode(node);
+            Scheduler.addToHighQueue(report);
         }
     }
 

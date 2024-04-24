@@ -50,6 +50,5 @@ class OrEntailmentTest {
 
         RuleInfoSet[] inferrable = ((RuleNode)P0).mayInfer();
         assertEquals(1, inferrable[0].size());
-        assertEquals(0, inferrable[1].size());
     }
 }
