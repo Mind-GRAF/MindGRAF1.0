@@ -1,7 +1,10 @@
 package edu.guc.mind_graf.mgip.rules;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
+import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.reports.KnownInstance;
@@ -12,31 +15,91 @@ import edu.guc.mind_graf.mgip.requests.Channel;
 import edu.guc.mind_graf.mgip.requests.ChannelType;
 import edu.guc.mind_graf.mgip.requests.MatchChannel;
 import edu.guc.mind_graf.mgip.requests.Request;
+import edu.guc.mind_graf.mgip.ruleHandlers.Ptree;
+import edu.guc.mind_graf.mgip.ruleHandlers.PtreeNode;
+import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.context.Context;
-import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.context.ContextController;
+import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.set.NodeSet;
-import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.nodes.RuleNode;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.set.PropositionNodeSet;
+import edu.guc.mind_graf.set.RuleInfoSet;
+
 public class BridgeRule extends RuleNode {
 
-    public BridgeRule(String name, Boolean isVariable) {
-        super(name, isVariable);
-        // TODO Auto-generated constructor stub
-    }
+    private HashMap <Node, Integer> antToAttitude;
+    private  HashMap <Node, Integer> cqToAttitude;
+    private int cAnt;
 
     public BridgeRule(DownCableSet downCableSet) {
         super(downCableSet);
-
+        antToAttitude = new HashMap<>();
+        cqToAttitude = new HashMap<>();
+        for(DownCable downCable : downCableSet){
+            if(downCable.getRelation().getName().contains("-ant")){ // assuming all antecedents of a bridge rule would be of the form 1-ant where 1 is the attitude id
+                int attitude =  Integer.parseInt(downCable.getRelation().getName().split("-")[0]);
+                for(Node nodeAnt : downCable.getNodeSet()){
+                    antToAttitude.put(nodeAnt, attitude);
+                }
+            }
+            else if(downCable.getRelation().getName().contains("-cq")){ // assuming all consequents of a bridge rule would be of the form 1-cq where 1 is the attitude id
+                int attitude =  Integer.parseInt(downCable.getRelation().getName().split("-")[0]);
+                for(Node nodeCq : downCable.getNodeSet()){
+                    cqToAttitude.put(nodeCq, attitude);
+                }
+            }
+        }
+        PropositionNodeSet antecedents = new PropositionNodeSet();
+        for(Node antNode : antToAttitude.keySet()){
+            if(antNode.isOpen())
+                antecedents.add(antNode);
+        }
+        cAnt = antToAttitude.keySet().size() - antecedents.size();
+        this.ruleInfoHandler = Ptree.constructPtree(antecedents, antecedents.size(), Integer.MAX_VALUE, 2);
     }
 
-    public static void applyRuleHandler(Report report, BridgeRule node) {
-        // TODO Ossama
-
+    public boolean mayTryToInfer() {
+        if(cAnt < this.ruleInfoHandler.getConstantAntecedents().getPcount())
+            return false;
+        for(PtreeNode root : ((Ptree)ruleInfoHandler).getRoots()) {
+            if(root.getSIndex().getAllRuleInfos().isEmpty()) {  // maybe should also check pcount of roots?
+                return false;
+            }
+        }
+        return true;
     }
+
+    public RuleInfoSet[] mayInfer() {
+        RuleInfoSet[] inferrable = {new RuleInfoSet()};  // at index 0 the set of positively inferred, at index 1 the set of negatively inferred
+        if(mayTryToInfer()) {
+//            for (RuleInfo ri : ruleInfoHandler.getInferrableRuleInfos()) {
+            for(RuleInfo ri : this.getRootRuleInfos()){
+                if (ri.getPcount() == antToAttitude.size())
+                    inferrable[0].addRuleInfo(ri);
+            }
+        }
+        return inferrable;
+    }
+
+    public void applyRuleHandler(Report report) {
+        if(report.anySupportSupportedInAttitude(antToAttitude.get(report.getReporterNode()))) {
+            super.applyRuleHandler(report);
+        }
+    }
+
+    public void putInferenceReportOnQueue(Report report) {
+        for(Node node : cqToAttitude.keySet()) {
+            report.setAttitude(cqToAttitude.get(node));
+            report.setRequesterNode(node);
+            Scheduler.addToHighQueue(report);
+        }
+    }
+
+
 
     protected void requestAntecedentsNotAlreadyWorkingOn(Request currentRequest, KnownInstance knownInstance) {
         Channel currentChannel = currentRequest.getChannel();
@@ -53,7 +116,7 @@ public class BridgeRule extends RuleNode {
         for (Node currentNode : argAntNodesToConsiderClose) {
             int currentNodeAttitude = currContext.getPropositionAttitude(currentNode.getId());
             Request newRequest = establishChannel(ChannelType.AntRule, currentNode, switchSubs, unionSubs,
-                    currentContextName, currentNodeAttitude, -1, (PropositionNode) this);
+                    currentContextName, currentNodeAttitude, -1, this);
             Scheduler.addToLowQueue(newRequest);
         }
     }
@@ -71,7 +134,7 @@ public class BridgeRule extends RuleNode {
         for (Node currentNode : remainingAntArgNodeSet) {
             int currentNodeAttitude = currContext.getPropositionAttitude(currentNode.getId());
             Request newRequest = establishChannel(ChannelType.AntRule, currentNode, switchRuleSubs, filterRuleSubs,
-                    currentContext, currentNodeAttitude, -1, (PropositionNode) this);
+                    currentContext, currentNodeAttitude, -1, this);
             Scheduler.addToLowQueue(newRequest);
         }
 
@@ -104,14 +167,13 @@ public class BridgeRule extends RuleNode {
                         int currentNodeAttitude = currContext.getPropositionAttitude(currentNode.getId());
                         Request newRequest = establishChannel(ChannelType.AntRule, currentNode, switchRuleSubs,
                                 filterRuleSubs,
-                                currentContext, currentNodeAttitude, -1, (PropositionNode) this);
+                                currentContext, currentNodeAttitude, -1, this);
                         Scheduler.addToLowQueue(newRequest);
 
                     }
 
                 } else
                     super.grandparentMethodRequest(currentRequest);
-                ;
 
             } else {
                 boolean isNotBound = isOpenNodeNotBound(filterRuleSubs);
@@ -136,7 +198,6 @@ public class BridgeRule extends RuleNode {
 
                 }
                 super.grandparentMethodRequest(currentRequest);
-                return;
 
             }
 
@@ -163,7 +224,7 @@ public class BridgeRule extends RuleNode {
                 if (!this.isOpen()) {
                     /** Close Type Implementation */
                     if (assertedInContext) {
-                        if (this.isForwardReport() == false) {
+                        if (!this.isForwardReport()) {
                             this.setForwardReport(true);
                             requestAntecedentsNotAlreadyWorkingOn(tempRequest);
                         }
@@ -184,13 +245,13 @@ public class BridgeRule extends RuleNode {
                                 currentReportAttitudeID);
                         if (compatibilityCheck && supportCheck) {
                             if (notBound) {
-                                if (this.isForwardReport() == false) {
+                                if (!this.isForwardReport()) {
                                     this.setForwardReport(true);
                                     requestAntecedentsNotAlreadyWorkingOn(tempRequest, currentKnownInstance);
                                 }
 
                             } else {
-                                if (this.isForwardReport() == false) {
+                                if (!this.isForwardReport()) {
                                     this.setForwardReport(true);
                                     requestAntecedentsNotAlreadyWorkingOn(tempRequest);
                                 }
@@ -199,15 +260,14 @@ public class BridgeRule extends RuleNode {
 
                         }
                     }
-                    if (this.isForwardReport() == false) {
+                    if (!this.isForwardReport()) {
                         this.setForwardReport(true);
                         grandparentMethodRequest(tempRequest);
                     }
                 }
             } else {
                 /** Backward Inference */
-                applyRuleHandler(currentReport, this);
-
+                applyRuleHandler(currentReport);
             }
         } else {
             /** Not AntecedentToRule Channel */

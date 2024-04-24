@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+import edu.guc.mind_graf.mgip.rules.*;
 import edu.guc.mind_graf.paths.AndPath;
 import edu.guc.mind_graf.paths.ComposePath;
 import edu.guc.mind_graf.paths.FUnitPath;
@@ -58,8 +59,17 @@ public class Network {
 	public void addBasicRelations() {
 		Network.createRelation("forall", "propositionnode", Adjustability.EXPAND, 2);
 		Network.createRelation("min", "individualnode", Adjustability.NONE, 1);
-		Network.createRelation("min", "individualnode", Adjustability.NONE, 1);
+		Network.createRelation("max", "individualnode", Adjustability.NONE, 1);
 		Network.createRelation("arg", "propositionnode", Adjustability.NONE, 1);
+		Network.createRelation("object", "", Adjustability.EXPAND, 2);
+		Network.createRelation("member", "", Adjustability.EXPAND, 2);
+		Network.createRelation("class", "", Adjustability.EXPAND, 2);
+		Network.createRelation("i", "individualnode", Adjustability.EXPAND, 2);
+		Network.createRelation("cq", "propositionnode", Adjustability.EXPAND, 2);
+		Network.createRelation("ant", "propositionnode", Adjustability.EXPAND, 2);
+		Network.createRelation("&ant", "propositionnode", Adjustability.EXPAND, 2);
+		Network.createRelation("thresh", "propositionnode", Adjustability.EXPAND, 2);
+		Network.createRelation("threshmax", "propositionnode", Adjustability.EXPAND, 2);
 	}
 
 	public void addBasicNodes() throws NoSuchTypeException {
@@ -92,8 +102,32 @@ public class Network {
 				case "individualnode":
 					node = new IndividualNode(downCableSet);
 					break;
-				case "rulenode":
-					node = new RuleNode(downCableSet);
+//				case "rulenode":
+//					node = new RuleNode(downCableSet);
+//					break;
+				case "andor":
+					node = new AndOr(downCableSet);
+					propositionNodes.put(node.getId(), node);
+					break;
+				case "andentailment":
+					node = new AndEntailment(downCableSet);
+					propositionNodes.put(node.getId(), node);
+					break;
+				case "orentailment":
+					node = new OrEntailment(downCableSet);
+					propositionNodes.put(node.getId(), node);
+					break;
+				case "thresh":
+					node = new Thresh(downCableSet);
+					propositionNodes.put(node.getId(), node);
+					break;
+				case "numentailment":
+					node = new NumEntailment(downCableSet);
+					propositionNodes.put(node.getId(), node);
+					break;
+				case "bridgerule":
+					node = new BridgeRule(downCableSet);
+					propositionNodes.put(node.getId(), node);
 					break;
 				default:
 					if (userDefinedClasses.containsKey(SemanticType)) {
@@ -188,9 +222,9 @@ public class Network {
 			case "individualnode":
 				node = new IndividualNode(name, false);
 				break;
-			case "rulenode":
-				node = new RuleNode(name, false);
-				break;
+//			case "rulenode":
+//				node = new RuleNode(name, false);
+//				break;
 			default:
 				if (userDefinedClasses.containsKey(SemanticType)) {
 					CustomClass customClass = userDefinedClasses.get(SemanticType);
@@ -260,9 +294,9 @@ public class Network {
 			case "individualnode":
 				node = new IndividualNode(name, true);
 				break;
-			case "rulenode":
-				node = new RuleNode(name, true);
-				break;
+//			case "rulenode":
+//				node = new RuleNode(name, true);
+//				break;
 			default:
 				if (userDefinedClasses.containsKey(SemanticType)) {
 					CustomClass customClass = userDefinedClasses.get(SemanticType);

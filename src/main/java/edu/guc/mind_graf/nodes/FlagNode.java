@@ -4,7 +4,7 @@ import edu.guc.mind_graf.set.PropositionNodeSet;
 
 public class FlagNode {
 
-    private Node node;
+    private Node node; // would normally be an antecedent
     private boolean flag;
     private PropositionNodeSet support; //the support supporting the report the node sent
 
@@ -39,7 +39,16 @@ public class FlagNode {
     }
 
     public boolean equals(FlagNode fn) {
+        // maybe throw exception here if nodes equal but flags different
         return this.node.equals(fn.getNode());
     }
-    
+
+    @Override
+    public String toString() {
+        return "FlagNode{" +
+                "node=" + node.getName() +
+                ", flag=" + flag +
+                ", support=" + support +
+                '}';
+    }
 }

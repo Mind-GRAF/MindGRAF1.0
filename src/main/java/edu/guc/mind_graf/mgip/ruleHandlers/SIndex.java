@@ -1,55 +1,79 @@
 package edu.guc.mind_graf.mgip.ruleHandlers;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-
+import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.exceptions.InvalidRuleInfoException;
 import edu.guc.mind_graf.nodes.Node;
+import edu.guc.mind_graf.set.NodeSet;
+import edu.guc.mind_graf.set.RuleInfoSet;
 
 public abstract class SIndex extends RuleInfoHandler {
 
-    private HashMap<Integer, Object> ruleInfoMap;
+    private NodeSet commonVariables;
 
-    private Set<Node> commonVariables; 
+    protected int min;
 
     public SIndex() {
-        ruleInfoMap = new HashMap<>();
-        commonVariables = new HashSet<>();
+        commonVariables = new NodeSet();
     }
 
-    public SIndex(Set<Node> commonVariables) {
-        ruleInfoMap = new HashMap<>();
+    public SIndex(NodeSet commonVariables) {
         this.commonVariables = commonVariables;
     }
 
-    protected int customHash(ArrayList<String> set) {
-        Collections.sort(set); // Sort the strings
-        return Objects.hash(set.toArray());
+    public NodeSet getCommonVariables() {
+        return commonVariables;
     }
 
-    @Override
-    public void insertVariableRI(RuleInfo ri) throws InvalidRuleInfoException {
-        ArrayList<String> key = new ArrayList<>();
-        for(Node node : commonVariables){
-            String value = ri.getSubs().get(node).toString();
-            if(value != null)
-                key.add(value);
+    public void setCommonVariables(NodeSet commonVariables) {
+        this.commonVariables = commonVariables;
+    }
+
+//    public SIndex createSIndex(PropositionNodeSet antecedents) {
+//        NodeSet commonVariables = antecedents.getCommonVariables();
+//        return new Linear(commonVariables);
+//    }
+
+    protected int customHash(Substitutions subs) throws InvalidRuleInfoException {
+        int hash = 0;
+        int factor = 1;
+        for(Node var : commonVariables){
+            if(!subs.containsVar(var))
+                throw new InvalidRuleInfoException("substitution not in info");
+            if(subs.get(var) == null)
+                hash += 99*factor;
             else
-                throw new InvalidRuleInfoException("Common Substitution not found in RuleInfo");
+                hash += subs.get(var).getId()*factor; //consider checking for invalid subs here (if var not in subs, they're invalid)
+            factor *= 100;
         }
-        int hash = customHash(key);
-        insertIntoMap(ri, hash);
+        //assuming ids wont be over 100
+        return hash;
     }
 
-    protected abstract RuleInfo insertIntoMap(RuleInfo ri, int hash);
-
     @Override
-    public void clear() {
-        ruleInfoMap.clear();
+    public RuleInfoSet insertVariableRI(RuleInfo ri) throws InvalidRuleInfoException {
+        int hash = customHash(ri.getSubs());
+        return insertIntoMap(ri, hash);
+    }
+
+    public RuleInfoSet insertVariableRI(RuleInfoSet ri) throws InvalidRuleInfoException {
+           RuleInfoSet allRuleInfos = new RuleInfoSet();
+            for(RuleInfo r : ri){
+                RuleInfoSet inserted = insertVariableRI(r);
+                if(inserted != null && !inserted.isEmpty()){
+                    allRuleInfos = allRuleInfos.union(inserted);
+                }
+            }
+            return allRuleInfos;
+    }
+
+    public abstract RuleInfoSet insertIntoMap(RuleInfo ri, int hash);
+
+    public int getMin() {
+        return min;
+    }
+
+    public void setMin(int min) {
+        this.min = min;
     }
 
 }
