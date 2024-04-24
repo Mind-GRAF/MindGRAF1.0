@@ -35,6 +35,21 @@ public class MindGRAF_Parser {
       private static ArrayList<ArrayList<Integer>> consisAttitudeLists = new ArrayList<ArrayList<Integer>>();
       private  static ArrayList<Integer> consisAttitudeList = new ArrayList<Integer>();
       private static int currConsisAttitude;
+
+      //setting closed under conjunction Attitudes
+      private static ArrayList<ArrayList<Integer>> conjunctionAttitudeLists = new ArrayList<ArrayList<Integer>>();
+      private  static ArrayList<Integer> conjunctionAttitudeList = new ArrayList<Integer>();
+      private static int currConjunctionAttitude;
+
+      //setting closed under consequence Attitudes
+      private static ArrayList<ArrayList<Integer>> consequenceAttitudeLists = new ArrayList<ArrayList<Integer>>();
+      private  static ArrayList<Integer> consequenceAttitudeList = new ArrayList<Integer>();
+      private static int currConseqAttitude;
+
+       //setting telescopable Attitudes
+      private static ArrayList<ArrayList<Integer>> teleAttitudeLists = new ArrayList<ArrayList<Integer>>();
+      private  static ArrayList<Integer> teleAttitudeList = new ArrayList<Integer>();
+      private static int currTeleAttitude;
       
       //mode1 creation of nodes
       private static  ArrayList<String> NodesNames = new ArrayList<String>();
@@ -72,9 +87,10 @@ TOKEN :
 | <MODE3: "set-mode-3">
 | <N:"N"|"n">
 | <BOOL:"true"|"false">
-|< #IDENTIFIER: <LETTER> (<LETTER>|<DIGIT>)* >
-|< #LETTER: ["_","a"-"z","A"-"Z"] >
-|< #DIGIT: ["0"-"9"] >
+| < #IDENTIFIER: <LETTER> (<LETTER>|<DIGIT>)* >
+| < #LETTER: ["_","a"-"z","A"-"Z"] >
+| < #DIGIT: ["0"-"9"] >
+| <ANDOR_THRESH: (("andor"|"thresh")"(")>
 | <VARIABLE: "?">
 | <WFF_NAME: "WFF"(<DIGIT>)+>
 | <STRING: (["a"-"z", "A"-"Z"])+ (["a"-"z", "A"-"Z", "0"-"9", "_"])*>
@@ -88,15 +104,35 @@ TOKEN :
 
 // Define the grammar
 
+void Expression() : {}
+{
+    AndOrExpression() | Predicate()
+}
+
+void AndOrExpression() : {Token connective;}
+{
+    <ANDOR_THRESH> <NUMBER> "," <NUMBER> ")" "{" ExpressionList() "}"
+    {
+
+    }
+}
+
+void ExpressionList() : {}
+{
+    Expression() ("," Expression())*
+}
+
 void Predicate() : {
   Token num;
   Token predicateName;
 }
+
 {
   predicateName=<PREDICATE_NAME_BRACKET>( num  = <NUMBER>",")? Arguments()")"
   {
   String predName = predicateName.image.trim().toLowerCase();
-  predName = predName.substring(0,predName.length()-1);    if (mode == 1) {
+  predName = predName.substring(0,predName.length()-1);    
+    if (mode == 1) {
       HashMap<String, DownCable> cableSet = new HashMap<String, DownCable>();
       try {
         Node n = controller.getNetwork().createNode(predName, "propositionnode");
@@ -109,7 +145,7 @@ void Predicate() : {
           String nodeName = NodesNames.get(i);
           Node node;
           if(nodeName.charAt(nodeName.length() - 1)=='?')
-            node = controller.getNetwork().createVariableNode(nodeName, "propositionnode");
+            node = controller.getNetwork().createVariableNode(nodeName.substring(0,nodeName.length()-1), "propositionnode");
           else
             node = controller.getNetwork().createNode(nodeName, "propositionnode");
           Relation relation = controller.getNetwork().createRelation("a" + (i + 1), "propositionnode",
@@ -119,24 +155,10 @@ void Predicate() : {
         }
         NodesNames.clear();
         DownCableSet dcSet = new DownCableSet(cableSet);
+        controller.getNetwork().createNode("propositionnode", dcSet);
 
         //printing
-        controller.getNetwork().createNode("propositionnode", dcSet);
-        HashMap<String,HashMap<String, Node>>  allNodes = controller.getNetwork().getMolecularNodes();
-        for(HashMap<String,Node> oneNode :allNodes.values() ){
-            for(Node molec : oneNode.values()){
-              DownCableSet set = molec.getDownCableSet();
-              Collection<DownCable> allCables = set.getValues();
-              for(DownCable someCable : allCables)
-              {
-                System.out.println("Relation: "+someCable.getRelation());
-               Collection<Node> nodeset =  someCable.getNodeSet().getValues();
-               for(Node someNode : nodeset){
-                System.out.println("Node Name: "+someNode.getName());
-               }
-              }
-            }
-        }
+        
       } catch (NoSuchTypeException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
@@ -156,14 +178,16 @@ void Argument() :
 {Token Argument;
 Token var=null;}
 {
-  Argument=<STRING>(var=<VARIABLE>)?
+ ( Argument=<STRING>(var=<VARIABLE>)?
   {
     String argString = Argument.image.trim().toLowerCase();
   if(var!=null)
   argString +='?';
   NodesNames.add(argString);
 
-  }
+  })
+  |
+  ExpressionList()
 }
 
 
@@ -222,7 +246,7 @@ void Command() throws ParseException :
     |("define-context " stringToken=<STRING>)defineContext()
     )
     |(
-      "add-to-context" Predicate() 
+      "add-to-context" Expression() 
     )
     }
 
@@ -271,7 +295,7 @@ void Setup() throws ParseException :
     initialAttitudes.put("belief",0);
 }
 {
-   "set-attitudes" "{"attitude()(","attitude())*"}"
+   ("set-attitudes" "{"attitude()(","attitude())*"}"
    {
 
     System.out.println("Attitudes Defined:");
@@ -280,7 +304,9 @@ void Setup() throws ParseException :
    }
    
 
-   }
+   })
+   |
+   <N>
 
 }
 
@@ -314,6 +340,217 @@ initialAttitudes.put(a,attitudeNumber);
 attitudeNumber++;
 }
 }
+
+void underTeleAttitudes() throws ParseException : 
+{}
+{
+   "set-telescopable " (teleAttitudeList())+
+   {
+
+    for (ArrayList<Integer> list : teleAttitudeLists) {
+            for (Integer num : list) {
+                System.out.print(num + " ");
+            }
+            System.out.println(); // Move to the next line after printing each inner list
+        }
+   }
+
+}
+
+
+void teleAttitudeList() throws ParseException :
+{
+  Token attitude;
+}
+{
+("{"OneAttitudeInTeleList()(","OneAttitudeInTeleList())*"}")
+{
+  ArrayList<Integer> finalTeleList = new ArrayList<Integer>();
+  for(int i = 0;i<teleAttitudeList.size();i++){
+    finalTeleList.add(teleAttitudeList.get(i));
+  }
+
+teleAttitudeLists.add(finalTeleList);
+teleAttitudeList.clear();
+
+                System.out.println("now printing all contents:");
+
+    for (ArrayList<Integer> list : teleAttitudeLists) {
+            for (Integer num : list) {
+                System.out.print(num + " ");
+            }
+            System.out.println(); // Move to the next line after printing each inner list
+        }
+System.out.print(teleAttitudeList.size()+" the size..");
+System.out.println(teleAttitudeList.size()+" the size..");
+System.out.println(finalTeleList.size()+" the size of the final list");
+
+}
+
+}
+
+void OneAttitudeInTeleList() throws ParseException :
+{
+  Token attitude;
+}
+{
+attitude=<STRING>
+{
+  String s = attitude.image.trim().toLowerCase();
+  if(!initialAttitudes.containsKey(s))
+    throw new ParseException("Not in initially Defined Attitudes");
+  currTeleAttitude = initialAttitudes.get(s);
+  teleAttitudeList.add(currTeleAttitude);
+ 
+
+}
+}
+
+
+
+
+
+
+
+
+
+
+void underConsequenceAttitudes() throws ParseException : 
+{}
+{
+   "set-closed-consequence " (consequenceAttitudeList())+
+   {
+
+    for (ArrayList<Integer> list : consequenceAttitudeLists) {
+            for (Integer num : list) {
+                System.out.print(num + " ");
+            }
+            System.out.println(); // Move to the next line after printing each inner list
+        }
+   }
+
+}
+
+
+void consequenceAttitudeList() throws ParseException :
+{
+  Token attitude;
+}
+{
+("{"OneAttitudeInConsequenceList()(","OneAttitudeInConsequenceList())*"}")
+{
+  ArrayList<Integer> finalConsequenceList = new ArrayList<Integer>();
+  for(int i = 0;i<consequenceAttitudeList.size();i++){
+    finalConsequenceList.add(consequenceAttitudeList.get(i));
+  }
+
+consequenceAttitudeLists.add(finalConsequenceList);
+consequenceAttitudeList.clear();
+
+                System.out.println("now printing all contents:");
+
+    for (ArrayList<Integer> list : consequenceAttitudeLists) {
+            for (Integer num : list) {
+                System.out.print(num + " ");
+            }
+            System.out.println(); // Move to the next line after printing each inner list
+        }
+System.out.print(consequenceAttitudeList.size()+" the size..");
+System.out.println(consequenceAttitudeList.size()+" the size..");
+System.out.println(finalConsequenceList.size()+" the size of the final list");
+
+}
+
+}
+
+void OneAttitudeInConsequenceList() throws ParseException :
+{
+  Token attitude;
+}
+{
+attitude=<STRING>
+{
+  String s = attitude.image.trim().toLowerCase();
+  if(!initialAttitudes.containsKey(s))
+    throw new ParseException("Not in initially Defined Attitudes");
+  currConseqAttitude = initialAttitudes.get(s);
+  consequenceAttitudeList.add(currConseqAttitude);
+ 
+
+}
+}
+
+
+
+void underConjunctionAttitudes() throws ParseException : 
+{}
+{
+   "set-closed-conjunction " (conjunctionAttitudeList())+
+   {
+
+    for (ArrayList<Integer> list : conjunctionAttitudeLists) {
+            for (Integer num : list) {
+                System.out.print(num + " ");
+            }
+            System.out.println(); // Move to the next line after printing each inner list
+        }
+   }
+
+}
+
+
+
+void conjunctionAttitudeList() throws ParseException :
+{
+  Token attitude;
+}
+{
+("{"OneAttitudeInConjunctionList()(","OneAttitudeInConjunctionList())*"}")
+{
+  ArrayList<Integer> finalConjunctionList = new ArrayList<Integer>();
+  for(int i = 0;i<conjunctionAttitudeList.size();i++){
+    finalConjunctionList.add(conjunctionAttitudeList.get(i));
+  }
+
+conjunctionAttitudeLists.add(finalConjunctionList);
+conjunctionAttitudeList.clear();
+
+                System.out.println("now printing all contents:");
+
+    for (ArrayList<Integer> list : conjunctionAttitudeLists) {
+            for (Integer num : list) {
+                System.out.print(num + " ");
+            }
+            System.out.println(); // Move to the next line after printing each inner list
+        }
+System.out.print(conjunctionAttitudeList.size()+" the size..");
+System.out.println(conjunctionAttitudeList.size()+" the size..");
+System.out.println(finalConjunctionList.size()+" the size of the final list");
+
+}
+
+}
+
+void OneAttitudeInConjunctionList() throws ParseException :
+{
+  Token attitude;
+}
+{
+attitude=<STRING>
+{
+  String s = attitude.image.trim().toLowerCase();
+  if(!initialAttitudes.containsKey(s))
+    throw new ParseException("Not in initially Defined Attitudes");
+  currConsisAttitude = initialAttitudes.get(s);
+  conjunctionAttitudeList.add(currConjunctionAttitude);
+ 
+
+}
+}
+
+
+
+
 
 void consistentAttitudes() throws ParseException : 
 {}
@@ -362,8 +599,6 @@ System.out.println(consisAttitudeList.size()+" the size..");
 System.out.println(finalConsisList.size()+" the size of the final list");
 
 }
-
-
 
 }
 

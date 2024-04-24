@@ -33,13 +33,15 @@ public interface MindGRAF_ParserConstants {
   /** RegularExpression Id. */
   int DIGIT = 15;
   /** RegularExpression Id. */
-  int VARIABLE = 16;
+  int ANDOR_THRESH = 16;
   /** RegularExpression Id. */
-  int WFF_NAME = 17;
+  int VARIABLE = 17;
   /** RegularExpression Id. */
-  int STRING = 18;
+  int WFF_NAME = 18;
   /** RegularExpression Id. */
-  int PREDICATE_NAME_BRACKET = 19;
+  int STRING = 19;
+  /** RegularExpression Id. */
+  int PREDICATE_NAME_BRACKET = 20;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -62,18 +64,22 @@ public interface MindGRAF_ParserConstants {
     "<IDENTIFIER>",
     "<LETTER>",
     "<DIGIT>",
+    "<ANDOR_THRESH>",
     "\"?\"",
     "<WFF_NAME>",
     "<STRING>",
     "<PREDICATE_NAME_BRACKET>",
     "\",\"",
     "\")\"",
+    "\"{\"",
+    "\"}\"",
     "\"define-context \"",
     "\"add-to-context\"",
     "\"set-uvbr\"",
     "\"set-attitudes\"",
-    "\"{\"",
-    "\"}\"",
+    "\"set-telescopable \"",
+    "\"set-closed-consequence \"",
+    "\"set-closed-conjunction \"",
     "\"set-consistent-attitudes \"",
   };
 
