@@ -31,12 +31,6 @@ public abstract class RuleNode extends PropositionNode {
     protected RuleInfoHandler ruleInfoHandler;
     protected RuleInfoSet rootRuleInfos;
 
-//    public RuleNode(String name, Boolean isVariable) {
-//        super(name, isVariable);
-//        this.forwardReport = false;
-//        // TODO Auto-generated constructor stub
-//    }
-
     public RuleNode(DownCableSet downCableSet) {
         super(downCableSet);
         this.name = "P" + (Network.MolecularCount);

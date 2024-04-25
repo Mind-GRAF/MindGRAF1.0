@@ -31,7 +31,7 @@ class SingletonTest {
     public void testInsertIntoMap() {
         NodeSet commonVariables = new NodeSet(X, Y);
         Singleton singletonWithCommonVars = new Singleton(commonVariables);
-        RuleInfo ri = new RuleInfo(1, 2, new Substitutions(), new FlagNodeSet());
+        RuleInfo ri = new RuleInfo("", 0, 1, 2, new Substitutions(), new FlagNodeSet());
         RuleInfoSet inserted = singletonWithCommonVars.insertIntoMap(ri, 1);
         assertNotNull(inserted);
         assertEquals(1, inserted.size());
@@ -41,8 +41,8 @@ class SingletonTest {
     public void testGetAllRuleInfos() {
         NodeSet commonVariables = new NodeSet(X, Y);
         Singleton singletonWithCommonVars = new Singleton(commonVariables);
-        RuleInfo ri1 = new RuleInfo(1, 2, new Substitutions(), new FlagNodeSet());
-        RuleInfo ri2 = new RuleInfo(2, 1, new Substitutions(), new FlagNodeSet());
+        RuleInfo ri1 = new RuleInfo("", 0, 1, 2, new Substitutions(), new FlagNodeSet());
+        RuleInfo ri2 = new RuleInfo("", 0, 2, 1, new Substitutions(), new FlagNodeSet());
         singletonWithCommonVars.insertIntoMap(ri1, 1);
         singletonWithCommonVars.insertIntoMap(ri2, 2);
         RuleInfoSet allRuleInfos = singletonWithCommonVars.getAllRuleInfos();

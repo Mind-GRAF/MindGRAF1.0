@@ -62,31 +62,29 @@ public class BridgeRule extends RuleNode {
         this.ruleInfoHandler = Ptree.constructPtree(antecedents, antecedents.size(), Integer.MAX_VALUE, 2);
     }
 
-    public boolean mayTryToInfer() {
-        if(cAnt < this.ruleInfoHandler.getConstantAntecedents().getPcount())
-            return false;
-        for(PtreeNode root : ((Ptree)ruleInfoHandler).getRoots()) {
-            if(root.getSIndex().getAllRuleInfos().isEmpty()) {  // maybe should also check pcount of roots?
-                return false;
-            }
-        }
-        return true;
-    }
+//    public boolean mayTryToInfer() {
+//        if(cAnt < this.ruleInfoHandler.getConstantAntecedents().getPcount())
+//            return false;
+//        for(PtreeNode root : ((Ptree)ruleInfoHandler).getRoots()) {
+//            if(root.getSIndex().getAllRuleInfos().isEmpty()) {  // maybe should also check pcount of roots?
+//                return false;
+//            }
+//        }
+//        return true;
+//    }
 
     public RuleInfoSet[] mayInfer() {
         RuleInfoSet[] inferrable = {new RuleInfoSet()};  // at index 0 the set of positively inferred, at index 1 the set of negatively inferred
-        if(mayTryToInfer()) {
-//            for (RuleInfo ri : ruleInfoHandler.getInferrableRuleInfos()) {
-            for(RuleInfo ri : this.getRootRuleInfos()){
-                if (ri.getPcount() == antToAttitude.size())
-                    inferrable[0].addRuleInfo(ri);
-            }
+        for(RuleInfo ri : this.getRootRuleInfos()){
+            if (ri.getPcount() == antToAttitude.size())
+                inferrable[0].addRuleInfo(ri);
         }
         return inferrable;
     }
 
     public void applyRuleHandler(Report report) {
         if(report.anySupportSupportedInAttitude(antToAttitude.get(report.getReporterNode()))) {
+            report.setAttitude(-1);
             super.applyRuleHandler(report);
         }
     }

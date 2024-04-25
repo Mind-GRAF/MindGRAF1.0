@@ -60,7 +60,7 @@ class SIndexTest {
         Substitutions subs1 = new Substitutions();
         subs1.add(X, null);
         subs1.add(Y, null);
-        RuleInfo ri = new RuleInfo(1, 2, subs1, new FlagNodeSet());
+        RuleInfo ri = new RuleInfo("", 0, 1, 2, subs1, new FlagNodeSet());
         linear.setMin(5);
         RuleInfoSet inserted = linear.insertVariableRI(ri);
         assertNull(inserted);
@@ -72,7 +72,7 @@ class SIndexTest {
 
     @Test
     void testInsertIntoMapSingleton() {
-        RuleInfo ri = new RuleInfo();
+        RuleInfo ri = new RuleInfo("", 0 );
         int hash = 1;
         Singleton singleton = new Singleton();
         singleton.insertIntoMap(ri, hash);
@@ -88,8 +88,8 @@ class SIndexTest {
 
     @Test
     void insertIntoMapLinear() {
-        RuleInfo ruleInfo1 = new RuleInfo(1, 2, new Substitutions(), new FlagNodeSet());
-        RuleInfo ruleInfo2 = new RuleInfo(2, 1, new Substitutions(), new FlagNodeSet());
+        RuleInfo ruleInfo1 = new RuleInfo("", 0, 1, 2, new Substitutions(), new FlagNodeSet());
+        RuleInfo ruleInfo2 = new RuleInfo("", 0, 2, 1, new Substitutions(), new FlagNodeSet());
         linear.insertIntoMap(ruleInfo1, 0);
         assertNotNull(((Linear)linear).getRuleInfoMap().get(0));
         RuleInfoSet afterInsertion = linear.insertIntoMap(ruleInfo2, 0);

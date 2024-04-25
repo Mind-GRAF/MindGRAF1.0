@@ -47,13 +47,14 @@ class BridgeRuleTest {
         Substitutions subs1 = new Substitutions();
         subs1.add(X, paris);
         Report bReport = new Report(subs1, new PropositionNodeSet(), 1, true, InferenceType.BACKWARD, P0, M0);
+        bReport.setContextName("");
         ((RuleNode)P0).applyRuleHandler(bReport);
 
         Substitutions subs2 = new Substitutions();
         subs2.add(X, paris);
         Report cReport = new Report(subs2, new PropositionNodeSet(), 2, true, InferenceType.BACKWARD, P0, M1);
+        cReport.setContextName("");
         ((RuleNode)P0).applyRuleHandler(cReport);
-
         assertEquals(1, Scheduler.getHighQueue().size());
 
     }

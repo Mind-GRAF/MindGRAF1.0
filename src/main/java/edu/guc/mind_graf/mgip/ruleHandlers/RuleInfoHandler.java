@@ -6,21 +6,25 @@ import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
 
+import java.util.HashMap;
+
 public abstract class RuleInfoHandler {
 
-    private RuleInfo constantRI;
+    private HashMap<String, RuleInfo> constantRIMap;
 
     public RuleInfoHandler() {
-        constantRI = new RuleInfo();
+        constantRIMap = new HashMap<>();
     }
 
-    public RuleInfo getConstantAntecedents() {
-        return constantRI;
+    public RuleInfo getConstantAntecedents(String context, int attitude) {
+        return constantRIMap.get(context + attitude);
     }
 
     public RuleInfoSet insertRI(RuleInfo ri) throws InvalidRuleInfoException {
-        if (ri.getSubs() == null || ri.getSubs().size() == 0) {
-            constantRI = constantRI.combine(ri);
+        if (ri.getSubs() == null || ri.getSubs().isEmpty()) {
+            String cHash = ri.getContext() + ri.getAttitude();
+            RuleInfo constantRI = constantRIMap.getOrDefault( cHash, new RuleInfo(ri.getContext(), ri.getAttitude())).combine(ri);
+            constantRIMap.put(cHash, constantRI);
             return new RuleInfoSet(constantRI); // editable depending on all possible cases
         }
         else
@@ -39,15 +43,5 @@ public abstract class RuleInfoHandler {
     public abstract RuleInfoSet insertVariableRI(RuleInfo ri) throws InvalidRuleInfoException;
 
     public abstract RuleInfoSet getAllRuleInfos();
-
-//    public RuleInfoSet getInferrableRuleInfos() {
-//        RuleInfoSet result = new RuleInfoSet();
-//        for (RuleInfo r : getAllRuleInfos()) {
-//            result.addRuleInfo(r.combine(this.getConstantAntecedents()));
-//        }
-//        if(result.isEmpty())
-//            result.addRuleInfo(this.getConstantAntecedents());
-//        return result;
-//    }
 
 }

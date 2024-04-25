@@ -20,7 +20,7 @@ public class Singleton extends SIndex {
 
     @Override
     public RuleInfoSet insertIntoMap(RuleInfo ri, int hash) {
-        RuleInfo combined = ri.combine(ruleInfoMap.getOrDefault(hash, new RuleInfo()));
+        RuleInfo combined = ri.combine(ruleInfoMap.getOrDefault(hash, new RuleInfo(ri.getContext(), ri.getAttitude())));
         if(combined == null)
             return null;
         ruleInfoMap.put(hash, combined);

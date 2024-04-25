@@ -44,7 +44,7 @@ class AndOrTest {
         Substitutions subs = new Substitutions();
         subs.add(A, Network.createNode("Nemo", "propositionnode"));
         FlagNodeSet flags = new FlagNodeSet(new FlagNode(M0, true, new PropositionNodeSet()));
-        RuleInfoSet inserted = ((RuleNode)P0).getRuleInfoHandler().insertRI(new RuleInfo(1, 0, subs, flags));
+        RuleInfoSet inserted = ((RuleNode)P0).getRuleInfoHandler().insertRI(new RuleInfo("", 0, 1, 0, subs, flags));
         ((RuleNode)P0).setRootRuleInfos(inserted);
 
         RuleInfoSet[] inferrable = ((RuleNode)P0).mayInfer();

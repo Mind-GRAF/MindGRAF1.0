@@ -47,7 +47,7 @@ class NumEntailmentTest {
                 new DownCable(Network.getRelations().get("cq"), new NodeSet(M2))));
 
         FlagNodeSet flags = new FlagNodeSet(new FlagNode(M0, true, new PropositionNodeSet()));
-        RuleInfoSet inserted = ((RuleNode)P0).getRuleInfoHandler().insertRI(new RuleInfo(1, 0, new Substitutions(), flags));
+        RuleInfoSet inserted = ((RuleNode)P0).getRuleInfoHandler().insertRI(new RuleInfo("", 0, 1, 0, new Substitutions(), flags));
         ((RuleNode)P0).setRootRuleInfos(inserted);
 
         RuleInfoSet[] inferrable = ((RuleNode)P0).mayInfer();

@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.mgip.reports.Report;
 import edu.guc.mind_graf.nodes.FlagNode;
 import edu.guc.mind_graf.nodes.Node;
@@ -13,6 +14,8 @@ import edu.guc.mind_graf.set.NodeSet;
 
 public class RuleInfo {
 
+    private String context;
+    private int attitude;
     private int pcount;
     private int ncount;
     private Substitutions subs;
@@ -20,14 +23,18 @@ public class RuleInfo {
     // dont have inference type since it should always be backward, will revise this
     // if needed
 
-    public RuleInfo() {
+    public RuleInfo(String context, int attitude) {
+        this.context = context;
+        this.attitude = attitude;
         pcount = 0;
         ncount = 0;
         subs = new Substitutions();
         fns = new FlagNodeSet();
     }
 
-    public RuleInfo(int pcount, int ncount, Substitutions subs, FlagNodeSet fns) {
+    public RuleInfo(String context, int attitude, int pcount, int ncount, Substitutions subs, FlagNodeSet fns) {
+        this.context = context;
+        this.attitude = attitude;
         this.pcount = pcount;
         this.ncount = ncount;
         this.subs = subs;
@@ -42,7 +49,7 @@ public class RuleInfo {
         else
             ncount++;
         FlagNode reporter = new FlagNode(report.getReporterNode(), report.isSign(), report.getSupport());
-        return new RuleInfo(pcount, ncount, report.getSubstitutions(), new FlagNodeSet(reporter));
+        return new RuleInfo(report.getContextName(), report.getAttitude(), pcount, ncount, report.getSubstitutions(), new FlagNodeSet(reporter));
     }
 
     public FlagNodeSet getFns() {
@@ -86,6 +93,8 @@ public class RuleInfo {
     }
 
     public boolean isCompatible(RuleInfo r) {
+        if(!this.context.equals(r.context) || this.attitude != r.attitude)
+            return false;
         for (Map.Entry<Node, Node> entry : this.subs.getMap().entrySet()) {
             Node var = entry.getKey();
             Node value = entry.getValue();
@@ -100,9 +109,9 @@ public class RuleInfo {
     // substitution I'm assuming it's the same sign; otherwise, BR would've handled
     // it)
     public RuleInfo combine(RuleInfo r) {
-        RuleInfo res = new RuleInfo();
         if (!isCompatible(r))
             return null;
+        RuleInfo res = new RuleInfo(r.getContext(), r.getAttitude());
         int resPcount = this.pcount + r.getPcount();
         int resNcount = this.ncount + r.getNcount();
         // if disjoint loop wouldn't start so checking if disjoint's useless
@@ -136,10 +145,10 @@ public class RuleInfo {
             return false;
         }
         RuleInfo ri = (RuleInfo) obj;
-        return this.pcount == ri.getPcount() &&
-           this.ncount == ri.getNcount() &&
-           this.subs.equals(ri.getSubs())
-           && this.fns.equals(ri.getFns());
+        return this.context.equals(ri.context) && this.attitude == ri.attitude && this.pcount == ri.pcount &&
+           this.ncount == ri.ncount &&
+           this.subs.equals(ri.subs)
+           && this.fns.equals(ri.fns);
     }
 
 //    public RuleInfo combineAdd(RuleInfo ri) {
@@ -152,7 +161,9 @@ public class RuleInfo {
     @Override
     public String toString() {
         return "RuleInfo{" +
-                "pcount=" + pcount +
+                "context=" + context +
+                ", attitude=" + attitude +
+                ", pcount=" + pcount +
                 ", ncount=" + ncount +
                 ", subs=" + subs +
                 ", fns=" + fns +
@@ -171,7 +182,7 @@ public class RuleInfo {
     }
 
     public RuleInfo clone(){
-        RuleInfo ri = new RuleInfo();
+        RuleInfo ri = new RuleInfo(this.context, this.attitude);
         ri.setPcount(this.pcount);
         ri.setNcount(this.ncount);
         ri.setSubs(this.subs.clone());
@@ -179,4 +190,19 @@ public class RuleInfo {
         return ri;
     }
 
+    public String getContext() {
+        return context;
+    }
+
+    public void setContext(String context) {
+        this.context = context;
+    }
+
+    public int getAttitude() {
+        return attitude;
+    }
+
+    public void setAttitude(int attitude) {
+        this.attitude = attitude;
+    }
 }

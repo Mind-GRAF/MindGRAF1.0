@@ -80,30 +80,35 @@ class RuleNodeTest {
         Node henry = Network.createNode("henry", "individualnode");
         govSubs.add(G, henry);
         Report report0 = new Report(govSubs, new PropositionNodeSet(), 0, true, InferenceType.BACKWARD, P0, M0);
+        report0.setContextName("");
         ((RuleNode)P0).applyRuleHandler(report0);
 
         Substitutions civSubs = new Substitutions();
         Node anne = Network.createNode("anne", "individualnode");
         civSubs.add(C, anne);
         Report report1 = new Report(civSubs, new PropositionNodeSet(), 0, true, InferenceType.BACKWARD, P0, M1);
+        report1.setContextName("");
         ((RuleNode)P0).applyRuleHandler(report1);
 
         Substitutions coSubs = new Substitutions();
         Node england = Network.createNode("england", "individualnode");
         coSubs.add(Co, england);
         Report report2 = new Report(coSubs, new PropositionNodeSet(), 0, true, InferenceType.BACKWARD, P0, M2);
+        report2.setContextName("");
         ((RuleNode)P0).applyRuleHandler(report2);
 
         Substitutions rSubs = new Substitutions();
         rSubs.add(Co, england);
         rSubs.add(G, henry);
         Report report3 = new Report(rSubs, new PropositionNodeSet(), 0, true, InferenceType.BACKWARD, P0, M3);
+        report3.setContextName("");
         ((RuleNode)P0).applyRuleHandler(report3);
 
         Substitutions lSubs = new Substitutions();
         lSubs.add(Co, england);
         lSubs.add(C, anne);
         Report report4 = new Report(lSubs, new PropositionNodeSet(), 0, true, InferenceType.BACKWARD, P0, M4);
+        report4.setContextName("");
         ((RuleNode)P0).applyRuleHandler(report4);
 
         assertEquals(1, Scheduler.getHighQueue().size());
@@ -158,7 +163,9 @@ class RuleNodeTest {
         Node P0 = Network.createNode("numentailment", new DownCableSet(new DownCable(Network.getRelations().get("i"), new NodeSet(one)),
                 new DownCable(Network.getRelations().get("&ant"), new NodeSet(M0, M1)),
                 new DownCable(Network.getRelations().get("cq"), new NodeSet(M2))));
-        ((RuleNode)P0).applyRuleHandler(new Report(new Substitutions(), new PropositionNodeSet(), 0, true, InferenceType.BACKWARD, P0, M0));
+        Report testReport = new Report(new Substitutions(), new PropositionNodeSet(), 0, true, InferenceType.BACKWARD, P0, M0);
+        testReport.setContextName("");
+        ((RuleNode)P0).applyRuleHandler(testReport);
         assertEquals(1, Scheduler.getHighQueue().size());
     }
 
@@ -184,7 +191,9 @@ class RuleNodeTest {
 
         Substitutions subs = new Substitutions();
         subs.add(A, Network.createNode("Nemo", "propositionnode"));
-        ((RuleNode)P0).applyRuleHandler(new Report(subs, new PropositionNodeSet(), 0, true, InferenceType.BACKWARD, P0, M0));
+        Report testReport = new Report(subs, new PropositionNodeSet(), 0, true, InferenceType.BACKWARD, P0, M0);
+        testReport.setContextName("");
+        ((RuleNode)P0).applyRuleHandler(testReport);
         assertEquals(2, Scheduler.getHighQueue().size());
     }
 
@@ -213,7 +222,9 @@ class RuleNodeTest {
 
         Substitutions subs = new Substitutions();
         subs.add(X, Network.createNode("Patroclus", "individualnode"));
-        ((RuleNode)P0).applyRuleHandler(new Report(subs, new PropositionNodeSet(), 0, true, InferenceType.BACKWARD, P0, M0));
+        Report testReport = new Report(subs, new PropositionNodeSet(), 0, true, InferenceType.BACKWARD, P0, M0);
+        testReport.setContextName("");
+        ((RuleNode)P0).applyRuleHandler(testReport);
         assertEquals(2, Scheduler.getHighQueue().size());
     }
 }

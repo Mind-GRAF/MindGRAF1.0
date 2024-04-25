@@ -13,7 +13,7 @@ class OrentailhandlerTest {
     void insertRI_shouldReturnNullWhenPcountIsZero() {
         // Arrange
         Orentailhandler handler = new Orentailhandler();
-        RuleInfo ri = new RuleInfo(0, 0, null, null);
+        RuleInfo ri = new RuleInfo("", 0, 0, 0, null, null);
 
         // Act
         RuleInfoSet result = handler.insertRI(ri);
@@ -26,7 +26,7 @@ class OrentailhandlerTest {
     void insertRI_shouldReturnRuleInfoSetWhenPcountIsGreaterThanZero() {
         // Arrange
         Orentailhandler handler = new Orentailhandler();
-        RuleInfo ri = new RuleInfo(1, 0, null, null);
+        RuleInfo ri = new RuleInfo("", 0, 1, 0, null, null);
 
         // Act
         RuleInfoSet result = handler.insertRI(ri);
@@ -41,7 +41,7 @@ class OrentailhandlerTest {
     void getUsedToInfer_shouldReturnCorrectRuleInfo() {
         // Arrange
         Orentailhandler handler = new Orentailhandler();
-        RuleInfo expected = new RuleInfo(1, 0, null, null);
+        RuleInfo expected = new RuleInfo("", 0, 1, 0, null, null);
 
         // Act
         handler.insertRI(expected);
@@ -55,7 +55,7 @@ class OrentailhandlerTest {
     void setUsedToInfer_shouldSetCorrectRuleInfo() {
         // Arrange
         Orentailhandler handler = new Orentailhandler();
-        RuleInfo expected = new RuleInfo(1, 0, null, null);
+        RuleInfo expected = new RuleInfo("", 0, 1, 0, null, null);
 
         // Act
         handler.setUsedToInfer(expected);
