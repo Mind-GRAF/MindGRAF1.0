@@ -12,18 +12,21 @@ public class ContextController {
     private static ContextSet contextSet;
     private static Set<String,Integer> attitudes = new Set<>();
     private static Network network;
+    //TODO: wael remove network
     private static boolean uvbrEnabled;
     
+    private static boolean handleContradictionsManually;
     
     
     private static ArrayList<ArrayList<Integer>> consistentAttitudes;
     
-    public static void setUp(Set<String,Integer> attitudeNames, ArrayList<ArrayList<Integer>> consistentAttitudes, boolean uvbrEnabled){
+    public static void setUp(Set<String,Integer> attitudeNames, ArrayList<ArrayList<Integer>> consistentAttitudes, boolean uvbrEnabled, boolean handleContradictionsManually){
         network = new Network();
         ContextController.attitudes = attitudeNames;
         ContextController.uvbrEnabled = uvbrEnabled;
         ContextController.consistentAttitudes = consistentAttitudes;
         contextSet = new ContextSet();
+        ContextController.handleContradictionsManually = handleContradictionsManually;
         
     }
     public static void setCurrContext(String currContext) {
@@ -81,5 +84,9 @@ public class ContextController {
         PropositionNode n = (PropositionNode) Network.getNodeById(nodeId);
         Context.removeHypothesisFromContext(c,attitudeNumber, n);
     }
-
+    
+    public static boolean isHandleContradictionsManually() {
+        //TODO: wael rename this variable
+        return handleContradictionsManually;
+    }
 }

@@ -14,15 +14,31 @@ public class Revision {
 		}
 		
 		ArrayList<ArrayList<Integer>> filteredConsistentAttitudes = filterAttitudes(ContextController.getConsistentAttitudes(),attitudeNumberOfAddedNode);
-		
+		ArrayList<Integer> contradictingNodeAttitudes = new ArrayList<>();
+		//TODO: wael add a set for already checked attitudes to increase performance
 		for(ArrayList<Integer> entry : filteredConsistentAttitudes){
 			for(int attitudeNumber : entry){
 //				if(isSupported(c, attitudeNumber, nodeCompliment){
-//					TODO: wael group contradiction together
+				contradictingNodeAttitudes.add(attitudeNumber);
 //				}
 			}
 		}
+		if(!contradictingNodeAttitudes.isEmpty()){
+			if(ContextController.isHandleContradictionsManually()){
+				handleContradictionsManually();
+			}else{
+				handleContradictionsAutomatically();
+			}
+		}
 
+	}
+	
+	public static void  handleContradictionsManually(){
+		   //TODO: wael
+	}
+	
+	public static void  handleContradictionsAutomatically(){
+	
 	}
 	
 	private static ArrayList<ArrayList<Integer>> filterAttitudes(ArrayList<ArrayList<Integer>> consistentAttitudes, int attitudeNumber) {
