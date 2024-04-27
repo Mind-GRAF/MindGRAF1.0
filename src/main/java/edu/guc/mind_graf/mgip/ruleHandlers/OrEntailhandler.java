@@ -3,7 +3,7 @@ package edu.guc.mind_graf.mgip.ruleHandlers;
 import edu.guc.mind_graf.exceptions.InvalidRuleInfoException;
 import edu.guc.mind_graf.set.RuleInfoSet;
 
-public class Orentailhandler extends RuleInfoHandler{
+public class OrEntailhandler extends RuleInfoHandler{
 
     RuleInfo usedToInfer;
     @Override

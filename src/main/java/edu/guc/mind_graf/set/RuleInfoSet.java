@@ -12,18 +12,10 @@ public class RuleInfoSet implements Iterable<RuleInfo>{
     
     private HashSet<RuleInfo> ris;
 
-    public RuleInfoSet() {
-        ris = new HashSet<>();
-    }
-
     public RuleInfoSet(RuleInfo... ruleInfos) {
         this.ris = new HashSet<>();
         for (RuleInfo r : ruleInfos)
             this.ris.add(r);
-    }
-
-    public HashSet<RuleInfo> getRIS() {
-        return ris;
     }
 
     public void addRuleInfo(RuleInfo ri) {
@@ -40,7 +32,7 @@ public class RuleInfoSet implements Iterable<RuleInfo>{
                 result.add(r);
         }
         this.ris = result;
-    }
+    } // for every ruleinfo in the set, combine it with the given ruleinfo and add the result to the set
 
     public RuleInfoSet combineAdd(RuleInfo ri) {
         RuleInfoSet newInfo = new RuleInfoSet();
@@ -86,34 +78,12 @@ public class RuleInfoSet implements Iterable<RuleInfo>{
         return newInfo;    // return set of rule infos that are a result of combining or have never been combined
     }
 
-    public RuleInfoSet union(RuleInfoSet ris) {
+    public RuleInfoSet union(RuleInfoSet combineWith) {
         RuleInfoSet result = new RuleInfoSet();
         result.ris.addAll(this.ris);
-        if(ris != null)
-            result.ris.addAll(ris.getRIS());
+        if(combineWith != null)
+            result.ris.addAll(combineWith.getRIS());
         return result;
-    }
-
-    public void clear() {
-        ris.clear();
-    }
-
-    public int size() {
-        return ris.size();
-    }
-
-    @Override
-    public Iterator<RuleInfo> iterator() {
-        return ris.iterator();
-    }
-
-    @Override
-    public String toString() {
-        String res = "";
-        for(RuleInfo ri : ris) {
-            res += ri.toString() + " ";
-        }
-        return res;
     }
 
     public RuleInfoSet combineDisjointSets(RuleInfoSet combineWith){
@@ -130,10 +100,6 @@ public class RuleInfoSet implements Iterable<RuleInfo>{
         ris.remove(toRemove);
     }
 
-    public boolean isEmpty(){
-        return ris.isEmpty();
-    }
-
     public void addRootRuleInfo(RuleInfoSet inserted) {
         for(RuleInfo rInserted : inserted){
             for(RuleInfo rRoot : ris){
@@ -147,5 +113,34 @@ public class RuleInfoSet implements Iterable<RuleInfo>{
 
     public boolean contains(RuleInfo ri) {
         return ris.contains(ri);
+    }
+    @Override
+    public Iterator<RuleInfo> iterator() {
+        return ris.iterator();
+    }
+
+    @Override
+    public String toString() {
+        String res = "";
+        for(RuleInfo ri : ris) {
+            res += ri.toString() + " ";
+        }
+        return res;
+    }
+
+    public void clear() {
+        ris.clear();
+    }
+
+    public int size() {
+        return ris.size();
+    }
+
+    public HashSet<RuleInfo> getRIS() {
+        return ris;
+    }
+
+    public boolean isEmpty(){
+        return ris.isEmpty();
     }
 }

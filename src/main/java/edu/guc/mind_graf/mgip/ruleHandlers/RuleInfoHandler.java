@@ -12,6 +12,8 @@ public abstract class RuleInfoHandler {
 
     private HashMap<String, RuleInfo> constantRIMap;
 
+    private int cMin;
+
     public RuleInfoHandler() {
         constantRIMap = new HashMap<>();
     }
@@ -25,7 +27,10 @@ public abstract class RuleInfoHandler {
             String cHash = ri.getContext() + ri.getAttitude();
             RuleInfo constantRI = constantRIMap.getOrDefault( cHash, new RuleInfo(ri.getContext(), ri.getAttitude())).combine(ri);
             constantRIMap.put(cHash, constantRI);
-            return new RuleInfoSet(constantRI); // editable depending on all possible cases
+            RuleInfoSet result = new RuleInfoSet();
+            if(constantRI.getPcount() >= cMin)
+                result.addRuleInfo(constantRI);
+            return result;
         }
         else
             return insertVariableRI(ri);
@@ -43,5 +48,9 @@ public abstract class RuleInfoHandler {
     public abstract RuleInfoSet insertVariableRI(RuleInfo ri) throws InvalidRuleInfoException;
 
     public abstract RuleInfoSet getAllRuleInfos();
+
+    public void setcMin(int cMin) {
+        this.cMin = cMin;
+    }
 
 }

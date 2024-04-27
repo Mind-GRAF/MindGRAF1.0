@@ -1,16 +1,13 @@
 package edu.guc.mind_graf.mgip.ruleHandlers;
 
 import java.util.Map;
-import java.util.Objects;
 
 import edu.guc.mind_graf.components.Substitutions;
-import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.mgip.reports.Report;
 import edu.guc.mind_graf.nodes.FlagNode;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.set.FlagNodeSet;
 import edu.guc.mind_graf.set.FreeVariableSet;
-import edu.guc.mind_graf.set.NodeSet;
 
 public class RuleInfo {
 
@@ -50,6 +47,63 @@ public class RuleInfo {
             ncount++;
         FlagNode reporter = new FlagNode(report.getReporterNode(), report.isSign(), report.getSupport());
         return new RuleInfo(report.getContextName(), report.getAttitude(), pcount, ncount, report.getSubstitutions(), new FlagNodeSet(reporter));
+    }
+
+    public boolean isCompatible(RuleInfo r) {
+        if(!this.context.equals(r.context) || this.attitude != r.attitude)
+            return false;
+        for (Map.Entry<Node, Node> entry : this.subs.getMap().entrySet()) {
+            Node var = entry.getKey();
+            Node value = entry.getValue();
+            if (r.getSubs().contains(var) && !r.getSubs().get(var).equals(value)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // not handling the case of different signs (if i got reports of the same
+    // substitution I'm assuming it's the same sign; otherwise, BR would've handled
+    // it)
+
+    public RuleInfo combine(RuleInfo r) {
+        if (!isCompatible(r))
+            return null;
+        RuleInfo res = new RuleInfo(r.getContext(), r.getAttitude());
+        int resPcount = this.pcount + r.getPcount();
+        int resNcount = this.ncount + r.getNcount();
+        // if disjoint loop wouldn't start so checking if disjoint's useless
+        FlagNodeSet intersection = this.fns.intersection(r.getFns());
+        // if a node exists in both then it was counted twice, we want to count it once
+        for (FlagNode fn : intersection.getFlagNodes()) {
+            if (fn.isFlag())
+                resPcount--;
+            else
+                resNcount--;
+        }
+
+        Substitutions resSubs = new Substitutions();
+        resSubs.addSubs(this.subs);
+        resSubs.addSubs(r.getSubs()); // counting on that if the subs are not compatible, the method will not be
+        // called and that adding overwrites repeated nodes ==> a variable wouldn't
+        // exist twice in two different nodes
+        FlagNodeSet resFns = this.fns.combine(r.getFns());
+        res.pcount = resPcount;
+        res.ncount = resNcount;
+        res.subs = resSubs;
+        res.fns = resFns;
+        return res;
+    }
+
+    public RuleInfo addNullSubs(FreeVariableSet ns){
+        RuleInfo ruleInfoWithNulls = clone();
+        for(Node n : ns.getFreeVariables()){
+            if(!ruleInfoWithNulls.getSubs().contains(n)){
+                ruleInfoWithNulls.getSubs().add(n, null);
+            }
+        }
+        return ruleInfoWithNulls;
+
     }
 
     public FlagNodeSet getFns() {
@@ -92,51 +146,6 @@ public class RuleInfo {
         this.subs = subs;
     }
 
-    public boolean isCompatible(RuleInfo r) {
-        if(!this.context.equals(r.context) || this.attitude != r.attitude)
-            return false;
-        for (Map.Entry<Node, Node> entry : this.subs.getMap().entrySet()) {
-            Node var = entry.getKey();
-            Node value = entry.getValue();
-            if (r.getSubs().contains(var) && !r.getSubs().get(var).equals(value)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    // not handling the case of different signs (if i got reports of the same
-    // substitution I'm assuming it's the same sign; otherwise, BR would've handled
-    // it)
-    public RuleInfo combine(RuleInfo r) {
-        if (!isCompatible(r))
-            return null;
-        RuleInfo res = new RuleInfo(r.getContext(), r.getAttitude());
-        int resPcount = this.pcount + r.getPcount();
-        int resNcount = this.ncount + r.getNcount();
-        // if disjoint loop wouldn't start so checking if disjoint's useless
-        FlagNodeSet intersection = this.fns.intersection(r.getFns());
-        // if a node exists in both then it was counted twice, we want to count it once
-        for (FlagNode fn : intersection.getFlagNodes()) {
-            if (fn.isFlag())
-                resPcount--;
-            else
-                resNcount--;
-        }
-
-        Substitutions resSubs = new Substitutions();
-        resSubs.addSubs(this.subs);
-        resSubs.addSubs(r.getSubs()); // counting on that if the subs are not compatible, the method will not be
-                                      // called and that adding overwrites repeated nodes ==> a variable wouldn't
-                                      // exist twice in two different nodes
-        FlagNodeSet resFns = this.fns.combine(r.getFns());
-        res.pcount = resPcount;
-        res.ncount = resNcount;
-        res.subs = resSubs;
-        res.fns = resFns;
-        return res;
-    }
-
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
@@ -168,17 +177,6 @@ public class RuleInfo {
                 ", subs=" + subs +
                 ", fns=" + fns +
                 '}';
-    }
-
-    public RuleInfo addNullSubs(FreeVariableSet ns){
-        RuleInfo ruleInfoWithNulls = clone();
-        for(Node n : ns.getFreeVariables()){
-            if(!ruleInfoWithNulls.getSubs().contains(n)){
-                ruleInfoWithNulls.getSubs().add(n, null);
-            }
-        }
-        return ruleInfoWithNulls;
-
     }
 
     public RuleInfo clone(){
