@@ -142,9 +142,4 @@ class PtreeTest {
         assertEquals(9, testing.arrayOfNodes().size());
     }
 
-    @Test
-    void getAllRuleInfos() {
-        assertNotNull(testing.getAllRuleInfos());
-        assertEquals(0, testing.getAllRuleInfos().size());
-    }
 }

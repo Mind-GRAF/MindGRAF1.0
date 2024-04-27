@@ -47,8 +47,6 @@ public abstract class RuleInfoHandler {
 
     public abstract RuleInfoSet insertVariableRI(RuleInfo ri) throws InvalidRuleInfoException;
 
-    public abstract RuleInfoSet getAllRuleInfos();
-
     public void setcMin(int cMin) {
         this.cMin = cMin;
     }

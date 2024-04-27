@@ -53,6 +53,8 @@ public abstract class SIndex extends RuleInfoHandler {
             return allRuleInfos;
     }
 
+    public abstract RuleInfoSet getAllRuleInfos();
+
     public abstract RuleInfoSet insertIntoMap(RuleInfo ri, int hash);
 
     public int getMin() {

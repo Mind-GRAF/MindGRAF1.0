@@ -11,11 +11,6 @@ public class OrEntailhandler extends RuleInfoHandler{
         return null;
     }
 
-    @Override
-    public RuleInfoSet getAllRuleInfos() {
-        return null;
-    }
-
     public RuleInfoSet insertRI(RuleInfo ri) {
         if(ri.getPcount() > 0) {
             usedToInfer = ri;
