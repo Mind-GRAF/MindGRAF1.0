@@ -1,9 +1,6 @@
 package edu.guc.mind_graf.nodes;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.Map.Entry;
 
 import edu.guc.mind_graf.network.Network;
@@ -20,13 +17,14 @@ import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 
 public abstract class Node {
 
-	private int id;
+	private final int id;
 	protected String name;
 	private UpCableSet upCableSet;
 	private final Syntactic syntacticType;
 	private DownCableSet downCableSet;
 	private NodeSet freeVariableSet;
 	private static int count = 0;
+	private int freeVariablesHash;
 
 	public Node(String name, Boolean isVariable) { // constructor for base and
 													// variable nodes
@@ -122,6 +120,10 @@ public abstract class Node {
 
 		setFreeVariableSet(freeVariables);
 		return freeVariables;
+	}
+
+	public int getFreeVariablesHash() {
+		return freeVariablesHash;
 	}
 
 	private void findFreeVariables(NodeSet freeVariables, HashSet<String> invalidPairs, LinkedList<Node> pathTrace) {
@@ -360,22 +362,16 @@ public abstract class Node {
 	}
 
 	public boolean isMolecular() {
-		if (this.syntacticType == Syntactic.MOLECULAR)
-			return true;
-		return false;
-	}
+        return this.syntacticType == Syntactic.MOLECULAR;
+    }
 
 	public boolean isBase() {
-		if (this.syntacticType == Syntactic.BASE)
-			return true;
-		return false;
-	}
+        return this.syntacticType == Syntactic.BASE;
+    }
 
 	public boolean isVariable() {
-		if (this.syntacticType == Syntactic.VARIABLE)
-			return true;
-		return false;
-	}
+        return this.syntacticType == Syntactic.VARIABLE;
+    }
 
 	public static int getCount() {
 		return count;
@@ -413,8 +409,26 @@ public abstract class Node {
 		return freeVariableSet;
 	}
 
+	public int customHash() {  // custom hash function to hash using the free variables
+		int hash = 0;
+		int factor = 1;
+		int[] sorted = new int[freeVariableSet.size()];
+		int i = 0;
+		for(Node var : freeVariableSet) {
+			sorted[i++] = var.getId();
+		}
+		Arrays.sort(sorted);
+		for(int id : sorted) {
+			hash += id*factor;
+			factor *= 100;
+		}
+		//assuming ids wont be over 100
+		return hash;
+	}
+
 	public void setFreeVariableSet(NodeSet freeVariableSet) {
 		this.freeVariableSet = freeVariableSet;
+		this.freeVariablesHash = customHash();
 	}
 
 	public boolean equals(Node n) {

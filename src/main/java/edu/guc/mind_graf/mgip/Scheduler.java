@@ -107,7 +107,7 @@ public class Scheduler {
     /***
      * Method to add a request to low queue
      * 
-     * @param request
+     * @param newRequest // changed from request cz it was causing error (not sure this is right)
      */
     public static void addToLowQueue(Request newRequest) {
         lowQueue.add(newRequest);

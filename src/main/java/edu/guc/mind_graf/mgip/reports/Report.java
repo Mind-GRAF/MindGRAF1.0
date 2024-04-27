@@ -15,15 +15,17 @@ public class Report {
     private int attitude;
     private String contextName;
     private ReportType reportType;
+    private Node reporterNode;
 
     public Report(Substitutions substitution, PropositionNodeSet suppt, int attitudeid,
-            boolean sign, InferenceType inference, Node requesterNode) {
+                  boolean sign, InferenceType inference, Node requesterNode, Node reporterNode) {
         this.substitutions = substitution;
         this.attitude = attitudeid;
         this.support = suppt;
         this.requesterNode = requesterNode;
         this.sign = sign;
         this.inferenceType = inference;
+        this.reporterNode = reporterNode;
     }
 
     public String stringifyReport() {
@@ -41,8 +43,8 @@ public class Report {
      * this method checks if the nodes that helped in creating the report are
      * supported in the attitude in the context belonging to the report
      * 
-     * @param reportContextName
-     * @param reportAttitudeID
+     * @param //reportContextName
+     * @param //reportAttitudeID
      */
     public boolean anySupportSupportedInAttitudeContext(String ChnlContextName, int ChnlAttitudeID) {
         // int[] supportIds = support.getProps();
@@ -140,4 +142,17 @@ public class Report {
         this.inferenceType = inferenceType;
     }
 
+
+    public Node getReporterNode() {
+        return reporterNode;
+    }
+
+    public void setReporterNode(Node reporterNode) {
+        this.reporterNode = reporterNode;
+    }
+
+    public boolean anySupportSupportedInAttitude(Integer integer) {
+        // TODO
+        return true;
+    }
 }

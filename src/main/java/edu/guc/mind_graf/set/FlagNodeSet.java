@@ -1,15 +1,22 @@
 package edu.guc.mind_graf.set;
 
 import java.util.HashSet;
+import java.util.Iterator;
 
 import edu.guc.mind_graf.nodes.FlagNode;
 
-public class FlagNodeSet{
+public class FlagNodeSet implements Iterable<FlagNode>{
 
     private HashSet<FlagNode> flagNodes;
 
     public FlagNodeSet() {
         flagNodes = new HashSet<FlagNode>();
+    }
+
+    public FlagNodeSet(FlagNode... fns) {
+        this.flagNodes = new HashSet<>();
+        for (FlagNode n : fns)
+            this.flagNodes.add(n);
     }
 
     public HashSet<FlagNode> getFlagNodes() {
@@ -59,6 +66,44 @@ public class FlagNodeSet{
         FlagNodeSet newFns = new FlagNodeSet();
         flagNodes.stream().filter(fn -> fns.contains(fn)).forEach(fn -> newFns.addFlagNode(fn));
         return newFns;
-    } // should retuen a flag node set of the common flag nodes between the two sets
+    } // should return a flag node set of the common flag nodes between the two sets
 
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof FlagNodeSet fns){
+            if(flagNodes.size() != fns.size())
+                return false;
+            for(FlagNode fn : flagNodes){
+                if(!fns.contains(fn))
+                    return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        String s = "FlagNodeSet{ ";
+        for(FlagNode fn : flagNodes){
+            s += fn + " ";
+        }
+        s += "}";
+        return s;
+    }
+
+    public FlagNodeSet clone() {
+        FlagNodeSet newFns = new FlagNodeSet();
+        newFns.addFlagNodes(this);
+        return newFns;
+    }
+
+    @Override
+    public Iterator<FlagNode> iterator() {
+        return flagNodes.iterator();
+    }
+
+    public boolean isEmpty() {
+        return flagNodes.isEmpty();
+    }
 }
