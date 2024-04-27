@@ -89,7 +89,7 @@ public class Ptree extends RuleInfoHandler {
             PtreeNode p1 = pSequence.pollFirst();
             PtreeNode p2 = pSequence.peekFirst();
             NodeSet intersection = p1.getVars().intersection(p2.getVars());
-            if(intersection.size() == 0){
+            if(intersection.isEmpty()){
                 pSequence.addLast(p1);
                 if(firstMismatched == p1){ // if the first mismatched node is reached again, then the tree is complete, every node left in the pSequence is a disjoint tree
                     break;
@@ -154,7 +154,7 @@ public class Ptree extends RuleInfoHandler {
 
             int hash = n.getFreeVariablesHash();
             RuleInfoSet mayInfer = varSetLeafMap.get(hash).insertIntoNode(ri, isPropagating);
-            if(mayInfer != null && mayInfer.size() > 0){
+            if(mayInfer != null && !mayInfer.isEmpty()){
                 return mayInfer;
             }
 
@@ -172,8 +172,7 @@ public class Ptree extends RuleInfoHandler {
 
     private RuleInfoSet startPropagation() throws InvalidRuleInfoException {
         HashSet <PtreeNode> visited = new HashSet<>();
-        ArrayDeque <PtreeNode> queue = new ArrayDeque<>();
-        queue.addAll(varSetLeafMap.values());
+        ArrayDeque <PtreeNode> queue = new ArrayDeque<>(varSetLeafMap.values());
         RuleInfoSet rootRuleInfos = new RuleInfoSet();
         while(!queue.isEmpty()){
             PtreeNode p = queue.pollFirst();
@@ -197,8 +196,7 @@ public class Ptree extends RuleInfoHandler {
 
     public String BFString(){
         StringBuilder sb = new StringBuilder();
-        ArrayDeque <PtreeNode> queue = new ArrayDeque<>();
-        queue.addAll(varSetLeafMap.values());
+        ArrayDeque <PtreeNode> queue = new ArrayDeque<>(varSetLeafMap.values());
         while(!queue.isEmpty()){
             PtreeNode p = queue.pollFirst();
             sb.append(p.toString());
@@ -221,10 +219,8 @@ public class Ptree extends RuleInfoHandler {
 
     public ArrayList<PtreeNode> arrayOfNodes(){  //for testing
         ArrayList<PtreeNode> arr = new ArrayList<>();
-        ArrayDeque <PtreeNode> queue = new ArrayDeque<>();
-        HashSet<PtreeNode> addedToQueue = new HashSet<>();
-        queue.addAll(varSetLeafMap.values());
-        addedToQueue.addAll(varSetLeafMap.values());
+        ArrayDeque <PtreeNode> queue = new ArrayDeque<>(varSetLeafMap.values());
+        HashSet<PtreeNode> addedToQueue = new HashSet<>(varSetLeafMap.values());
         while(!queue.isEmpty()){
             PtreeNode p = queue.pollFirst();
             arr.add(p);
@@ -238,10 +234,6 @@ public class Ptree extends RuleInfoHandler {
 
     public ArrayDeque<PtreeNode> getRoots() {
         return roots;
-    }
-
-    public void setRoots(ArrayDeque<PtreeNode> roots) {
-        this.roots = roots;
     }
 
     public RuleInfoSet getAllRuleInfos() {

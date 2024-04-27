@@ -10,8 +10,8 @@ public class PtreeNode {
 
     private PtreeNode parent; // important for upward traversal (propagation of RIs)
     private PtreeNode sibling; // important for combining RIs
-    private SIndex sIndex; // A linear or singleton SIndex based on the position of the PtreeNode in the tree.
-    private NodeSet vars; // free vars in propositions node represents
+    private final SIndex sIndex; // A linear or singleton SIndex based on the position of the PtreeNode in the tree.
+    private final NodeSet vars; // free vars in propositions node represents
     private FreeVariableSet siblingIntersection; // shared vars between sibling and this node  (parent.getCommonVariables)
 
     public PtreeNode(PtreeNode parent, PtreeNode sibling, SIndex sIndex,
@@ -47,20 +47,8 @@ public class PtreeNode {
         return sIndex;
     }
 
-    public void setSIndex(SIndex sIndex) {
-        this.sIndex = sIndex;
-    }
-
     public NodeSet getVars() {
         return vars;
-    }
-
-    public void setVars(NodeSet vars) {
-        this.vars = vars;
-    }
-
-    public FreeVariableSet getSiblingIntersection() {
-        return siblingIntersection;
     }
 
     public void setSiblingIntersection(FreeVariableSet siblingIntersection) {
@@ -70,13 +58,13 @@ public class PtreeNode {
     public RuleInfoSet insertIntoNode(RuleInfo ri, boolean isPropagating) throws InvalidRuleInfoException {
         RuleInfoSet newRuleInfoSet = sIndex.insertVariableRI(ri);
         RuleInfoSet result = new RuleInfoSet();
-        if(newRuleInfoSet == null || newRuleInfoSet.size() == 0)
+        if(newRuleInfoSet == null || newRuleInfoSet.isEmpty())
             return result;
         for(RuleInfo newRuleInfo : newRuleInfoSet){
             if(newRuleInfo.getPcount() >= sIndex.getMin() && isPropagating){
                 if(parent != null) {
                     RuleInfoSet combinedWithSibling = combineWithSibling(newRuleInfo);
-                    if(combinedWithSibling.size() > 0) {
+                    if(!combinedWithSibling.isEmpty()) {
                         result = result.union(parent.insertIntoNode(combinedWithSibling, true));
                     }
                     else {
