@@ -12,21 +12,21 @@ public class ContextController {
     private static ContextSet contextSet;
     private static Set<String,Integer> attitudes = new Set<>();
     private static Network network;
-    //TODO: wael remove network
     private static boolean uvbrEnabled;
-    
-    private static boolean handleContradictionsManually;
+    private static boolean automaticHandling;
+
     
     
     private static ArrayList<ArrayList<Integer>> consistentAttitudes;
     
-    public static void setUp(Set<String,Integer> attitudeNames, ArrayList<ArrayList<Integer>> consistentAttitudes, boolean uvbrEnabled, boolean handleContradictionsManually){
+    public static void setUp(Set<String,Integer> attitudeNames, ArrayList<ArrayList<Integer>> consistentAttitudes, boolean uvbrEnabled){
         network = new Network();
         ContextController.attitudes = attitudeNames;
         ContextController.uvbrEnabled = uvbrEnabled;
         ContextController.consistentAttitudes = consistentAttitudes;
+        ContextController.automaticHandling = false;
+        //TODO: wael update the setup method
         contextSet = new ContextSet();
-        ContextController.handleContradictionsManually = handleContradictionsManually;
         
     }
     public static void setCurrContext(String currContext) {
@@ -73,20 +73,20 @@ public class ContextController {
         return attitudes;
     }
 
+    public static boolean isAutomaticHandling() {
+        return automaticHandling;
+    }
+
     public static void addToContext(String contextName, int attitudeNumber, int nodeId) {
         Context c = ContextController.getContext(contextName);
         PropositionNode n = (PropositionNode) Network.getNodeById(nodeId);
-       Context.addHypothesisToContext(c,attitudeNumber, n);
+        Context.addHypothesisToContext(c,attitudeNumber, n);
     }
-    
+
     public static void removeFromContext(String contextName, int attitudeNumber, int nodeId) {
         Context c = ContextController.getContext(contextName);
         PropositionNode n = (PropositionNode) Network.getNodeById(nodeId);
         Context.removeHypothesisFromContext(c,attitudeNumber, n);
     }
-    
-    public static boolean isHandleContradictionsManually() {
-        //TODO: wael rename this variable
-        return handleContradictionsManually;
-    }
+
 }

@@ -24,11 +24,15 @@ class NetworkTest {
 		Set<String,Integer> attitudeNames = new Set<>();
 		attitudeNames.add( "beliefs",0);
 		attitudeNames.add("obligations",1);
+		attitudeNames.add("fears",2);
+		attitudeNames.add("hate",3);
 		
 		ArrayList<ArrayList<Integer>> consistentAttitudes = new ArrayList<>();
 		consistentAttitudes.add(new ArrayList<>(List.of(0)));
 		consistentAttitudes.add(new ArrayList<>(List.of(1)));
 		consistentAttitudes.add(new ArrayList<>(List.of(0,1)));
+		consistentAttitudes.add(new ArrayList<>(List.of(0,2)));
+		consistentAttitudes.add(new ArrayList<>(List.of(0,2,3)));
 		
 		ContextController.setUp(attitudeNames,consistentAttitudes ,false);
 		ContextController.createNewContext("guc");
@@ -65,7 +69,7 @@ class NetworkTest {
 			Node M1 = Network.createNode("propositionnode", downCableSetM1);
 			
 			
-			Node ruleNode1 = Network.createNode("ruleNode1", "rulenode");
+//			Node ruleNode1 = Network.createNode("ruleNode1", "rulenode");
 			n.printNodes();
 		}catch (Exception e){
 			e.printStackTrace();
