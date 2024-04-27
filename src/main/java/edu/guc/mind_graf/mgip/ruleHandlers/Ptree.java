@@ -51,7 +51,7 @@ public class Ptree extends RuleInfoHandler {
             int hash = ant.getFreeVariablesHash();
             if(!varSetLeafMap.containsKey(hash)) {
                 Singleton sIndex = new Singleton(ant.getFreeVariables());
-                varSetLeafMap.put(hash, new PtreeNode(null, null, null, null, sIndex, vars, null));
+                varSetLeafMap.put(hash, new PtreeNode(null, null, sIndex, vars, null));
             }
             // insert in vpList
             for(Node n : vars){
@@ -123,7 +123,7 @@ public class Ptree extends RuleInfoHandler {
         // setup parent
         SIndex parentSIndex = new Linear(intersection);
         NodeSet vars = p1.getVars().union(p2.getVars());
-        PtreeNode parent = new PtreeNode(null, null, p1, p2, parentSIndex, vars, null);
+        PtreeNode parent = new PtreeNode(null, null, parentSIndex, vars, null);
         p1.setParent(parent);
         p2.setParent(parent);
         return parent;

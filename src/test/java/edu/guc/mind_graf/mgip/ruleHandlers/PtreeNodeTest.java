@@ -37,7 +37,7 @@ class PtreeNodeTest {
         NodeSet commonVariables = new NodeSet(X, Y);
         NodeSet vars = new NodeSet(X, Y, Z);
         FreeVariableSet siblingIntersection = new FreeVariableSet(X, Y);
-        ptreeNode = new PtreeNode(null, null, null, null, new Linear(commonVariables), vars, siblingIntersection);
+        ptreeNode = new PtreeNode(null, null, new Linear(commonVariables), vars, siblingIntersection);
     }
 
     @AfterEach

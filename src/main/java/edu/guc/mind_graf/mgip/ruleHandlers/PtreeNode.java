@@ -10,12 +10,11 @@ public class PtreeNode {
 
     private PtreeNode parent; // important for upward traversal (propagation of RIs)
     private PtreeNode sibling; // important for combining RIs
-    private SIndex sIndex; // linear or singleton based on siblingIntersection
-    //private Set<Integer> pats; // antecedents node stores info abt
+    private SIndex sIndex; // A linear or singleton SIndex based on the position of the PtreeNode in the tree.
     private NodeSet vars; // free vars in propositions node represents
     private FreeVariableSet siblingIntersection; // shared vars between sibling and this node  (parent.getCommonVariables)
 
-    public PtreeNode(PtreeNode parent, PtreeNode sibling, PtreeNode leftChild, PtreeNode rightChild, SIndex sIndex,
+    public PtreeNode(PtreeNode parent, PtreeNode sibling, SIndex sIndex,
                      NodeSet vars, FreeVariableSet siblingIntersection) {
         this.parent = parent;
         this.sibling = sibling;
