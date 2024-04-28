@@ -1,5 +1,6 @@
 package edu.guc.mind_graf.mgip.reports;
 
+import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.requests.ChannelType;
 import edu.guc.mind_graf.components.Substitutions;
@@ -155,4 +156,9 @@ public class Report {
         // TODO
         return true;
     }
+
+    public Report clone() {
+        return new Report(this.substitutions, this.support, this.attitude, this.sign, this.inferenceType, this.requesterNode, this.reporterNode);
+    }
+
 }

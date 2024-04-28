@@ -1,5 +1,6 @@
 package edu.guc.mind_graf.nodes;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import edu.guc.mind_graf.mgip.InferenceType;
@@ -52,10 +53,10 @@ public abstract class RuleNode extends PropositionNode {
 
         try{
             RuleInfoSet inserted = ruleInfoHandler.insertRI(RuleInfo.createRuleInfo(report));
-            rootRuleInfos.addRootRuleInfo(inserted);
             if(inserted != null && inserted.size() > 0){
+                rootRuleInfos.addRootRuleInfo(inserted);
                 RuleInfoSet[] mayInfer = mayInfer();
-                sendInferenceReports(mayInfer, report.getAttitude());
+                sendInferenceReports(mayInfer);
             }
         } catch (Exception e){
 
@@ -65,7 +66,8 @@ public abstract class RuleNode extends PropositionNode {
 
     public abstract RuleInfoSet[] mayInfer();
 
-    public void sendInferenceReports(RuleInfoSet[] inferrable, int attitude) {
+    public void sendInferenceReports(RuleInfoSet[] inferrable) {
+        ArrayList<Report> reports = new ArrayList<>();
          for (int i = 0; i < inferrable.length; i++) {
              for(RuleInfo ri : inferrable[i]) {
                  PropositionNodeSet supports = new PropositionNodeSet();   // probably wrong (maybe should make new support of the flag nodes and rule node
@@ -73,14 +75,35 @@ public abstract class RuleNode extends PropositionNode {
                      supports.add(fn.getNode());
                  }
                  supports.add(this);
-                 Report newReport = new Report(ri.getSubs() == null ? new Substitutions() : ri.getSubs(), supports, attitude,
+                 Report newReport = new Report(ri.getSubs() == null ? new Substitutions() : ri.getSubs(), supports, ri.getAttitude(),
                          (i == 0), InferenceType.FORWARD, null, this);
-                 putInferenceReportOnQueue(newReport);
+                 newReport.setContextName(ri.getContext());
+                 newReport.setReportType(ReportType.RuleCons);
+                 reports.add(newReport);
              }
          }
+        sendInferenceResponse(reports);
     }
 
-    public abstract void putInferenceReportOnQueue(Report report);
+    public void sendResponseToArgs(ArrayList<Report> reports,NodeSet arg) {
+        for(Report report : reports) {
+            NodeSet filteredArgs = new NodeSet();
+            for(Node node : arg) {
+                if(!report.getSupport().contains(node)) {
+                    filteredArgs.add(node);
+                }
+            }
+            this.sendReportToConsequents(filteredArgs, report);
+        }
+    }
+
+    public void sendInferenceToCq(ArrayList<Report> reports, NodeSet cq) {
+        for(Report report : reports) {
+            this.sendReportToConsequents(cq, report);
+        }
+    }
+
+    public abstract void sendInferenceResponse(ArrayList<Report> reports);
 
     /***
      * this method gets all the consequents and arguments that this node is a rule

@@ -1,5 +1,6 @@
 package edu.guc.mind_graf.mgip.rules;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -89,11 +90,13 @@ public class BridgeRule extends RuleNode {
         }
     }
 
-    public void putInferenceReportOnQueue(Report report) {
-        for(Node node : cqToAttitude.keySet()) {
-            report.setAttitude(cqToAttitude.get(node));
-            report.setRequesterNode(node);
-            Scheduler.addToHighQueue(report);
+    public void sendInferenceResponse(ArrayList<Report> reports) {
+        for(Report report : reports) {
+            Report newReportInAttitude = report.clone();
+            for(Node cq : cqToAttitude.keySet()){
+                newReportInAttitude.setAttitude(cqToAttitude.get(cq));
+                sendReportToConsequents( new NodeSet(cq), newReportInAttitude);
+            }
         }
     }
 

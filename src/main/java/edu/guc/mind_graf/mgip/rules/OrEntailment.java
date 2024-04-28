@@ -9,6 +9,8 @@ import edu.guc.mind_graf.nodes.RuleNode;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
 
+import java.util.ArrayList;
+
 public class OrEntailment  extends RuleNode {
 
     private NodeSet ant;
@@ -29,11 +31,7 @@ public class OrEntailment  extends RuleNode {
         return inferrable;
     }
 
-    public void putInferenceReportOnQueue(Report report) {
-        for(Node node : cq) {
-            report.setRequesterNode(node);
-            Scheduler.addToHighQueue(report);
-        }
+    public void sendInferenceResponse(ArrayList<Report> reports) {
+        sendInferenceToCq(reports, cq);
     }
-
 }

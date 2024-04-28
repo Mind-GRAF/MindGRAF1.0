@@ -12,6 +12,8 @@ import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
 
+import java.util.ArrayList;
+
 public class NumEntailment extends RuleNode {
 
     private int i;
@@ -39,11 +41,8 @@ public class NumEntailment extends RuleNode {
         return inferrable;
     }
 
-    public void putInferenceReportOnQueue(Report report) {
-        for(Node node : cq) {
-            report.setRequesterNode(node);
-        }
-        Scheduler.addToHighQueue(report);
+    public void sendInferenceResponse(ArrayList<Report> reports) {
+        sendInferenceToCq(reports, cq);
     }
 
 }

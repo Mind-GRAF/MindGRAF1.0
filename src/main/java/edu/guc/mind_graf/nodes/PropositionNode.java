@@ -246,8 +246,8 @@ public class PropositionNode extends Node {
      * @return boolean
      */
     public boolean sendReport(Report report, Channel currentChannel) {
-        System.out.println("Sending Report (" + report.stringifyReport() + ") through the channel ("
-                + currentChannel.getChannelType() + " of id " + currentChannel.getIdCount() + ")");
+//        System.out.println("Sending Report (" + report.stringifyReport() + ") through the channel ("
+//                + currentChannel.getChannelType() + " of id " + currentChannel.getIdCount() + ")");  Commented out bcz this shouldnt work should it? requester node is null since its forward inference so stringifyReport wouldnt work
         if (currentChannel.testReportToSend(report)) {
             System.out.println("the report was succefully sent over channel ("
                     + currentChannel.getChannelType() + " " + currentChannel.getIdCount() + ")");
@@ -348,6 +348,25 @@ public class PropositionNode extends Node {
             }
 
             sendReport(newReport, newChannel);
+        }
+    }
+
+    protected void sendReportToConsequents(NodeSet nodeset, Report toBeSent) {
+        for (Node sentTo : nodeset) {
+            Substitutions reportSubs = toBeSent.getSubstitutions();
+            Substitutions switchSubs = new Substitutions();
+            Report newReport = new Report(reportSubs, toBeSent.getSupport(), toBeSent.getAttitude(), toBeSent.isSign(),
+                    toBeSent.getInferenceType(), sentTo, this);
+            newReport.setContextName(toBeSent.getContextName());
+            newReport.setReportType(toBeSent.getReportType());
+            Channel newChannel = new RuleToConsequentChannel(switchSubs, reportSubs,
+                    toBeSent.getContextName(), toBeSent.getAttitude(),
+                    sentTo);
+            if (toBeSent.getInferenceType() == InferenceType.FORWARD) {
+                forwardChannels.addChannel(newChannel);
+
+            }
+            sendReport(toBeSent, newChannel);
         }
     }
 
