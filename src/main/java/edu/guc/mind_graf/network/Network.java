@@ -67,7 +67,6 @@ public class Network {
 		Network.createRelation("i", "individualnode", Adjustability.EXPAND, 2);
 		Network.createRelation("cq", "propositionnode", Adjustability.EXPAND, 2);
 		Network.createRelation("ant", "propositionnode", Adjustability.EXPAND, 2);
-		Network.createRelation("&ant", "propositionnode", Adjustability.EXPAND, 2);
 		Network.createRelation("thresh", "propositionnode", Adjustability.EXPAND, 2);
 		Network.createRelation("threshmax", "propositionnode", Adjustability.EXPAND, 2);
 	}

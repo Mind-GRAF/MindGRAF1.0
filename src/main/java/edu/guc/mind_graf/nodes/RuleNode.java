@@ -91,8 +91,8 @@ public abstract class RuleNode extends PropositionNode {
 
     public NodeSet getDownConsNodeSet() {
         NodeSet ret = new NodeSet();
-        DownCable consequentCable = this.getDownCableSet().get("consequent");
-        DownCable argsCable = this.getDownCableSet().get("args");
+        DownCable consequentCable = this.getDownCableSet().get("cq");
+        DownCable argsCable = this.getDownCableSet().get("arg");
         if (argsCable != null) {
             argsCable.getNodeSet().addAllTo(ret);
         }

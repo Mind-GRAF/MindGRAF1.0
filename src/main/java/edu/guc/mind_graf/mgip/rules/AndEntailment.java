@@ -28,7 +28,7 @@ public class AndEntailment extends RuleNode {
 
     public AndEntailment(DownCableSet downcableSet) {
         super(downcableSet);
-        ant = downcableSet.get("&ant").getNodeSet();
+        ant = downcableSet.get("ant").getNodeSet();
         cq = downcableSet.get("cq").getNodeSet();
         PropositionNodeSet antecedents = RuleInfoHandler.getVariableAntecedents(ant);
         cAnt = ant.size() - antecedents.size();

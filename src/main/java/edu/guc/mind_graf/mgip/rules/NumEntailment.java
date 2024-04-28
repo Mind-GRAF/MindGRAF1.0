@@ -21,7 +21,7 @@ public class NumEntailment extends RuleNode {
     public NumEntailment(DownCableSet downcableSet) {
         super(downcableSet);
         i = downcableSet.get("i").getNodeSet().getIntValue();
-        ant = downcableSet.get("&ant").getNodeSet();
+        ant = downcableSet.get("ant").getNodeSet();
         cq = downcableSet.get("cq").getNodeSet();
         PropositionNodeSet antecedents = RuleInfoHandler.getVariableAntecedents(ant);
         int cAnt = ant.size() - antecedents.size();

@@ -73,7 +73,7 @@ class RuleNodeTest {
         DownCable brainwashedC = new DownCable(brainwashed, new NodeSet(C));
         Node M5 = Network.createNode("propositionnode", new DownCableSet(brainwashG, brainwashedC));
 
-        Node P0 = Network.createNode("andentailment", new DownCableSet(new DownCable(Network.getRelations().get("&ant"), new NodeSet(M0, M1, M2, M3, M4)),
+        Node P0 = Network.createNode("andentailment", new DownCableSet(new DownCable(Network.getRelations().get("ant"), new NodeSet(M0, M1, M2, M3, M4)),
                 new DownCable(Network.getRelations().get("cq"), new NodeSet(M5))));
 
         Substitutions govSubs = new Substitutions();
@@ -161,7 +161,7 @@ class RuleNodeTest {
         Node M2 = Network.createNode("propositionnode", new DownCableSet(aMember, aClass));
 
         Node P0 = Network.createNode("numentailment", new DownCableSet(new DownCable(Network.getRelations().get("i"), new NodeSet(one)),
-                new DownCable(Network.getRelations().get("&ant"), new NodeSet(M0, M1)),
+                new DownCable(Network.getRelations().get("ant"), new NodeSet(M0, M1)),
                 new DownCable(Network.getRelations().get("cq"), new NodeSet(M2))));
         Report testReport = new Report(new Substitutions(), new PropositionNodeSet(), 0, true, InferenceType.BACKWARD, P0, M0);
         testReport.setContextName("");
