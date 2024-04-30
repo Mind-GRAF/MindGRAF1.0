@@ -1,6 +1,7 @@
 package edu.guc.mind_graf.mgip.matching;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import edu.guc.mind_graf.cables.DownCable;
+import edu.guc.mind_graf.cables.UpCable;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.caseFrames.Adjustability;
 import edu.guc.mind_graf.components.Substitutions;
@@ -468,4 +470,326 @@ public class MatcherTest {
             e.printStackTrace();
         }
     }
+
+    @Test
+    void EmptyPath() {
+    } // stack overflow
+
+    @Test
+    void BangPath() {
+    }
+
+    @Test
+    void KStarPath() {
+        try {
+            Node cs = Network.createNode("cs", "propositionnode");
+            Node phy = Network.createNode("phy", "propositionnode");
+            Node var = Network.createVariableNode("var", "propositionnode");
+
+            Relation p = Network.createRelation("p", "", Adjustability.NONE, 0);
+            Relation obj = Network.createRelation("obj", "", Adjustability.NONE, 0);
+            obj.setPath(new edu.guc.mind_graf.paths.KStarPath(new edu.guc.mind_graf.paths.FUnitPath(p)));
+
+            DownCable d1 = new DownCable(obj, new NodeSet(cs));
+            DownCable d2 = new DownCable(p, new NodeSet(phy));
+
+            DownCable d3 = new DownCable(obj, new NodeSet(var));
+
+            Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2));
+            Node M1 = Network.createNode("propositionnode", new DownCableSet(d3));
+
+            List<Match> matchList = Matcher.match(M1);
+
+            assertNotNull(matchList);
+        } catch (NoSuchTypeException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    void KPlusPath() {
+        try {
+            Node cs = Network.createNode("cs", "propositionnode");
+            Node phy = Network.createNode("phy", "propositionnode");
+            Node var = Network.createVariableNode("var", "propositionnode");
+
+            Relation p = Network.createRelation("p", "", Adjustability.NONE, 0);
+            Relation obj = Network.createRelation("obj", "", Adjustability.NONE, 0);
+            obj.setPath(new edu.guc.mind_graf.paths.KPlusPath(new edu.guc.mind_graf.paths.FUnitPath(p)));
+
+            DownCable d1 = new DownCable(obj, new NodeSet(cs));
+            DownCable d2 = new DownCable(p, new NodeSet(phy));
+
+            DownCable d3 = new DownCable(obj, new NodeSet(var));
+
+            Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2));
+            Node M1 = Network.createNode("propositionnode", new DownCableSet(d3));
+
+            List<Match> matchList = Matcher.match(M1);
+
+            assertNotNull(matchList);
+        } catch (NoSuchTypeException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    void FUnitPath() {
+        try {
+            Node cs = Network.createNode("cs", "propositionnode");
+            Node phy = Network.createNode("phy", "propositionnode");
+            Node var = Network.createVariableNode("var", "propositionnode");
+
+            Relation p = Network.createRelation("p", "", Adjustability.NONE, 0);
+            Relation obj = Network.createRelation("obj", "", Adjustability.NONE, 0);
+            obj.setPath(new edu.guc.mind_graf.paths.FUnitPath(p));
+
+            DownCable d1 = new DownCable(obj, new NodeSet(cs));
+            DownCable d2 = new DownCable(p, new NodeSet(phy));
+
+            DownCable d3 = new DownCable(obj, new NodeSet(var));
+
+            Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2));
+            Node M1 = Network.createNode("propositionnode", new DownCableSet(d3));
+
+            List<Match> matchList = Matcher.match(M1);
+
+            assertNotNull(matchList);
+        } catch (NoSuchTypeException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    void BUnitPath() {
+        try {
+            Node cs = Network.createNode("cs", "propositionnode");
+            Node phy = Network.createNode("phy", "propositionnode");
+            Node var = Network.createVariableNode("var", "propositionnode");
+
+            Relation p = Network.createRelation("p", "", Adjustability.NONE, 0);
+            Relation obj = Network.createRelation("obj", "", Adjustability.NONE, 0);
+            obj.setPath(new edu.guc.mind_graf.paths.BUnitPath(p));
+
+            DownCable d1 = new DownCable(obj, new NodeSet(cs));
+
+            DownCable d3 = new DownCable(obj, new NodeSet(var));
+
+            Node M0 = Network.createNode("propositionnode", new DownCableSet(d1));
+            M0.getUpCableSet().addNode(p, phy);
+            Node M1 = Network.createNode("propositionnode", new DownCableSet(d3));
+
+            List<Match> matchList = Matcher.match(M1);
+
+            assertNotNull(matchList);
+        } catch (NoSuchTypeException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    void AndPath() {
+        try {
+            Node cs = Network.createNode("cs", "propositionnode");
+            Node phy = Network.createNode("phy", "propositionnode");
+            Node var = Network.createVariableNode("var", "propositionnode");
+
+            Relation p = Network.createRelation("p", "", Adjustability.NONE, 0);
+            Relation q = Network.createRelation("q", "", Adjustability.NONE, 0);
+            Relation obj = Network.createRelation("obj", "", Adjustability.NONE, 0);
+            obj.setPath(new edu.guc.mind_graf.paths.AndPath(new edu.guc.mind_graf.paths.BUnitPath(q),
+                    new edu.guc.mind_graf.paths.FUnitPath(p)));
+
+            DownCable d1 = new DownCable(obj, new NodeSet(cs));
+            DownCable d2 = new DownCable(p, new NodeSet(phy));
+
+            DownCable d3 = new DownCable(obj, new NodeSet(var));
+
+            Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2));
+            Node M1 = Network.createNode("propositionnode", new DownCableSet(d3));
+
+            List<Match> matchList = Matcher.match(M1);
+
+            assertEquals(1, matchList.size());
+
+            M0.getUpCableSet().addNode(q, phy);
+
+            matchList = Matcher.match(M1);
+
+            assertNotNull(matchList.size());
+        } catch (NoSuchTypeException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    void OrPath() {
+        try {
+            Node cs = Network.createNode("cs", "propositionnode");
+            Node phy = Network.createNode("phy", "propositionnode");
+            Node theory = Network.createNode("theory", "propositionnode");
+            Node var = Network.createVariableNode("var", "propositionnode");
+
+            Relation p = Network.createRelation("p", "", Adjustability.NONE, 0);
+            Relation q = Network.createRelation("q", "", Adjustability.NONE, 0);
+            Relation obj = Network.createRelation("obj", "", Adjustability.NONE, 0);
+            obj.setPath(new edu.guc.mind_graf.paths.OrPath(new edu.guc.mind_graf.paths.BUnitPath(q),
+                    new edu.guc.mind_graf.paths.FUnitPath(p)));
+
+            DownCable d1 = new DownCable(obj, new NodeSet(cs));
+            DownCable d2 = new DownCable(p, new NodeSet(phy));
+
+            DownCable d3 = new DownCable(obj, new NodeSet(var));
+
+            Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2));
+            Node M1 = Network.createNode("propositionnode", new DownCableSet(d3));
+
+            List<Match> matchList = Matcher.match(M1);
+
+            assertEquals(2, matchList.size());
+
+            M0.getUpCableSet().addNode(q, theory);
+
+            matchList = Matcher.match(M1);
+
+            assertNotNull(matchList.size());
+        } catch (NoSuchTypeException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    void ComposePath() {
+        try {
+            Node cs = Network.createNode("cs", "propositionnode");
+            Node phy = Network.createNode("phy", "propositionnode");
+            Node var = Network.createVariableNode("var", "propositionnode");
+
+            Relation p = Network.createRelation("p", "", Adjustability.NONE, 0);
+            Relation obj = Network.createRelation("obj", "", Adjustability.NONE, 0);
+            obj.setPath(new edu.guc.mind_graf.paths.ComposePath(new edu.guc.mind_graf.paths.FUnitPath(p),
+                    new edu.guc.mind_graf.paths.FUnitPath(p)));
+
+            DownCable d1 = new DownCable(obj, new NodeSet(cs));
+            DownCable d2 = new DownCable(p, new NodeSet(phy));
+            DownCable d3 = new DownCable(obj, new NodeSet(var));
+
+            Node M0 = Network.createNode("propositionnode", new DownCableSet(d2));
+
+            DownCable d4 = new DownCable(p, new NodeSet(M0));
+
+            Node M1 = Network.createNode("propositionnode", new DownCableSet(d1, d4));
+            Node M2 = Network.createNode("propositionnode", new DownCableSet(d3));
+
+            List<Match> matchList = Matcher.match(M2);
+
+            assertNotNull(matchList);
+        } catch (NoSuchTypeException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    void ConversePath() {
+    }
+
+    @Test
+    void IrreflexiveRestrictPath() {
+        try {
+            Node cs = Network.createNode("cs", "propositionnode");
+            Node phy = Network.createNode("phy", "propositionnode");
+            Node var = Network.createVariableNode("var", "propositionnode");
+
+            Relation p = Network.createRelation("p", "", Adjustability.NONE, 0);
+            Relation obj = Network.createRelation("obj", "", Adjustability.NONE, 0);
+            obj.setPath(new edu.guc.mind_graf.paths.IrreflexiveRestrictPath(new edu.guc.mind_graf.paths.FUnitPath(p)));
+
+            DownCable d1 = new DownCable(obj, new NodeSet(cs));
+            DownCable d2 = new DownCable(p, new NodeSet(phy));
+
+            DownCable d3 = new DownCable(obj, new NodeSet(var));
+
+            Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2));
+            Node M1 = Network.createNode("propositionnode", new DownCableSet(d3));
+
+            List<Match> matchList = Matcher.match(M1);
+
+            assertNotNull(matchList);
+        } catch (NoSuchTypeException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    void DomainRestrictPath() {
+        try {
+            Node cs = Network.createNode("cs", "propositionnode");
+            Node phy = Network.createNode("phy", "propositionnode");
+            Node n = Network.createNode("n", "propositionnode");
+            Node var = Network.createVariableNode("var", "propositionnode");
+
+            Relation p = Network.createRelation("p", "", Adjustability.NONE, 0);
+            Relation q = Network.createRelation("q", "", Adjustability.NONE, 0);
+            Relation obj = Network.createRelation("obj", "", Adjustability.NONE, 0);
+            obj.setPath(new edu.guc.mind_graf.paths.DomainRestrictPath(new edu.guc.mind_graf.paths.FUnitPath(q),
+                    new edu.guc.mind_graf.paths.FUnitPath(p), n));
+
+            DownCable d1 = new DownCable(obj, new NodeSet(cs));
+            DownCable d2 = new DownCable(p, new NodeSet(phy));
+            DownCable d3 = new DownCable(q, new NodeSet(n));
+
+            DownCable d4 = new DownCable(obj, new NodeSet(var));
+
+            Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2, d3));
+            Node M1 = Network.createNode("propositionnode", new DownCableSet(d4));
+
+            List<Match> matchList = Matcher.match(M1);
+
+            assertNotNull(matchList);
+        } catch (NoSuchTypeException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    void RangeRestrictPath() {
+        try {
+            Node cs = Network.createNode("cs", "propositionnode");
+            Node phy = Network.createNode("phy", "propositionnode");
+            Node n = Network.createNode("n", "propositionnode");
+            Node var = Network.createVariableNode("var", "propositionnode");
+
+            Relation p = Network.createRelation("p", "", Adjustability.NONE, 0);
+            Relation q = Network.createRelation("q", "", Adjustability.NONE, 0);
+            Relation obj = Network.createRelation("obj", "", Adjustability.NONE, 0);
+            obj.setPath(new edu.guc.mind_graf.paths.RangeRestrictPath(new edu.guc.mind_graf.paths.BUnitPath(q),
+                    new edu.guc.mind_graf.paths.FUnitPath(p), n));
+
+            DownCable d1 = new DownCable(obj, new NodeSet(cs));
+            DownCable d2 = new DownCable(p, new NodeSet(phy));
+            phy.getUpCableSet().addNode(q, n);
+
+            DownCable d4 = new DownCable(obj, new NodeSet(var));
+
+            Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2));
+            Node M1 = Network.createNode("propositionnode", new DownCableSet(d4));
+
+            List<Match> matchList = Matcher.match(M1);
+
+            assertNotNull(matchList);
+        } catch (NoSuchTypeException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
 }

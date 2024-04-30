@@ -34,8 +34,12 @@ import edu.guc.mind_graf.set.NodeSet;
 /*
 TODO:
 
-path based inference
+add attitude to PBI
 Test (PBI)
+
+fix filter & switch subs in unifyVariable
+
+fix tests
 
 change the uvbr constant to uvbr in Network
 
@@ -106,7 +110,7 @@ public class Matcher {
     }
 
     private static boolean unify(Node queryNode, Node node, Match match) {
-        if(!queryNode.getClass().isAssignableFrom(node.getClass())){
+        if (!queryNode.getClass().isAssignableFrom(node.getClass())) {
             matchList.remove(match);
             return false;
         }
@@ -277,19 +281,19 @@ public class Matcher {
         for (Cable downCable : queryNode.getDownCableSet().getValues()) {
             Relation relation = downCable.getRelation();
             Path path = relation.getPath();
-            if (path != null && passPathFirstCheck(queryNode, node, match, path)) {
-                PathTrace pathTrace = new PathTrace();
-                LinkedList<Object[]> listOfNodeList = path.follow(node, pathTrace, context);
-                if (listOfNodeList == null || listOfNodeList.isEmpty()) {
-                    return;
-                } else {
-                    for (Object[] nodeList : listOfNodeList) {
-                        for (Object n : nodeList) {
-                            Node node1 = (Node) n;
+            for (Node qn : downCable.getNodeSet().getValues()) {
+                if (path != null && passPathFirstCheck(qn, node, match, path)) {
+                    PathTrace pathTrace = new PathTrace();
+                    LinkedList<Object[]> listOfNodeList = path.follow(node, pathTrace, context);
+                    if (listOfNodeList == null || listOfNodeList.isEmpty()) {
+                        return;
+                    } else {
+                        for (Object[] nodeList : listOfNodeList) {
+                            Node n = (Node) nodeList[0];
                             Match m = match.clone();
-                            if (unify(queryNode, node1, m)) {
+                            if (unify(qn, n, m)) {
                                 matchList.add(m);
-                                // matchList.getSupports().add(pathTrace.getSupports());
+                                // matchList.getSupports().add(((PathTrace) nodeList[1]).getSupports());
                             }
                         }
                     }

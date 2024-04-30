@@ -34,10 +34,6 @@ public class Substitutions {
         map.clear();
     }
 
-    public Substitutions getSubs(Substitutions sub) {
-        return sub;
-    }
-
     public void addSubs(Substitutions subs) {
         for (Node var : subs.map.keySet()) {
             Node value = subs.map.get(var);
