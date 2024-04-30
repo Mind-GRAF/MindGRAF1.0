@@ -15,11 +15,7 @@ public class Context {
     private NodeSet suppSet;
 
     public Context(String currContextName, int attitude, NodeSet assumptions) {
-        //TODO Auto-generated constructor stub
-    }
-
-    public Context(String currContextName, int attitude, Node orAssumption) {
-        //TODO Auto-generated constructor stub
+        name = currContextName;
     }
 
     public Context() {
@@ -55,6 +51,12 @@ public class Context {
     public boolean checkValidity(NodeSet assumedNodes) {
         //Check for the negation of any of the given nodes in that context.
         throw new UnsupportedOperationException("Unimplemented method 'checkValidity'");
+    }
+
+    public boolean isSubset(Context context) {
+        // // TODO Auto-generated method stub
+        // throw new UnsupportedOperationException("Unimplemented method 'isSubset'");
+        return true;
     }
 
 }

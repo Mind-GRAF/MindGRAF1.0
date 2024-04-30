@@ -613,7 +613,8 @@ public class PropositionNode extends Node {
         if (this.isOpen()) {
             boolean flag;
             boolean channelCheck = report.getReportType() == ReportType.Matched
-                    || report.getReportType() == ReportType.RuleCons;
+                    || report.getReportType() == ReportType.RuleCons 
+                    || report.getReportType() == ReportType.Introduction;// Need to check
             if (channelCheck) {
                 flag = knownInstances.addKnownInstance(report);
                 System.out.println(
@@ -989,5 +990,4 @@ public class PropositionNode extends Node {
     public KnownInstanceSet getKnownInstances() {
         return knownInstances;
     }
-
 }

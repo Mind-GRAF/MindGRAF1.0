@@ -20,7 +20,7 @@ public class ReportSet {
     }
 
     public Report getReport() {
-       //gets the first report in the set
+        //gets the first report in the set
         return reportSet.iterator().next();
     }
 
@@ -28,14 +28,9 @@ public class ReportSet {
         return reportSet;
     }
 
-    // public SupportSet combineSupport() {
-    //     SupportSet combinedSupport = new SupportSet();
-    //     for (Report report : ((ReportSet) reportSet).getReports()) {
-    //         combinedSupport.
-    //     }
-    //     combinedSupport = combinedSupport.remove(antecedent);
-    //     return combinedSupport;
-    // }
+    public void add(Report report) {
+        reportSet.add(report);
+    }
 
 }
 

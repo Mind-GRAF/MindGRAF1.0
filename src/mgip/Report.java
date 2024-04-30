@@ -2,10 +2,12 @@ package mgip;
 
 import mgip.requests.ChannelType;
 import components.Substitutions;
+import context.Context;
 import mgip.ReportType;
 import network.Network;
 import nodes.Node;
 import nodes.PropositionNode;
+import set.NodeSet;
 import set.PropositionNodeSet;
 
 public class Report {
@@ -143,6 +145,12 @@ public class Report {
 
     public void setInferenceType(InferenceType inferenceType) {
         this.inferenceType = inferenceType;
+    }
+
+    public Context getContext(String contextName2) {
+        // TODO Auto-generated method stub
+        return new Context("Context 1", 1, new NodeSet());
+        // throw new UnsupportedOperationException("Unimplemented method 'getContext'");
     }
 
 }

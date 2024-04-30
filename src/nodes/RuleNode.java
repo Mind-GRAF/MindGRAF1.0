@@ -1,10 +1,14 @@
 package nodes;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import javax.naming.spi.DirStateFactory.Result;
+
 import mgip.KnownInstance;
+import mgip.KnownInstanceSet;
 import mgip.InferenceType;
 import mgip.Report;
 import mgip.Scheduler;
@@ -20,21 +24,25 @@ import mgip.ruleIntroduction.MCII;
 import mgip.ruleIntroduction.RII;
 import mgip.rules.*;
 import network.Network;
+import relations.Relation;
 import set.CombinationSet;
 import set.ContextSet;
-import set.MCIISet;
 import set.NodeSet;
+import set.PropositionNodeSet;
 import set.CombinationSet;
 import set.Set;
 import support.Support;
 import cables.DownCable;
 import cables.DownCableSet;
+import caseFrames.Adjustability;
 import components.Substitutions;
 import context.Context;
 import exceptions.NoSuchTypeException;
 
 public class RuleNode extends PropositionNode {
     private boolean forwardReport;
+    public MCII mcii = new MCII();
+    protected boolean introduced = false;
 
     public RuleNode(String name, Boolean isVariable) {
         super(name, isVariable);
@@ -212,126 +220,241 @@ public class RuleNode extends PropositionNode {
             // TODO: handle exception
         }
     }
+
+    public MCII getMcii() {
+        return mcii;
+    }
     
-    public boolean processIntroductionRequest(Request currentRequest) {
+    public boolean processIntroductionRequest(Request currentRequest) throws NoSuchTypeException {
         //need to check if we already made an introduction request to the same node before
+        // if(this.isOpen()){
+        //     return false;
+        // }
         String currContextName = currentRequest.getChannel().getContextName();
         int attitude = currentRequest.getChannel().getAttitudeID();
         Substitutions filterSubs = currentRequest.getChannel().getFilterSubstitutions();
         Substitutions switchSubs = currentRequest.getChannel().getSwitcherSubstitutions();
-        Context currContext = getContext(currContextName);
         System.out.println("Current Request: " + currentRequest + " Current Context: " + currContextName + 
         " Attitude: " + attitude + " Filter Subs: " + filterSubs + " Switch Subs: " + switchSubs + 
-        " Requester Node: " + currentRequest.getChannel().getRequesterNode().getName()+"/n");
-        
-        if (this instanceof And || this instanceof Nor){
-            if (this.getDownConsNodeSet().size() > 0){
-                for (Node consNode : this.getDownConsNodeSet()){
-                    if (isFree(consNode)){
-                        return false;}
-                    else{
-                        sendRequestsToNodeSet(getDownAntArgNodeSet(), currentRequest, currContext);
-                    }
-                }
-        }
-    }
-        else if (this instanceof AndOr || this instanceof Thresh){
+        " Requester Node: " + currentRequest.getChannel().getRequesterNode().getName()+"\n");
+        if (this instanceof AndOr || this instanceof Thresh){
+            System.out.println("In AndOr or Thresh Node");
             NodeSet args = this.getDownAntArgNodeSet();
             Context newContext = new Context(currContextName,attitude,args);
-            System.out.println("New Context: " + newContext.getContextName()+ "Modified Attitude: " + attitude + "Assumed Args: " + args+"/n");
+            System.out.println("New Context: " + newContext.getContextName()+ "Modified Attitude: " + attitude + "Assumed Args: " + args+"\n");
             IntroductionChannel intiatedChannel = initiateIntroChannel(currentRequest.getChannel(), this, newContext.getContextName());
-            System.out.println("Initiated Channel in Context: " + intiatedChannel.getContextName()+" Attitude: "+intiatedChannel.getAttitudeID()+" with Rule: "+intiatedChannel.getRequesterNode().getName()+" Filter Subs: "+intiatedChannel.getFilterSubstitutions()+" Switch Subs: "+intiatedChannel.getSwitcherSubstitutions() + " Requester Node: "+intiatedChannel.getRequesterNode().getName()+"/n");
+            System.out.println("Initiated Channel in Context: " + intiatedChannel.getContextName()+" Attitude: "+intiatedChannel.getAttitudeID()+" with Rule: "+intiatedChannel.getRequesterNode().getName()+" Filter Subs: "+intiatedChannel.getFilterSubstitutions()+" Switch Subs: "+intiatedChannel.getSwitcherSubstitutions() + " Requester Node: "+intiatedChannel.getRequesterNode().getName()+"\n");
             RII rii = new RII(currentRequest, null, args , newContext , attitude);
-            System.out.println("RII of new Context: " + rii.getContext().getContextName()+" Attitude: "+rii.getAttitudeID()+" Request: "+rii.getRequest().getChannel().getRequesterNode().getName()+" Antecedents: "+rii.getAntNodes()+" Consequents: "+rii.getConqArgNodes()+"/n");
-            sendRequestsToNodeSet(args, currentRequest,newContext);// sending requests
-            System.out.println("Sent Requests to NodeSet: "+args+" in Context:"+newContext+" with current request: "+currentRequest+"/n");
+            System.out.println("RII of new Context: " + rii.getContext().getContextName()+" Attitude: "+rii.getAttitudeID()+" Request: "+rii.getRequest().getChannel().getRequesterNode().getName()+" Antecedents: "+rii.getAntNodes()+" Consequents: "+rii.getConqArgNodes()+"\n");
+            mcii.addRII(rii);
+            // sendRequestsToNodeSet(args, currentRequest,newContext);// sending requests
+            System.out.println("Sent Requests to NodeSet: "+args+" in Context:"+newContext+" with current request: "+currentRequest+"\n");
+            return true;
         }
         //Check if all the nodes are bound by a quantifier
-        else if(this instanceof AndEntail){
-         NodeSet ants = this.getDownAntArgNodeSet();
-         for(Node ant : ants) {
-            ant = ant.applySubstitution(currentRequest.getChannel().getFilterSubstitutions());
-            if(isFree(ant)){
-                return false;
-            }
-        }  
-        NodeSet cons = this.getDownConsNodeSet();
-        Context newContext = new Context(currContextName,attitude,ants);//clone of the current context in addition to the assumed antecedents
-        boolean validContext = newContext.checkValidity(ants);
-         RII rii = new RII(currentRequest, ants, cons , newContext , attitude);
-         sendRequestsToNodeSet(cons, currentRequest, newContext);//installing introduction channels and sending requests
-        }
-        else if(this instanceof OrEntail || this instanceof NumEntail){
+        else if(this instanceof OrEntail){
+            System.out.println("In OrEntail or NumEntail Node");
             NodeSet ants = this.getDownAntArgNodeSet();
+            System.out.println("Rule Ants"+ants);
             NodeSet cons = this.getDownConsNodeSet();
-            MCII mcii = new MCII(); //creates a new empty MCII
+            System.out.println("Rule Cons"+cons);
+            System.out.println("MCII at creation " +mcii );
+            NodeSet subants = new NodeSet();
             for(Node ant : ants) {
                 ant = ant.applySubstitution(currentRequest.getChannel().getFilterSubstitutions());
-                if(isFree(ant)){
-                    return false;
-                }
+                subants.add(ant);
+                System.out.println("Substituted Ant :"+ant);
             }
-            if (this instanceof NumEntail){
-                int i = this.getMin(); //Gets value of i from the NumEntail node
-                List<NodeSet> combinations = CombinationSet.generateCombinations(ants, i);
-                for (NodeSet combination : combinations) {
-                    Context newContext = new Context(currContextName, attitude, combination);
-                    RII rii = new RII(currentRequest, combination, cons , newContext , attitude);
-                    mcii.addRII(rii);
-                    sendRequestsToNodeSet(cons, filterSubs, switchSubs, newContext.getContextName(), attitude, ChannelType.RuleCons, this);
-                }
+            if(this instanceof OrEntail){// It's an OrEntail node
+                
             }
-            else{//It's an OrEntail node
-            for(Node ant : ants) {
-                Context newContext = new Context(currContextName, attitude, ant);
-                RII rii = new RII(currentRequest, ants, cons , newContext , attitude);
-                mcii.addRII(rii);
-                sendRequestsToNodeSet(cons, currentRequest, newContext); //send requests to all consequents
-                }  
-            }
-           }  
+           }
+           return false;
     }
 
 
-    private Context getContext(String currContextName) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getContext'");
+    protected Context getContext(String currContextName) {
+        return new Context(currContextName,1,new NodeSet());
     }
 
-    public void sendRequestsToNodeSet(NodeSet nodeSet, Request currentRequest, Context newContext) {
-        for (Node node : nodeSet) {
-            // Create a new IntroductionChannel based on the current request's channel
-            IntroductionChannel introChannel = initiateIntroChannel(currentRequest.getChannel(), this, newContext.getContextName());
+    // public void sendRequestsToNodeSet(NodeSet nodeSet, Request currentRequest, Context newContext) {
+    //     for (Node node : nodeSet) {
+    //         // Create a new IntroductionChannel based on the current request's channel
+    //         IntroductionChannel introChannel = initiateIntroChannel(currentRequest.getChannel(), this, newContext.getContextName());
             
-            Request request = new Request(introChannel, this);
+    //         Request request = new Request(introChannel, this);
+    //         System.out.println("Request to be sent to Node: "+node+" with new request: "+request+" in Context: "+introChannel.getContextName()+"\n");
 
-            Scheduler.getLowQueue().add(request);
+    //         Scheduler.getLowQueue().add(request);
+    //     }
+    // }
+
+    public static void main(String[] args) throws NoSuchTypeException {
+        //Testing Begin Algo.
+        Scheduler S = new Scheduler();
+        S.initiate();
+        System.out.println("Scheduler low Q: "+S.getLowQueue());
+
+        Network N = new Network();
+        
+        // Create a new RuleNode
+        Node A = new PropositionNode("A", false);
+        Node B = new PropositionNode("B", false);
+        Node antecedent1 = new PropositionNode("Antecedent 1", false);
+        Node antecedent2 = new PropositionNode("Antecedent 2", false);
+        Node antecedent3 = new PropositionNode("Antecedent 3", false);
+        Node varant = new PropositionNode("VarAnt", true);
+        Node X = new PropositionNode("X", true);
+        Node consequent = new PropositionNode("Consequent", false);
+        
+        System.out.println("Antecedent 1: "+antecedent1.getId());
+        System.out.println("Antecedent 2: "+antecedent2.getId());
+        System.out.println("Antecedent 3: "+antecedent3.getId());
+        System.out.println("VarAnt: "+varant.getId());
+        System.out.println("Consequent: "+consequent.getId());
+
+        // Add antecedents and consequent to the RuleNode
+        Relation ant = new Relation("antecedent", "", Adjustability.NONE, 4);
+        Relation consequentRelation = new Relation("consequent", "", Adjustability.EXPAND, 1);
+        Relation quantifier = Network.createRelation("forall", "propositionnode",
+        Adjustability.EXPAND, 2);
+
+        NodeSet ants = new NodeSet(antecedent1, antecedent2, antecedent3, varant);
+        // NodeSet ants = new NodeSet(antecedent1, antecedent2, antecedent3, varant, X);//With Free Varible no Sub "X"
+        
+        DownCable d1 = new DownCable(ant, ants);
+        DownCable d2 = new DownCable(consequentRelation, new NodeSet(consequent));
+        DownCable d3 = new DownCable(quantifier, ants);
+
+
+        NumEntail ruleNode = new NumEntail(new DownCableSet(d1, d2, d3));
+
+        Context currContext = new Context("Original Context", 1, new NodeSet(ruleNode));
+
+        System.out.println("DownCableSet ants: " + ruleNode.getDownCableSet().get("antecedent"));
+        
+        System.out.println("RuleNode: "+ruleNode.getName());
+        System.out.println("RuleNode Type: "+ruleNode.getSyntacticType());
+        System.out.println("NumEntail ? :" + (ruleNode instanceof NumEntail));
+        System.out.println("Antecedents : "+ruleNode.getDownAntArgNodeSet());
+        System.out.println("Consequent : "+ruleNode.getDownConsNodeSet());
+
+        //Makes node an open Formula
+        NodeSet fetchedFreeVar = ruleNode.fetchFreeVariables();
+        fetchedFreeVar.add(varant);//Have Sub in Filter
+        // fetchedFreeVar.add(X);//Doesn't have Sub in Filter
+        System.out.println("Fetched free var" + fetchedFreeVar);
+        
+        KnownInstanceSet instances = ruleNode.getKnownInstances();
+
+        System.out.println("KnownInstances: " + instances);
+        //print the known instances
+        instances.printKnownInstances(instances.getPositiveKInstances(), instances.getNegativeKInstances());
+        
+        
+
+        Substitutions sub = new Substitutions();
+        sub.add(varant, A);
+
+        System.out.println("Free Vars: "+ ruleNode.getFreeVariables().contains(varant));
+
+        System.out.println("Substitution: "+sub);
+
+        System.out.println("IsFree :" +varant.isFree(ruleNode));
+
+        System.out.println(varant.applySubstitution(sub));
+
+        boolean isO = ruleNode.isOpen();
+        System.out.println("Is Open? :" + isO);
+
+        
+        // Test processIntroductionRequest
+        Request currentRequest = new Request(new Channel(new Substitutions(), sub, currContext.getContextName(), 1, ruleNode), ruleNode);
+        Report reportRII1 = new Report(new Substitutions(), new PropositionNodeSet(B), 1, true, InferenceType.INTRO, ruleNode);
+        Report reportRII2 = new Report(new Substitutions(), new PropositionNodeSet(B), 1, true, InferenceType.INTRO, ruleNode);
+        Report reportRII3 = new Report(new Substitutions(), new PropositionNodeSet(B), 1, true, InferenceType.INTRO, ruleNode);
+        Report reportRII4 = new Report(new Substitutions(), new PropositionNodeSet(B), 1, true, InferenceType.INTRO, ruleNode);
+        Report reportRII5 = new Report(new Substitutions(), new PropositionNodeSet(B), 1, true, InferenceType.INTRO, ruleNode);
+        Report reportRII6 = new Report(new Substitutions(), new PropositionNodeSet(B), 1, true, InferenceType.INTRO, ruleNode);
+        Report reportForward = new Report(new Substitutions(), new PropositionNodeSet(B), 1, false, InferenceType.FORWARD, null);
+        reportRII1.setContextName("Context 1");
+        reportRII2.setContextName("Context 2");
+        reportRII3.setContextName("Context 3");
+        reportForward.setContextName("Context 7");
+        reportRII4.setContextName("Context 4");
+        reportRII5.setContextName("Context 5");
+        reportRII6.setContextName("Context 6");
+        Scheduler.addToHighQueue(reportRII1);
+        Scheduler.addToHighQueue(reportRII2);
+        Scheduler.addToHighQueue(reportRII3);
+        Scheduler.addToHighQueue(reportRII4);
+        Scheduler.addToHighQueue(reportRII5);
+        Scheduler.addToHighQueue(reportRII6);
+        Scheduler.addToHighQueue(reportForward);
+        System.out.println(Scheduler.getHighQueue());
+
+        try {
+            boolean res = ruleNode.processIntroductionRequest(currentRequest);
+            ruleNode.processReports();
+            // System.out.println("Processing Report in "+ rep.getContextName());
+            System.out.println("Scheduler after reqs: " + S.getLowQueue());
+            System.out.println("Scheduler report Q: " + S.getHighQueue());
+        } catch (NoSuchTypeException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
     }
 
-    public void processReport(Report report) {
+    public int processIntroReports(ArrayList<Report> introReps) {
         // Find matching RII based on report information (rule, context, etc.)
-        RII rii = findMatchingRII(report);
-    
-        if (rii != null && rii.isSufficent()== false) {
-            // Check report compatibility and support
-            if (report.isCompatible(introductionChannel) && report.isRelevantForRule(rii.getRule())) {
-                // Update RII
-                rii.update(report);
-    
-                // Check if rule can be introduced or negated
-                if (rii.isSufficent() == true) {
-                    // Create introduction report with appropriate sign and combined support
-                    Report introductionReport = createIntroductionReport(rii);
-    
-                    // Handle introduction/negation (assert, store, etc.)
-                    // ...
+        int res = 0;
+        System.out.println(mcii.getExpectedReportsCount());
+        System.out.println(introReps.size());
+        if(introReps.size()< mcii.getExpectedReportsCount())
+        {
+            System.out.println("Not enough " + res);
+            return res;
+        }
+        else{
+            for(Report report : introReps)
+            {
+                RII rii = findMatchingRII(report);
+                Substitutions riiFilterSubs = rii.getRequest().getChannel().getFilterSubstitutions();
+                if(report.getSubstitutions().compatible(riiFilterSubs)&&(report.getContext(report.getContextName()).isSubset(rii.getContext()))&& !mcii.isSufficient()){
+                if(filterSupport(rii, report)){
+                    System.out.println("Report to be added: "+report);
+                        rii.update(report);
+                        res =  introductionHandler(rii);
+                    }
                 }
             }
+            System.out.println("Result " + res);
+            return res;
         }
     }
 
-    public static void processIntroductionReport()
+    protected int introductionHandler(RII rii) {
+        return 1;
+    }
+
+    private boolean filterSupport(RII rii, Report report) {
+        // // TODO Auto-generated method stub
+        // throw new UnsupportedOperationException("Unimplemented method 'filterSupport'");
+        return true;
+    }
+
+    protected RII findMatchingRII(Report report) {
+        for (RII rii : mcii.getRIIList()) {
+            System.out.println("RII's Request context Name: "+ rii.getContext().getContextName());
+            System.out.println("Report's context Name: "+ report.getContextName());
+            if (rii.getContext().getContextName().equals(report.getContextName()) && (rii.getAttitudeID() == report.getAttitude()) && (rii.isSufficient()== false)) {
+                return rii;
+            }
+        }
+        return null;
+    }
+
+    public static void processIntroductionReport(Report report)
     {
         Report reportHasTurn = Scheduler.getHighQueue().poll();
         if (reportHasTurn.getReportType() == ReportType.Introduction)
@@ -341,27 +464,15 @@ public class RuleNode extends PropositionNode {
         }
     }
 
-    public static boolean filterSupports(Report rep, RII rii)
-    {
-        if(rep.getSupport().isSubset(rii.getContext()) && rii.getContext().checkNodesPresent(rep.getSupport())){  //get context proposition nodes
-            return true;
-        }
-        else{
-            return false;
-        }
-    }
-    public static void introductionHandler(RII rii)
-    {
-        if(this instanceof AndOr)
-        {
-            if( (rii.getPosCount() >= min) || (rii.getNegCount() > rii.getConqArgNodes().size() - max)){
-                rii.setSufficent();
-                Support sup = combineSupport(rii);
-                //Build an instance of the rule using the substitutions found in the original request.
-                //send a report declaring this instance in the context of the original request having the support Sup.
-                
-        }
-    }
+    // public static boolean filterSupports(Report rep, RII rii)
+    // {
+    //     if(rep.getSupport().isSubset(rii.getContext()) && rii.getContext().checkNodesPresent(rep.getSupport())){  //get context proposition nodes
+    //         return true;
+    //     }
+    //     else{
+    //         return false;
+    //     }
+    // }
 
     public static Support combineSupport(RII rii)
     { //Return Sup of the rule instance
@@ -448,10 +559,25 @@ public class RuleNode extends PropositionNode {
      * 
      * @return
      */
+    ArrayList<Report> introReports = new ArrayList<Report>();
     public void processReports() {
         Report reportHasTurn = Scheduler.getHighQueue().poll();
         try {
-            processSingleReports(reportHasTurn);
+            if(Scheduler.getHighQueue().isEmpty() && introReports.size() > 0)
+                {
+                    processIntroReports(introReports);
+                }
+            if (reportHasTurn.getInferenceType() == InferenceType.INTRO)
+            {
+                System.out.println("Adding Intro Report in " + reportHasTurn.getContextName());
+                introReports.add(reportHasTurn);
+                processReports();
+            }
+            else{
+                System.out.println("Not Intro Report");
+                processSingleReports(reportHasTurn);
+                processReports();
+            }
         } catch (Exception e) {
             // TODO: handle exception
         }
@@ -473,6 +599,10 @@ public class RuleNode extends PropositionNode {
 
         boolean assertedInContext = supported(currentReportContextName, currentReportAttitudeID);
         Substitutions onlySubsBindFreeVar = onlyRelevantSubs(currentReportSubs);
+
+        if(currentReport.getReportType() == ReportType.Introduction){
+            processIntroductionReport(currentReport);
+        }
 
         if (currentReport.getReportType() == ReportType.AntRule) {
             Channel tempChannel = new AntecedentToRuleChannel(null, currentReportSubs, currentReportContextName,

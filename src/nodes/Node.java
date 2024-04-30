@@ -14,6 +14,7 @@ import cables.DownCable;
 import cables.DownCableSet;
 import cables.UpCable;
 import cables.UpCableSet;
+import caseFrames.Adjustability;
 import components.Substitutions;
 import exceptions.NoSuchTypeException;
 
@@ -24,7 +25,7 @@ public abstract class Node {
 	private UpCableSet upCableSet;
 	private final Syntactic syntacticType;
 	private DownCableSet downCableSet;
-	private NodeSet freeVariableSet;
+	private NodeSet freeVariableSet = new NodeSet() ;
 	private static int count = 0;
 
 	public Node(String name, Boolean isVariable) { // constructor for base and
@@ -52,7 +53,6 @@ public abstract class Node {
 		this.upCableSet = new UpCableSet();
 
 		this.downCableSet = downCables;
-		freeVariableSet = new NodeSet();
 		System.out.println(freeVariableSet.getValues());
 		for (Cable c : downCables.getValues())
 			for (Node node : c.getNodeSet().getValues())
@@ -176,7 +176,43 @@ public abstract class Node {
 		return null;
 	}
 
+	public Node setNegation() throws NoSuchTypeException {
+		UpCableSet upCableSet = this.getUpCableSet();
+		Node zero = Network.createNode("0", "propositionnode");
+		Relation neg = new Relation("arg", "", Adjustability.NONE, 1);
+		Relation min = new Relation("min", "", Adjustability.NONE, 1);
+		Relation max = new Relation("max", "", Adjustability.NONE, 1);
+		DownCable minCable = new DownCable(min, new NodeSet(zero)); 
+		DownCable maxCable = new DownCable(max, new NodeSet(zero)); 
+		DownCableSet downCableSet = new DownCableSet(minCable,maxCable);
+		Node negation = Network.createNode("rulenode", downCableSet);
+		UpCable negationCable = new UpCable(neg, new NodeSet(negation));
+		upCableSet.addCable(negationCable);
+		System.out.println("Negation: " + negation);
+		return negation;
+
+	}
+
+	public static Node createNegation(Node negated) throws NoSuchTypeException {
+		if(Network.getBaseNodes().get("0") == null){
+			System.out.println("zeroNode is null");
+			return negated.setNegation();
+		}
+		NodeSet zeroNode = new NodeSet(Network.getBaseNodes().get("0"));
+		DownCable min = new DownCable(Network.getRelations().get("min"), zeroNode);
+		DownCable max = new DownCable(Network.getRelations().get("max"), zeroNode);
+		NodeSet negatedSet = new NodeSet(negated);
+		DownCable arg = new DownCable(Network.getRelations().get("arg"), negatedSet);
+		DownCableSet negationDownCableSet = new DownCableSet(min, max, arg);
+		return Network.createNode("rulenode", negationDownCableSet);
+	}
+
 	public boolean isFree(Node Node) {
+		// System.out.println("reached isFree");
+		// System.out.println(Node);
+		// System.out.println(this);
+		// System.out.println(Node.getFreeVariables());
+		// System.out.println(Node.getFreeVariables().contains(this));
 		return Node.getFreeVariables().contains(this);
 	}
 
@@ -250,20 +286,13 @@ public abstract class Node {
 			}
 		}
 	}
-
+	
 	public Node applySubstitution(Substitutions substitutions)
 			throws NoSuchTypeException {
 		HashMap<String, Node> builtNodes = new HashMap<String, Node>();
 		LinkedList<Node> pathTrace = new LinkedList<Node>();
 		return this.substituteHelper(this, substitutions, builtNodes, pathTrace);
 	}
-	// //My applySub Method (Mostafa)
-	// public Node applySubstitution(Substitutions substitutions, Node node)
-	// 		throws NoSuchTypeException {
-	// 	HashMap<String, Node> builtNodes = new HashMap<String, Node>();
-	// 	LinkedList<Node> pathTrace = new LinkedList<Node>();
-	// 	return substituteHelper(node, substitutions, builtNodes, pathTrace);
-	// }
 
 	private Node substituteHelper(Node parent,
 			Substitutions substitutions,
@@ -434,6 +463,10 @@ public abstract class Node {
 	public void processRequests() {
 		// TODO Auto-generated method stub
 
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 }

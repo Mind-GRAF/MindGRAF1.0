@@ -6,6 +6,20 @@
   "configurations": [
     {
       "type": "java",
+      "name": "Network",
+      "request": "launch",
+      "mainClass": "network.Network",
+      "projectName": "MindGraf"
+    },
+    {
+      "type": "java",
+      "name": "RuleNode",
+      "request": "launch",
+      "mainClass": "nodes.RuleNode",
+      "projectName": "MindGraf"
+    },
+    {
+      "type": "java",
       "name": "CombinationSet",
       "request": "launch",
       "mainClass": "set.CombinationSet",

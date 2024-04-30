@@ -17,7 +17,7 @@ public class RII {
     private ReportSet reportSet;
     private int posCount;
     private int negCount;
-    private boolean isSufficent;
+    private boolean isSufficient;
 
     public RII(Request request, NodeSet antNodes, NodeSet conqArgNodes, Context context, int attitudeID) {
         this.request = request;
@@ -25,10 +25,10 @@ public class RII {
         this.conqArgNodes = conqArgNodes;
         this.context = context;
         this.attitudeID = attitudeID;
-        this.reportSet = null;
+        this.reportSet = new ReportSet();
         this.posCount = 0;
         this.negCount = 0;
-        this.isSufficent = false;
+        this.isSufficient = false;
     }
 
     public void addPosReport() {
@@ -40,11 +40,11 @@ public class RII {
     }
 
     public void setSufficent() {
-        this.isSufficent = true;
+        this.isSufficient = true;
     }
 
-    public boolean isSufficent() {
-        return this.isSufficent;
+    public boolean isSufficient() {
+        return this.isSufficient;
     }
 
     public int getPosCount() {
@@ -80,18 +80,13 @@ public class RII {
     }
 
     public void update(Report report) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'update'");
+        if(report.isSign()){
+            addPosReport();
+            reportSet.add(report);
+        }
+        else{
+            addNegReport();
+            reportSet.add(report);
+        }
     }
-
-    // private RII findMatchingRII(Report report) {
-    //     // Option 2: Searching within the rule node (assuming a List<RII> riiList exists within the rule node)
-    //     for (RII rii : rule.getRiiList()) {
-    //         if (rii.getContext().equals(report.getContext())) {
-    //             return rii;
-    //         }
-    //     }
-    //     return null; // No matching RII found
-    // }
-
 }
