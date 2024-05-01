@@ -21,6 +21,7 @@ import set.NodeSet;
 import cables.DownCable;
 import cables.DownCableSet;
 import cables.UpCable;
+import exceptions.DirectCycleException;
 import exceptions.NoSuchTypeException;
 import set.PropositionNodeSet;
 import support.Pair;
@@ -514,7 +515,7 @@ public class PropositionNode extends Node {
             supportPropSet.add(this);
             Substitutions subs = substitutions == null ? new Substitutions() : substitutions;
             Substitutions subs2 = new Substitutions();
-            Report toBeSent = new Report(subs, supportPropSet, currentAttitudeID, reportSign, inferenceType, null);
+            Report toBeSent = new Report(subs, support, currentAttitudeID, reportSign, inferenceType, null);
             toBeSent.setContextName(currentContextName);
             toBeSent.setReportType(channelType);
             switch (channelType) {
@@ -689,9 +690,10 @@ public class PropositionNode extends Node {
      * 
      * @param report
      * @return Report
+     * @throws DirectCycleException 
      */
 
-    private Report attemptAddingReportToKnownInstances(Report report) {
+    private Report attemptAddingReportToKnownInstances(Report report) throws DirectCycleException {
         if (this.isOpen()) {
             boolean flag;
             boolean channelCheck = report.getReportType() == ReportType.Matched
@@ -847,8 +849,9 @@ public class PropositionNode extends Node {
      * 
      * @param currentRequest
      * @return
+     * @throws DirectCycleException 
      */
-    protected void processSingleRequests(Request currentRequest) {
+    protected void processSingleRequests(Request currentRequest) throws DirectCycleException {
         System.out.println(this.getName() + " Processing Requests as a Proposition node");
 
         Channel currentChannel = currentRequest.getChannel();
@@ -859,7 +862,8 @@ public class PropositionNode extends Node {
         PropositionNodeSet supportNodeSet = new PropositionNodeSet();
         if (this.supported(currentContext, currentAttitude)) {
             supportNodeSet.add((PropositionNode) this);
-            Report NewReport = new Report(reportSubstitutions, supportNodeSet, currentAttitude, true,
+            Support support = new Support(-1, new Pair<>(supportNodeSet, new PropositionNodeSet()), currentAttitude);
+            Report NewReport = new Report(reportSubstitutions, support, currentAttitude, true,
                     InferenceType.BACKWARD, requesterNode);
             // if (((RuleNode) requesterNode).isForwardReport() == true) {
             // NewReport.setInferenceType(InferenceType.FORWARD);
@@ -963,8 +967,9 @@ public class PropositionNode extends Node {
      * 
      * @param currentReport
      * @throws NoSuchTypeException
+     * @throws DirectCycleException 
      */
-    protected void processSingleReports(Report currentReport) throws NoSuchTypeException {
+    protected void processSingleReports(Report currentReport) throws NoSuchTypeException, DirectCycleException {
         System.out.println(this.getName() + " Processing Reports as a Proposition node");
         boolean forwardReportType = currentReport.getInferenceType() == InferenceType.FORWARD;
 
@@ -980,7 +985,8 @@ public class PropositionNode extends Node {
                     supportNode.addJustificationBasedSupport(reportToBeBroadcasted.getSupport());
                     PropositionNodeSet reportSupportPropSet = new PropositionNodeSet();
                     reportSupportPropSet.add(supportNode);
-                    reportToBeBroadcasted.setSupport(reportSupportPropSet);
+                    Support support = new Support(-1, new Pair<>(reportSupportPropSet,new PropositionNodeSet()), reportToBeBroadcasted.getAttitude());
+                    reportToBeBroadcasted.setSupport(support);
                     if (reportToBeBroadcasted.getInferenceType() == InferenceType.FORWARD) {
                         System.out.println(
                                 "A New Fact has been succefully added to the set of forward asserted nodes");
@@ -1019,8 +1025,15 @@ public class PropositionNode extends Node {
 
     }
 
-    private void addJustificationBasedSupport(PropositionNodeSet support) {
-        // TODO Ahmed
+    private void addJustificationBasedSupport(Support support) {
+    	for(Integer key : support.getJustificationSupport().getFirst().keySet()) {
+        	try {
+				this.getSupport().addJustificatoinSupportForAttitude(key, support.getJustificationSupport().getFirst().get(key));
+			} catch (DirectCycleException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    	}
 
     }
 

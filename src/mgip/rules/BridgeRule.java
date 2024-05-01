@@ -12,6 +12,7 @@ import mgip.requests.ChannelType;
 import mgip.requests.MatchChannel;
 import mgip.requests.Request;
 import context.Context;
+import exceptions.DirectCycleException;
 import exceptions.NoSuchTypeException;
 import nodes.Node;
 import set.NodeSet;
@@ -81,8 +82,9 @@ public class BridgeRule extends RuleNode {
      * Request handling in Rule proposition nodes.
      * 
      * @param currentRequest
+     * @throws DirectCycleException 
      */
-    protected void processSingleRequests(Request currentRequest) {
+    protected void processSingleRequests(Request currentRequest) throws DirectCycleException {
         Channel currentChannel = currentRequest.getChannel();
         if (currentChannel instanceof AntecedentToRuleChannel || currentChannel instanceof MatchChannel)
             super.processSingleRequests(currentRequest);
@@ -144,7 +146,7 @@ public class BridgeRule extends RuleNode {
 
     }
 
-    protected void processSingleReports(Report currentReport) throws NoSuchTypeException {
+    protected void processSingleReports(Report currentReport) throws NoSuchTypeException, DirectCycleException {
         String currentReportContextName = currentReport.getContextName();
         int currentReportAttitudeID = currentReport.getAttitude();
         Substitutions currentReportSubs = currentReport.getSubstitutions();

@@ -4,10 +4,11 @@ import mgip.requests.ChannelType;
 import components.Substitutions;
 import nodes.Node;
 import set.PropositionNodeSet;
+import support.Support;
 
 public class Report {
     private Substitutions substitutions;
-    private PropositionNodeSet support;
+    private Support support;
     private boolean sign;
     private InferenceType inferenceType;
     private Node requesterNode;
@@ -15,7 +16,7 @@ public class Report {
     private String contextName;
     private ReportType reportType;
 
-    public Report(Substitutions substitution, PropositionNodeSet suppt, int attitudeid,
+    public Report(Substitutions substitution, Support suppt, int attitudeid,
             boolean sign, InferenceType inference, Node requesterNode) {
         this.substitutions = substitution;
         this.attitude = attitudeid;
@@ -66,11 +67,11 @@ public class Report {
         this.substitutions = substitutions;
     }
 
-    public PropositionNodeSet getSupport() {
+    public Support getSupport() {
         return support;
     }
 
-    public void setSupport(PropositionNodeSet support) {
+    public void setSupport(Support support) {
         this.support = support;
     }
 

@@ -20,6 +20,7 @@ import set.NodeSet;
 import cables.DownCable;
 import cables.DownCableSet;
 import components.Substitutions;
+import exceptions.DirectCycleException;
 import exceptions.NoSuchTypeException;
 
 public class RuleNode extends PropositionNode {
@@ -207,8 +208,9 @@ public class RuleNode extends PropositionNode {
      * 
      * @param currentRequest
      * @return
+     * @throws DirectCycleException 
      */
-    protected void processSingleRequests(Request currentRequest) {
+    protected void processSingleRequests(Request currentRequest) throws DirectCycleException {
         System.out.println(this.getName() + " Processing Requests as a Rule node");
         Channel currentChannel = currentRequest.getChannel();
         if (currentChannel instanceof AntecedentToRuleChannel || currentChannel instanceof MatchChannel)
@@ -284,8 +286,9 @@ public class RuleNode extends PropositionNode {
      * 
      * @param currentReport
      * @return
+     * @throws DirectCycleException 
      */
-    protected void processSingleReports(Report currentReport) throws NoSuchTypeException {
+    protected void processSingleReports(Report currentReport) throws NoSuchTypeException, DirectCycleException {
         System.out.println(this.getName() + " Processing Reports as a Rule node");
 
         String currentReportContextName = currentReport.getContextName();
@@ -434,11 +437,11 @@ public class RuleNode extends PropositionNode {
 
     // method for any of the children rules to call whenever it needs to act as a
     // normal proposition node
-    public void grandparentMethodRequest(Request currentRequest) {
+    public void grandparentMethodRequest(Request currentRequest) throws DirectCycleException {
         super.processSingleRequests(currentRequest);
     }
 
-    public void grandparentMethodReport(Report currentReport) throws NoSuchTypeException {
+    public void grandparentMethodReport(Report currentReport) throws NoSuchTypeException, DirectCycleException {
         super.processSingleReports(currentReport);
     }
 

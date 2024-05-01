@@ -17,7 +17,7 @@ import nodes.PropositionNode;
 public class Support {
 
 	private int nodeID;
-	private HashMap<Integer, ArrayList<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>>> justificationSupport;
+	private Pair<HashMap<Integer, ArrayList<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>>>,PropositionNodeSet> justificationSupport;
 	private Pair<HashMap<Integer, ArrayList<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>>>,PropositionNodeSet> assumptionSupport;
 	private HashMap<Integer, SupportTree> supportsTree;
 	private HashSet<Integer> isHyp;
@@ -26,8 +26,32 @@ public class Support {
 	public Support(int nodeID){
 		// Constructor
 		this.nodeID = nodeID;
-		justificationSupport = new HashMap<>();
+		justificationSupport = new Pair<>();
 		assumptionSupport = new Pair<>();
+		isHyp = new HashSet<>();
+		isTreeCalculatetd = new HashSet<>();
+		supportsTree = new HashMap<>();
+	}
+	
+	public Support(int nodeID, HashMap<Integer, ArrayList<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>>> justificationSupport) throws DirectCycleException{
+		// Constructor
+		setJustificationSupport(new Pair<>(justificationSupport,new PropositionNodeSet()));
+		this.nodeID = nodeID;
+		isHyp = new HashSet<>();
+		isTreeCalculatetd = new HashSet<>();
+		supportsTree = new HashMap<>();
+	}
+	
+	public Support(int nodeID, Pair<PropositionNodeSet,PropositionNodeSet> justificationSupport, int currentAttitudeID) throws DirectCycleException{
+		// Constructor
+		HashMap<Integer,Pair<PropositionNodeSet,PropositionNodeSet>> innerHashMap = new HashMap<>();
+        innerHashMap.put(currentAttitudeID, justificationSupport);
+        ArrayList<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>> array = new ArrayList<>();
+        array.add(innerHashMap);
+        HashMap<Integer, ArrayList<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>>> outerHashMap = new HashMap<>();
+        outerHashMap.put(currentAttitudeID, array);
+		setJustificationSupport(new Pair<>(outerHashMap,new PropositionNodeSet()));
+		this.nodeID = nodeID;
 		isHyp = new HashSet<>();
 		isTreeCalculatetd = new HashSet<>();
 		supportsTree = new HashMap<>();
@@ -57,7 +81,7 @@ public class Support {
 	/**
 	 * @return the justificationSupport
 	 */
-	public HashMap<Integer, ArrayList<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>>> getJustificationSupport() {
+	public Pair<HashMap<Integer, ArrayList<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>>>,PropositionNodeSet> getJustificationSupport() {
 		return justificationSupport;
 	}
 
@@ -72,18 +96,18 @@ public class Support {
 	 * @param justificationSupport the justificationSupport to set
 	 * @throws Exception 
 	 */
-	public void setJustificationSupport(
-		HashMap<Integer, ArrayList<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>>> justificationSupport) throws DirectCycleException {
-		if(hasCycle(justificationSupport)){
+	private void setJustificationSupport(
+			Pair<HashMap<Integer, ArrayList<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>>>,PropositionNodeSet> justificationSupport) throws DirectCycleException {
+		if(hasCycle(justificationSupport.getFirst())){
 			throw new DirectCycleException("Direct Cycle found");
 		}
 		else {
-			this.assumptionSupport.setFirst(createAssumptionSupport(justificationSupport));
+			this.assumptionSupport.setFirst(createAssumptionSupport(justificationSupport.getFirst()));
 			this.justificationSupport = justificationSupport;
 		}
 	}
 
-	public boolean hasCycle(
+	private boolean hasCycle(
 		HashMap<Integer, ArrayList<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>>> justificationSupport) {
 		
 		PropositionNodeSet dependents = new PropositionNodeSet();
@@ -112,8 +136,12 @@ public class Support {
 		}
 		
 		HashMap<Integer, Node> networkPropositions = Network.getPropositionNodes();
-		PropositionNode thisNode = (PropositionNode) networkPropositions.get(nodeID);
-		thisNode.getJustificationSupportDependents().putAll(dependents.getValues());
+		for(int currProp : dependents.getValues()) {
+			PropositionNode depNode = (PropositionNode) networkPropositions.get(currProp);
+			if(nodeID != -1) {
+				depNode.getJustificationSupportDependents().add(nodeID);
+			}
+		}
 		return false;
 	}
 
@@ -153,8 +181,10 @@ public class Support {
 			newAssumptionSupport.put(supportedAttitude, newAssumptionsHashMapArray);
 		}
 		
-		PropositionNode thisNode = (PropositionNode) networkPropositions.get(nodeID);
-		thisNode.getAssumptionSupportDependents().putAll(dependents.getValues());
+		for(Integer dep: dependents.getValues()) {
+			PropositionNode depNode = (PropositionNode) networkPropositions.get(dep);
+			depNode.getAssumptionSupportDependents().add(nodeID);
+		}
 		return newAssumptionSupport;
 	}
 
@@ -192,9 +222,10 @@ public class Support {
 								PropositionNodeSet newPropSet2 = oldPropsSet.getSecond();
 
 								newPropSet1.putAll(currPropsSet.getFirst().getValues());
-								newPropSet1.putAll(currPropsSet.getSecond().getValues());
 								newPropSet2.putAll(currPropsSet.getSecond().getValues());
 
+								
+								
 								// for(int oldProp : oldPropsSet.getProps()) {
 								// 	newPropSet.add(oldProp);
 								// 	dependents.add(oldProp);
@@ -203,14 +234,36 @@ public class Support {
 								// 	newPropSet.add(currProp);
 								// 	dependents.add(currProp);
 								// }
+								
+								PropositionNodeSet newpropSet3 = newPropSet1;
+								newpropSet3.putAll(newPropSet2.getValues());
+								for(int currProp : newpropSet3.getValues()) {
+									PropositionNode depNode = (PropositionNode) networkPropositions.get(currProp);
+									if(nodeID != -1) {
+										depNode.getAssumptionSupportDependents().add(nodeID);
+									}
+									this.assumptionSupport.getSecond().putAll(depNode.getSupport().getAssumptionSupport().getSecond().getValues());
+									this.justificationSupport.getSecond().putAll(depNode.getSupport().getJustificationSupport().getSecond().getValues());
+								}
+								
 								newSupport.put(currAttitude, new Pair<PropositionNodeSet,PropositionNodeSet>(newPropSet1,newPropSet2));
 							}
 							else {
 								for(int currProp : currSupport.get(currAttitude).getFirst().getProps()) {
-									dependents.add(currProp);
+									PropositionNode depNode = (PropositionNode) networkPropositions.get(currProp);
+									if(nodeID != -1) {
+										depNode.getAssumptionSupportDependents().add(nodeID);
+									}
+									this.assumptionSupport.getSecond().putAll(depNode.getSupport().getAssumptionSupport().getSecond().getValues());
+									this.justificationSupport.getSecond().putAll(depNode.getSupport().getJustificationSupport().getSecond().getValues());
 								}
 								for(int currProp : currSupport.get(currAttitude).getSecond().getProps()) {
-									dependents.add(currProp);
+									PropositionNode depNode = (PropositionNode) networkPropositions.get(currProp);
+									if(nodeID != -1) {
+										depNode.getAssumptionSupportDependents().add(nodeID);
+									}
+									this.assumptionSupport.getSecond().putAll(depNode.getSupport().getAssumptionSupport().getSecond().getValues());
+									this.justificationSupport.getSecond().putAll(depNode.getSupport().getJustificationSupport().getSecond().getValues());
 								}
 								newSupport.put(currAttitude, currSupport.get(currAttitude));
 							}
@@ -252,7 +305,6 @@ public class Support {
 							PropositionNodeSet newPropSet2 = oldPropsSet.getSecond();
 
 							newPropSet1.putAll(currPropsSet.getFirst().getValues());
-							newPropSet1.putAll(currPropsSet.getSecond().getValues());
 							newPropSet2.putAll(currPropsSet.getSecond().getValues());
 							// for(int oldProp : oldPropsSet.getProps()) {
 							// 	newPropSet.add(oldProp);
@@ -274,13 +326,6 @@ public class Support {
 		return result;
 	}
 
-	// /**
-	//  * @param assumptionSupport the assumptionSupport to set
-	//  */
-	// public void setAssumptionSupport(Pair<HashMap<Integer, ArrayList<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>>>,PropositionNodeSet> assumptionSupport) {
-	// 	this.assumptionSupport = assumptionSupport;
-	// }
-
 	public void addJustificatoinSupportForAttitude(int attitudeID,  ArrayList<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>> justificationSupport) throws DirectCycleException {
 		HashMap<Integer, ArrayList<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>>> temp = new HashMap<>();
 		temp.put(attitudeID, justificationSupport);
@@ -296,11 +341,11 @@ public class Support {
 				this.assumptionSupport.getFirst().put(attitudeID, createAssumptionSupport(temp).get(attitudeID));
 			}
 
-			if(this.justificationSupport.containsKey(attitudeID)){
-				this.justificationSupport.get(attitudeID).addAll(justificationSupport);
+			if(this.justificationSupport.getFirst().containsKey(attitudeID)){
+				this.justificationSupport.getFirst().get(attitudeID).addAll(justificationSupport);
 			}
 			else {
-				this.justificationSupport.put(attitudeID, justificationSupport);
+				this.justificationSupport.getFirst().put(attitudeID, justificationSupport);
 			}
 			isTreeCalculatetd.remove(attitudeID);
 		}
@@ -326,13 +371,13 @@ public class Support {
 
 	public boolean hasChildren(int attitudeID) {
 
-		if(!justificationSupport.containsKey(attitudeID) && ! assumptionSupport.getFirst().containsKey(attitudeID)) {
+		if(!justificationSupport.getFirst().containsKey(attitudeID) && ! assumptionSupport.getFirst().containsKey(attitudeID)) {
 			return false;
 		}
 
 		boolean empty = true;
 
-		for(HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>> curr : justificationSupport.get(attitudeID)) {
+		for(HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>> curr : justificationSupport.getFirst().get(attitudeID)) {
 			for(Integer currKey : curr.keySet()) {
 				if(!curr.get(currKey).getFirst().equals(null) && !curr.get(currKey).getSecond().equals(null)) {
 					empty = false;
@@ -367,7 +412,7 @@ public class Support {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Node").append(nodeID).append(": ").append("\n");
-        sb.append(mapToString(" JustificationSupport", justificationSupport));
+        sb.append(mapToString(" JustificationSupport", justificationSupport.getFirst()));
         sb.append(mapToString(" AssumptionSupport", assumptionSupport.getFirst()));
         return sb.toString();
     }
@@ -395,11 +440,11 @@ public class Support {
                     PropositionNodeSet WeightnodeSet = innerEntry.getValue().getFirst();
 
                     sb.append("       In Attitude ").append(innerKey).append(":").append("\n");
-                    sb.append("       Graded PropositionNodeSet: ").append(WeightnodeSet.toString()).append("\n");
+                    sb.append("       Origin PropositionNodeSet: ").append(WeightnodeSet.toString()).append("\n");
 
                     PropositionNodeSet NonWeightnodeSet = innerEntry.getValue().getSecond();
 
-                    sb.append("       Non Graded PropositionNodeSet: ").append(NonWeightnodeSet.toString()).append("\n");
+                    sb.append("       Graded PropositionNodeSet: ").append(NonWeightnodeSet.toString()).append("\n");
                 }
             }
             sb.append("\n"); // Extra newline for better separation
@@ -409,7 +454,8 @@ public class Support {
     }
 	
 	public void removeNodeFromJustifications (int id) {
-		removeNodeFromSupportHelper(id, justificationSupport);
+		removeNodeFromSupportHelper(id, justificationSupport.getFirst());
+		justificationSupport.getSecond().remove(id);
 	}
 	
 	public void removeNodeFromAssumptions (int id) {
@@ -449,7 +495,7 @@ public class Support {
 	}
 	
 	public void ForgetNodeFromJustifications (int id) {
-		ForgetNodeFromSupportHelper(id, justificationSupport,1);
+		ForgetNodeFromSupportHelper(id, justificationSupport.getFirst(),1);
 	}
 	
 	public void ForgetNodeFromAssumptions (int id) {
@@ -494,7 +540,7 @@ public class Support {
 
 	public void calculateSupportsTree() {
 		
-		for(Integer Attitude : justificationSupport.keySet()) {
+		for(Integer Attitude : justificationSupport.getFirst().keySet()) {
 			if(!isTreeCalculatetd.contains(Attitude))
 			supportsTree.put(Attitude, calculateSupportTreeForAttitude(Attitude));
 		}
@@ -503,7 +549,7 @@ public class Support {
 	
 	public SupportTree calculateSupportTreeForAttitude(int Attitude) {
 		
-		ArrayList<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>> supports = justificationSupport.get(Attitude);
+		ArrayList<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>> supports = justificationSupport.getFirst().get(Attitude);
 		//get Propositions of the network
 		HashMap<Integer, Node> networkPropositions = Network.getPropositionNodes(); 
 		
