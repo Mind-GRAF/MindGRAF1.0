@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import edu.guc.mind_graf.cables.Cable;
 import edu.guc.mind_graf.caseFrames.Adjustability;
@@ -278,31 +279,56 @@ public class Matcher {
     }
 
     private static void pathBasedInference(Node queryNode, Node node, Match match) {
+        List<Match> molecularMatchList = new ArrayList<>();
+        molecularMatchList.add(match);
+        boolean nullCables = true;
         for (Cable downCable : queryNode.getDownCableSet().getValues()) {
+            List<Match> tempMatchList = new ArrayList<>();
             Relation relation = downCable.getRelation();
             Path path = relation.getPath();
-            for (Node qn : downCable.getNodeSet().getValues()) {
-                if (path != null && passPathFirstCheck(qn, node, match, path)) {
-                    PathTrace pathTrace = new PathTrace();
-                    LinkedList<Object[]> listOfNodeList = path.follow(node, pathTrace, context);
-                    if (listOfNodeList == null || listOfNodeList.isEmpty()) {
-                        return;
-                    } else {
-                        for (Object[] nodeList : listOfNodeList) {
-                            Node n = (Node) nodeList[0];
-                            Match m = match.clone();
-                            if (unify(qn, n, m)) {
-                                matchList.add(m);
-                                // matchList.getSupports().add(((PathTrace) nodeList[1]).getSupports());
+            if (downCable == null)
+                continue;
+            nullCables = false;
+            if (path != null && passPathFirstCheck(node, match, path)) {
+                LinkedList<Object[]> listOfNodeList = path.follow(node, new PathTrace(), context);
+                if (listOfNodeList == null || listOfNodeList.isEmpty()) {
+                    continue;
+                } else {
+                    Collection<Node> coll = new ArrayList<>();
+                    Map<Node, NodeSet> nodeSupportMap = new HashMap<>();
+                    for (int i = 0; i < listOfNodeList.size(); i++) {
+                        Object[] arr = listOfNodeList.get(i);
+                        coll.add(((Node) arr[0]));
+                        nodeSupportMap.put(((Node) arr[0]), ((PathTrace) arr[1]).getSupports());
+                    }
+                    List<List<Node>> nodePermutations = getAllPermutations(coll);
+                    for (List<Node> nodePermutation : nodePermutations) {
+                        List<List<Node>> queryNodePermutations = getAllPermutations(
+                                queryNode.getDownCableSet().get(relation.getName()).getNodeSet().getValues());
+                        for (List<Node> queryNodePermutation : queryNodePermutations) {
+                            for (Match molecularMatch : molecularMatchList) {
+                                Match tempMatch = molecularMatch.clone();
+                                if (unifyMolecular(
+                                        queryNodePermutation,
+                                        nodePermutation,
+                                        relation,
+                                        tempMatch) != null)
+                                    tempMatchList.add(tempMatch);
+                                // add supports
                             }
                         }
                     }
                 }
             }
+            molecularMatchList = new ArrayList<>(removeDuplicates(tempMatchList));
         }
+        if (!nullCables) {
+            matchList.addAll(molecularMatchList);
+        }
+        matchList.remove(match);
     }
 
-    private static boolean passPathFirstCheck(Node queryNode, Node node, Match match, Path path) {
+    private static boolean passPathFirstCheck(Node node, Match match, Path path) {
         if (path instanceof EmptyPath || path instanceof BangPath || path instanceof KStarPath) {
             return true;
         } else if (path instanceof FUnitPath) {
@@ -311,31 +337,31 @@ public class Matcher {
             return node.getUpCable(((BUnitPath) path).getRelation().getName()) != null;
         } else if (path instanceof AndPath) {
             for (Path p : ((AndPath) path).getPaths()) {
-                if (!passPathFirstCheck(queryNode, node, match, p)) {
+                if (!passPathFirstCheck(node, match, p)) {
                     return false;
                 }
             }
         } else if (path instanceof OrPath) {
             for (Path p : ((OrPath) path).getPaths()) {
-                if (passPathFirstCheck(queryNode, node, match, p)) {
+                if (passPathFirstCheck(node, match, p)) {
                     return true;
                 }
             }
             return false;
         } else if (path instanceof ComposePath
-                && !passPathFirstCheck(queryNode, node, match, ((ComposePath) path).getPaths().getFirst())) {
+                && !passPathFirstCheck(node, match, ((ComposePath) path).getPaths().getFirst())) {
             return false;
         } else if (path instanceof ConversePath) {
-            return passPathFirstCheck(queryNode, node, match, ((ConversePath) path).getPath().converse());
+            return passPathFirstCheck(node, match, ((ConversePath) path).getPath().converse());
         } else if (path instanceof IrreflexiveRestrictPath) {
-            return passPathFirstCheck(queryNode, node, match, ((IrreflexiveRestrictPath) path).getPath());
+            return passPathFirstCheck(node, match, ((IrreflexiveRestrictPath) path).getPath());
         } else if (path instanceof DomainRestrictPath) {
-            return passPathFirstCheck(queryNode, node, match, ((DomainRestrictPath) path).getP())
-                    && passPathFirstCheck(queryNode, node, match, ((DomainRestrictPath) path).getQ());
+            return passPathFirstCheck(node, match, ((DomainRestrictPath) path).getP())
+                    && passPathFirstCheck(node, match, ((DomainRestrictPath) path).getQ());
         } else if (path instanceof RangeRestrictPath) {
-            return passPathFirstCheck(queryNode, node, match, ((RangeRestrictPath) path).getP());
+            return passPathFirstCheck(node, match, ((RangeRestrictPath) path).getP());
         } else if (path instanceof KPlusPath) {
-            return passPathFirstCheck(queryNode, node, match, ((KPlusPath) path).getPath());
+            return passPathFirstCheck(node, match, ((KPlusPath) path).getPath());
         }
         return true;
     }

@@ -486,8 +486,8 @@ public class MatcherTest {
             Node phy = Network.createNode("phy", "propositionnode");
             Node var = Network.createVariableNode("var", "propositionnode");
 
-            Relation p = Network.createRelation("p", "", Adjustability.NONE, 0);
-            Relation obj = Network.createRelation("obj", "", Adjustability.NONE, 0);
+            Relation p = Network.createRelation("p", "", Adjustability.REDUCE, 0);
+            Relation obj = Network.createRelation("obj", "", Adjustability.REDUCE, 0);
             obj.setPath(new edu.guc.mind_graf.paths.KStarPath(new edu.guc.mind_graf.paths.FUnitPath(p)));
 
             DownCable d1 = new DownCable(obj, new NodeSet(cs));
@@ -514,8 +514,8 @@ public class MatcherTest {
             Node phy = Network.createNode("phy", "propositionnode");
             Node var = Network.createVariableNode("var", "propositionnode");
 
-            Relation p = Network.createRelation("p", "", Adjustability.NONE, 0);
-            Relation obj = Network.createRelation("obj", "", Adjustability.NONE, 0);
+            Relation p = Network.createRelation("p", "", Adjustability.REDUCE, 0);
+            Relation obj = Network.createRelation("obj", "", Adjustability.REDUCE, 0);
             obj.setPath(new edu.guc.mind_graf.paths.KPlusPath(new edu.guc.mind_graf.paths.FUnitPath(p)));
 
             DownCable d1 = new DownCable(obj, new NodeSet(cs));
@@ -542,8 +542,8 @@ public class MatcherTest {
             Node phy = Network.createNode("phy", "propositionnode");
             Node var = Network.createVariableNode("var", "propositionnode");
 
-            Relation p = Network.createRelation("p", "", Adjustability.NONE, 0);
-            Relation obj = Network.createRelation("obj", "", Adjustability.NONE, 0);
+            Relation p = Network.createRelation("p", "", Adjustability.REDUCE, 0);
+            Relation obj = Network.createRelation("obj", "", Adjustability.REDUCE, 0);
             obj.setPath(new edu.guc.mind_graf.paths.FUnitPath(p));
 
             DownCable d1 = new DownCable(obj, new NodeSet(cs));
@@ -570,8 +570,8 @@ public class MatcherTest {
             Node phy = Network.createNode("phy", "propositionnode");
             Node var = Network.createVariableNode("var", "propositionnode");
 
-            Relation p = Network.createRelation("p", "", Adjustability.NONE, 0);
-            Relation obj = Network.createRelation("obj", "", Adjustability.NONE, 0);
+            Relation p = Network.createRelation("p", "", Adjustability.REDUCE, 0);
+            Relation obj = Network.createRelation("obj", "", Adjustability.REDUCE, 0);
             obj.setPath(new edu.guc.mind_graf.paths.BUnitPath(p));
 
             DownCable d1 = new DownCable(obj, new NodeSet(cs));
@@ -635,9 +635,9 @@ public class MatcherTest {
             Node theory = Network.createNode("theory", "propositionnode");
             Node var = Network.createVariableNode("var", "propositionnode");
 
-            Relation p = Network.createRelation("p", "", Adjustability.NONE, 0);
-            Relation q = Network.createRelation("q", "", Adjustability.NONE, 0);
-            Relation obj = Network.createRelation("obj", "", Adjustability.NONE, 0);
+            Relation p = Network.createRelation("p", "", Adjustability.REDUCE, 0);
+            Relation q = Network.createRelation("q", "", Adjustability.REDUCE, 0);
+            Relation obj = Network.createRelation("obj", "", Adjustability.REDUCE, 0);
             obj.setPath(new edu.guc.mind_graf.paths.OrPath(new edu.guc.mind_graf.paths.BUnitPath(q),
                     new edu.guc.mind_graf.paths.FUnitPath(p)));
 
@@ -671,8 +671,8 @@ public class MatcherTest {
             Node phy = Network.createNode("phy", "propositionnode");
             Node var = Network.createVariableNode("var", "propositionnode");
 
-            Relation p = Network.createRelation("p", "", Adjustability.NONE, 0);
-            Relation obj = Network.createRelation("obj", "", Adjustability.NONE, 0);
+            Relation p = Network.createRelation("p", "", Adjustability.REDUCE, 0);
+            Relation obj = Network.createRelation("obj", "", Adjustability.REDUCE, 0);
             obj.setPath(new edu.guc.mind_graf.paths.ComposePath(new edu.guc.mind_graf.paths.FUnitPath(p),
                     new edu.guc.mind_graf.paths.FUnitPath(p)));
 
@@ -707,8 +707,8 @@ public class MatcherTest {
             Node phy = Network.createNode("phy", "propositionnode");
             Node var = Network.createVariableNode("var", "propositionnode");
 
-            Relation p = Network.createRelation("p", "", Adjustability.NONE, 0);
-            Relation obj = Network.createRelation("obj", "", Adjustability.NONE, 0);
+            Relation p = Network.createRelation("p", "", Adjustability.REDUCE, 0);
+            Relation obj = Network.createRelation("obj", "", Adjustability.REDUCE, 0);
             obj.setPath(new edu.guc.mind_graf.paths.IrreflexiveRestrictPath(new edu.guc.mind_graf.paths.FUnitPath(p)));
 
             DownCable d1 = new DownCable(obj, new NodeSet(cs));
@@ -736,9 +736,9 @@ public class MatcherTest {
             Node n = Network.createNode("n", "propositionnode");
             Node var = Network.createVariableNode("var", "propositionnode");
 
-            Relation p = Network.createRelation("p", "", Adjustability.NONE, 0);
-            Relation q = Network.createRelation("q", "", Adjustability.NONE, 0);
-            Relation obj = Network.createRelation("obj", "", Adjustability.NONE, 0);
+            Relation p = Network.createRelation("p", "", Adjustability.REDUCE, 0);
+            Relation q = Network.createRelation("q", "", Adjustability.REDUCE, 0);
+            Relation obj = Network.createRelation("obj", "", Adjustability.REDUCE, 0);
             obj.setPath(new edu.guc.mind_graf.paths.DomainRestrictPath(new edu.guc.mind_graf.paths.FUnitPath(q),
                     new edu.guc.mind_graf.paths.FUnitPath(p), n));
 
@@ -768,9 +768,9 @@ public class MatcherTest {
             Node n = Network.createNode("n", "propositionnode");
             Node var = Network.createVariableNode("var", "propositionnode");
 
-            Relation p = Network.createRelation("p", "", Adjustability.NONE, 0);
-            Relation q = Network.createRelation("q", "", Adjustability.NONE, 0);
-            Relation obj = Network.createRelation("obj", "", Adjustability.NONE, 0);
+            Relation p = Network.createRelation("p", "", Adjustability.REDUCE, 0);
+            Relation q = Network.createRelation("q", "", Adjustability.REDUCE, 0);
+            Relation obj = Network.createRelation("obj", "", Adjustability.REDUCE, 0);
             obj.setPath(new edu.guc.mind_graf.paths.RangeRestrictPath(new edu.guc.mind_graf.paths.BUnitPath(q),
                     new edu.guc.mind_graf.paths.FUnitPath(p), n));
 
