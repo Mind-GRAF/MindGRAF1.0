@@ -236,10 +236,6 @@ public abstract class RuleNode extends PropositionNode {
             // TODO: handle exception
         }
     }
-
-    public MCII getMcii() {
-        return mcii;
-    }
     
     public boolean processIntroductionRequest(Request currentRequest) throws NoSuchTypeException {
         //need to check if we already made an introduction request to the same node before
@@ -409,7 +405,7 @@ public abstract class RuleNode extends PropositionNode {
         }
     }
 
-    public int processIntroReports(ArrayList<Report> introReps) {
+    public int processIntroductionReports(ArrayList<Report> introReps) {
         // Find matching RII based on report information (rule, context, etc.)
         int res = 0;
         System.out.println(mcii.getExpectedReportsCount());
@@ -486,7 +482,8 @@ public abstract class RuleNode extends PropositionNode {
         Channel currentChannel = currentRequest.getChannel();
         if (currentChannel instanceof AntecedentToRuleChannel || currentChannel instanceof MatchChannel)
             super.processSingleRequests(currentRequest);
-
+        else if(currentChannel instanceof IntroductionChannel)
+            processIntroductionRequest(currentRequest);
         else {
             String currentContext = currentChannel.getContextName();
             int currentAttitude = currentChannel.getAttitudeID();
@@ -549,7 +546,7 @@ public abstract class RuleNode extends PropositionNode {
         try {
             if(Scheduler.getHighQueue().isEmpty() && introReports.size() > 0)
                 {
-                    processIntroReports(introReports);
+                    processIntroductionReports(introReports);
                 }
             if (reportHasTurn.getInferenceType() == InferenceType.INTRO)
             {

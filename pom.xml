@@ -64,6 +64,19 @@
                             </environmentVariables>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>rulenode</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>mvn</executable>
+                            <mainClass>edu.guc.mind_graf.nodes.RuleNode</mainClass>
+                            <environmentVariables>
+                                <LANG>en_US</LANG>
+                            </environmentVariables>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
         </plugins>
