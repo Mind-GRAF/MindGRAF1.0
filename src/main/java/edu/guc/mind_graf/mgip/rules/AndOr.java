@@ -42,7 +42,7 @@ public class AndOr extends RuleNode {
         return inferrable;
     }
 
-    public void sendInferenceResponse(ArrayList<Report> reports) {
+    public void sendInferenceReports(ArrayList<Report> reports) {
         sendResponseToArgs(reports, arg);
     }
 

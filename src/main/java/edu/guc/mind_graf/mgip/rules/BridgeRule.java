@@ -61,6 +61,7 @@ public class BridgeRule extends RuleNode {
         }
         cAnt = antToAttitude.keySet().size() - antecedents.size();
         this.ruleInfoHandler = Ptree.constructPtree(antecedents, antecedents.size(), Integer.MAX_VALUE, 2);
+        this.ruleInfoHandler.setcMin(cAnt);
     }
 
 //    public boolean mayTryToInfer() {
@@ -90,7 +91,7 @@ public class BridgeRule extends RuleNode {
         }
     }
 
-    public void sendInferenceResponse(ArrayList<Report> reports) {
+    public void sendInferenceReports(ArrayList<Report> reports) {
         for(Report report : reports) {
             Report newReportInAttitude = report.clone();
             for(Node cq : cqToAttitude.keySet()){

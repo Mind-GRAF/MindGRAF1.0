@@ -37,7 +37,7 @@ public class AndEntailment extends RuleNode {
         return inferrable;
     }
 
-    public void sendInferenceResponse(ArrayList<Report> reports) {
+    public void sendInferenceReports(ArrayList<Report> reports) {
         sendInferenceToCq(reports, cq);
     }
 

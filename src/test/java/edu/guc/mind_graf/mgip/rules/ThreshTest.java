@@ -25,7 +25,7 @@ class ThreshTest {
         Network network = new Network();
         Node X = Network.createVariableNode("X", "propositionnode");
         Node one = Network.createNode("1", "individualnode");
-        Node three = Network.createNode("3", "individualnode");
+        Node two = Network.createNode("2", "individualnode");
         Node idealistic = Network.createNode("Idealistic", "individualnode");
         Node moral = Network.createNode("Moral", "individualnode");
         Node brave = Network.createNode("Brave", "individualnode");
@@ -41,7 +41,7 @@ class ThreshTest {
         Node M2 = Network.createNode("propositionnode", new DownCableSet(bMember, bClass));
 
         Node P0 = Network.createNode("thresh", new DownCableSet(new DownCable(Network.getRelations().get("thresh"), new NodeSet(one)),
-                new DownCable(Network.getRelations().get("threshmax"), new NodeSet(three)),
+                new DownCable(Network.getRelations().get("threshmax"), new NodeSet(two)),
                 new DownCable(Network.getRelations().get("arg"), new NodeSet(M0, M1, M2))));
 
         Substitutions subs = new Substitutions();

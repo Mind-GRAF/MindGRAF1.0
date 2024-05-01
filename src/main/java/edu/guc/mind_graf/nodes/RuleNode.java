@@ -3,6 +3,7 @@ package edu.guc.mind_graf.nodes;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import edu.guc.mind_graf.exceptions.InvalidRuleInfoException;
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.reports.KnownInstance;
@@ -53,23 +54,24 @@ public abstract class RuleNode extends PropositionNode {
 
         try{
             RuleInfoSet inserted = ruleInfoHandler.insertRI(RuleInfo.createRuleInfo(report));
-            if(inserted != null && inserted.size() > 0){
+            if(inserted != null && !inserted.isEmpty()){
                 rootRuleInfos.addRootRuleInfo(inserted);
                 RuleInfoSet[] mayInfer = mayInfer();
-                sendInferenceReports(mayInfer);
+                createInferenceReports(mayInfer);
             }
-        } catch (Exception e){
-
+        } catch (InvalidRuleInfoException e){
+            System.out.println("Inserting RI failed");
         }
 
     }
 
     public abstract RuleInfoSet[] mayInfer();
 
-    public void sendInferenceReports(RuleInfoSet[] inferrable) {
+    public void createInferenceReports(RuleInfoSet[] inferrable) {
         ArrayList<Report> reports = new ArrayList<>();
          for (int i = 0; i < inferrable.length; i++) {
              for(RuleInfo ri : inferrable[i]) {
+                 rootRuleInfos.removeRuleInfo(ri);
                  PropositionNodeSet supports = new PropositionNodeSet();   // probably wrong (maybe should make new support of the flag nodes and rule node
                  for (FlagNode fn : ri.getFns()) {
                      supports.add(fn.getNode());
@@ -79,10 +81,11 @@ public abstract class RuleNode extends PropositionNode {
                          (i == 0), InferenceType.FORWARD, null, this);
                  newReport.setContextName(ri.getContext());
                  newReport.setReportType(ReportType.RuleCons);
+                 newReport.getSubstitutions().removeNulls();
                  reports.add(newReport);
              }
          }
-        sendInferenceResponse(reports);
+        sendInferenceReports(reports);
     }
 
     public void sendResponseToArgs(ArrayList<Report> reports,NodeSet arg) {
@@ -103,7 +106,7 @@ public abstract class RuleNode extends PropositionNode {
         }
     }
 
-    public abstract void sendInferenceResponse(ArrayList<Report> reports);
+    public abstract void sendInferenceReports(ArrayList<Report> reports);
 
     /***
      * this method gets all the consequents and arguments that this node is a rule
@@ -443,7 +446,6 @@ public abstract class RuleNode extends PropositionNode {
 
                 for (Channel outMatchChannel : outgoingMatchedChannels) {
                     sendReport(currentReport, outMatchChannel);
-
                 }
                 for (Channel outAntChannel : outgoingAntRuleChannels) {
                     sendReport(currentReport, outAntChannel);
