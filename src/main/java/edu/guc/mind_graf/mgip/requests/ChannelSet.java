@@ -13,6 +13,7 @@ public class ChannelSet implements Iterable<Channel> {
         channels.put(ChannelType.Matched, new Hashtable<String, Channel>());
         channels.put(ChannelType.RuleCons, new Hashtable<String, Channel>());
         channels.put(ChannelType.AntRule, new Hashtable<String, Channel>());
+        channels.put(ChannelType.Introduction, new Hashtable<String, Channel>());
     }
 
     public Channel addChannel(Channel channel) {
@@ -69,6 +70,11 @@ public class ChannelSet implements Iterable<Channel> {
 
     public Collection<Channel> getMatchChannels() {
         Hashtable<String, Channel> channelsHash = channels.get(ChannelType.Matched);
+        return channelsHash.values();
+    }
+
+    public Collection<Channel> getIntroductionChannels() {
+        Hashtable<String, Channel> channelsHash = channels.get(ChannelType.Introduction);
         return channelsHash.values();
     }
 

@@ -71,6 +71,8 @@ public class Channel {
             channelType = ChannelType.AntRule;
         else if (this instanceof RuleToConsequentChannel)
             channelType = ChannelType.RuleCons;
+        else if (this instanceof IntroductionChannel)
+            channelType = ChannelType.Introduction;
         else
             channelType = ChannelType.Matched;
         return channelType;

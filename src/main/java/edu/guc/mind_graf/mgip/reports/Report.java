@@ -18,7 +18,7 @@ public class Report {
     private Node reporterNode;
 
     public Report(Substitutions substitution, PropositionNodeSet suppt, int attitudeid,
-                  boolean sign, InferenceType inference, Node requesterNode, Node reporterNode) {
+            boolean sign, InferenceType inference, Node requesterNode, Node reporterNode) {
         this.substitutions = substitution;
         this.attitude = attitudeid;
         this.support = suppt;
@@ -43,8 +43,8 @@ public class Report {
      * this method checks if the nodes that helped in creating the report are
      * supported in the attitude in the context belonging to the report
      * 
-     * @param //reportContextName
-     * @param //reportAttitudeID
+     * @param reportContextName
+     * @param reportAttitudeID
      */
     public boolean anySupportSupportedInAttitudeContext(String ChnlContextName, int ChnlAttitudeID) {
         // int[] supportIds = support.getProps();
@@ -128,6 +128,9 @@ public class Report {
             case RuleCons:
                 this.setReportType(ReportType.RuleCons);
                 break;
+            case Introduction:
+                this.setReportType(ReportType.Introduction);
+                break;
             default:
                 // handle error or do nothing
                 break;
@@ -142,7 +145,7 @@ public class Report {
         this.inferenceType = inferenceType;
     }
 
-
+    
     public Node getReporterNode() {
         return reporterNode;
     }
@@ -154,5 +157,11 @@ public class Report {
     public boolean anySupportSupportedInAttitude(Integer integer) {
         // TODO
         return true;
+    }
+
+    public Context getContext(String contextName2) {
+        // TODO Auto-generated method stub
+        return new Context("Context 1", 1, new NodeSet());
+        // throw new UnsupportedOperationException("Unimplemented method 'getContext'");
     }
 }
