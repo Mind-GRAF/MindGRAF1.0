@@ -22,12 +22,16 @@ import edu.guc.mind_graf.cables.UpCable;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.support.Support;
 
 public class PropositionNode extends Node {
     protected ChannelSet outgoingChannels;
     protected ChannelSet forwardChannels;
     protected KnownInstanceSet knownInstances;
     protected boolean forwardDone;
+    protected Support support;
+    protected PropositionNodeSet justificationSupportDependents;
+    protected PropositionNodeSet assumptionSupportDependents;
 
     public PropositionNode(String name, Boolean isVariable) {
         super(name, isVariable);
@@ -46,6 +50,28 @@ public class PropositionNode extends Node {
         forwardDone = false;
         knownInstances = new KnownInstanceSet();
     }
+
+    /**
+     * @return the support
+     */
+    public Support getSupport() {
+        return support;
+    }
+
+    /**
+     * @return the justificationSupportDependents
+     */
+    public PropositionNodeSet getJustificationSupportDependents() {
+        return justificationSupportDependents;
+    }
+
+    /**
+     * @return the assumptionSupportDependents
+     */
+    public PropositionNodeSet getAssumptionSupportDependents() {
+        return assumptionSupportDependents;
+    }
+
 
     /***
      * Method getting the NodeSet that this current node is considered a consequent
