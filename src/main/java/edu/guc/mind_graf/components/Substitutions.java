@@ -165,11 +165,4 @@ public class Substitutions {
         return map.isEmpty();
     }
 
-    public void removeNulls(){
-        for(Node var : map.keySet()){
-            if(map.get(var) == null){
-                map.remove(var);
-            }
-        }
-    }
 }

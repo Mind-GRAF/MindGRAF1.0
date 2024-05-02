@@ -72,6 +72,7 @@ public abstract class RuleNode extends PropositionNode {
          for (int i = 0; i < inferrable.length; i++) {
              for(RuleInfo ri : inferrable[i]) {
                  rootRuleInfos.removeRuleInfo(ri);
+                 ri.removeNullSubs();
                  PropositionNodeSet supports = new PropositionNodeSet();   // probably wrong (maybe should make new support of the flag nodes and rule node
                  for (FlagNode fn : ri.getFns()) {
                      supports.add(fn.getNode());
@@ -81,7 +82,7 @@ public abstract class RuleNode extends PropositionNode {
                          (i == 0), InferenceType.FORWARD, null, this);
                  newReport.setContextName(ri.getContext());
                  newReport.setReportType(ReportType.RuleCons);
-                 newReport.getSubstitutions().removeNulls();
+                 newReport.getSubstitutions();
                  reports.add(newReport);
              }
          }

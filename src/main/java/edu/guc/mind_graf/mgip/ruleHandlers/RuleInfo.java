@@ -106,6 +106,14 @@ public class RuleInfo {
 
     }
 
+    public void removeNullSubs(){
+        for(Node var : subs.getMap().keySet()){
+            if(subs.getMap().get(var) == null){
+                subs.getMap().remove(var);
+            }
+        }
+    }
+
     public FlagNodeSet getFns() {
         return fns;
     }

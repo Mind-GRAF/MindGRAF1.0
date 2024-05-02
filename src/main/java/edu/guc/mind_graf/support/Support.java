@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import edu.guc.mind_graf.exceptions.DirectCycleException;
+import edu.guc.mind_graf.nodes.RuleNode;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.nodes.Node;
@@ -31,6 +32,10 @@ public class Support {
 		isHyp = new HashSet<>();
 		isTreeCalculatetd = new HashSet<>();
 		supportsTree = new HashMap<>();
+	}
+
+	public Support(RuleNode ruleNode, ArrayList<Node> nodes, int att){
+
 	}
 	
 	/**
