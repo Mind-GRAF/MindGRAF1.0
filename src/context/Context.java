@@ -24,4 +24,9 @@ public class Context {
         throw new RuntimeException("PropositionNode is not in any attitude");
     }
 
+    public String getName() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getName'");
+    }
+
 }

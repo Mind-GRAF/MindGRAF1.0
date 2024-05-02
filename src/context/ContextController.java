@@ -33,7 +33,7 @@ public class ContextController {
         ContextController.currContext = c;
     }
     
-    public int getAttitudeNumber(String attitudeName) {
+    public static int getAttitudeNumber(String attitudeName) {
         return attitudes.get(attitudeName);
     }
 
@@ -55,14 +55,6 @@ public class ContextController {
     
     public static ArrayList<ArrayList<Integer>> getConsistentAttitudes() {
         return consistentAttitudes;
-    }
-    
-    public static void createNewContext(String name){
-        if(contextSet.contains(name)){
-            throw new RuntimeException("context Already Exists");
-        }
-        Context c = new Context(name, ContextController.attitudes);
-        contextSet.add(name,c);
     }
 
     public static Set<String,Integer> getAttitudes() {

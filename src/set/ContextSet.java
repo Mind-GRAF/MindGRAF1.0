@@ -4,11 +4,18 @@ import context.Context;
 
 public class ContextSet {
 
-    public ContextSet(String currContext) {
+    public ContextSet() {
+        super();
     }
 
-    public Context getContext(String contextName) {
-        return null;
+    public Context get(String currContext) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'get'");
+    }
+
+    public boolean contains(String name) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'contains'");
     }
 
 }

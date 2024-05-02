@@ -16,9 +16,17 @@ import cables.UpCable;
 import cables.UpCableSet;
 import components.Substitutions;
 import exceptions.NoSuchTypeException;
+import mgip.requests.AntecedentToRuleChannel;
+import mgip.requests.Channel;
+import mgip.Scheduler;
+import mgip.requests.ChannelSet;
+import mgip.requests.ChannelType;
+import mgip.requests.MatchChannel;
+import mgip.requests.RuleToConsequentChannel;
 
 public abstract class Node {
 
+	protected ChannelSet outgoingChannels;
 	private int id;
 	protected String name;
 	private UpCableSet upCableSet;
@@ -427,6 +435,38 @@ public abstract class Node {
 	public void processRequests() {
 		// TODO Auto-generated method stub
 
+	}
+
+	public boolean needsDeliberation() {
+		switch(this.getDownCableSet().get("action").getNodeSet().getNode(0).getName().contains()) {
+		case "SNIF":
+		case "SNITERATE":
+		case "ACHIEVE":
+			return true;
+			default: return false;
+		}
+	}
+
+	public void sendRequests(NodeSet ns, Substitutions filterSubs, int contextID, ChannelType channelType) {
+		for (Node sentTo : ns) {
+			Channel newChannel = null;
+			if (channelType == ChannelType.Matched) {
+				newChannel = new MatchChannel(new LinearSubstitutions(), filterSubs, contextID, this, sentTo, true);
+			} else if (channelType == ChannelType.AntRule) {
+				newChannel = new AntecedentToRuleChannel(new LinearSubstitutions(), filterSubs, contextID, this, sentTo,
+						true);
+			} else {
+				newChannel = new RuleToConsequentChannel(new LinearSubstitutions(), filterSubs, contextID, this, sentTo,
+						true);
+			}
+			incomingChannels.addChannel(newChannel);
+			sentTo.receiveRequest(newChannel);
+		}
+	}
+
+	public void receiveRequest(Channel channel) {
+		outgoingChannels.addChannel(channel);
+		Runner.addToLowQueue(this);
 	}
 
 }

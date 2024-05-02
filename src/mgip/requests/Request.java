@@ -3,7 +3,7 @@ package mgip.requests;
 import nodes.Node;
 
 public class Request {
-
+    
     Channel channel;
     Node reporterNode;
 

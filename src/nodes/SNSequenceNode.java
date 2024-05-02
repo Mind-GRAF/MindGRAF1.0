@@ -3,12 +3,13 @@ package nodes;
 import java.util.Stack;
 
 import cables.DownCable;
+import cables.DownCableSet;
 import mgip.Scheduler;
 
 public class SNSequenceNode extends ActNode {
 
-    public SNSequenceNode(String name, Boolean isVariable) {
-        super(name, isVariable);
+    public SNSequenceNode(DownCableSet downCables) {
+        super(downCables);
     }
 
     public void runActuator(ActNode node) {

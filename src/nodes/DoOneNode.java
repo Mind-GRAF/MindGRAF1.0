@@ -2,13 +2,16 @@ package nodes;
 
 import java.util.Random;
 
+import cables.DownCableSet;
 import mgip.Scheduler;
 import set.NodeSet;
 
 public class DoOneNode extends ActNode {
 
-    public DoOneNode(String name, Boolean isVariable) {
-        super(name, isVariable);
+    static int doOneCount;
+
+    public DoOneNode(DownCableSet downCables) {
+        super(downCables);
     }
 
     public void runActuator(ActNode node) {
