@@ -41,16 +41,6 @@ public abstract class RuleNode extends PropositionNode {
     }
 
     public void applyRuleHandler(Report report) {
-        // if (this.isForwardReport() == true) {
-        // this.setForwardReport(false);
-        // report.setInferenceType(InferenceType.FORWARD);
-        // NodeSet downCons = getDownConsNodeSet();
-        // sendReportToCons(downCons, report);
-
-        // } else {
-        // for (Channel outChnl : outgoingChannels)
-        // putInferenceReportOnQueue(report, outChnl);
-        // }
 
         try{
             RuleInfoSet inserted = ruleInfoHandler.insertRI(RuleInfo.createRuleInfo(report));
@@ -82,7 +72,6 @@ public abstract class RuleNode extends PropositionNode {
                          (i == 0), InferenceType.FORWARD, null, this);
                  newReport.setContextName(ri.getContext());
                  newReport.setReportType(ReportType.RuleCons);
-                 newReport.getSubstitutions();
                  reports.add(newReport);
              }
          }
@@ -385,6 +374,7 @@ public abstract class RuleNode extends PropositionNode {
                                 currentReportContextName,
                                 currentReportAttitudeID);
                         if (compatibilityCheck && supportCheck) {
+
                             if (notBound) {
                                 if (!this.isForwardReport()) {
                                     this.setForwardReport(true);

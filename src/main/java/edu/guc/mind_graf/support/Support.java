@@ -34,7 +34,7 @@ public class Support {
 		supportsTree = new HashMap<>();
 	}
 
-	public Support(RuleNode ruleNode, ArrayList<Node> nodes, int att){
+	public Support(int nodeId, int attitude, HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> map){
 
 	}
 	
