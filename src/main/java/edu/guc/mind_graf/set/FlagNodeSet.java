@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 import edu.guc.mind_graf.nodes.FlagNode;
+import edu.guc.mind_graf.nodes.Node;
 
 public class FlagNodeSet implements Iterable<FlagNode>{
 
@@ -70,6 +71,14 @@ public class FlagNodeSet implements Iterable<FlagNode>{
         flagNodes.stream().filter(fn -> fns.contains(fn)).forEach(fn -> newFns.addFlagNode(fn));
         return newFns;
     } // should return a flag node set of the common flag nodes between the two sets
+
+    public boolean containsNode(Node node){
+        for(FlagNode fn : flagNodes){
+            if(fn.getNode().equals(node))
+                return true;
+        }
+        return false;
+    }
 
     @Override
     public boolean equals(Object obj) {

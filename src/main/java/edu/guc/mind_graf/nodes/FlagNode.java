@@ -1,14 +1,15 @@
 package edu.guc.mind_graf.nodes;
 
 import edu.guc.mind_graf.set.PropositionNodeSet;
+import edu.guc.mind_graf.support.Support;
 
 public class FlagNode {
 
     private Node node; // would normally be an antecedent
     private boolean flag;
-    private PropositionNodeSet support; //the support supporting the report the node sent
+    private Support support; //the support supporting the report the node sent
 
-    public FlagNode(Node node, boolean flag, PropositionNodeSet support) {
+    public FlagNode(Node node, boolean flag, Support support) {
         this.node = node;
         this.flag = flag;
         this.support = support;

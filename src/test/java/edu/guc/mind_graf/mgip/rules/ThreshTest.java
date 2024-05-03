@@ -14,6 +14,7 @@ import edu.guc.mind_graf.set.FlagNodeSet;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
+import edu.guc.mind_graf.support.Support;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -46,8 +47,8 @@ class ThreshTest {
 
         Substitutions subs = new Substitutions();
         subs.add(X, Network.createNode("Patroclus", "individualnode"));
-        FlagNodeSet flags = new FlagNodeSet(new FlagNode(M0, true, new PropositionNodeSet()));
-        RuleInfoSet inserted = ((RuleNode)P0).getRuleInfoHandler().insertRI(new RuleInfo("", 0, 1, 0, subs, flags));
+        FlagNodeSet flags = new FlagNodeSet(new FlagNode(M0, true, new Support(-1)));
+        RuleInfoSet inserted = ((RuleNode)P0).getRuleInfoHandler().insertRI(new RuleInfo("", 0, 1, 0, subs, flags, new Support(-1)));
         ((RuleNode)P0).setRootRuleInfos(inserted);
         RuleInfoSet[] inferrable = ((RuleNode)P0).mayInfer();
         assertEquals(1, inferrable[0].size());

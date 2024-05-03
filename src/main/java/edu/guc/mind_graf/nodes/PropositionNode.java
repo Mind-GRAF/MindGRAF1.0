@@ -465,8 +465,8 @@ public class PropositionNode extends Node {
             Substitutions substitutions, boolean reportSign, InferenceType inferenceType) {
 
         try {
-            PropositionNodeSet supportPropSet = new PropositionNodeSet();
-            supportPropSet.add(this);
+            Support supportPropSet = new Support(-1);
+            supportPropSet.addNode(this, currentAttitudeID);
             Substitutions subs = substitutions == null ? new Substitutions() : substitutions;
             Substitutions subs2 = new Substitutions();
             Report toBeSent = new Report(subs, supportPropSet, currentAttitudeID, reportSign, inferenceType, null, this);
@@ -811,9 +811,9 @@ public class PropositionNode extends Node {
         int currentAttitude = currentChannel.getAttitudeID();
         Node requesterNode = currentChannel.getRequesterNode();
         Substitutions reportSubstitutions = new Substitutions();
-        PropositionNodeSet supportNodeSet = new PropositionNodeSet();
+        Support supportNodeSet = new Support(-1);
         if (this.supported(currentContext, currentAttitude)) {
-            supportNodeSet.add(this);
+            supportNodeSet.addNode(this, currentAttitude);
             Report NewReport = new Report(reportSubstitutions, supportNodeSet, currentAttitude, true,
                     InferenceType.BACKWARD, requesterNode, this);
             // if (((RuleNode) requesterNode).isForwardReport() == true) {
@@ -933,8 +933,8 @@ public class PropositionNode extends Node {
                         reportToBeBroadcasted.getSubstitutions());
                 if (supportNode != null) {
                     supportNode.addJustificationBasedSupport(reportToBeBroadcasted.getSupport());
-                    PropositionNodeSet reportSupportPropSet = new PropositionNodeSet();
-                    reportSupportPropSet.add(supportNode);
+                    Support reportSupportPropSet = new Support(-1);
+                    reportSupportPropSet.addNode(supportNode, reportToBeBroadcasted.getAttitude());
                     reportToBeBroadcasted.setSupport(reportSupportPropSet);
                     if (reportToBeBroadcasted.getInferenceType() == InferenceType.FORWARD) {
                         System.out.println(
@@ -974,7 +974,7 @@ public class PropositionNode extends Node {
 
     }
 
-    private void addJustificationBasedSupport(PropositionNodeSet support) {
+    private void addJustificationBasedSupport(Support support) {
         // TODO Ahmed
 
     }

@@ -8,6 +8,7 @@ import edu.guc.mind_graf.nodes.FlagNode;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.set.FlagNodeSet;
 import edu.guc.mind_graf.set.FreeVariableSet;
+import edu.guc.mind_graf.support.Support;
 
 public class RuleInfo {
 
@@ -17,6 +18,7 @@ public class RuleInfo {
     private int ncount;
     private Substitutions subs;
     private FlagNodeSet fns;
+    private Support support;
     // dont have inference type since it should always be backward, will revise this
     // if needed
 
@@ -27,15 +29,17 @@ public class RuleInfo {
         ncount = 0;
         subs = new Substitutions();
         fns = new FlagNodeSet();
+        support = new Support(-1);
     }
 
-    public RuleInfo(String context, int attitude, int pcount, int ncount, Substitutions subs, FlagNodeSet fns) {
+    public RuleInfo(String context, int attitude, int pcount, int ncount, Substitutions subs, FlagNodeSet fns, Support support) {
         this.context = context;
         this.attitude = attitude;
         this.pcount = pcount;
         this.ncount = ncount;
         this.subs = subs;
         this.fns = fns;
+        this.support = support;
     }
 
     public static RuleInfo createRuleInfo(Report report){
@@ -46,7 +50,7 @@ public class RuleInfo {
         else
             ncount++;
         FlagNode reporter = new FlagNode(report.getReporterNode(), report.isSign(), report.getSupport());
-        return new RuleInfo(report.getContextName(), report.getAttitude(), pcount, ncount, report.getSubstitutions(), new FlagNodeSet(reporter));
+        return new RuleInfo(report.getContextName(), report.getAttitude(), pcount, ncount, report.getSubstitutions(), new FlagNodeSet(reporter), new Support(-1));
     }
 
     public boolean isCompatible(RuleInfo r) {
@@ -92,6 +96,7 @@ public class RuleInfo {
         res.ncount = resNcount;
         res.subs = resSubs;
         res.fns = resFns;
+        res.support = this.support.union(r.support);
         return res;
     }
 
@@ -103,7 +108,6 @@ public class RuleInfo {
             }
         }
         return ruleInfoWithNulls;
-
     }
 
     public void removeNullSubs(){
@@ -128,14 +132,6 @@ public class RuleInfo {
 
     public void setPcount(int pcount) {
         this.pcount = pcount;
-    }
-
-    public void incrementPcount() {
-        this.pcount++;
-    }
-
-    public void incrementNcount() {
-        this.ncount++;
     }
 
     public int getNcount() {
@@ -193,7 +189,16 @@ public class RuleInfo {
         ri.setNcount(this.ncount);
         ri.setSubs(this.subs.clone());
         ri.setFns(this.fns.clone());
+        ri.setSupport(this.support.clone());
         return ri;
+    }
+
+    public Support getSupport() {
+        return support;
+    }
+
+    public void setSupport(Support support) {
+        this.support = support;
     }
 
     public String getContext() {

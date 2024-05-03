@@ -4,12 +4,14 @@ import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.reports.Report;
 import edu.guc.mind_graf.mgip.ruleHandlers.OrEntailhandler;
+import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.RuleNode;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class OrEntailment  extends RuleNode {
 
@@ -31,7 +33,7 @@ public class OrEntailment  extends RuleNode {
         return inferrable;
     }
 
-    public void sendInferenceReports(ArrayList<Report> reports) {
+    public void sendInferenceReports(HashMap<RuleInfo, Report> reports) {
         sendInferenceToCq(reports, cq);
     }
 }

@@ -91,8 +91,8 @@ public class BridgeRule extends RuleNode {
         }
     }
 
-    public void sendInferenceReports(ArrayList<Report> reports) {
-        for(Report report : reports) {
+    public void sendInferenceReports(HashMap<RuleInfo, Report> reports) {
+        for(Report report : reports.values()) {
             Report newReportInAttitude = report.clone();
             for(Node cq : cqToAttitude.keySet()){
                 newReportInAttitude.setAttitude(cqToAttitude.get(cq));

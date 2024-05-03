@@ -11,6 +11,7 @@ import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class AndEntailment extends RuleNode {
 
@@ -37,7 +38,7 @@ public class AndEntailment extends RuleNode {
         return inferrable;
     }
 
-    public void sendInferenceReports(ArrayList<Report> reports) {
+    public void sendInferenceReports(HashMap<RuleInfo, Report> reports) {
         sendInferenceToCq(reports, cq);
     }
 

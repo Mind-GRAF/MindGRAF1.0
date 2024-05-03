@@ -6,10 +6,11 @@ import edu.guc.mind_graf.mgip.requests.ChannelType;
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.set.PropositionNodeSet;
+import edu.guc.mind_graf.support.Support;
 
 public class Report {
     private Substitutions substitutions;
-    private PropositionNodeSet support;
+    private Support support;
     private boolean sign;
     private InferenceType inferenceType;
     private Node requesterNode;
@@ -18,7 +19,7 @@ public class Report {
     private ReportType reportType;
     private Node reporterNode;
 
-    public Report(Substitutions substitution, PropositionNodeSet suppt, int attitudeid,
+    public Report(Substitutions substitution, Support suppt, int attitudeid,
                   boolean sign, InferenceType inference, Node requesterNode, Node reporterNode) {
         this.substitutions = substitution;
         this.attitude = attitudeid;
@@ -70,11 +71,11 @@ public class Report {
         this.substitutions = substitutions;
     }
 
-    public PropositionNodeSet getSupport() {
+    public Support getSupport() {
         return support;
     }
 
-    public void setSupport(PropositionNodeSet support) {
+    public void setSupport(Support support) {
         this.support = support;
     }
 

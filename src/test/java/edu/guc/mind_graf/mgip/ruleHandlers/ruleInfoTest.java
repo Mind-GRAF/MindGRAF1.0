@@ -1,6 +1,7 @@
 package edu.guc.mind_graf.mgip.ruleHandlers;
 
 import edu.guc.mind_graf.set.FreeVariableSet;
+import edu.guc.mind_graf.support.Support;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -52,8 +53,8 @@ class RuleInfoTest {
         subs2.add(X, Dory);
         subs2.add(Y, Marlin);
         // Create RuleInfo objects for testing
-        RuleInfo ruleInfo1 = new RuleInfo("", 0, 2, 3, subs1, new FlagNodeSet());
-        RuleInfo ruleInfo2 = new RuleInfo("", 0, 4, 1, subs2, new FlagNodeSet());
+        RuleInfo ruleInfo1 = new RuleInfo("", 0, 2, 3, subs1, new FlagNodeSet(), new Support(-1));
+        RuleInfo ruleInfo2 = new RuleInfo("", 0, 4, 1, subs2, new FlagNodeSet(), new Support(-1));
 
         // Combine the RuleInfo objects
         RuleInfo combinedRuleInfo = ruleInfo1.combine(ruleInfo2);
@@ -75,23 +76,23 @@ class RuleInfoTest {
 
     @Test
     public void testEquals() {
-        RuleInfo ruleInfo1 = new RuleInfo("", 0, 2, 1, new Substitutions(), new FlagNodeSet());
-        RuleInfo ruleInfo2 = new RuleInfo("", 0, 2, 1, new Substitutions(), new FlagNodeSet());
+        RuleInfo ruleInfo1 = new RuleInfo("", 0, 2, 1, new Substitutions(), new FlagNodeSet(), new Support(-1));
+        RuleInfo ruleInfo2 = new RuleInfo("", 0, 2, 1, new Substitutions(), new FlagNodeSet(), new Support(-1));
 
         assertTrue(ruleInfo1.equals(ruleInfo2));
     }
 
     @Test
     public void testNotEquals() {
-        RuleInfo ruleInfo1 = new RuleInfo("", 0, 2, 1, new Substitutions(), new FlagNodeSet());
-        RuleInfo ruleInfo2 = new RuleInfo("", 0, 3, 1, new Substitutions(), new FlagNodeSet());
+        RuleInfo ruleInfo1 = new RuleInfo("", 0, 2, 1, new Substitutions(), new FlagNodeSet(), new Support(-1));
+        RuleInfo ruleInfo2 = new RuleInfo("", 0, 3, 1, new Substitutions(), new FlagNodeSet(), new Support(-1));
 
         assertFalse(ruleInfo1.equals(ruleInfo2));
     }
 
     @Test
     public void testAddNullSubs() {
-        RuleInfo ruleInfo1 = new RuleInfo("", 0, 2, 1, new Substitutions(), new FlagNodeSet());
+        RuleInfo ruleInfo1 = new RuleInfo("", 0, 2, 1, new Substitutions(), new FlagNodeSet(), new Support(-1));
         FreeVariableSet freeVariables = new FreeVariableSet();
         freeVariables.add(X);
         freeVariables.add(Y);
@@ -104,7 +105,7 @@ class RuleInfoTest {
 
     @Test
     void testClone() {
-        RuleInfo ruleInfo1 = new RuleInfo("", 0, 2, 1, new Substitutions(), new FlagNodeSet());
+        RuleInfo ruleInfo1 = new RuleInfo("", 0, 2, 1, new Substitutions(), new FlagNodeSet(), new Support(-1));
         RuleInfo result = ruleInfo1.clone();
 
         assertEquals(ruleInfo1.getPcount(), result.getPcount());

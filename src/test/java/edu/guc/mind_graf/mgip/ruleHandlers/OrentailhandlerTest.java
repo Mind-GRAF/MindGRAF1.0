@@ -1,6 +1,7 @@
 package edu.guc.mind_graf.mgip.ruleHandlers;
 
 import edu.guc.mind_graf.set.RuleInfoSet;
+import edu.guc.mind_graf.support.Support;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -11,7 +12,7 @@ class OrEntailhandlerTest {
     void insertRI_shouldReturnNullWhenPcountIsZero() {
         // Arrange
         OrEntailhandler handler = new OrEntailhandler();
-        RuleInfo ri = new RuleInfo("", 0, 0, 0, null, null);
+        RuleInfo ri = new RuleInfo("", 0, 0, 0, null, null, new Support(-1));
 
         // Act
         RuleInfoSet result = handler.insertRI(ri);
@@ -24,7 +25,7 @@ class OrEntailhandlerTest {
     void insertRI_shouldReturnRuleInfoSetWhenPcountIsGreaterThanZero() {
         // Arrange
         OrEntailhandler handler = new OrEntailhandler();
-        RuleInfo ri = new RuleInfo("", 0, 1, 0, null, null);
+        RuleInfo ri = new RuleInfo("", 0, 1, 0, null, null, new Support(-1));
 
         // Act
         RuleInfoSet result = handler.insertRI(ri);
@@ -39,7 +40,7 @@ class OrEntailhandlerTest {
     void getUsedToInfer_shouldReturnCorrectRuleInfo() {
         // Arrange
         OrEntailhandler handler = new OrEntailhandler();
-        RuleInfo expected = new RuleInfo("", 0, 1, 0, null, null);
+        RuleInfo expected = new RuleInfo("", 0, 1, 0, null, null, new Support(-1));
 
         // Act
         handler.insertRI(expected);
@@ -53,7 +54,7 @@ class OrEntailhandlerTest {
     void setUsedToInfer_shouldSetCorrectRuleInfo() {
         // Arrange
         OrEntailhandler handler = new OrEntailhandler();
-        RuleInfo expected = new RuleInfo("", 0, 1, 0, null, null);
+        RuleInfo expected = new RuleInfo("", 0, 1, 0, null, null, new Support(-1));
 
         // Act
         handler.setUsedToInfer(expected);

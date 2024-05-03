@@ -9,6 +9,7 @@ import edu.guc.mind_graf.set.FlagNodeSet;
 import edu.guc.mind_graf.set.FreeVariableSet;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
+import edu.guc.mind_graf.support.Support;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,7 +53,7 @@ class PtreeNodeTest {
         subs1.add(X, Nemo);
         subs1.add(Y, Marlin);
 
-        RuleInfo ri = new RuleInfo("", 0, 1, 2, subs1, new FlagNodeSet());
+        RuleInfo ri = new RuleInfo("", 0, 1, 2, subs1, new FlagNodeSet(), new Support(-1));
         RuleInfoSet result = ptreeNode.insertIntoNode(ri, true);
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -66,8 +67,8 @@ class PtreeNodeTest {
         Substitutions subs2 = new Substitutions();
         subs2.add(X, Nemo);
         subs2.add(Y, Marlin);
-        RuleInfo ri1 = new RuleInfo("", 0, 1, 2, subs1, new FlagNodeSet());
-        RuleInfo ri2 = new RuleInfo("", 0, 2, 1, subs2, new FlagNodeSet());
+        RuleInfo ri1 = new RuleInfo("", 0, 1, 2, subs1, new FlagNodeSet(), new Support(-1));
+        RuleInfo ri2 = new RuleInfo("", 0, 2, 1, subs2, new FlagNodeSet(), new Support(-1));
         RuleInfoSet ris = new RuleInfoSet(ri1, ri2);
         RuleInfoSet result = ptreeNode.insertIntoNode(ris, true);
         assertNotNull(result);

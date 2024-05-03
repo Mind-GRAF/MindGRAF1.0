@@ -6,6 +6,7 @@ import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.nodes.FlagNode;
 import edu.guc.mind_graf.nodes.Node;
+import edu.guc.mind_graf.support.Support;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,10 +24,10 @@ class FlagNodeSetTest {
         new Network();
         Node testingNode = Network.createNode("propositionnode", new DownCableSet(new DownCable(Network.getRelations().get("arg"), new NodeSet())));
         fns1 = new FlagNodeSet();
-        fns1Fn = new FlagNode(testingNode, true, new PropositionNodeSet());
+        fns1Fn = new FlagNode(testingNode, true, new Support(-1));
         fns1.addFlagNode(fns1Fn);
         fns2 = new FlagNodeSet();
-        fns2Fn = new FlagNode(testingNode, true, new PropositionNodeSet());
+        fns2Fn = new FlagNode(testingNode, true, new Support(-1));
         fns2.addFlagNode(fns2Fn);
     }
 

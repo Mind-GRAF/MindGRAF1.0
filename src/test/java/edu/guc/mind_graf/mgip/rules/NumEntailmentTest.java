@@ -14,6 +14,7 @@ import edu.guc.mind_graf.set.FlagNodeSet;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
+import edu.guc.mind_graf.support.Support;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -46,8 +47,8 @@ class NumEntailmentTest {
                 new DownCable(Network.getRelations().get("ant"), new NodeSet(M0, M1)),
                 new DownCable(Network.getRelations().get("cq"), new NodeSet(M2))));
 
-        FlagNodeSet flags = new FlagNodeSet(new FlagNode(M0, true, new PropositionNodeSet()));
-        RuleInfoSet inserted = ((RuleNode)P0).getRuleInfoHandler().insertRI(new RuleInfo("", 0, 1, 0, new Substitutions(), flags));
+        FlagNodeSet flags = new FlagNodeSet(new FlagNode(M0, true, new Support(-1)));
+        RuleInfoSet inserted = ((RuleNode)P0).getRuleInfoHandler().insertRI(new RuleInfo("", 0, 1, 0, new Substitutions(), flags, new Support(-1)));
         ((RuleNode)P0).setRootRuleInfos(inserted);
 
         RuleInfoSet[] inferrable = ((RuleNode)P0).mayInfer();
