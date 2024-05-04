@@ -685,27 +685,6 @@ public class Network {
 		// AndPath and2 = new AndPath(pCompose2);
 		//
 		// NodeSet oss = new NodeSet();
-
-		Node cs = createNode("cs", "propositionnode");
-		Node phy = createNode("phy", "propositionnode");
-		Node fun = createNode("fun", "propositionnode");
-		Node var1 = createVariableNode("var1", "propositionnode");
-
-		Relation obj = createRelation("obj", "", Adjustability.NONE, 0);
-		Relation prop = createRelation("prop", "", Adjustability.NONE, 0);
-
-		DownCable d1 = new DownCable(obj, new NodeSet(cs, phy));
-		DownCable d2 = new DownCable(prop, new NodeSet(fun));
-
-		DownCable d3 = new DownCable(obj, new NodeSet(var1, createNode("Math", "propositionnode")));
-
-		Node M0 = createNode("propositionnode", new DownCableSet(d1, d2));
-		Node M1 = createNode("propositionnode", new DownCableSet(d3, d2));
-
-		List<Match> matchList = Matcher.match(M1);
-
-		System.out.println("aa");
-
 	}
 
 }

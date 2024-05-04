@@ -15,6 +15,7 @@ import edu.guc.mind_graf.cables.UpCable;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.caseFrames.Adjustability;
 import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.network.Network;
@@ -46,6 +47,8 @@ public class MatcherTest {
     @Test
     void nodeBasedNone() {
         try {
+            Context ctx = ContextController.getContext("guc");
+
             Node cs = Network.createNode("cs", "propositionnode");
             Node phy = Network.createNode("phy", "propositionnode");
             Node fun = Network.createNode("fun", "propositionnode");
@@ -63,7 +66,7 @@ public class MatcherTest {
             Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2));
             Node M1 = Network.createNode("propositionnode", new DownCableSet(d3, d2));
 
-            List<Match> matchList = Matcher.match(M1);
+            List<Match> matchList = Matcher.match(M1, ctx, 0);
 
             assertEquals(2, matchList.size());
 
@@ -96,6 +99,8 @@ public class MatcherTest {
     @Test
     void nodeBasedNoneEmpty() {
         try {
+            Context ctx = ContextController.getContext("guc");
+
             Node cs = Network.createNode("cs", "propositionnode");
             Node phy = Network.createNode("phy", "propositionnode");
             Node math = Network.createNode("math", "propositionnode");
@@ -113,7 +118,7 @@ public class MatcherTest {
             Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2));
             Node M1 = Network.createNode("propositionnode", new DownCableSet(d3, d2));
 
-            List<Match> matchList = Matcher.match(M1);
+            List<Match> matchList = Matcher.match(M1, ctx, 0);
 
             assertEquals(0, matchList.size());
         } catch (NoSuchTypeException e) {
@@ -125,6 +130,8 @@ public class MatcherTest {
     @Test
     void wireBasedReduceType1() {
         try {
+            Context ctx = ContextController.getContext("guc");
+
             Node cs = Network.createNode("cs", "propositionnode");
             Node phy = Network.createNode("phy", "propositionnode");
             Node fun = Network.createNode("fun", "propositionnode");
@@ -141,7 +148,7 @@ public class MatcherTest {
             Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2));
             Node M1 = Network.createNode("propositionnode", new DownCableSet(d3, d2));
 
-            List<Match> matchList = Matcher.match(M1);
+            List<Match> matchList = Matcher.match(M1, ctx, 0);
 
             assertEquals(2, matchList.size());
 
@@ -172,6 +179,8 @@ public class MatcherTest {
     @Test
     void wireBasedReduceType2() {
         try {
+            Context ctx = ContextController.getContext("guc");
+
             Node cs = Network.createNode("cs", "propositionnode");
             Node phy = Network.createNode("phy", "propositionnode");
             Node fun = Network.createNode("fun", "propositionnode");
@@ -190,7 +199,7 @@ public class MatcherTest {
             Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2));
             Node M1 = Network.createNode("propositionnode", new DownCableSet(d3, d2));
 
-            List<Match> matchList = Matcher.match(M1);
+            List<Match> matchList = Matcher.match(M1, ctx, 0);
 
             assertEquals(6, matchList.size());
 
@@ -249,6 +258,8 @@ public class MatcherTest {
     @Test
     void wireBasedExpandType1() {
         try {
+            Context ctx = ContextController.getContext("guc");
+
             Node cs = Network.createNode("cs", "propositionnode");
             Node phy = Network.createNode("phy", "propositionnode");
             Node fun = Network.createNode("fun", "propositionnode");
@@ -267,7 +278,7 @@ public class MatcherTest {
             Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2));
             Node M1 = Network.createNode("propositionnode", new DownCableSet(d3, d2));
 
-            List<Match> matchList = Matcher.match(M1);
+            List<Match> matchList = Matcher.match(M1, ctx, 0);
 
             assertEquals(6, matchList.size());
 
@@ -326,6 +337,8 @@ public class MatcherTest {
     @Test
     void wireBasedExpandType2() {
         try {
+            Context ctx = ContextController.getContext("guc");
+
             Node cs = Network.createNode("cs", "propositionnode");
             Node phy = Network.createNode("phy", "propositionnode");
             Node fun = Network.createNode("fun", "propositionnode");
@@ -342,7 +355,7 @@ public class MatcherTest {
             Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2));
             Node M1 = Network.createNode("propositionnode", new DownCableSet(d3, d2));
 
-            List<Match> matchList = Matcher.match(M1);
+            List<Match> matchList = Matcher.match(M1, ctx, 0);
 
             assertEquals(2, matchList.size());
 
@@ -373,6 +386,8 @@ public class MatcherTest {
     @Test
     void uvbrCheckVarTerm() {
         try {
+            Context ctx = ContextController.getContext("guc");
+
             Node cs = Network.createNode("cs", "propositionnode");
             Node fun = Network.createNode("fun", "propositionnode");
             Node var1 = Network.createVariableNode("var1", "propositionnode");
@@ -389,7 +404,7 @@ public class MatcherTest {
             Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2));
             Node M1 = Network.createNode("propositionnode", new DownCableSet(d3, d2));
 
-            List<Match> matchList = Matcher.match(M1);
+            List<Match> matchList = Matcher.match(M1, ctx, 0);
 
             assertEquals(1, matchList.size());
 
@@ -414,6 +429,8 @@ public class MatcherTest {
     @Test
     void uvbrCheckVarVar() {
         try {
+            Context ctx = ContextController.getContext("guc");
+
             Node cs = Network.createNode("cs", "propositionnode");
             Node fun = Network.createNode("fun", "propositionnode");
             Node var1 = Network.createVariableNode("var1", "propositionnode");
@@ -431,7 +448,7 @@ public class MatcherTest {
             Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2));
             Node M1 = Network.createNode("propositionnode", new DownCableSet(d3, d4));
 
-            List<Match> matchList = Matcher.match(M1);
+            List<Match> matchList = Matcher.match(M1, ctx, 0);
 
             assertEquals(0, matchList.size());
         } catch (NoSuchTypeException e) {
@@ -443,6 +460,8 @@ public class MatcherTest {
     @Test
     void occursCheck() {
         try {
+            Context ctx = ContextController.getContext("guc");
+
             Node var1 = Network.createVariableNode("var1", "propositionnode");
 
             Relation obj = Network.createRelation("obj", "", Adjustability.NONE, 0);
@@ -462,7 +481,7 @@ public class MatcherTest {
             Node M1 = Network.createNode("propositionnode", new DownCableSet(d1, molecularCable));
             Node M2 = Network.createNode("propositionnode", new DownCableSet(d3, d4));
 
-            List<Match> matchList = Matcher.match(M2);
+            List<Match> matchList = Matcher.match(M2, ctx, 0);
 
             assertEquals(0, matchList.size());
         } catch (NoSuchTypeException e) {
@@ -474,6 +493,8 @@ public class MatcherTest {
     @Test
     void EmptyPath() {
         try {
+            Context ctx = ContextController.getContext("guc");
+
             Node cs = Network.createNode("cs", "propositionnode");
             Node phy = Network.createNode("phy", "propositionnode");
             Node fun = Network.createNode("fun", "propositionnode");
@@ -493,7 +514,7 @@ public class MatcherTest {
             Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2));
             Node M1 = Network.createNode("propositionnode", new DownCableSet(d3, d2));
 
-            List<Match> matchList = Matcher.match(M1);
+            List<Match> matchList = Matcher.match(M1, ctx, 0);
 
             assertEquals(2, matchList.size());
 
@@ -530,6 +551,8 @@ public class MatcherTest {
     @Test
     void KStarPath() {
         try {
+            Context ctx = ContextController.getContext("guc");
+
             Node cs = Network.createNode("cs", "propositionnode");
             Node phy = Network.createNode("phy", "propositionnode");
             Node var = Network.createVariableNode("var", "propositionnode");
@@ -546,7 +569,7 @@ public class MatcherTest {
             Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2));
             Node M1 = Network.createNode("propositionnode", new DownCableSet(d3));
 
-            List<Match> matchList = Matcher.match(M1);
+            List<Match> matchList = Matcher.match(M1, ctx, 0);
 
             assertNotNull(matchList);
         } catch (NoSuchTypeException e) {
@@ -558,6 +581,8 @@ public class MatcherTest {
     @Test
     void KPlusPath() {
         try {
+            Context ctx = ContextController.getContext("guc");
+
             Node cs = Network.createNode("cs", "propositionnode");
             Node phy = Network.createNode("phy", "propositionnode");
             Node var = Network.createVariableNode("var", "propositionnode");
@@ -574,7 +599,7 @@ public class MatcherTest {
             Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2));
             Node M1 = Network.createNode("propositionnode", new DownCableSet(d3));
 
-            List<Match> matchList = Matcher.match(M1);
+            List<Match> matchList = Matcher.match(M1, ctx, 0);
 
             assertNotNull(matchList);
         } catch (NoSuchTypeException e) {
@@ -586,6 +611,8 @@ public class MatcherTest {
     @Test
     void FUnitPath() {
         try {
+            Context ctx = ContextController.getContext("guc");
+
             Node cs = Network.createNode("cs", "propositionnode");
             Node phy = Network.createNode("phy", "propositionnode");
             Node var = Network.createVariableNode("var", "propositionnode");
@@ -602,7 +629,7 @@ public class MatcherTest {
             Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2));
             Node M1 = Network.createNode("propositionnode", new DownCableSet(d3));
 
-            List<Match> matchList = Matcher.match(M1);
+            List<Match> matchList = Matcher.match(M1, ctx, 0);
 
             assertNotNull(matchList);
         } catch (NoSuchTypeException e) {
@@ -614,6 +641,8 @@ public class MatcherTest {
     @Test
     void BUnitPath() {
         try {
+            Context ctx = ContextController.getContext("guc");
+
             Node cs = Network.createNode("cs", "propositionnode");
             Node phy = Network.createNode("phy", "propositionnode");
             Node var = Network.createVariableNode("var", "propositionnode");
@@ -630,7 +659,7 @@ public class MatcherTest {
             M0.getUpCableSet().addNode(p, phy);
             Node M1 = Network.createNode("propositionnode", new DownCableSet(d3));
 
-            List<Match> matchList = Matcher.match(M1);
+            List<Match> matchList = Matcher.match(M1, ctx, 0);
 
             assertNotNull(matchList);
         } catch (NoSuchTypeException e) {
@@ -642,6 +671,8 @@ public class MatcherTest {
     @Test
     void AndPath() {
         try {
+            Context ctx = ContextController.getContext("guc");
+
             Node cs = Network.createNode("cs", "propositionnode");
             Node phy = Network.createNode("phy", "propositionnode");
             Node var = Network.createVariableNode("var", "propositionnode");
@@ -660,13 +691,13 @@ public class MatcherTest {
             Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2));
             Node M1 = Network.createNode("propositionnode", new DownCableSet(d3));
 
-            List<Match> matchList = Matcher.match(M1);
+            List<Match> matchList = Matcher.match(M1, ctx, 0);
 
             assertEquals(1, matchList.size());
 
             M0.getUpCableSet().addNode(q, phy);
 
-            matchList = Matcher.match(M1);
+            matchList = Matcher.match(M1, ctx, 0);
 
             assertNotNull(matchList.size());
         } catch (NoSuchTypeException e) {
@@ -678,6 +709,8 @@ public class MatcherTest {
     @Test
     void OrPath() {
         try {
+            Context ctx = ContextController.getContext("guc");
+
             Node cs = Network.createNode("cs", "propositionnode");
             Node phy = Network.createNode("phy", "propositionnode");
             Node theory = Network.createNode("theory", "propositionnode");
@@ -697,13 +730,13 @@ public class MatcherTest {
             Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2));
             Node M1 = Network.createNode("propositionnode", new DownCableSet(d3));
 
-            List<Match> matchList = Matcher.match(M1);
+            List<Match> matchList = Matcher.match(M1, ctx, 0);
 
             assertEquals(2, matchList.size());
 
             M0.getUpCableSet().addNode(q, theory);
 
-            matchList = Matcher.match(M1);
+            matchList = Matcher.match(M1, ctx, 0);
 
             assertNotNull(matchList.size());
         } catch (NoSuchTypeException e) {
@@ -715,6 +748,8 @@ public class MatcherTest {
     @Test
     void ComposePath() {
         try {
+            Context ctx = ContextController.getContext("guc");
+
             Node cs = Network.createNode("cs", "propositionnode");
             Node phy = Network.createNode("phy", "propositionnode");
             Node var = Network.createVariableNode("var", "propositionnode");
@@ -735,7 +770,7 @@ public class MatcherTest {
             Node M1 = Network.createNode("propositionnode", new DownCableSet(d1, d4));
             Node M2 = Network.createNode("propositionnode", new DownCableSet(d3));
 
-            List<Match> matchList = Matcher.match(M2);
+            List<Match> matchList = Matcher.match(M2, ctx, 0);
 
             assertNotNull(matchList);
         } catch (NoSuchTypeException e) {
@@ -747,6 +782,8 @@ public class MatcherTest {
     @Test
     void ConversePath() {
         try {
+            Context ctx = ContextController.getContext("guc");
+
             Node cs = Network.createNode("cs", "propositionnode");
             Node phy = Network.createNode("phy", "propositionnode");
             Node var = Network.createVariableNode("var", "propositionnode");
@@ -763,7 +800,7 @@ public class MatcherTest {
             M0.getUpCableSet().addNode(p, phy);
             Node M1 = Network.createNode("propositionnode", new DownCableSet(d3));
 
-            List<Match> matchList = Matcher.match(M1);
+            List<Match> matchList = Matcher.match(M1, ctx, 0);
 
             assertNotNull(matchList);
         } catch (NoSuchTypeException e) {
@@ -775,6 +812,8 @@ public class MatcherTest {
     @Test
     void IrreflexiveRestrictPath() {
         try {
+            Context ctx = ContextController.getContext("guc");
+
             Node cs = Network.createNode("cs", "propositionnode");
             Node phy = Network.createNode("phy", "propositionnode");
             Node var = Network.createVariableNode("var", "propositionnode");
@@ -791,7 +830,7 @@ public class MatcherTest {
             Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2));
             Node M1 = Network.createNode("propositionnode", new DownCableSet(d3));
 
-            List<Match> matchList = Matcher.match(M1);
+            List<Match> matchList = Matcher.match(M1, ctx, 0);
 
             assertNotNull(matchList);
         } catch (NoSuchTypeException e) {
@@ -803,6 +842,8 @@ public class MatcherTest {
     @Test
     void DomainRestrictPath() {
         try {
+            Context ctx = ContextController.getContext("guc");
+
             Node cs = Network.createNode("cs", "propositionnode");
             Node phy = Network.createNode("phy", "propositionnode");
             Node n = Network.createNode("n", "propositionnode");
@@ -823,7 +864,7 @@ public class MatcherTest {
             Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2, d3));
             Node M1 = Network.createNode("propositionnode", new DownCableSet(d4));
 
-            List<Match> matchList = Matcher.match(M1);
+            List<Match> matchList = Matcher.match(M1, ctx, 0);
 
             assertNotNull(matchList);
         } catch (NoSuchTypeException e) {
@@ -835,6 +876,8 @@ public class MatcherTest {
     @Test
     void RangeRestrictPath() {
         try {
+            Context ctx = ContextController.getContext("guc");
+
             Node cs = Network.createNode("cs", "propositionnode");
             Node phy = Network.createNode("phy", "propositionnode");
             Node n = Network.createNode("n", "propositionnode");
@@ -855,7 +898,7 @@ public class MatcherTest {
             Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2));
             Node M1 = Network.createNode("propositionnode", new DownCableSet(d4));
 
-            List<Match> matchList = Matcher.match(M1);
+            List<Match> matchList = Matcher.match(M1, ctx, 0);
 
             assertNotNull(matchList);
         } catch (NoSuchTypeException e) {
