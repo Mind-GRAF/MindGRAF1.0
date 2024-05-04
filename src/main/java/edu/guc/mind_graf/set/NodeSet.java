@@ -137,4 +137,11 @@ public class NodeSet implements Iterable<Node> {
     public Iterator<Node> iterator() {
         return nodes.values().iterator();
     }
+
+    public NodeSet clone() {
+        NodeSet clone = new NodeSet();
+        for (Node n : this.nodes.values())
+            clone.add(n);
+        return clone;
+    }
 }

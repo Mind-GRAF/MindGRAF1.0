@@ -546,6 +546,7 @@ public class MatcherTest {
 
     @Test
     void BangPath() {
+        assertNotNull(null);
     }
 
     @Test

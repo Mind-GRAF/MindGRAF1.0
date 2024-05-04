@@ -35,11 +35,11 @@ import edu.guc.mind_graf.set.NodeSet;
 /*
 TODO:
 
-Test (PBI)
+Test BangPath
 
 change the uvbr constant to uvbr in Network
 
-check supports in isDuplicate in match
+replace NodeSet with Support
 
 */
 
@@ -53,7 +53,7 @@ public class Matcher {
             for (Node node : Network.getNodes().values()) {
                 if (node.equals(queryNode) || !queryNode.getClass().isAssignableFrom(node.getClass()))
                     continue;
-                Match match = new Match(new Substitutions(), new Substitutions(), node, 0);
+                Match match = new Match(new Substitutions(), new Substitutions(), node, 0, new NodeSet()); // replace NodeSet with Support
                 if (node.getSyntacticType() == Syntactic.VARIABLE) {
                     match.getFilterSubs().add(node, queryNode);
                 } else if (node.getSyntacticType() == Syntactic.MOLECULAR) {
@@ -72,7 +72,7 @@ public class Matcher {
                 if (node.equals(queryNode) || !queryNode.getClass().isAssignableFrom(node.getClass()))
                     continue;
                 if (node.getSyntacticType() == Syntactic.VARIABLE) {
-                    Match match = new Match(new Substitutions(), new Substitutions(), node, 0);
+                    Match match = new Match(new Substitutions(), new Substitutions(), node, 0, new NodeSet()); // replace NodeSet with Support
                     match.getFilterSubs().add(node, queryNode);
                     matchList.add(match);
                 }
@@ -84,13 +84,14 @@ public class Matcher {
             for (Node molecular : molecularSet.values()) {
                 if (molecular.equals(queryNode))
                     continue;
-                Match match = new Match(new Substitutions(), new Substitutions(), molecular, -1);
+                Match match = new Match(new Substitutions(), new Substitutions(), molecular, -1, new NodeSet()); // replace NodeSet with Support
                 matchList.add(match);
                 unify(queryNode, molecular, match, ctx, attitude);
             }
         }
 
         for (Match match : matchList) {
+            // match.setSupport(new Support(match.getSupport(), attitude)); // replace NodeSet with Support
             if (match.getMatchType() == -1) {
                 match.setMatchType(0);
             }
