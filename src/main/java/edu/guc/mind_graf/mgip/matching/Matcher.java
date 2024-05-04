@@ -35,12 +35,7 @@ import edu.guc.mind_graf.set.NodeSet;
 /*
 TODO:
 
-add attitude to PBI
 Test (PBI)
-
-fix filter & switch subs in unifyVariable
-
-fix tests
 
 change the uvbr constant to uvbr in Network
 
@@ -51,7 +46,6 @@ check supports in isDuplicate in match
 public class Matcher {
     static ArrayList<Match> matchList;
     static boolean uvbr = true;
-    static Context context = null;
 
     public static List<Match> match(Node queryNode, Context ctx, int attitude) {
         matchList = new ArrayList<>();
@@ -92,7 +86,7 @@ public class Matcher {
                     continue;
                 Match match = new Match(new Substitutions(), new Substitutions(), molecular, -1);
                 matchList.add(match);
-                unify(queryNode, molecular, match, attitude);
+                unify(queryNode, molecular, match, ctx, attitude);
             }
         }
 
@@ -104,7 +98,7 @@ public class Matcher {
         return matchList;
     }
 
-    private static boolean unify(Node queryNode, Node node, Match match, int attitude) {
+    private static boolean unify(Node queryNode, Node node, Match match, Context ctx, int attitude) {
         if (!queryNode.getClass().isAssignableFrom(node.getClass())) {
             matchList.remove(match);
             return false;
@@ -116,10 +110,10 @@ public class Matcher {
             }
         } else if (queryNode.getSyntacticType() == Syntactic.VARIABLE
                 || node.getSyntacticType() == Syntactic.VARIABLE) {
-            return unifyVariable(queryNode, node, match, attitude);
+            return unifyVariable(queryNode, node, match, ctx, attitude);
         } else if (queryNode.getSyntacticType() == Syntactic.MOLECULAR
                 && node.getSyntacticType() == Syntactic.MOLECULAR) {
-            pathBasedInference(queryNode, node, match.clone(), attitude);
+            pathBasedInference(queryNode, node, match.clone(), ctx, attitude);
             Object[] downRelationList = queryNode.getDownCableSet().keySet();
             List<Match> molecularMatchList = new ArrayList<>();
             molecularMatchList.add(match);
@@ -141,7 +135,7 @@ public class Matcher {
                                     queryNodePermutation,
                                     nodePermutation,
                                     Network.getRelations().get(downRelation),
-                                    tempMatch, attitude) != null)
+                                    tempMatch, ctx, attitude) != null)
                                 tempMatchList.add(tempMatch);
                         }
                     }
@@ -161,14 +155,14 @@ public class Matcher {
         return true;
     }
 
-    private static boolean unifyVariable(Node queryNode, Node node, Match match, int attitude) {
+    private static boolean unifyVariable(Node queryNode, Node node, Match match, Context ctx, int attitude) {
         if (queryNode.getSyntacticType() == Syntactic.VARIABLE) {
             if (match.getSwitchSubs().getMap().get(queryNode) != null)
-                return unify(match.getSwitchSubs().get(queryNode), node, match, attitude);
+                return unify(match.getSwitchSubs().get(queryNode), node, match, ctx, attitude);
         }
         if (node.getSyntacticType() == Syntactic.VARIABLE) {
             if (match.getFilterSubs().getMap().get(node) != null) {
-                return unify(queryNode, match.getFilterSubs().get(node), match, attitude);
+                return unify(queryNode, match.getFilterSubs().get(node), match, ctx, attitude);
             }
         }
         if ((queryNode.getSyntacticType() == Syntactic.MOLECULAR
@@ -194,7 +188,7 @@ public class Matcher {
     }
 
     private static Match unifyMolecular(List<Node> queryNodeList, List<Node> nodeList, Relation relation,
-            Match match, int attitude) {
+            Match match, Context ctx, int attitude) {
         if (queryNodeList.size() != nodeList.size()) {
             // wire based inference
             if (relation.getAdjust() == Adjustability.NONE)
@@ -224,7 +218,7 @@ public class Matcher {
             if (!nonUnifiedNodes.isEmpty()) {
                 Node n = nonUnifiedNodes.iterator().next();
                 nonUnifiedNodes.remove(n);
-                if (unify(queryNode, n, match, attitude)) {
+                if (unify(queryNode, n, match, ctx, attitude)) {
                     isUnified = true;
                 }
             }
@@ -272,7 +266,7 @@ public class Matcher {
         return match;
     }
 
-    private static void pathBasedInference(Node queryNode, Node node, Match match, int attitude) {
+    private static void pathBasedInference(Node queryNode, Node node, Match match, Context ctx, int attitude) {
         List<Match> molecularMatchList = new ArrayList<>();
         molecularMatchList.add(match);
         boolean nullCables = true;
@@ -284,7 +278,7 @@ public class Matcher {
                 continue;
             nullCables = false;
             if (path != null && passPathFirstCheck(node, match, path)) {
-                LinkedList<Object[]> listOfNodeList = path.follow(node, new PathTrace(), context, attitude);
+                LinkedList<Object[]> listOfNodeList = path.follow(node, new PathTrace(), ctx, attitude);
                 if (listOfNodeList == null || listOfNodeList.isEmpty()) {
                     continue;
                 } else {
@@ -308,7 +302,7 @@ public class Matcher {
                                         queryNodePermutation,
                                         nodePermutation,
                                         relation,
-                                        tempMatch, attitude) != null)
+                                        tempMatch, ctx, attitude) != null)
                                     tempMatchList.add(tempMatch);
                                 // add supports
                             }
