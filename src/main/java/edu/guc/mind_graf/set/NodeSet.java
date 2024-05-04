@@ -8,7 +8,7 @@ import edu.guc.mind_graf.nodes.Node;
 
 public class NodeSet implements Iterable<Node> {
     private HashMap<String, Node> nodes;
-    private boolean isFinal; 
+    private boolean isFinal;
 
     public NodeSet() {
         nodes = new HashMap<String, Node>();
@@ -143,5 +143,14 @@ public class NodeSet implements Iterable<Node> {
         for (Node n : this.nodes.values())
             clone.add(n);
         return clone;
+    }
+
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!(obj instanceof NodeSet))
+            return false;
+        NodeSet n = (NodeSet) obj;
+        return this.getNames().equals(n.getNames());
     }
 }
