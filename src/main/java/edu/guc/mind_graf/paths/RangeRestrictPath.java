@@ -42,14 +42,14 @@ public class RangeRestrictPath extends Path {
 	}
 
 	@Override
-	public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context) {
+	public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context, int attitude) {
 		LinkedList<Object[]> result = new LinkedList<Object[]>();
-		LinkedList<Object[]> pFollow = this.p.follow(node, trace, context);
+		LinkedList<Object[]> pFollow = this.p.follow(node, trace, context, attitude);
 		for (Object[] objects : pFollow) {
 
 			Node nodeP = (Node) objects[0];
 			PathTrace pathTraceP = (PathTrace) objects[1];
-			LinkedList<Object[]> qFollow = this.q.follow(nodeP, pathTraceP, context);
+			LinkedList<Object[]> qFollow = this.q.follow(nodeP, pathTraceP, context, attitude);
 			for (Object[] obj : qFollow) {
 
 				Node nodeQ = (Node) obj[0];
@@ -71,8 +71,8 @@ public class RangeRestrictPath extends Path {
 
 	@Override
 	public LinkedList<Object[]> followConverse(Node node, PathTrace trace,
-			Context context) {
-		return new DomainRestrictPath(q, p.converse(), zNode).follow(node, trace, context);
+			Context context, int attitude) {
+		return new DomainRestrictPath(q, p.converse(), zNode).follow(node, trace, context, attitude);
 	}
 
 	@Override

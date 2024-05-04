@@ -8,7 +8,7 @@ import edu.guc.mind_graf.context.Context;
 public class EmptyPath extends Path {
 
 	@Override
-	public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context) {
+	public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context, int attitude) {
 		// TODO Auto-generated method stub
 		LinkedList<Object[]> result = new LinkedList<Object[]>();
 		Object[] obj = { node, trace };
@@ -18,7 +18,7 @@ public class EmptyPath extends Path {
 
 	@Override
 	public LinkedList<Object[]> followConverse(Node node, PathTrace trace,
-			Context context) {
+			Context context, int attitude) {
 		// TODO Auto-generated method stub
 		LinkedList<Object[]> result = new LinkedList<Object[]>();
 		Object[] obj = { node, trace };

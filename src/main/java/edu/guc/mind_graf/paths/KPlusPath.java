@@ -27,10 +27,10 @@ public class KPlusPath extends Path {
 			this.path = path;
 		}
 
-		public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context) {
+		public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context, int attitude) {
 		    LinkedList<Object[]> visited = new LinkedList<>();
 		    HashSet<Node> seen = new HashSet<>();
-		    LinkedList<Object[]> queue = this.path.follow(node,trace,context);
+		    LinkedList<Object[]> queue = this.path.follow(node,trace,context, attitude);
 		 
 		    while (!queue.isEmpty()) {
 		        Object[] current = queue.removeFirst();
@@ -41,7 +41,7 @@ public class KPlusPath extends Path {
 		            visited.add(current);
 		            seen.add(current_node);
 
-		            LinkedList<Object[]> neighbors = this.path.follow(current_node, current_trace, context);
+		            LinkedList<Object[]> neighbors = this.path.follow(current_node, current_trace, context, attitude);
 		            for (Object[] neighbor : neighbors) {
 		                Node neighbor_node = (Node) neighbor[0];
 		                if (!seen.contains(neighbor_node)) {
@@ -58,7 +58,7 @@ public class KPlusPath extends Path {
 
 	@Override
 	public LinkedList<Object[]> followConverse(Node node, PathTrace trace,
-			Context context) {
+			Context context, int attitude) {
 		 LinkedList<Object[]> visited = new LinkedList<>();
 		    HashSet<Node> seen = new HashSet<>();
 		    visited.add(new Object[] {node, trace});
@@ -68,7 +68,7 @@ public class KPlusPath extends Path {
 		        Object[] current = visited.get(index++);
 		        Node current_node = (Node) current[0];
 		        PathTrace current_trace = (PathTrace) current[1];
-		        LinkedList<Object[]> neighbors = this.path.followConverse(current_node, current_trace, context);
+		        LinkedList<Object[]> neighbors = this.path.followConverse(current_node, current_trace, context, attitude);
 		        for (Object[] neighbor : neighbors) {
 		            Node neighbor_node = (Node) neighbor[0];
 		            if (!seen.contains(neighbor_node)) {
