@@ -76,12 +76,12 @@ public class AndPath extends Path {
 
 	private LinkedList<Object[]> intersection(LinkedList<Object[]> list1, LinkedList<Object[]> list2) {
 		LinkedList<Object[]> result = new LinkedList<Object[]>();
-		HashSet<Object[]> hashedResult = new HashSet<>();
+		HashMap<Node, Object[]> map = new HashMap();
 		for (Object[] objects : list1) {
-			hashedResult.add(objects);
+			map.put(((Node) objects[0]), objects);
 		}
 		for (Object[] objects : list2) {
-			if (hashedResult.contains(objects))
+			if(map.get(((Node) objects[0])) != null)
 				result.add(objects);
 		}
 
