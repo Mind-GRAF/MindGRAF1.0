@@ -571,7 +571,26 @@ public class MatcherTest {
 
             List<Match> matchList = Matcher.match(M1, ctx, 0);
 
-            assertNotNull(matchList);
+            assertEquals(2, matchList.size());
+
+            Substitutions switch1 = new Substitutions();
+            switch1.add(var, cs);
+
+            Substitutions switch2 = new Substitutions();
+            switch2.add(var, phy);
+
+            List<Substitutions> switchSubs = new ArrayList<>();
+            switchSubs.add(switch1);
+            switchSubs.add(switch2);
+
+            int matchType = 0;
+
+            for (Match m : matchList) {
+                assertTrue(m.getFilterSubs().getMap().isEmpty());
+                assertTrue(Substitutions.testContains(switchSubs, m.getSwitchSubs()));
+                assertEquals(M0, m.getNode());
+                assertEquals(matchType, m.getMatchType());
+            }
         } catch (NoSuchTypeException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -601,7 +620,26 @@ public class MatcherTest {
 
             List<Match> matchList = Matcher.match(M1, ctx, 0);
 
-            assertNotNull(matchList);
+            assertEquals(2, matchList.size());
+
+            Substitutions switch1 = new Substitutions();
+            switch1.add(var, cs);
+
+            Substitutions switch2 = new Substitutions();
+            switch2.add(var, phy);
+
+            List<Substitutions> switchSubs = new ArrayList<>();
+            switchSubs.add(switch1);
+            switchSubs.add(switch2);
+
+            int matchType = 0;
+
+            for (Match m : matchList) {
+                assertTrue(m.getFilterSubs().getMap().isEmpty());
+                assertTrue(Substitutions.testContains(switchSubs, m.getSwitchSubs()));
+                assertEquals(M0, m.getNode());
+                assertEquals(matchType, m.getMatchType());
+            }
         } catch (NoSuchTypeException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -631,7 +669,26 @@ public class MatcherTest {
 
             List<Match> matchList = Matcher.match(M1, ctx, 0);
 
-            assertNotNull(matchList);
+            assertEquals(2, matchList.size());
+
+            Substitutions switch1 = new Substitutions();
+            switch1.add(var, cs);
+
+            Substitutions switch2 = new Substitutions();
+            switch2.add(var, phy);
+
+            List<Substitutions> switchSubs = new ArrayList<>();
+            switchSubs.add(switch1);
+            switchSubs.add(switch2);
+
+            int matchType = 0;
+
+            for (Match m : matchList) {
+                assertTrue(m.getFilterSubs().getMap().isEmpty());
+                assertTrue(Substitutions.testContains(switchSubs, m.getSwitchSubs()));
+                assertEquals(M0, m.getNode());
+                assertEquals(matchType, m.getMatchType());
+            }
         } catch (NoSuchTypeException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -661,7 +718,26 @@ public class MatcherTest {
 
             List<Match> matchList = Matcher.match(M1, ctx, 0);
 
-            assertNotNull(matchList);
+            assertEquals(2, matchList.size());
+
+            Substitutions switch1 = new Substitutions();
+            switch1.add(var, cs);
+
+            Substitutions switch2 = new Substitutions();
+            switch2.add(var, phy);
+
+            List<Substitutions> switchSubs = new ArrayList<>();
+            switchSubs.add(switch1);
+            switchSubs.add(switch2);
+
+            int matchType = 0;
+
+            for (Match m : matchList) {
+                assertTrue(m.getFilterSubs().getMap().isEmpty());
+                assertTrue(Substitutions.testContains(switchSubs, m.getSwitchSubs()));
+                assertEquals(M0, m.getNode());
+                assertEquals(matchType, m.getMatchType());
+            }
         } catch (NoSuchTypeException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -695,11 +771,36 @@ public class MatcherTest {
 
             assertEquals(1, matchList.size());
 
+            int matchType = 0;
+
+            Substitutions switch1 = new Substitutions();
+            switch1.add(var, cs);
+
+            List<Substitutions> switchSubs = new ArrayList<>();
+            switchSubs.add(switch1);
+
+            assertTrue(matchList.get(0).getFilterSubs().getMap().isEmpty());
+            assertTrue(Substitutions.testContains(switchSubs, matchList.get(0).getSwitchSubs()));
+            assertEquals(M0, matchList.get(0).getNode());
+            assertEquals(matchType, matchList.get(0).getMatchType());
+
             M0.getUpCableSet().addNode(q, phy);
 
             matchList = Matcher.match(M1, ctx, 0);
 
-            assertNotNull(matchList.size());
+            assertEquals(2, matchList.size());
+
+            Substitutions switch2 = new Substitutions();
+            switch2.add(var, phy);
+
+            switchSubs.add(switch2);
+
+            for (Match m : matchList) {
+                assertTrue(m.getFilterSubs().getMap().isEmpty());
+                assertTrue(Substitutions.testContains(switchSubs, m.getSwitchSubs()));
+                assertEquals(M0, m.getNode());
+                assertEquals(matchType, m.getMatchType());
+            }
         } catch (NoSuchTypeException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -734,11 +835,45 @@ public class MatcherTest {
 
             assertEquals(2, matchList.size());
 
+            Substitutions switch1 = new Substitutions();
+            switch1.add(var, cs);
+
+            Substitutions switch2 = new Substitutions();
+            switch2.add(var, phy);
+
+            List<Substitutions> switchSubs = new ArrayList<>();
+            switchSubs.add(switch1);
+            switchSubs.add(switch2);
+
+            int matchType = 0;
+
+            for (Match m : matchList) {
+                assertTrue(m.getFilterSubs().getMap().isEmpty());
+                assertTrue(Substitutions.testContains(switchSubs, m.getSwitchSubs()));
+                assertEquals(M0, m.getNode());
+                assertEquals(matchType, m.getMatchType());
+            }
+
             M0.getUpCableSet().addNode(q, theory);
 
             matchList = Matcher.match(M1, ctx, 0);
 
-            assertNotNull(matchList.size());
+            assertEquals(3, matchList.size());
+
+            Substitutions switch3 = new Substitutions();
+            switch3.add(var, theory);
+
+            switchSubs.add(switch3);
+
+            for (Match m : matchList) {
+                assertTrue(m.getFilterSubs().getMap().isEmpty());
+                assertTrue(Substitutions.testContains(switchSubs, m.getSwitchSubs()));
+                assertEquals(M0, m.getNode());
+                if (m.getSwitchSubs().get(var).equals(cs))
+                    assertEquals(0, m.getMatchType());
+                else
+                    assertEquals(1, m.getMatchType());
+            }
         } catch (NoSuchTypeException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -772,7 +907,26 @@ public class MatcherTest {
 
             List<Match> matchList = Matcher.match(M2, ctx, 0);
 
-            assertNotNull(matchList);
+            assertEquals(2, matchList.size());
+
+            Substitutions switch1 = new Substitutions();
+            switch1.add(var, cs);
+
+            Substitutions switch2 = new Substitutions();
+            switch2.add(var, phy);
+
+            List<Substitutions> switchSubs = new ArrayList<>();
+            switchSubs.add(switch1);
+            switchSubs.add(switch2);
+
+            int matchType = 0;
+
+            for (Match m : matchList) {
+                assertTrue(m.getFilterSubs().getMap().isEmpty());
+                assertTrue(Substitutions.testContains(switchSubs, m.getSwitchSubs()));
+                assertEquals(M1, m.getNode());
+                assertEquals(matchType, m.getMatchType());
+            }
         } catch (NoSuchTypeException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -802,7 +956,26 @@ public class MatcherTest {
 
             List<Match> matchList = Matcher.match(M1, ctx, 0);
 
-            assertNotNull(matchList);
+            assertEquals(2, matchList.size());
+
+            Substitutions switch1 = new Substitutions();
+            switch1.add(var, cs);
+
+            Substitutions switch2 = new Substitutions();
+            switch2.add(var, phy);
+
+            List<Substitutions> switchSubs = new ArrayList<>();
+            switchSubs.add(switch1);
+            switchSubs.add(switch2);
+
+            int matchType = 0;
+
+            for (Match m : matchList) {
+                assertTrue(m.getFilterSubs().getMap().isEmpty());
+                assertTrue(Substitutions.testContains(switchSubs, m.getSwitchSubs()));
+                assertEquals(M0, m.getNode());
+                assertEquals(matchType, m.getMatchType());
+            }
         } catch (NoSuchTypeException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -832,7 +1005,26 @@ public class MatcherTest {
 
             List<Match> matchList = Matcher.match(M1, ctx, 0);
 
-            assertNotNull(matchList);
+            assertEquals(2, matchList.size());
+
+            Substitutions switch1 = new Substitutions();
+            switch1.add(var, cs);
+
+            Substitutions switch2 = new Substitutions();
+            switch2.add(var, phy);
+
+            List<Substitutions> switchSubs = new ArrayList<>();
+            switchSubs.add(switch1);
+            switchSubs.add(switch2);
+
+            int matchType = 0;
+
+            for (Match m : matchList) {
+                assertTrue(m.getFilterSubs().getMap().isEmpty());
+                assertTrue(Substitutions.testContains(switchSubs, m.getSwitchSubs()));
+                assertEquals(M0, m.getNode());
+                assertEquals(matchType, m.getMatchType());
+            }
         } catch (NoSuchTypeException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -866,7 +1058,26 @@ public class MatcherTest {
 
             List<Match> matchList = Matcher.match(M1, ctx, 0);
 
-            assertNotNull(matchList);
+            assertEquals(2, matchList.size());
+
+            Substitutions switch1 = new Substitutions();
+            switch1.add(var, cs);
+
+            Substitutions switch2 = new Substitutions();
+            switch2.add(var, phy);
+
+            List<Substitutions> switchSubs = new ArrayList<>();
+            switchSubs.add(switch1);
+            switchSubs.add(switch2);
+
+            int matchType = 0;
+
+            for (Match m : matchList) {
+                assertTrue(m.getFilterSubs().getMap().isEmpty());
+                assertTrue(Substitutions.testContains(switchSubs, m.getSwitchSubs()));
+                assertEquals(M0, m.getNode());
+                assertEquals(matchType, m.getMatchType());
+            }
         } catch (NoSuchTypeException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -900,7 +1111,26 @@ public class MatcherTest {
 
             List<Match> matchList = Matcher.match(M1, ctx, 0);
 
-            assertNotNull(matchList);
+            assertEquals(2, matchList.size());
+
+            Substitutions switch1 = new Substitutions();
+            switch1.add(var, cs);
+
+            Substitutions switch2 = new Substitutions();
+            switch2.add(var, phy);
+
+            List<Substitutions> switchSubs = new ArrayList<>();
+            switchSubs.add(switch1);
+            switchSubs.add(switch2);
+
+            int matchType = 0;
+
+            for (Match m : matchList) {
+                assertTrue(m.getFilterSubs().getMap().isEmpty());
+                assertTrue(Substitutions.testContains(switchSubs, m.getSwitchSubs()));
+                assertEquals(M0, m.getNode());
+                assertEquals(matchType, m.getMatchType());
+            }
         } catch (NoSuchTypeException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
