@@ -408,16 +408,16 @@ public class MatcherTest {
 
             assertEquals(1, matchList.size());
 
-            Substitutions filter = new Substitutions();
-            filter.add(var1, var2);
+            Substitutions switch1 = new Substitutions();
+            switch1.add(var2, var1);
 
-            List<Substitutions> filterSubs = new ArrayList<>();
-            filterSubs.add(filter);
+            List<Substitutions> switchSubs = new ArrayList<>();
+            switchSubs.add(switch1);
 
             int matchType = 0;
 
-            assertTrue(Substitutions.testContains(filterSubs, matchList.get(0).getFilterSubs()));
-            assertTrue(matchList.get(0).getSwitchSubs().getMap().isEmpty());
+            assertTrue(matchList.get(0).getFilterSubs().getMap().isEmpty());
+            assertTrue(Substitutions.testContains(switchSubs, matchList.get(0).getSwitchSubs()));
             assertEquals(M0, matchList.get(0).getNode());
             assertEquals(matchType, matchList.get(0).getMatchType());
         } catch (NoSuchTypeException e) {
