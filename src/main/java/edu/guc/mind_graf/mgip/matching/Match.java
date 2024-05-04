@@ -53,7 +53,7 @@ public class Match {
 
     public boolean isDuplicate(Match other) {
         return this != other && node.equals(other.node) && matchType == other.matchType
-                && filterSubs.equals(other.filterSubs) && switchSubs.equals(other.switchSubs);
+                && filterSubs.equals(other.filterSubs) && switchSubs.equals(other.switchSubs); // supports are equal
     }
 
     public Match clone() {

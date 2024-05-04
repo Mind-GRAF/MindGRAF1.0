@@ -44,6 +44,8 @@ fix tests
 
 change the uvbr constant to uvbr in Network
 
+check supports in isDuplicate in match
+
 */
 
 public class Matcher {
@@ -298,8 +300,10 @@ public class Matcher {
                     Map<Node, NodeSet> nodeSupportMap = new HashMap<>();
                     for (int i = 0; i < listOfNodeList.size(); i++) {
                         Object[] arr = listOfNodeList.get(i);
-                        coll.add(((Node) arr[0]));
-                        nodeSupportMap.put(((Node) arr[0]), ((PathTrace) arr[1]).getSupports());
+                        if (arr[0] != node) {
+                            coll.add(((Node) arr[0]));
+                            nodeSupportMap.put(((Node) arr[0]), ((PathTrace) arr[1]).getSupports());
+                        }
                     }
                     List<List<Node>> nodePermutations = getAllPermutations(coll);
                     for (List<Node> nodePermutation : nodePermutations) {
