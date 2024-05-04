@@ -305,7 +305,8 @@ public class Matcher {
                         }
                     }
                     List<List<Node>> nodePermutations = getAllPermutations(coll);
-                    for (List<Node> nodePermutation : nodePermutations) {
+                    for (int i = 0; i < nodePermutations.size(); i++) {
+                        List<Node> nodePermutation = nodePermutations.get(i);
                         List<List<Node>> queryNodePermutations = getAllPermutations(
                                 queryNode.getDownCableSet().get(relation.getName()).getNodeSet().getValues());
                         for (List<Node> queryNodePermutation : queryNodePermutations) {
@@ -315,9 +316,11 @@ public class Matcher {
                                         queryNodePermutation,
                                         nodePermutation,
                                         relation,
-                                        tempMatch, ctx, attitude) != null)
+                                        tempMatch, ctx, attitude) != null) {
+                                    nodeSupportMap.get(nodePermutation.get(i))
+                                            .addAllTo((NodeSet) tempMatch.getSupport());
                                     tempMatchList.add(tempMatch);
-                                // add supports
+                                }
                             }
                         }
                     }
