@@ -109,7 +109,7 @@ public class Network {
 					node = new AndOr(downCableSet);
 					propositionNodes.put(node.getId(), node);
 					break;
-				case "andentailment":
+				case "AndEntailment":
 					node = new AndEntailment(downCableSet);
 					propositionNodes.put(node.getId(), node);
 					break;
@@ -121,7 +121,7 @@ public class Network {
 					node = new Thresh(downCableSet);
 					propositionNodes.put(node.getId(), node);
 					break;
-				case "numentailment":
+				case "NumEntailment":
 					node = new NumEntailment(downCableSet);
 					propositionNodes.put(node.getId(), node);
 					break;

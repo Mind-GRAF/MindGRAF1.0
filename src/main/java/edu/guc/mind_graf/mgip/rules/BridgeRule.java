@@ -103,7 +103,7 @@ public class BridgeRule extends RuleNode {
 
     protected void requestAntecedentsNotAlreadyWorkingOn(Request currentRequest, KnownInstance knownInstance) {
         Channel currentChannel = currentRequest.getChannel();
-        String currentContextName = currentChannel.getContextName();
+        String currentContextName = currentChannel.getName();
         Substitutions filterSubs = currentChannel.getFilterSubstitutions();
         Substitutions switchSubs = currentChannel.getSwitcherSubstitutions();
         Substitutions reportSubs = knownInstance.getSubstitutions();
@@ -124,7 +124,7 @@ public class BridgeRule extends RuleNode {
     protected void requestAntecedentsNotAlreadyWorkingOn(Request currentRequest) {
         Substitutions filterRuleSubs = currentRequest.getChannel().getFilterSubstitutions();
         Substitutions switchRuleSubs = currentRequest.getChannel().getSwitcherSubstitutions();
-        String currentContext = currentRequest.getChannel().getContextName();
+        String currentContext = currentRequest.getChannel().getName();
 
         NodeSet antArgNodeSet = getDownAntArgNodeSet();
         NodeSet remainingAntArgNodeSet = removeAlreadyEstablishedChannels(antArgNodeSet,
@@ -145,13 +145,13 @@ public class BridgeRule extends RuleNode {
      * 
      * @param currentRequest
      */
-    protected void processSingleRequests(Request currentRequest) {
+    protected void processSingleRequests(Request currentRequest) throws NoSuchTypeException {
         Channel currentChannel = currentRequest.getChannel();
         if (currentChannel instanceof AntecedentToRuleChannel || currentChannel instanceof MatchChannel)
             super.processSingleRequests(currentRequest);
 
         else {
-            String currentContext = currentChannel.getContextName();
+            String currentContext = currentChannel.getName();
             int currentAttitude = currentChannel.getAttitudeID();
             Substitutions filterRuleSubs = currentChannel.getFilterSubstitutions();
             Substitutions switchRuleSubs = currentChannel.getSwitcherSubstitutions();
@@ -206,7 +206,7 @@ public class BridgeRule extends RuleNode {
     }
 
     protected void processSingleReports(Report currentReport) throws NoSuchTypeException {
-        String currentReportContextName = currentReport.getContextName();
+        String currentReportContextName = currentReport.getName();
         int currentReportAttitudeID = currentReport.getAttitude();
         Substitutions currentReportSubs = currentReport.getSubstitutions();
         boolean forwardReportType = currentReport.getInferenceType() == InferenceType.FORWARD;

@@ -42,7 +42,7 @@ class NumEntailmentTest {
         DownCable aClass = new DownCable(Network.getRelations().get("class"), new NodeSet(Alive));
         Node M2 = Network.createNode("propositionnode", new DownCableSet(aMember, aClass));
 
-        Node P0 = Network.createNode("numentailment", new DownCableSet(new DownCable(Network.getRelations().get("i"), new NodeSet(one)),
+        Node P0 = Network.createNode("NumEntailment", new DownCableSet(new DownCable(Network.getRelations().get("i"), new NodeSet(one)),
                 new DownCable(Network.getRelations().get("&ant"), new NodeSet(M0, M1)),
                 new DownCable(Network.getRelations().get("cq"), new NodeSet(M2))));
 

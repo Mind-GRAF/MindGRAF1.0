@@ -102,7 +102,7 @@ public class Ptree extends RuleInfoHandler {
                 firstMismatched = null;
                 p2 = pSequence.pollFirst();
                 PtreeNode parent = matchSiblings(p1, p2, intersection);
-                if(ptreeNodeMin < 2) // it's not andentail, 2 is for andentail
+                if(ptreeNodeMin < 2) // it's not AndEntailment, 2 is for AndEntailment
                     parent.setMin(ptreeNodeMin);
                 else
                     parent.setMin(p1.getMin() + p2.getMin());

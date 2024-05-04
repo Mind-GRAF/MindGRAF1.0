@@ -1,12 +1,11 @@
 package edu.guc.mind_graf.mgip.ruleIntroduction;
 
-import context.Context;
+import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.mgip.reports.Report;
-import edu.guc.mind_graf.mgip.requests.AntecedentToRuleChannel;
 import edu.guc.mind_graf.mgip.requests.Request;
-import edu.guc.mind_graf.mgip.requests.RuleToConsequentChannel;
-import edu.guc.mind_graf.mgip.set.NodeSet;
-import edu.guc.mind_graf.mgip.set.ReportSet;
+import edu.guc.mind_graf.set.NodeSet;
+import edu.guc.mind_graf.set.ReportSet;
+
 
 public class RII {
     private Request request;

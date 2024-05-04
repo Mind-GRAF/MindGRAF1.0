@@ -11,6 +11,15 @@ import edu.guc.mind_graf.nodes.RuleNode;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
+import edu.guc.mind_graf.cables.DownCable;
+import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.context.Context;
+import edu.guc.mind_graf.exceptions.NoSuchTypeException;
+import edu.guc.mind_graf.mgip.InferenceType;
+import edu.guc.mind_graf.mgip.requests.ChannelType;
+import edu.guc.mind_graf.mgip.requests.Request;
+import edu.guc.mind_graf.mgip.ruleIntroduction.RII;
+import edu.guc.mind_graf.support.Support;
 
 public class Thresh extends RuleNode {
 
@@ -51,7 +60,7 @@ public class Thresh extends RuleNode {
 
     @Override
     public boolean processIntroductionRequest(Request currentRequest) throws NoSuchTypeException {
-        String currContextName = currentRequest.getChannel().getContextName();
+        String currContextName = currentRequest.getChannel().getName();
         Context currContext = getContext(currContextName);
         int attitude = currentRequest.getChannel().getAttitudeID();
         Substitutions filterSubs = currentRequest.getChannel().getFilterSubstitutions();
@@ -68,7 +77,7 @@ public class Thresh extends RuleNode {
 
     public static Node buildPosInstance(RII rii, NodeSet Subs){
         Node node = rii.getReportSet().getReport().getRequesterNode();
-        Node newNode = new AndEntail(node.getDownCableSet());
+        Node newNode = new Thresh(node.getDownCableSet());
         DownCableSet oldDownCableSet = newNode.getDownCableSet();
         DownCable oldAntDownCable = oldDownCableSet.get("arg");
         oldAntDownCable.replaceNodeSet(Subs);
@@ -78,7 +87,7 @@ public class Thresh extends RuleNode {
 
     public static Node buildNegInstance(RII rii, NodeSet Subs) throws NoSuchTypeException{
         Node node = rii.getReportSet().getReport().getRequesterNode();
-        Node newNode = new AndEntail(node.getDownCableSet());
+        Node newNode = new Thresh(node.getDownCableSet());
         DownCableSet oldDownCableSet = newNode.getDownCableSet();
         DownCable oldAntDownCable = oldDownCableSet.get("ant");
         oldAntDownCable.replaceNodeSet(Subs);
@@ -89,18 +98,18 @@ public class Thresh extends RuleNode {
 
     public int introductionHandler(RII rii)
     {
-        if( (rii.getPosCount() > max) || (rii.getNegCount() > rii.getConqArgNodes().size() - min)){
+        if( (rii.getPosCount() > threshmax) || (rii.getNegCount() > rii.getConqArgNodes().size() - thresh)){
             rii.setSufficent();
             Support sup = combineSupport(rii);
             PropositionNodeSet supp = new PropositionNodeSet();
             //Build an instance of the rule using the substitutions found in the original request.
             RuleNode instance = (RuleNode) buildPosInstance(rii, rii.getConqArgNodes());
             //send a report declaring this instance in the context of the original request having the support Sup.
-            Report report = new Report(null, supp, rii.getAttitudeID(), true, InferenceType.INTRO, null); 
+            Report report = new Report(null, supp, rii.getAttitudeID(), true, InferenceType.INTRO, null, instance); 
             instance.broadcastReport(report);
             return 1;
         }
-        else if((rii.getPosCount() >= min) && (rii.getNegCount() >= rii.getConqArgNodes().size() - max))
+        else if((rii.getPosCount() >= thresh) && (rii.getNegCount() >= rii.getConqArgNodes().size() - threshmax))
         {
             rii.setSufficent();
             Support sup = combineSupport(rii);
@@ -110,7 +119,7 @@ public class Thresh extends RuleNode {
             try {
                 instance = (RuleNode) buildNegInstance(rii, rii.getConqArgNodes());
                 //send a report declaring this instance in the context of the original request having the support Sup.
-                Report report = new Report(null, supp, rii.getAttitudeID(), false, InferenceType.INTRO, null); 
+                Report report = new Report(null, supp, rii.getAttitudeID(), false, InferenceType.INTRO, null, instance); 
                 instance.broadcastReport(report);
                 return -1;
             } catch (NoSuchTypeException e) {

@@ -94,7 +94,7 @@ public class Channel {
         this.switcherSubstitutions = switcherSubstitutions;
     }
 
-    public String getContextName() {
+    public String getName() {
         return contextName;
     }
 
@@ -127,7 +127,7 @@ public class Channel {
     }
 
     public String stringifyChannelID() {
-        String channelContextName = this.getContextName();
+        String channelContextName = this.getName();
         int channelAttitudeId = this.getAttitudeID();
         Substitutions filterSubs = this.getFilterSubstitutions();
         Substitutions switchSubs = this.getSwitcherSubstitutions();

@@ -1,9 +1,11 @@
 package edu.guc.mind_graf.mgip.reports;
 
+import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.requests.ChannelType;
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.nodes.Node;
+import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 
 public class Report {
@@ -29,7 +31,7 @@ public class Report {
     }
 
     public String stringifyReport() {
-        String reportContextName = this.getContextName();
+        String reportContextName = this.getName();
         int reportAttitudeId = this.getAttitude();
         Substitutions subs = this.getSubstitutions();
         Node requesterNode = this.getRequesterNode();
@@ -43,8 +45,8 @@ public class Report {
      * this method checks if the nodes that helped in creating the report are
      * supported in the attitude in the context belonging to the report
      * 
-     * @param reportContextName
-     * @param reportAttitudeID
+     * @param //reportContextName
+     * @param //reportAttitudeID
      */
     public boolean anySupportSupportedInAttitudeContext(String ChnlContextName, int ChnlAttitudeID) {
         // int[] supportIds = support.getProps();
@@ -101,7 +103,7 @@ public class Report {
         this.requesterNode = requesterNode;
     }
 
-    public String getContextName() {
+    public String getName() {
         return contextName;
     }
 

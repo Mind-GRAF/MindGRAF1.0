@@ -69,7 +69,7 @@ class AndEntailmentTest {
         DownCable brainwashedC = new DownCable(brainwashed, new NodeSet(C));
         Node M5 = Network.createNode("propositionnode", new DownCableSet(brainwashG, brainwashedC));
 
-        Node P0 = Network.createNode("andentailment", new DownCableSet(new DownCable(Network.getRelations().get("&ant"), new NodeSet(M0, M1, M2, M3, M4)),
+        Node P0 = Network.createNode("AndEntailment", new DownCableSet(new DownCable(Network.getRelations().get("&ant"), new NodeSet(M0, M1, M2, M3, M4)),
                 new DownCable(Network.getRelations().get("cq"), new NodeSet(M5))));
 
         FlagNode govFlag = new FlagNode(M0, true, new PropositionNodeSet());

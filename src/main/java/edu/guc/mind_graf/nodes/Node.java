@@ -194,7 +194,7 @@ public abstract class Node {
 		return negation;
 	}
 
-	public Node createNegation(Node negated) throws NoSuchTypeException {
+	public static Node createNegation(Node negated) throws NoSuchTypeException {
 		if(Network.getBaseNodes().get("0") == null){
 			System.out.println("zeroNode is null");
 			return negated.setNegation();

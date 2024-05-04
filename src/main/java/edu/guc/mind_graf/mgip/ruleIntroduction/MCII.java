@@ -66,7 +66,7 @@ public class MCII {
     public String toString() {
         String str = "[";
         for (RII rii : riiList) {
-            str += rii.getContext().getContextName()+", ";
+            str += rii.getContext().getName()+", ";
         }
         str+="]";
         return str;

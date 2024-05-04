@@ -336,10 +336,10 @@ public class PropositionNode extends Node {
             Report newReport = new Report(reportSubs, toBeSent.getSupport(), toBeSent.getAttitude(), toBeSent.isSign(),
                     toBeSent.getInferenceType(), sentTo, this);
             // new report every loop due to duplications in queues when testing.
-            newReport.setContextName(toBeSent.getContextName());
+            newReport.setContextName(toBeSent.getName());
             newReport.setReportType(toBeSent.getReportType());
             Channel newChannel = new AntecedentToRuleChannel(switchSubs, reportSubs,
-                    toBeSent.getContextName(), toBeSent.getAttitude(),
+                    toBeSent.getName(), toBeSent.getAttitude(),
                     sentTo);
             if (toBeSent.getInferenceType() == InferenceType.FORWARD) {
                 forwardChannels.addChannel(newChannel);
@@ -363,10 +363,10 @@ public class PropositionNode extends Node {
             Report newReport = new Report(currentMatch.getFilterSubs(), toBeSent.getSupport(), toBeSent.getAttitude(),
                     toBeSent.isSign(),
                     toBeSent.getInferenceType(), currentMatch.getNode(), this);
-            newReport.setContextName(toBeSent.getContextName());
+            newReport.setContextName(toBeSent.getName());
             newReport.setReportType(toBeSent.getReportType());
             Channel newChannel = new MatchChannel(currentMatch.getSwitchSubs(), newReport.getSubstitutions(),
-                    newReport.getContextName(), newReport.getAttitude(), currentMatch.getMatchType(),
+                    newReport.getName(), newReport.getAttitude(), currentMatch.getMatchType(),
                     currentMatch.getNode());
             if (newReport.getInferenceType() == InferenceType.FORWARD) {
                 forwardChannels.addChannel(newChannel);
@@ -785,11 +785,11 @@ public class PropositionNode extends Node {
      * @param currentRequest
      * @return
      */
-    protected void processSingleRequests(Request currentRequest) {
+    protected void processSingleRequests(Request currentRequest) throws NoSuchTypeException {
         System.out.println(this.getName() + " Processing Requests as a Proposition node");
 
         Channel currentChannel = currentRequest.getChannel();
-        String currentContext = currentChannel.getContextName();
+        String currentContext = currentChannel.getName();
         int currentAttitude = currentChannel.getAttitudeID();
         Node requesterNode = currentChannel.getRequesterNode();
         Substitutions reportSubstitutions = new Substitutions();

@@ -1,23 +1,27 @@
 package edu.guc.mind_graf.nodes;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
+import edu.guc.mind_graf.caseFrames.Adjustability;
+import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.reports.KnownInstance;
+import edu.guc.mind_graf.mgip.reports.KnownInstanceSet;
 import edu.guc.mind_graf.mgip.reports.Report;
 import edu.guc.mind_graf.mgip.reports.ReportType;
-import edu.guc.mind_graf.mgip.requests.AntecedentToRuleChannel;
-import edu.guc.mind_graf.mgip.requests.Channel;
-import edu.guc.mind_graf.mgip.requests.ChannelSet;
-import edu.guc.mind_graf.mgip.requests.ChannelType;
-import edu.guc.mind_graf.mgip.requests.MatchChannel;
-import edu.guc.mind_graf.mgip.requests.Request;
+import edu.guc.mind_graf.mgip.requests.*;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfoHandler;
+import edu.guc.mind_graf.mgip.ruleIntroduction.MCII;
+import edu.guc.mind_graf.mgip.ruleIntroduction.RII;
 import edu.guc.mind_graf.mgip.rules.AndOr;
+import edu.guc.mind_graf.mgip.rules.NumEntailment;
+import edu.guc.mind_graf.mgip.rules.OrEntailment;
 import edu.guc.mind_graf.mgip.rules.Thresh;
 import edu.guc.mind_graf.network.Network;
+import edu.guc.mind_graf.relations.Relation;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
@@ -25,12 +29,13 @@ import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
+import edu.guc.mind_graf.support.Support;
 
 public abstract class RuleNode extends PropositionNode {
     private boolean forwardReport;
     protected RuleInfoHandler ruleInfoHandler;
     protected RuleInfoSet rootRuleInfos;
-    public MCII mcii = new MCII();
+    protected MCII mcii = new MCII();
     protected boolean introduced = false;
 
 //    public RuleNode(String name, Boolean isVariable) {
@@ -183,7 +188,7 @@ public abstract class RuleNode extends PropositionNode {
     protected void requestAntecedentsNotAlreadyWorkingOn(Request currentRequest, KnownInstance knownInstance) {
         boolean ruleType = this instanceof Thresh || this instanceof AndOr;
         Channel currentChannel = currentRequest.getChannel();
-        String currentContextName = currentChannel.getContextName();
+        String currentContextName = currentChannel.getName();
         int currentAttitudeID = currentChannel.getAttitudeID();
         Substitutions filterSubs = currentChannel.getFilterSubstitutions();
         Substitutions switchSubs = currentChannel.getSwitcherSubstitutions();
@@ -208,7 +213,7 @@ public abstract class RuleNode extends PropositionNode {
     protected void requestAntecedentsNotAlreadyWorkingOn(Request currentRequest) {
         Substitutions filterRuleSubs = currentRequest.getChannel().getFilterSubstitutions();
         Substitutions switchRuleSubs = currentRequest.getChannel().getSwitcherSubstitutions();
-        String currentContext = currentRequest.getChannel().getContextName();
+        String currentContext = currentRequest.getChannel().getName();
         int currentAttitude = currentRequest.getChannel().getAttitudeID();
         boolean ruleType = this instanceof Thresh || this instanceof AndOr;
 
@@ -242,7 +247,7 @@ public abstract class RuleNode extends PropositionNode {
         // if(this.isOpen()){
         //     return false;
         // }
-        String currContextName = currentRequest.getChannel().getContextName();
+        String currContextName = currentRequest.getChannel().getName();
         int attitude = currentRequest.getChannel().getAttitudeID();
         Substitutions filterSubs = currentRequest.getChannel().getFilterSubstitutions();
         Substitutions switchSubs = currentRequest.getChannel().getSwitcherSubstitutions();
@@ -253,19 +258,19 @@ public abstract class RuleNode extends PropositionNode {
             System.out.println("In AndOr or Thresh Node");
             NodeSet args = this.getDownAntArgNodeSet();
             Context newContext = new Context(currContextName,attitude,args);
-            System.out.println("New Context: " + newContext.getContextName()+ "Modified Attitude: " + attitude + "Assumed Args: " + args+"\n");
-            IntroductionChannel intiatedChannel = initiateIntroChannel(currentRequest.getChannel(), this, newContext.getContextName());
-            System.out.println("Initiated Channel in Context: " + intiatedChannel.getContextName()+" Attitude: "+intiatedChannel.getAttitudeID()+" with Rule: "+intiatedChannel.getRequesterNode().getName()+" Filter Subs: "+intiatedChannel.getFilterSubstitutions()+" Switch Subs: "+intiatedChannel.getSwitcherSubstitutions() + " Requester Node: "+intiatedChannel.getRequesterNode().getName()+"\n");
+            System.out.println("New Context: " + newContext.getName()+ "Modified Attitude: " + attitude + "Assumed Args: " + args+"\n");
+            IntroductionChannel intiatedChannel = initiateIntroChannel(currentRequest.getChannel(), this, newContext.getName());
+            System.out.println("Initiated Channel in Context: " + intiatedChannel.getName()+" Attitude: "+intiatedChannel.getAttitudeID()+" with Rule: "+intiatedChannel.getRequesterNode().getName()+" Filter Subs: "+intiatedChannel.getFilterSubstitutions()+" Switch Subs: "+intiatedChannel.getSwitcherSubstitutions() + " Requester Node: "+intiatedChannel.getRequesterNode().getName()+"\n");
             RII rii = new RII(currentRequest, null, args , newContext , attitude);
-            System.out.println("RII of new Context: " + rii.getContext().getContextName()+" Attitude: "+rii.getAttitudeID()+" Request: "+rii.getRequest().getChannel().getRequesterNode().getName()+" Antecedents: "+rii.getAntNodes()+" Consequents: "+rii.getConqArgNodes()+"\n");
+            System.out.println("RII of new Context: " + rii.getContext().getName()+" Attitude: "+rii.getAttitudeID()+" Request: "+rii.getRequest().getChannel().getRequesterNode().getName()+" Antecedents: "+rii.getAntNodes()+" Consequents: "+rii.getConqArgNodes()+"\n");
             mcii.addRII(rii);
             // sendRequestsToNodeSet(args, currentRequest,newContext);// sending requests
             System.out.println("Sent Requests to NodeSet: "+args+" in Context:"+newContext+" with current request: "+currentRequest+"\n");
             return true;
         }
         //Check if all the nodes are bound by a quantifier
-        else if(this instanceof OrEntail){
-            System.out.println("In OrEntail or NumEntail Node");
+        else if(this instanceof OrEntailment){
+            System.out.println("In OrEntail or NumEntailment Node");
             NodeSet ants = this.getDownAntArgNodeSet();
             System.out.println("Rule Ants"+ants);
             NodeSet cons = this.getDownConsNodeSet();
@@ -277,7 +282,7 @@ public abstract class RuleNode extends PropositionNode {
                 subants.add(ant);
                 System.out.println("Substituted Ant :"+ant);
             }
-            if(this instanceof OrEntail){// It's an OrEntail node
+            if(this instanceof OrEntailment){// It's an OrEntail node
                 
             }
            }
@@ -327,7 +332,7 @@ public abstract class RuleNode extends PropositionNode {
         DownCable d3 = new DownCable(quantifier, ants);
 
 
-        NumEntail ruleNode = new NumEntail(new DownCableSet(d1, d2, d3));
+        NumEntailment ruleNode = new NumEntailment(new DownCableSet(d1, d2, d3));
 
         Context currContext = new Context("Original Context", 1, new NodeSet(ruleNode));
 
@@ -335,7 +340,7 @@ public abstract class RuleNode extends PropositionNode {
         
         System.out.println("RuleNode: "+ruleNode.getName());
         System.out.println("RuleNode Type: "+ruleNode.getSyntacticType());
-        System.out.println("NumEntail ? :" + (ruleNode instanceof NumEntail));
+        System.out.println("NumEntailment ? :" + (ruleNode instanceof NumEntailment));
         System.out.println("Antecedents : "+ruleNode.getDownAntArgNodeSet());
         System.out.println("Consequent : "+ruleNode.getDownConsNodeSet());
 
@@ -369,14 +374,14 @@ public abstract class RuleNode extends PropositionNode {
 
         
         // Test processIntroductionRequest
-        Request currentRequest = new Request(new Channel(new Substitutions(), sub, currContext.getContextName(), 1, ruleNode), ruleNode);
-        Report reportRII1 = new Report(new Substitutions(), new PropositionNodeSet(B), 1, true, InferenceType.INTRO, ruleNode);
-        Report reportRII2 = new Report(new Substitutions(), new PropositionNodeSet(B), 1, true, InferenceType.INTRO, ruleNode);
-        Report reportRII3 = new Report(new Substitutions(), new PropositionNodeSet(B), 1, true, InferenceType.INTRO, ruleNode);
-        Report reportRII4 = new Report(new Substitutions(), new PropositionNodeSet(B), 1, true, InferenceType.INTRO, ruleNode);
-        Report reportRII5 = new Report(new Substitutions(), new PropositionNodeSet(B), 1, true, InferenceType.INTRO, ruleNode);
-        Report reportRII6 = new Report(new Substitutions(), new PropositionNodeSet(B), 1, true, InferenceType.INTRO, ruleNode);
-        Report reportForward = new Report(new Substitutions(), new PropositionNodeSet(B), 1, false, InferenceType.FORWARD, null);
+        Request currentRequest = new Request(new Channel(new Substitutions(), sub, currContext.getName(), 1, ruleNode), ruleNode);
+        Report reportRII1 = new Report(new Substitutions(), new PropositionNodeSet(B), 1, true, InferenceType.INTRO, ruleNode, null);
+        Report reportRII2 = new Report(new Substitutions(), new PropositionNodeSet(B), 1, true, InferenceType.INTRO, ruleNode, null);
+        Report reportRII3 = new Report(new Substitutions(), new PropositionNodeSet(B), 1, true, InferenceType.INTRO, ruleNode, null);
+        Report reportRII4 = new Report(new Substitutions(), new PropositionNodeSet(B), 1, true, InferenceType.INTRO, ruleNode, null);
+        Report reportRII5 = new Report(new Substitutions(), new PropositionNodeSet(B), 1, true, InferenceType.INTRO, ruleNode, null);
+        Report reportRII6 = new Report(new Substitutions(), new PropositionNodeSet(B), 1, true, InferenceType.INTRO, ruleNode, null);
+        Report reportForward = new Report(new Substitutions(), new PropositionNodeSet(B), 1, false, InferenceType.FORWARD, null, null);
         reportRII1.setContextName("Context 1");
         reportRII2.setContextName("Context 2");
         reportRII3.setContextName("Context 3");
@@ -396,7 +401,7 @@ public abstract class RuleNode extends PropositionNode {
         try {
             boolean req = ruleNode.processIntroductionRequest(currentRequest);
             ruleNode.processReports();
-            // System.out.println("Processing Report in "+ rep.getContextName());
+            // System.out.println("Processing Report in "+ rep.getName());
             System.out.println("Scheduler after reqs: " + S.getLowQueue());
             System.out.println("Scheduler report Q: " + S.getHighQueue());
         } catch (NoSuchTypeException e) {
@@ -405,8 +410,10 @@ public abstract class RuleNode extends PropositionNode {
         }
     }
 
-    public int processIntroductionReports(ArrayList<Report> introReps) {
+    ArrayList<Report> introReps = new ArrayList<Report>();
+    public int processIntroductionReport(Report introReport) {
         // Find matching RII based on report information (rule, context, etc.)
+        introReps.add(introReport);
         int res = 0;
         System.out.println(mcii.getExpectedReportsCount());
         System.out.println(introReps.size());
@@ -420,7 +427,7 @@ public abstract class RuleNode extends PropositionNode {
             {
                 RII rii = findMatchingRII(report);
                 Substitutions riiFilterSubs = rii.getRequest().getChannel().getFilterSubstitutions();
-                if(report.getSubstitutions().compatible(riiFilterSubs)&&(report.getContext(report.getContextName()).isSubset(rii.getContext()))&& !mcii.isSufficient()){
+                if(report.getSubstitutions().compatible(riiFilterSubs)&&(report.getContext(report.getName()).isSubset(rii.getContext()))&& !mcii.isSufficient()){
                 if(filterSupport(rii, report)){
                     System.out.println("Report to be added: "+report);
                         rii.update(report);
@@ -445,9 +452,9 @@ public abstract class RuleNode extends PropositionNode {
 
     protected RII findMatchingRII(Report report) {
         for (RII rii : mcii.getRIIList()) {
-            System.out.println("RII's Request context Name: "+ rii.getContext().getContextName());
-            System.out.println("Report's context Name: "+ report.getContextName());
-            if (rii.getContext().getContextName().equals(report.getContextName()) && (rii.getAttitudeID() == report.getAttitude()) && (rii.isSufficient()== false)) {
+            System.out.println("RII's Request context Name: "+ rii.getContext().getName());
+            System.out.println("Report's context Name: "+ report.getName());
+            if (rii.getContext().getName().equals(report.getName()) && (rii.getAttitudeID() == report.getAttitude()) && (rii.isSufficient()== false)) {
                 return rii;
             }
         }
@@ -456,14 +463,13 @@ public abstract class RuleNode extends PropositionNode {
 
     public static Support combineSupport(RII rii)
     { //Return Sup of the rule instance
-        Support sup = new Support();
+        Support sup = new Support(1); // ID 1 FOR TESTING
         return sup;
     }
 
     public static Support combineSupport(MCII mcii)
     { //Return Sup of the rule instance
         return combineSupport(mcii.getRii(0));
-        
     }
 
     public static IntroductionChannel initiateIntroChannel(Channel channel, RuleNode rule, String contextName) {
@@ -477,7 +483,7 @@ public abstract class RuleNode extends PropositionNode {
      * @param currentRequest
      * @return
      */
-    protected void processSingleRequests(Request currentRequest) {
+    protected void processSingleRequests(Request currentRequest) throws NoSuchTypeException {
         System.out.println(this.getName() + " Processing Requests as a Rule node");
         Channel currentChannel = currentRequest.getChannel();
         if (currentChannel instanceof AntecedentToRuleChannel || currentChannel instanceof MatchChannel)
@@ -485,7 +491,7 @@ public abstract class RuleNode extends PropositionNode {
         else if(currentChannel instanceof IntroductionChannel)
             processIntroductionRequest(currentRequest);
         else {
-            String currentContext = currentChannel.getContextName();
+            String currentContext = currentChannel.getName();
             int currentAttitude = currentChannel.getAttitudeID();
             Substitutions filterRuleSubs = currentChannel.getFilterSubstitutions();
             Substitutions switchRuleSubs = currentChannel.getSwitcherSubstitutions();
@@ -540,24 +546,18 @@ public abstract class RuleNode extends PropositionNode {
      * 
      * @return
      */
-    ArrayList<Report> introReports = new ArrayList<Report>();
+    
     public void processReports() {
         Report reportHasTurn = Scheduler.getHighQueue().poll();
         try {
-            if(Scheduler.getHighQueue().isEmpty() && introReports.size() > 0)
-                {
-                    processIntroductionReports(introReports);
-                }
             if (reportHasTurn.getInferenceType() == InferenceType.INTRO)
             {
-                System.out.println("Adding Intro Report in " + reportHasTurn.getContextName());
-                introReports.add(reportHasTurn);
-                processReports();
+                System.out.println("Adding Intro Report in " + reportHasTurn.getName());
+                processIntroductionReport(reportHasTurn);
             }
             else{
-                System.out.println("Not Intro Report");
+                System.out.println("Not an Intro Report");
                 processSingleReports(reportHasTurn);
-                processReports();
             }
         } catch (Exception e) {
             // TODO: handle exception
@@ -573,17 +573,17 @@ public abstract class RuleNode extends PropositionNode {
     protected void processSingleReports(Report currentReport) throws NoSuchTypeException {
         System.out.println(this.getName() + " Processing Reports as a Rule node");
 
-        String currentReportContextName = currentReport.getContextName();
+        String currentReportContextName = currentReport.getName();
         int currentReportAttitudeID = currentReport.getAttitude();
         Substitutions currentReportSubs = currentReport.getSubstitutions();
         boolean forwardReportType = currentReport.getInferenceType() == InferenceType.FORWARD;
 
         boolean assertedInContext = supported(currentReportContextName, currentReportAttitudeID);
         Substitutions onlySubsBindFreeVar = onlyRelevantSubs(currentReportSubs);
-
-        if(currentReport.getReportType() == ReportType.Introduction){
-            processIntroductionReport(currentReport);
-        }
+//
+//        if(currentReport.getReportType() == ReportType.Introduction){
+//            processIntroductionReport(currentReport);
+//        }
 
         if (currentReport.getReportType() == ReportType.AntRule) {
             Channel tempChannel = new AntecedentToRuleChannel(null, currentReportSubs, currentReportContextName,
@@ -722,7 +722,7 @@ public abstract class RuleNode extends PropositionNode {
 
     // method for any of the children rules to call whenever it needs to act as a
     // normal proposition node
-    public void grandparentMethodRequest(Request currentRequest) {
+    public void grandparentMethodRequest(Request currentRequest) throws NoSuchTypeException {
         super.processSingleRequests(currentRequest);
     }
 

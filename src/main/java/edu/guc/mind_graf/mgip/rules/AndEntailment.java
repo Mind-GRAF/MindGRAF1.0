@@ -16,6 +16,13 @@ import edu.guc.mind_graf.nodes.RuleNode;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
+import edu.guc.mind_graf.cables.DownCable;
+import edu.guc.mind_graf.context.Context;
+import edu.guc.mind_graf.exceptions.NoSuchTypeException;
+import edu.guc.mind_graf.mgip.requests.ChannelType;
+import edu.guc.mind_graf.mgip.requests.Request;
+import edu.guc.mind_graf.mgip.ruleIntroduction.RII;
+import edu.guc.mind_graf.support.Support;
 
 import java.util.ArrayDeque;
 import java.util.Collection;
@@ -65,7 +72,7 @@ public class AndEntailment extends RuleNode {
     }
 
     public boolean processIntroductionRequest(Request currentRequest) throws NoSuchTypeException{
-        String currContextName = currentRequest.getChannel().getContextName();
+        String currContextName = currentRequest.getChannel().getName();
         int attitude = currentRequest.getChannel().getAttitudeID();
         Substitutions filterSubs = currentRequest.getChannel().getFilterSubstitutions();
         Substitutions switchSubs = currentRequest.getChannel().getSwitcherSubstitutions();
@@ -73,8 +80,8 @@ public class AndEntailment extends RuleNode {
         System.out.println("Current Request: " + currentRequest + " Current Context: " + currContextName + 
         " Attitude: " + attitude + " Filter Subs: " + filterSubs + " Switch Subs: " + switchSubs + 
         " Requester Node: " + currentRequest.getChannel().getRequesterNode().getName()+"\n");
-        System.out.println("In NumEntail Node");
-        System.out.println("In AndEntail Node");
+        System.out.println("In NumEntailment Node");
+        System.out.println("In AndEntailment Node");
         NodeSet ants = this.getDownAntArgNodeSet();
         System.out.println("Antecedents: "+ants);
         NodeSet subants = new NodeSet();
@@ -100,13 +107,13 @@ public class AndEntailment extends RuleNode {
        // boolean validContext = newContext.checkValidity(ants);
         RII rii = new RII(currentRequest, subants, cons , newContext , attitude);
         mcii.addRII(rii);
-        sendRequestsToNodeSet(cons,filterSubs,switchSubs,newContext.getContextName(),attitude,ChannelType.Introduction,this);
+        sendRequestsToNodeSet(cons,filterSubs,switchSubs,newContext.getName(),attitude,ChannelType.Introduction,this);
         return true;
     }
 
     public static Node buildPosInstance(RII rii, NodeSet Subs){
         Node node = rii.getReportSet().getReport().getRequesterNode();
-        Node newNode = new AndEntail(node.getDownCableSet());
+        Node newNode = new AndEntailment(node.getDownCableSet());
         DownCableSet oldDownCableSet = newNode.getDownCableSet();
         DownCable oldAntDownCable = oldDownCableSet.get("ant");
         oldAntDownCable.replaceNodeSet(Subs);
@@ -116,7 +123,7 @@ public class AndEntailment extends RuleNode {
 
     public static Node buildNegInstance(RII rii, NodeSet Subs) throws NoSuchTypeException{
         Node node = rii.getReportSet().getReport().getRequesterNode();
-        Node newNode = new AndEntail(node.getDownCableSet());
+        Node newNode = new AndEntailment(node.getDownCableSet());
         DownCableSet oldDownCableSet = newNode.getDownCableSet();
         DownCable oldAntDownCable = oldDownCableSet.get("ant");
         oldAntDownCable.replaceNodeSet(Subs);
@@ -129,26 +136,26 @@ public class AndEntailment extends RuleNode {
     {
         if( (rii.getPosCount() == rii.getConqArgNodes().size())){
             rii.setSufficent();
-            Support sup = combineSupport(rii);
+//            Support sup = combineSupport(rii);
             PropositionNodeSet supp = new PropositionNodeSet();
             //Build an instance of the rule using the substitutions found in the original request.
             RuleNode instance = (RuleNode) buildPosInstance(rii, rii.getAntNodes());
             //send a report declaring this instance in the context of the original request having the support Sup.
-            Report report = new Report(null, supp, rii.getAttitudeID(), true, InferenceType.INTRO, null); 
+            Report report = new Report(null, supp, rii.getAttitudeID(), true, InferenceType.INTRO, null, instance);
             instance.broadcastReport(report);
             return 1;
         }
         else if(rii.getNegCount()>0)
         {
             rii.setSufficent();
-            Support sup = combineSupport(rii);
+//            Support sup = combineSupport(rii);
             PropositionNodeSet supp = new PropositionNodeSet();
             //Build an instance of the rule using the substitutions found in the original request.
             RuleNode instance;
             try {
                 instance = (RuleNode) buildNegInstance(rii, rii.getAntNodes());
                 //send a report declaring this instance in the context of the original request having the support Sup.
-                Report report = new Report(null, supp, rii.getAttitudeID(), false, InferenceType.INTRO, null); 
+                Report report = new Report(null, supp, rii.getAttitudeID(), false, InferenceType.INTRO, null, instance);
                 instance.broadcastReport(report);
                 return -1;
             } catch (NoSuchTypeException e) {

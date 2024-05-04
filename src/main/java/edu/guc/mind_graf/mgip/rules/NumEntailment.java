@@ -1,16 +1,28 @@
 package edu.guc.mind_graf.mgip.rules;
 
+import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
+import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.context.Context;
+import edu.guc.mind_graf.exceptions.NoSuchTypeException;
+import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.reports.Report;
+import edu.guc.mind_graf.mgip.requests.ChannelType;
+import edu.guc.mind_graf.mgip.requests.Request;
 import edu.guc.mind_graf.mgip.ruleHandlers.Ptree;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfoHandler;
+import edu.guc.mind_graf.mgip.ruleIntroduction.RII;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.RuleNode;
+import edu.guc.mind_graf.set.CombinationSet;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
+import edu.guc.mind_graf.support.Support;
+
+import java.util.List;
 
 public class NumEntailment extends RuleNode {
 
@@ -45,7 +57,7 @@ public class NumEntailment extends RuleNode {
         Scheduler.addToHighQueue(report);
     }
 
-    public boolean processIntroductionRequest(Request currentRequest) throws NoSuchTypeException {
+    public boolean processIntroductionRequest(Request currentRequest) throws NoSuchTypeException, NoSuchTypeException {
         // if(this.introduced){
         //     for(RII rii : mcii.getRIIList()){
         //         if(currentRequest.getChannel().getAttitudeID() == rii.getAttitudeID() && rii.getContext().isSubset(currentRequest.getChannel().getContext()))
@@ -54,7 +66,7 @@ public class NumEntailment extends RuleNode {
         //         }
         //     }
         // }
-        String currContextName = currentRequest.getChannel().getContextName();
+        String currContextName = currentRequest.getChannel().getName();
         int attitude = currentRequest.getChannel().getAttitudeID();
         Substitutions filterSubs = currentRequest.getChannel().getFilterSubstitutions();
         Substitutions switchSubs = currentRequest.getChannel().getSwitcherSubstitutions();
@@ -62,7 +74,7 @@ public class NumEntailment extends RuleNode {
         System.out.println("Current Request: " + currentRequest + " Current Context: " + currContextName + 
         " Attitude: " + attitude + " Filter Subs: " + filterSubs + " Switch Subs: " + switchSubs + 
         " Requester Node: " + currentRequest.getChannel().getRequesterNode().getName()+"\n");
-        System.out.println("In NumEntail Node");
+        System.out.println("In NumEntailment Node");
             NodeSet ants = this.getDownAntArgNodeSet();
             System.out.println("Rule Ants"+ants);
             NodeSet cons = this.getDownConsNodeSet();
@@ -88,20 +100,20 @@ public class NumEntailment extends RuleNode {
                 subants.add(ant);
                 System.out.println("Substituted Ant :"+ant);
             }
-            System.out.println("In NumEntail Node");
-            int i = 2; //Gets value of i from the NumEntail/OrEntail node
+            System.out.println("In NumEntailment Node");
+            int i = 2; //Gets value of i from the NumEntailment/OrEntail node
             int n = 1;
             List<NodeSet> combinations = CombinationSet.generateCombinations(subants, i);
             for (NodeSet combination : combinations) {
                 Context newContext = new Context("Context " + String.valueOf(n++), attitude, combination);
-                System.out.println("New Context: " + newContext.getContextName());
+                System.out.println("New Context: " + newContext.getName());
                 RII rii = new RII(currentRequest, combination, cons , newContext , attitude);
-                System.out.println("RII of new Context: " + rii.getContext().getContextName() + " Attitude: "
+                System.out.println("RII of new Context: " + rii.getContext().getName() + " Attitude: "
                         + rii.getAttitudeID() + " Request: " + rii.getRequest() + " Antecedents: " + rii.getAntNodes() 
                         + " Consequents: " + rii.getConqArgNodes() + "Requester"+ currentRequest.getChannel().getRequesterNode().getName() + "\n");
                 mcii.addRII(rii);
                 System.out.println("MCII" + mcii);
-                sendRequestsToNodeSet(cons,filterSubs,switchSubs,newContext.getContextName(),attitude,ChannelType.Introduction,this);
+                sendRequestsToNodeSet(cons,filterSubs,switchSubs,newContext.getName(),attitude, ChannelType.Introduction,this);
             }
             return true;
     }
@@ -120,7 +132,7 @@ public class NumEntailment extends RuleNode {
         System.out.println("\n In buildPosInstance");
         Node node = rii.getReportSet().getReport().getRequesterNode();
         System.out.println("Original node" + node);
-        Node newNode = new NumEntail(node.getDownCableSet());
+        Node newNode = new NumEntailment(node.getDownCableSet());
         newNode.setName(node.getName()+"_instance");
         DownCableSet oldDownCableSet = node.getDownCableSet();
         System.out.println("Old Down Cable Set" + oldDownCableSet);
@@ -132,7 +144,7 @@ public class NumEntailment extends RuleNode {
 
     public static Node buildNegInstance(RII rii, NodeSet Subs) throws NoSuchTypeException{
         Node node = rii.getReportSet().getReport().getRequesterNode();
-        Node newNode = new NumEntail(node.getDownCableSet());
+        Node newNode = new NumEntailment(node.getDownCableSet());
         DownCableSet oldDownCableSet = newNode.getDownCableSet();
         DownCable oldAntDownCable = oldDownCableSet.get("antecedent");
         oldAntDownCable.replaceNodeSet(Subs);
@@ -149,7 +161,7 @@ public class NumEntailment extends RuleNode {
         // System.out.println(rii.getConqArgNodes().size());
         if( (rii.getPosCount() == rii.getConqArgNodes().size())){
             rii.setSufficent();
-            Support sup = combineSupport(mcii);
+//            Support sup = combineSupport(mcii);
             mcii.addPosRII();
             System.out.println("MCII pos RII count: " + mcii.getPosRII());
             if(mcii.getPosRII() == mcii.getRIICount())
@@ -165,9 +177,9 @@ public class NumEntailment extends RuleNode {
                 RuleNode builtInstace = (RuleNode) buildPosInstance(rii,rii.getAntNodes());
                 System.out.println("Positive Instance Built: " + builtInstace + " Antecedents: " + rii.getAntNodes());
                 //send a report declaring this instance in the context of the original request having the support Sup.
-                Report report = new Report(null, supp, rii.getAttitudeID(), true, InferenceType.INTRO, null); 
+                Report report = new Report(null, supp, rii.getAttitudeID(), true, InferenceType.INTRO, null, builtInstace);
                 builtInstace.broadcastReport(report);
-                System.out.println("Report broadcasted:" + report + "in context:" + rii.getContext().getContextName());
+                System.out.println("Report broadcasted:" + report + "in context:" + rii.getContext().getName());
                 Substitutions subs = new Substitutions();
                 subs.add(builtInstace, builtInstace);
                 return 1;
@@ -177,7 +189,7 @@ public class NumEntailment extends RuleNode {
         {
             System.out.println("In Negative building");
             rii.setSufficent();
-            Support sup = combineSupport(mcii);
+//            Support sup = combineSupport(mcii);
             mcii.addNegRII();
             mcii.setSufficent();
             PropositionNodeSet supp = new PropositionNodeSet();
@@ -186,10 +198,10 @@ public class NumEntailment extends RuleNode {
                 RuleNode builtInstace =(RuleNode) buildNegInstance(rii,rii.getAntNodes());
                 System.out.println("Negative Instance Built: " + builtInstace + " Antecedents: " + rii.getAntNodes());
                 //send a report declaring this instance in the context of the original request having the support Sup.
-                Report report = new Report(null, supp, rii.getAttitudeID(), false, InferenceType.INTRO, null);
-                report.setContextName(rii.getRequest().getChannel().getContextName()); 
+                Report report = new Report(null, supp, rii.getAttitudeID(), false, InferenceType.INTRO, null, builtInstace);
+                report.setContextName(rii.getRequest().getChannel().getName()); 
                 builtInstace.broadcastReport(report);
-                System.out.println("Report broadcasted:" + report + " in context:" + rii.getRequest().getChannel().getContextName());
+                System.out.println("Report broadcasted:" + report + " in context:" + rii.getRequest().getChannel().getName());
                 return -1;
             } catch (NoSuchTypeException e) {
                 // TODO Auto-generated catch block

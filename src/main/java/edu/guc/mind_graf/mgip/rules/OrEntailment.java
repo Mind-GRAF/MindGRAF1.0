@@ -4,11 +4,20 @@ import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.reports.Report;
 import edu.guc.mind_graf.mgip.ruleHandlers.Orentailhandler;
-import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.RuleNode;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
+import edu.guc.mind_graf.cables.DownCable;
+import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.context.Context;
+import edu.guc.mind_graf.exceptions.NoSuchTypeException;
+import edu.guc.mind_graf.mgip.InferenceType;
+import edu.guc.mind_graf.mgip.requests.ChannelType;
+import edu.guc.mind_graf.mgip.requests.Request;
+import edu.guc.mind_graf.mgip.ruleIntroduction.RII;
+import edu.guc.mind_graf.set.PropositionNodeSet;
+import edu.guc.mind_graf.support.Support;
 
 public class OrEntailment  extends RuleNode {
 
@@ -38,7 +47,7 @@ public class OrEntailment  extends RuleNode {
     }
 
     public boolean processIntroductionRequest(Request currentRequest) throws NoSuchTypeException{
-        String currContextName = currentRequest.getChannel().getContextName();
+        String currContextName = currentRequest.getChannel().getName();
         int attitude = currentRequest.getChannel().getAttitudeID();
         Substitutions filterSubs = currentRequest.getChannel().getFilterSubstitutions();
         Substitutions switchSubs = currentRequest.getChannel().getSwitcherSubstitutions();
@@ -46,7 +55,7 @@ public class OrEntailment  extends RuleNode {
         System.out.println("Current Request: " + currentRequest + " Current Context: " + currContextName + 
         " Attitude: " + attitude + " Filter Subs: " + filterSubs + " Switch Subs: " + switchSubs + 
         " Requester Node: " + currentRequest.getChannel().getRequesterNode().getName()+"\n");
-        System.out.println("In NumEntail Node");
+        System.out.println("In NumEntailment Node");
             NodeSet ants = this.getDownAntArgNodeSet();
             System.out.println("Rule Ants"+ants);
             NodeSet cons = this.getDownConsNodeSet();
@@ -65,21 +74,21 @@ public class OrEntailment  extends RuleNode {
             }
             ant = ant.applySubstitution(currentRequest.getChannel().getFilterSubstitutions());
             Context newContext = new Context(String.valueOf(ant.getId()), attitude, new NodeSet(ant));
-            System.out.println("New Context: " + newContext.getContextName());
+            System.out.println("New Context: " + newContext.getName());
             RII rii = new RII(currentRequest, new NodeSet(ant), cons, newContext, attitude);
-            System.out.println("RII of new Context: " + rii.getContext().getContextName() + " Attitude: "
+            System.out.println("RII of new Context: " + rii.getContext().getName() + " Attitude: "
                     + rii.getAttitudeID() + " Request: " + rii.getRequest() + " Antecedents: " + rii.getAntNodes() 
                     + " Consequents: " + rii.getConqArgNodes() + "Requester"+ currentRequest.getChannel().getRequesterNode().getName() + "\n");
             mcii.addRII(rii);
             System.out.println("MCII" + mcii);
-            sendRequestsToNodeSet(cons, filterSubs, switchSubs, newContext.getContextName(), attitude, ChannelType.Introduction, this);
+            sendRequestsToNodeSet(cons, filterSubs, switchSubs, newContext.getName(), attitude, ChannelType.Introduction, this);
         }
         return true;
     }
 
     public static Node buildPosInstance(RII rii, NodeSet Subs){
         Node node = rii.getReportSet().getReport().getRequesterNode();
-        Node newNode = new OrEntail(node.getDownCableSet());
+        Node newNode = new OrEntailment(node.getDownCableSet());
         DownCableSet oldDownCableSet = newNode.getDownCableSet();
         DownCable oldAntDownCable = oldDownCableSet.get("ant");
         oldAntDownCable.replaceNodeSet(Subs);
@@ -89,7 +98,7 @@ public class OrEntailment  extends RuleNode {
 
     public static Node buildNegInstance(RII rii, NodeSet Subs) throws NoSuchTypeException{
         Node node = rii.getReportSet().getReport().getRequesterNode();
-        Node newNode = new OrEntail(node.getDownCableSet());
+        Node newNode = new OrEntailment(node.getDownCableSet());
         DownCableSet oldDownCableSet = newNode.getDownCableSet();
         DownCable oldAntDownCable = oldDownCableSet.get("ant");
         oldAntDownCable.replaceNodeSet(Subs);
@@ -110,7 +119,7 @@ public class OrEntailment  extends RuleNode {
                 //Build an instance of the rule using the substitutions found in the original request.
                 RuleNode builtInstace = (RuleNode) buildPosInstance(rii,rii.getAntNodes());
                 //send a report declaring this instance in the context of the original request having the support Sup.
-                Report report = new Report(null, supp, rii.getAttitudeID(), true, InferenceType.INTRO, null); 
+                Report report = new Report(null, supp, rii.getAttitudeID(), true, InferenceType.INTRO, null, builtInstace); 
                 builtInstace.broadcastReport(report);
                 return 1;
             }
@@ -126,7 +135,7 @@ public class OrEntailment  extends RuleNode {
             try {
                 builtInstace =(RuleNode) buildNegInstance(rii,rii.getAntNodes());
                 //send a report declaring this instance in the context of the original request having the support Sup.
-                Report report = new Report(null, supp, rii.getAttitudeID(), false, InferenceType.INTRO, null); 
+                Report report = new Report(null, supp, rii.getAttitudeID(), false, InferenceType.INTRO, null, builtInstace); 
                 builtInstace.broadcastReport(report);
                 return -1;
             } catch (NoSuchTypeException e) {
