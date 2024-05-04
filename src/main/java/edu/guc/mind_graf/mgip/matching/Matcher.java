@@ -53,7 +53,10 @@ public class Matcher {
             for (Node node : Network.getNodes().values()) {
                 if (node.equals(queryNode) || !queryNode.getClass().isAssignableFrom(node.getClass()))
                     continue;
-                Match match = new Match(new Substitutions(), new Substitutions(), node, 0, new NodeSet()); // replace NodeSet with Support
+                Match match = new Match(new Substitutions(), new Substitutions(), node, 0, new NodeSet()); // replace
+                                                                                                           // NodeSet
+                                                                                                           // with
+                                                                                                           // Support
                 if (node.getSyntacticType() == Syntactic.VARIABLE) {
                     match.getFilterSubs().add(node, queryNode);
                 } else if (node.getSyntacticType() == Syntactic.MOLECULAR) {
@@ -72,7 +75,10 @@ public class Matcher {
                 if (node.equals(queryNode) || !queryNode.getClass().isAssignableFrom(node.getClass()))
                     continue;
                 if (node.getSyntacticType() == Syntactic.VARIABLE) {
-                    Match match = new Match(new Substitutions(), new Substitutions(), node, 0, new NodeSet()); // replace NodeSet with Support
+                    Match match = new Match(new Substitutions(), new Substitutions(), node, 0, new NodeSet()); // replace
+                                                                                                               // NodeSet
+                                                                                                               // with
+                                                                                                               // Support
                     match.getFilterSubs().add(node, queryNode);
                     matchList.add(match);
                 }
@@ -84,14 +90,18 @@ public class Matcher {
             for (Node molecular : molecularSet.values()) {
                 if (molecular.equals(queryNode))
                     continue;
-                Match match = new Match(new Substitutions(), new Substitutions(), molecular, -1, new NodeSet()); // replace NodeSet with Support
+                Match match = new Match(new Substitutions(), new Substitutions(), molecular, -1, new NodeSet()); // replace
+                                                                                                                 // NodeSet
+                                                                                                                 // with
+                                                                                                                 // Support
                 matchList.add(match);
                 unify(queryNode, molecular, match, ctx, attitude);
             }
         }
 
         for (Match match : matchList) {
-            // match.setSupport(new Support(match.getSupport(), attitude)); // replace NodeSet with Support
+            // match.setSupport(new Support(match.getSupport(), attitude)); // replace
+            // NodeSet with Support
             if (match.getMatchType() == -1) {
                 match.setMatchType(0);
             }
@@ -157,6 +167,13 @@ public class Matcher {
     }
 
     private static boolean unifyVariable(Node queryNode, Node node, Match match, Context ctx, int attitude) {
+        if ((queryNode.getSyntacticType() == Syntactic.MOLECULAR
+                && occursCheck(node, queryNode, match))
+                || (node.getSyntacticType() == Syntactic.MOLECULAR && occursCheck(queryNode, node, match))) {
+            matchList.remove(match);
+            return false;
+        }
+
         if (queryNode.getSyntacticType() == Syntactic.VARIABLE) {
             if (match.getSwitchSubs().getMap().get(queryNode) != null)
                 return unify(match.getSwitchSubs().get(queryNode), node, match, ctx, attitude);
@@ -166,13 +183,8 @@ public class Matcher {
                 return unify(queryNode, match.getFilterSubs().get(node), match, ctx, attitude);
             }
         }
-        if ((queryNode.getSyntacticType() == Syntactic.MOLECULAR
-                && occursCheck(node, queryNode, match))
-                || (node.getSyntacticType() == Syntactic.MOLECULAR && occursCheck(queryNode, node, match))) {
-            matchList.remove(match);
-            return false;
-        }
-        if (node.getSyntacticType() != Syntactic.VARIABLE)
+
+        if (queryNode.getSyntacticType() == Syntactic.VARIABLE)
             if (!uvbr || (uvbr && !uvbrTrap(queryNode, node, match.getSwitchSubs())))
                 match.getSwitchSubs().add(queryNode, node);
             else {
