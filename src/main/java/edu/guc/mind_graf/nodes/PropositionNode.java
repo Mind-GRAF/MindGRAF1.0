@@ -401,7 +401,7 @@ public class PropositionNode extends Node {
             Substitutions reportSubs = toBeSent.getSubstitutions();
             Substitutions switchSubs = new Substitutions();
             Report newReport = new Report(reportSubs, toBeSent.getSupport(), toBeSent.getAttitude(), toBeSent.isSign(),
-                    toBeSent.getInferenceType(), sentTo);
+                    toBeSent.getInferenceType(), sentTo, this);
             // new report every loop due to duplications in queues when testing.
             newReport.setContextName(toBeSent.getContextName());
             newReport.setReportType(toBeSent.getReportType());
@@ -429,7 +429,7 @@ public class PropositionNode extends Node {
         for (Match currentMatch : nodeList) {
             Report newReport = new Report(currentMatch.getFilterSubs(), toBeSent.getSupport(), toBeSent.getAttitude(),
                     toBeSent.isSign(),
-                    toBeSent.getInferenceType(), currentMatch.getNode());
+                    toBeSent.getInferenceType(), currentMatch.getNode(), this);
             newReport.setContextName(toBeSent.getContextName());
             newReport.setReportType(toBeSent.getReportType());
             Channel newChannel = new MatchChannel(currentMatch.getSwitchSubs(), newReport.getSubstitutions(),
@@ -536,7 +536,7 @@ public class PropositionNode extends Node {
             supportPropSet.addNode(this, currentAttitudeID);
             Substitutions subs = substitutions == null ? new Substitutions() : substitutions;
             Substitutions subs2 = new Substitutions();
-            Report toBeSent = new Report(subs, support, currentAttitudeID, reportSign, inferenceType, null);
+            Report toBeSent = new Report(subs, support, currentAttitudeID, reportSign, inferenceType, null, this);
             toBeSent.setContextName(currentContextName);
             toBeSent.setReportType(channelType);
             switch (channelType) {
@@ -771,7 +771,7 @@ public class PropositionNode extends Node {
                 Report currentPveReport = new Report(currentPveKnownInstance.getSubstitutions(),
                         currentPveKnownInstance.getSupports(), currentPveKnownInstance.getAttitudeID(),
                         true,
-                        InferenceType.BACKWARD, this);
+                        InferenceType.BACKWARD, this, this);
                 currentPveReport.setContextName(currentContextName);
                 System.out.println("A reply has been succefully added to the set of backward asserted reply nodes");
                 Scheduler.addNodeAssertionThroughBReport(currentPveReport, replyNode);
@@ -789,7 +789,7 @@ public class PropositionNode extends Node {
                 Report currentNveReport = new Report(currentNveKnownInstance.getSubstitutions(),
                         currentNveKnownInstance.getSupports(), currentNveKnownInstance.getAttitudeID(),
                         false,
-                        InferenceType.BACKWARD, this);
+                        InferenceType.BACKWARD, this, this);
                 currentNveReport.setContextName(currentContextName);
                 System.out.println("A reply has been succefully added to the set of backward asserted reply nodes");
 
@@ -880,12 +880,12 @@ public class PropositionNode extends Node {
         int currentAttitude = currentChannel.getAttitudeID();
         Node requesterNode = currentChannel.getRequesterNode();
         Substitutions reportSubstitutions = new Substitutions();
-        Support supportNodeSet = new Support(-1);
+        PropositionNodeSet supportNodeSet = new PropositionNodeSet();
         if (this.supported(currentContext, currentAttitude)) {
             supportNodeSet.add((PropositionNode) this);
             Support support = new Support(-1, new Pair<>(supportNodeSet, new PropositionNodeSet()), currentAttitude);
             Report NewReport = new Report(reportSubstitutions, support, currentAttitude, true,
-                    InferenceType.BACKWARD, requesterNode);
+                    InferenceType.BACKWARD, requesterNode, this);
             // if (((RuleNode) requesterNode).isForwardReport() == true) {
             // NewReport.setInferenceType(InferenceType.FORWARD);
 
@@ -911,7 +911,7 @@ public class PropositionNode extends Node {
                         Report currentPveReport = new Report(currentPveKnownInstance.getSubstitutions(),
                                 currentPveKnownInstance.getSupports(), currentPveKnownInstance.getAttitudeID(),
                                 true,
-                                InferenceType.BACKWARD, requesterNode);
+                                InferenceType.BACKWARD, requesterNode, this);
                         currentPveReport.setContextName(currentContext);
 
                         currentPveReport.setReportType(currentChannel.getChannelType());
@@ -930,7 +930,7 @@ public class PropositionNode extends Node {
                         Report currentNveReport = new Report(currentNveKnownInstance.getSubstitutions(),
                                 currentNveKnownInstance.getSupports(), currentNveKnownInstance.getAttitudeID(),
                                 false,
-                                InferenceType.BACKWARD, requesterNode);
+                                InferenceType.BACKWARD, requesterNode, this);
                         currentNveReport.setContextName(currentContext);
 
                         currentNveReport.setReportType(currentChannel.getChannelType());

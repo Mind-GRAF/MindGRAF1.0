@@ -100,40 +100,6 @@ public class ContextController {
         c.removeHypothesisFromContext(attitudeNumber, n);
     }
 
-
-
-    public static int max(int x, int y){
-        return Math.max(x,y);
-    }
-
-    public static IntBinaryOperator mergeGrades() {
-        switch (ContextController.mergeFunctionNumber) {
-            case 1:
-                return Math::max;
-            case 2:
-                return Math::min;
-            case 3:
-                return (a, b) -> (a + b) / 2;
-            default:
-                throw new IllegalArgumentException("Invalid choice");
-        }
-    }
-
-    public static void addHypothesisToContext(String contextName, int attitudeNumber, PropositionNode node) {
-        Context c = ContextController.getContext(contextName);
-        c.addHypothesisToContext(attitudeNumber, node);
-        //TODO : wael this causes errors as the support is not initialised correctly
-//        Revision.checkContradiction(c,attitudeNumber,n);
-    }
-
-    public static void removeFromContext(String contextName, int attitudeNumber, int nodeId) {
-        Context c = ContextController.getContext(contextName);
-        PropositionNode n = (PropositionNode) Network.getNodeById(nodeId);
-        c.removeHypothesisFromContext(attitudeNumber, n);
-    }
-
-
-
     public static int max(int x, int y){
         return Math.max(x,y);
     }
