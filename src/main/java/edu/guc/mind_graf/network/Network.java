@@ -71,6 +71,9 @@ public class Network {
 		Network.createRelation("threshmax", "propositionnode", Adjustability.NONE, 1);
 		Network.createRelation("action", "propositionnode", Adjustability.NONE, 1);
 		Network.createRelation("do", "actnode", Adjustability.NONE, 1);
+		Network.createRelation("grade", "individualNode", Adjustability.NONE, 0);
+		Network.createRelation("prop", "pro positionnode", Adjustability.NONE, 0);
+
 	}
 
 	public void addBasicNodes() throws NoSuchTypeException {

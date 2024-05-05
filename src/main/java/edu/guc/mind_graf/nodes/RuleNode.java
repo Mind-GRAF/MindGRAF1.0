@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 
 import edu.guc.mind_graf.exceptions.InvalidRuleInfoException;
+import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.reports.KnownInstance;
@@ -26,6 +27,7 @@ import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.set.RuleInfoSet;
+import edu.guc.mind_graf.support.Support;
 import edu.guc.mind_graf.support.Support;
 
 public abstract class RuleNode extends PropositionNode {
@@ -264,7 +266,7 @@ public abstract class RuleNode extends PropositionNode {
      * @param currentRequest
      * @return
      */
-    protected void processSingleRequests(Request currentRequest) {
+    protected void processSingleRequests(Request currentRequest) throws DirectCycleException {
         System.out.println(this.getName() + " Processing Requests as a Rule node");
         Channel currentChannel = currentRequest.getChannel();
         if (currentChannel instanceof AntecedentToRuleChannel || currentChannel instanceof MatchChannel)
@@ -340,7 +342,7 @@ public abstract class RuleNode extends PropositionNode {
      * @param currentReport
      * @return
      */
-    protected void processSingleReports(Report currentReport) throws NoSuchTypeException {
+    protected void processSingleReports(Report currentReport) throws NoSuchTypeException, DirectCycleException {
         System.out.println(this.getName() + " Processing Reports as a Rule node");
 
         String currentReportContextName = currentReport.getContextName();
@@ -489,11 +491,15 @@ public abstract class RuleNode extends PropositionNode {
     // method for any of the children rules to call whenever it needs to act as a
     // normal proposition node
     public void grandparentMethodRequest(Request currentRequest) {
-        super.processSingleRequests(currentRequest);
+//        super.processSingleRequests(currentRequest);
+        //TODO: sara, changed by wael to merge supports
+
     }
 
     public void grandparentMethodReport(Report currentReport) throws NoSuchTypeException {
-        super.processSingleReports(currentReport);
+//        super.processSingleReports(currentReport);
+        //TODO: sara, changed by wael to merge supports
+
     }
 
     public boolean isForwardReport() {

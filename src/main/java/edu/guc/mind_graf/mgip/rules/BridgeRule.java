@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import edu.guc.mind_graf.cables.DownCable;
+import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.reports.KnownInstance;
@@ -147,7 +148,7 @@ public class BridgeRule extends RuleNode {
      * 
      * @param currentRequest
      */
-    protected void processSingleRequests(Request currentRequest) {
+    protected void processSingleRequests(Request currentRequest) throws DirectCycleException {
         Channel currentChannel = currentRequest.getChannel();
         if (currentChannel instanceof AntecedentToRuleChannel || currentChannel instanceof MatchChannel)
             super.processSingleRequests(currentRequest);

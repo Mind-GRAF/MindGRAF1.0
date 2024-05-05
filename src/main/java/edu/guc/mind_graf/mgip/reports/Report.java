@@ -27,7 +27,6 @@ public class Report {
         this.requesterNode = requesterNode;
         this.sign = sign;
         this.inferenceType = inference;
-        this.reporterNode = reporterNode;
     }
 
     public String stringifyReport() {

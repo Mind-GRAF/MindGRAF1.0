@@ -6,7 +6,7 @@ import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.PropositionNode;
 
-public class PropositionNodeSet implements Iterable<PropositionNode> {
+public class PropositionNodeSet implements Iterable<PropositionNode>,Cloneable {
 
     private HashSet<Integer> nodes;
     private boolean isFinal;
@@ -254,6 +254,13 @@ public class PropositionNodeSet implements Iterable<PropositionNode> {
                 commonVariables = commonVariables.intersection(n.getFreeVariables());
         }
         return commonVariables;
+    }
+    
+    @Override
+    public PropositionNodeSet clone() {
+        PropositionNodeSet clone = new PropositionNodeSet((HashSet<Integer>) this.getValues().clone());
+        clone.setIsFinal(this.isFinal);
+        return clone;
     }
 
 }

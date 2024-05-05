@@ -45,7 +45,7 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
                             return false;
 
                         } else {
-                            Support supportSet = targetKnownInstance.getSupports();
+                            PropositionNodeSet supportSet = targetKnownInstance.getSupports();
                             targetKnownInstance.setSupports(Supports.union(supportSet));
                             targetSet.put(ReportSubs, targetKnownInstance);
                             positiveKInstances.put(attitude, targetSet);
@@ -80,7 +80,7 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
 
                             return false;
                         } else {
-                            Support supportSet = targetKnownInstance.getSupports();
+                            PropositionNodeSet supportSet = targetKnownInstance.getSupports();
                             targetKnownInstance.setSupports(Supports.union(supportSet));
                             targetSet.put(ReportSubs, targetKnownInstance);
                             positiveKInstances.put(attitude, targetSet);

@@ -16,10 +16,7 @@ public class ContextController {
     private static Network network;
     private static boolean uvbrEnabled;
     private static boolean automaticHandlingEnabled;
-    private static int mergeFunctionNumber;
-
-
-
+    private static int mergeFunctionNumber;    
     private static ArrayList<ArrayList<Integer>> consistentAttitudes;
 
     public static void setUp(Set<String,Integer> attitudeNames, ArrayList<ArrayList<Integer>> consistentAttitudes, boolean uvbrEnabled){
@@ -40,7 +37,7 @@ public class ContextController {
         }
         ContextController.currContext = c;
     }
-
+    
     public static int getAttitudeNumber(String attitudeName) {
         return attitudes.get(attitudeName);
     }
@@ -88,6 +85,38 @@ public class ContextController {
 
     public static boolean automaticHandlingEnabled() {
         return automaticHandlingEnabled;
+    }
+
+    public static void addHypothesisToContext(String contextName, int attitudeNumber, PropositionNode node) {
+        Context c = ContextController.getContext(contextName);
+        c.addHypothesisToContext(attitudeNumber, node);
+        //TODO : wael this causes errors as the support is not initialised correctly
+//        Revision.checkContradiction(c,attitudeNumber,n);
+    }
+
+    public static void removeFromContext(String contextName, int attitudeNumber, int nodeId) {
+        Context c = ContextController.getContext(contextName);
+        PropositionNode n = (PropositionNode) Network.getNodeById(nodeId);
+        c.removeHypothesisFromContext(attitudeNumber, n);
+    }
+
+
+
+    public static int max(int x, int y){
+        return Math.max(x,y);
+    }
+
+    public static IntBinaryOperator mergeGrades() {
+        switch (ContextController.mergeFunctionNumber) {
+            case 1:
+                return Math::max;
+            case 2:
+                return Math::min;
+            case 3:
+                return (a, b) -> (a + b) / 2;
+            default:
+                throw new IllegalArgumentException("Invalid choice");
+        }
     }
 
     public static void addHypothesisToContext(String contextName, int attitudeNumber, PropositionNode node) {

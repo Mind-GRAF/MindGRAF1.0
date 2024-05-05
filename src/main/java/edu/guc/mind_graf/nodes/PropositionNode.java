@@ -1,11 +1,13 @@
 package edu.guc.mind_graf.nodes;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Scanner;
-
+import edu.guc.mind_graf.cables.DownCable;
+import edu.guc.mind_graf.cables.DownCableSet;
+import edu.guc.mind_graf.cables.UpCable;
+import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.context.Context;
+import edu.guc.mind_graf.context.ContextController;
+import edu.guc.mind_graf.exceptions.DirectCycleException;
+import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.matching.Match;
@@ -14,15 +16,20 @@ import edu.guc.mind_graf.mgip.reports.KnownInstanceSet;
 import edu.guc.mind_graf.mgip.reports.Report;
 import edu.guc.mind_graf.mgip.reports.ReportType;
 import edu.guc.mind_graf.mgip.requests.*;
-import edu.guc.mind_graf.context.ContextController;
+import edu.guc.mind_graf.network.Network;
+import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.set.NodeSet;
-import edu.guc.mind_graf.cables.DownCable;
-import edu.guc.mind_graf.cables.DownCableSet;
-import edu.guc.mind_graf.cables.UpCable;
-import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.set.PropositionNodeSet;
-import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.support.Pair;
 import edu.guc.mind_graf.support.Support;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Scanner;
+
 
 public class PropositionNode extends Node {
     protected ChannelSet outgoingChannels;
@@ -40,6 +47,9 @@ public class PropositionNode extends Node {
         forwardChannels = new ChannelSet();
         forwardDone = false;
         knownInstances = new KnownInstanceSet();
+        support = new Support(this.getId());
+        justificationSupportDependents = new PropositionNodeSet();
+        assumptionSupportDependents = new PropositionNodeSet();
     }
 
     public PropositionNode(DownCableSet downCableSet) {
@@ -49,6 +59,9 @@ public class PropositionNode extends Node {
         forwardChannels = new ChannelSet();
         forwardDone = false;
         knownInstances = new KnownInstanceSet();
+        support = new Support(this.getId());
+        justificationSupportDependents = new PropositionNodeSet();
+        assumptionSupportDependents = new PropositionNodeSet();
     }
 
     /**
@@ -73,11 +86,12 @@ public class PropositionNode extends Node {
     }
 
 
+
     /***
      * Method getting the NodeSet that this current node is considered a consequent
      * or argument
      * to
-     * 
+     *
      * @return nodeSet
      */
     public NodeSet getUpConsDomRuleNodeSet() {
@@ -97,7 +111,7 @@ public class PropositionNode extends Node {
      * Method getting the NodeSet that this current node is considered an antecedent
      * or argument
      * to
-     * 
+     *
      * @return nodeSet
      */
     public NodeSet getUpAntDomRuleNodeSet() {
@@ -117,7 +131,7 @@ public class PropositionNode extends Node {
     /***
      * Method getting the NodeSet of the antecedents and arguments for this current
      * node
-     * 
+     *
      * @return nodeSet
      */
 
@@ -138,7 +152,7 @@ public class PropositionNode extends Node {
     /***
      * Method handling all types of sending requests, taking different inputs to
      * handle different cases.
-     * 
+     *
      * @param type          type of request being addressed
      * @param targetNode    source Node being addressed
      * @param switchSubs    mapped substitutions from origin node
@@ -151,10 +165,10 @@ public class PropositionNode extends Node {
      * @return the established type based request
      */
     protected Request establishChannel(ChannelType type, Node targetNode,
-            Substitutions switchSubs,
-            Substitutions filterSubs, String contextName,
-            int attitudeId,
-            int matchType, Node requesterNode) {
+                                       Substitutions switchSubs,
+                                       Substitutions filterSubs, String contextName,
+                                       int attitudeId,
+                                       int matchType, Node requesterNode) {
         /* BEGIN - Helpful Prints */
         String reporterIdent = targetNode.getName();
         String requesterIdent = requesterNode.getName();
@@ -210,6 +224,7 @@ public class PropositionNode extends Node {
 
             } else {
                 ((PropositionNode) targetNode).addToOutgoingChannels(newChannel);
+
             }
             return newRequest;
         }
@@ -232,6 +247,7 @@ public class PropositionNode extends Node {
                 Channel channel = channelHashtable.get(channelId);
                 System.out.println("Channel ID: " + channel.getIdCount() + " & Channel Subs: "
                         + channel.getFilterSubstitutions().toString());
+                ;
                 // Print other channel properties as needed
             }
 
@@ -266,7 +282,7 @@ public class PropositionNode extends Node {
 
     /***
      * Used to send a report over a request through calling request.testReportToSend
-     * 
+     *
      * @param report
      * @param currentChannel
      * @return boolean
@@ -292,7 +308,7 @@ public class PropositionNode extends Node {
 
     /***
      * Trying to send a report to all outgoing channels
-     * 
+     *
      * @param report
      * @return
      */
@@ -307,24 +323,75 @@ public class PropositionNode extends Node {
      * is called to check whether a PropositionNode
      * is
      * supported in a specific attitude in a desired context or not.
-     * 
-     * 
+     *
+     *
      * @param desiredContextName
      * @param desiredAttitudeID
      * @return boolean
      */
 
     public boolean supported(String desiredContextName, int desiredAttitudeID) {
-        return true;
+        boolean supported = false;
+        Context desiredContext = ContextController.getContext(desiredContextName);
+
+        for(HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>> currSupport : this.support.getAssumptionSupport().getFirst().get(desiredAttitudeID)) {
+            for(Integer key : currSupport.keySet()) {
+                if(currSupport.get(key).getFirst().isSubset(desiredContext.getAttitudeProps(key).getFirst()) && currSupport.get(key).getSecond().isSubset(desiredContext.getAttitudeProps(key).getSecond())) {
+                    supported = true;
+                }
+                else {
+                    supported = false;
+                    break;
+                }
+            }
+            if(supported == true) {
+                return supported;
+            }
+        }
+
+        return supported;
 
     }
-    // TODO Ahmed
+
+    public void setHyp(String desiredContextName, int attitude) {
+        Context desiredContext = ContextController.getContext(desiredContextName);
+        desiredContext.getAttitudeProps(attitude).getSecond().add(this.getId());
+        this.support.setHyp(attitude);
+    }
+
+    public void removeNodeFromOtherNodesSupport() {
+        HashMap<Integer, Node> networkPropositions = Network.getPropositionNodes();
+        int[] assumptionDependents = this.getAssumptionSupportDependents().getProps();
+        for(int i = 0; i < assumptionDependents.length ; i++) {
+            PropositionNode dependent = (PropositionNode)networkPropositions.get(assumptionDependents[i]);
+            dependent.getSupport().removeNodeFromAssumptions(this.getId());
+        }
+        int[] justificationDependents = this.getJustificationSupportDependents().getProps();
+        for(int i = 0; i < justificationDependents.length ; i++) {
+            PropositionNode dependent = (PropositionNode)networkPropositions.get(justificationDependents[i]);
+            dependent.getSupport().removeNodeFromJustifications(this.getId());
+        }
+    }
+
+    public void ForgetNodeFromOtherNodesSupport() {
+        HashMap<Integer, Node> networkPropositions = Network.getPropositionNodes();
+        int[] assumptionDependents = this.getAssumptionSupportDependents().getProps();
+        for(int i = 0; i < assumptionDependents.length ; i++) {
+            PropositionNode dependent = (PropositionNode)networkPropositions.get(assumptionDependents[i]);
+            dependent.getSupport().ForgetNodeFromAssumptions(this.getId());
+        }
+        int[] justificationDependents = this.getJustificationSupportDependents().getProps();
+        for(int i = 0; i < justificationDependents.length ; i++) {
+            PropositionNode dependent = (PropositionNode)networkPropositions.get(justificationDependents[i]);
+            dependent.getSupport().ForgetNodeFromJustifications(this.getId());
+        }
+    }
 
     /***
      * Helper method responsible for establishing channels between this current node
      * and each of the non matching ones of the NodeSet to further reports
      * with the given inputs
-     * 
+     *
      * @param nodeset  NodeSet to be sent to
      * @param toBeSent Substitutions to be passed
      * @return
@@ -334,7 +401,7 @@ public class PropositionNode extends Node {
             Substitutions reportSubs = toBeSent.getSubstitutions();
             Substitutions switchSubs = new Substitutions();
             Report newReport = new Report(reportSubs, toBeSent.getSupport(), toBeSent.getAttitude(), toBeSent.isSign(),
-                    toBeSent.getInferenceType(), sentTo, this);
+                    toBeSent.getInferenceType(), sentTo);
             // new report every loop due to duplications in queues when testing.
             newReport.setContextName(toBeSent.getContextName());
             newReport.setReportType(toBeSent.getReportType());
@@ -353,7 +420,7 @@ public class PropositionNode extends Node {
      * Helper method responsible for establishing channels between this current node
      * and each of the List<Match> to further reports instances with the given
      * inputs
-     * 
+     *
      * @param nodeList
      * @param toBeSent
      * @return
@@ -362,7 +429,7 @@ public class PropositionNode extends Node {
         for (Match currentMatch : nodeList) {
             Report newReport = new Report(currentMatch.getFilterSubs(), toBeSent.getSupport(), toBeSent.getAttitude(),
                     toBeSent.isSign(),
-                    toBeSent.getInferenceType(), currentMatch.getNode(), this);
+                    toBeSent.getInferenceType(), currentMatch.getNode());
             newReport.setContextName(toBeSent.getContextName());
             newReport.setReportType(toBeSent.getReportType());
             Channel newChannel = new MatchChannel(currentMatch.getSwitchSubs(), newReport.getSubstitutions(),
@@ -399,8 +466,8 @@ public class PropositionNode extends Node {
     /***
      * Helper method responsible for establishing channels between this current node
      * and each of the NodeSet to further request instances with the given inputs
-     * 
-     * @param //ns            NodeSet to be sent to
+     *
+     * @param nodeSet            NodeSet to be sent to
      * @param filterSubs    Substitutions to be passed
      * @param switchSubs
      * @param contextName   latest request context
@@ -410,8 +477,8 @@ public class PropositionNode extends Node {
      * @return
      */
     protected void sendRequestsToNodeSet(NodeSet nodeSet, Substitutions filterSubs,
-            Substitutions switchSubs, String contextName, int attitudeId,
-            ChannelType channelType, Node requesterNode) {
+                                         Substitutions switchSubs, String contextName, int attitudeId,
+                                         ChannelType channelType, Node requesterNode) {
         for (Node sentTo : nodeSet) {
             Request newRequest = establishChannel(channelType, sentTo, switchSubs, filterSubs,
                     contextName, attitudeId, -1, requesterNode);
@@ -423,7 +490,7 @@ public class PropositionNode extends Node {
      * Helper method responsible for establishing channels between this current node
      * and each of the List<Match> to further request instances with the given
      * inputs
-     * 
+     *
      * @param matchesList
      * @param filterSubs
      * @param switchSubs
@@ -432,11 +499,11 @@ public class PropositionNode extends Node {
      * @param channelType
      * @param requesterNode
      * @return
-     * 
+     *
      */
     protected void sendRequestsToMatches(List<Match> matchesList, Substitutions filterSubs,
-            Substitutions switchSubs,
-            String contextId, int attitudeId, ChannelType channelType, Node requesterNode) {
+                                         Substitutions switchSubs,
+                                         String contextId, int attitudeId, ChannelType channelType, Node requesterNode) {
         for (Match currentMatch : matchesList) {
             int matchType = currentMatch.getMatchType();
             PropositionNode matchedNode = (PropositionNode) currentMatch.getNode();
@@ -451,7 +518,7 @@ public class PropositionNode extends Node {
     /***
      * Method handling all types of Nodes retrieval and sending
      * reports to each Node Type
-     * 
+     *
      * @param channelType        type of request being addressed
      * @param currentContextName context name used
      * @param currentAttitudeID  Attitude ID used
@@ -462,14 +529,14 @@ public class PropositionNode extends Node {
      */
 
     protected void getNodesToSendReport(ChannelType channelType, String currentContextName, int currentAttitudeID,
-            Substitutions substitutions, boolean reportSign, InferenceType inferenceType) {
+                                        Substitutions substitutions, boolean reportSign, InferenceType inferenceType) {
 
         try {
             Support supportPropSet = new Support(-1);
             supportPropSet.addNode(this, currentAttitudeID);
             Substitutions subs = substitutions == null ? new Substitutions() : substitutions;
             Substitutions subs2 = new Substitutions();
-            Report toBeSent = new Report(subs, supportPropSet, currentAttitudeID, reportSign, inferenceType, null, this);
+            Report toBeSent = new Report(subs, support, currentAttitudeID, reportSign, inferenceType, null);
             toBeSent.setContextName(currentContextName);
             toBeSent.setReportType(channelType);
             switch (channelType) {
@@ -510,8 +577,8 @@ public class PropositionNode extends Node {
      * @return
      */
     protected void getNodesToSendRequest(ChannelType channelType, String currentContextName,
-            int currentAttitudeID,
-            Substitutions substitutions) {
+                                         int currentAttitudeID,
+                                         Substitutions substitutions) {
         try {
             switch (channelType) {
                 case Matched:
@@ -543,7 +610,7 @@ public class PropositionNode extends Node {
      * criteria. The filter is perfomed through iterating over each node decide
      * either to keep it or remove it according to the filtering criteria we are
      * applying over the nodeSet.
-     * 
+     *
      * @param removeFromSet
      * @param currentRequest
      * @param toBeCompared
@@ -551,7 +618,7 @@ public class PropositionNode extends Node {
      */
 
     private NodeSet removeAlreadyEstablishedChannels(NodeSet removeFromSet, Request currentRequest,
-            Substitutions toBeCompared) {
+                                                     Substitutions toBeCompared) {
         NodeSet remainingNodes = new NodeSet();
         for (Node currentNode : removeFromSet) {
             if (currentNode instanceof PropositionNode) {
@@ -563,7 +630,7 @@ public class PropositionNode extends Node {
                         Substitutions processedRequestChannelFilterSubs = outgoingChannel.getFilterSubstitutions();
                         notTheSame &= !processedRequestChannelFilterSubs.isSubsetOf(toBeCompared)
                                 && outgoingChannel.getRequesterNode().getId() == currentRequest.getReporterNode()
-                                        .getId();
+                                .getId();
                     }
                     if (notTheSame) {
                         remainingNodes.add(currentNode);
@@ -583,14 +650,14 @@ public class PropositionNode extends Node {
      * the node
      * either to keep it or remove it according to the filtering criteria we are
      * applying over matchingNodes.
-     * 
+     *
      * @param matchingNodes
      * @param currentRequest
      * @param toBeCompared
      * @return list<Match>
      */
     protected List<Match> removeAlreadyEstablishedChannels(List<Match> matchingNodes,
-            Request currentRequest, Substitutions toBeCompared) {
+                                                           Request currentRequest, Substitutions toBeCompared) {
         List<Match> nodesToConsider = new ArrayList<Match>();
         for (Match sourceMatch : matchingNodes) {
             Node sourceNode = sourceMatch.getNode();
@@ -611,13 +678,13 @@ public class PropositionNode extends Node {
 
     /***
      * Checking if this node instance contains not yet bound free variables
-     * This method is implemented to check if this node represents a ”who”, ”where”,
-     * ”which” question, asking for bindings of a specific a specific set of
+     * This method is implemented to check if this node represents a â€�whoâ€�, â€�whereâ€�,
+     * â€�whichâ€� question, asking for bindings of a specific a specific set of
      * variables, in other
      * words, to state whether this PropositionNode has atleast one free variable
      * which
      * is not bound or not.
-     * 
+     *
      * @param subs reference substitutions
      * @return boolean
      */
@@ -641,12 +708,13 @@ public class PropositionNode extends Node {
      * attempts adding a report to the known instances if a report is returned means
      * it was never added before and needs to be handled properly else if null
      * returned means it was handled and stored before
-     * 
+     *
      * @param report
      * @return Report
+     * @throws DirectCycleException
      */
 
-    private Report attemptAddingReportToKnownInstances(Report report) {
+    private Report attemptAddingReportToKnownInstances(Report report) throws DirectCycleException {
         if (this.isOpen()) {
             boolean flag;
             boolean channelCheck = report.getReportType() == ReportType.Matched
@@ -655,7 +723,7 @@ public class PropositionNode extends Node {
                 flag = knownInstances.addKnownInstance(report);
                 System.out.println(
                         "Report " + report.stringifyReport() + " was just added to " + this.getName() + "'s KIs");
-                if (!flag) {
+                if (flag == false) {
                     return report;
 
                 } else {
@@ -671,10 +739,10 @@ public class PropositionNode extends Node {
 
     /***
      * this method is used to initiate the whole process of backward inference
-     * 
+     *
      * @return
      * @throws NoSuchTypeException
-     * 
+     *
      */
     public void deduce() throws NoSuchTypeException {
         /* BEGIN - Helpful Prints */
@@ -703,7 +771,7 @@ public class PropositionNode extends Node {
                 Report currentPveReport = new Report(currentPveKnownInstance.getSubstitutions(),
                         currentPveKnownInstance.getSupports(), currentPveKnownInstance.getAttitudeID(),
                         true,
-                        InferenceType.BACKWARD, this, this);
+                        InferenceType.BACKWARD, this);
                 currentPveReport.setContextName(currentContextName);
                 System.out.println("A reply has been succefully added to the set of backward asserted reply nodes");
                 Scheduler.addNodeAssertionThroughBReport(currentPveReport, replyNode);
@@ -721,7 +789,7 @@ public class PropositionNode extends Node {
                 Report currentNveReport = new Report(currentNveKnownInstance.getSubstitutions(),
                         currentNveKnownInstance.getSupports(), currentNveKnownInstance.getAttitudeID(),
                         false,
-                        InferenceType.BACKWARD, this, this);
+                        InferenceType.BACKWARD, this);
                 currentNveReport.setContextName(currentContextName);
                 System.out.println("A reply has been succefully added to the set of backward asserted reply nodes");
 
@@ -742,13 +810,13 @@ public class PropositionNode extends Node {
         getNodesToSendRequest(ChannelType.Matched, currentContextName,
                 currentattitudeID, null);
         System.out.println(Scheduler.schedule());
-        System.out.println(Scheduler.getBackwardAssertedReplyNodes().values());
+        System.out.println(Scheduler.getBackwardAssertedReplyNodes().values().toString());
 
     }
 
     /***
      * this method is used to initiate the whole process of forward inference
-     * 
+     *
      * @return
      */
     public void add() {
@@ -779,13 +847,13 @@ public class PropositionNode extends Node {
         getNodesToSendReport(ChannelType.Matched, currentContextName, currentAttitudeID, null, reportSign,
                 InferenceType.FORWARD);
         System.out.println(Scheduler.schedule());
-        System.out.println("*New Knowledge inferred: " + Scheduler.getForwardAssertedNodes().values());
+        System.out.println("*New Knowledge inferred: " + Scheduler.getForwardAssertedNodes().values().toString());
 
     }
 
     /***
      * Method for a certain node to process incoming requests
-     * 
+     *
      * @return
      */
     public void processRequests() {
@@ -799,11 +867,12 @@ public class PropositionNode extends Node {
 
     /***
      * Request handling in Non-Rule proposition nodes.
-     * 
+     *
      * @param currentRequest
      * @return
+     * @throws DirectCycleException
      */
-    protected void processSingleRequests(Request currentRequest) {
+    protected void processSingleRequests(Request currentRequest) throws DirectCycleException {
         System.out.println(this.getName() + " Processing Requests as a Proposition node");
 
         Channel currentChannel = currentRequest.getChannel();
@@ -813,9 +882,10 @@ public class PropositionNode extends Node {
         Substitutions reportSubstitutions = new Substitutions();
         Support supportNodeSet = new Support(-1);
         if (this.supported(currentContext, currentAttitude)) {
-            supportNodeSet.addNode(this, currentAttitude);
-            Report NewReport = new Report(reportSubstitutions, supportNodeSet, currentAttitude, true,
-                    InferenceType.BACKWARD, requesterNode, this);
+            supportNodeSet.add((PropositionNode) this);
+            Support support = new Support(-1, new Pair<>(supportNodeSet, new PropositionNodeSet()), currentAttitude);
+            Report NewReport = new Report(reportSubstitutions, support, currentAttitude, true,
+                    InferenceType.BACKWARD, requesterNode);
             // if (((RuleNode) requesterNode).isForwardReport() == true) {
             // NewReport.setInferenceType(InferenceType.FORWARD);
 
@@ -841,7 +911,7 @@ public class PropositionNode extends Node {
                         Report currentPveReport = new Report(currentPveKnownInstance.getSubstitutions(),
                                 currentPveKnownInstance.getSupports(), currentPveKnownInstance.getAttitudeID(),
                                 true,
-                                InferenceType.BACKWARD, requesterNode, this);
+                                InferenceType.BACKWARD, requesterNode);
                         currentPveReport.setContextName(currentContext);
 
                         currentPveReport.setReportType(currentChannel.getChannelType());
@@ -860,7 +930,7 @@ public class PropositionNode extends Node {
                         Report currentNveReport = new Report(currentNveKnownInstance.getSubstitutions(),
                                 currentNveKnownInstance.getSupports(), currentNveKnownInstance.getAttitudeID(),
                                 false,
-                                InferenceType.BACKWARD, requesterNode, this);
+                                InferenceType.BACKWARD, requesterNode);
                         currentNveReport.setContextName(currentContext);
 
                         currentNveReport.setReportType(currentChannel.getChannelType());
@@ -900,7 +970,7 @@ public class PropositionNode extends Node {
 
     /***
      * Method for a certain node to process incoming reports
-     * 
+     *
      * @return
      */
     public void processReports() {
@@ -915,27 +985,29 @@ public class PropositionNode extends Node {
 
     /***
      * Report handling in Non-Rule proposition nodes.
-     * 
+     *
      * @param currentReport
      * @throws NoSuchTypeException
+     * @throws DirectCycleException
      */
-    protected void processSingleReports(Report currentReport) throws NoSuchTypeException {
+    protected void processSingleReports(Report currentReport) throws NoSuchTypeException, DirectCycleException {
         System.out.println(this.getName() + " Processing Reports as a Proposition node");
         boolean forwardReportType = currentReport.getInferenceType() == InferenceType.FORWARD;
 
         Report reportToBeBroadcasted = attemptAddingReportToKnownInstances(currentReport);
         if (reportToBeBroadcasted != null) {// it didn't get handled before but if null won't be handled and saved again
-                                            // but will be broadcasted to the other nodes in the network as new suppors
-                                            // could be discovered
+            // but will be broadcasted to the other nodes in the network as new suppors
+            // could be discovered
 
             if (reportToBeBroadcasted.getReportType() == ReportType.RuleCons) {
                 PropositionNode supportNode = (PropositionNode) applySubstitution(
                         reportToBeBroadcasted.getSubstitutions());
                 if (supportNode != null) {
                     supportNode.addJustificationBasedSupport(reportToBeBroadcasted.getSupport());
-                    Support reportSupportPropSet = new Support(-1);
-                    reportSupportPropSet.addNode(supportNode, reportToBeBroadcasted.getAttitude());
-                    reportToBeBroadcasted.setSupport(reportSupportPropSet);
+                    PropositionNodeSet reportSupportPropSet = new PropositionNodeSet();
+                    reportSupportPropSet.add(supportNode);
+                    Support support = new Support(-1, new Pair<>(reportSupportPropSet,new PropositionNodeSet()), reportToBeBroadcasted.getAttitude());
+                    reportToBeBroadcasted.setSupport(support);
                     if (reportToBeBroadcasted.getInferenceType() == InferenceType.FORWARD) {
                         System.out.println(
                                 "A New Fact has been succefully added to the set of forward asserted nodes");
@@ -975,7 +1047,14 @@ public class PropositionNode extends Node {
     }
 
     private void addJustificationBasedSupport(Support support) {
-        // TODO Ahmed
+        for(Integer key : support.getJustificationSupport().getFirst().keySet()) {
+            try {
+                this.getSupport().addJustificatoinSupportForAttitude(key, support.getJustificationSupport().getFirst().get(key));
+            } catch (DirectCycleException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
 
     }
 
@@ -1025,6 +1104,13 @@ public class PropositionNode extends Node {
 
     public KnownInstanceSet getKnownInstances() {
         return knownInstances;
+    }
+
+    public int getGradeFromParent() {
+        //TODO: wael handle nulls
+        PropositionNode parentNode = (PropositionNode) this.getUpCable("prop").getNodeSet().iterator().next();
+        Node gradeNode = parentNode.getDownCable("grade").getNodeSet().iterator().next();
+        return Integer.parseInt(gradeNode.getName());
     }
 
 }

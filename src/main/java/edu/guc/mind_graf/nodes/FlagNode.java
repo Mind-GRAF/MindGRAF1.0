@@ -39,8 +39,16 @@ public class FlagNode {
 //        this.support = support;
 //    }
 
+    public Support getSupport() {
+        return support;
+    }
+
+    public void setSupport(Support support) {
+        this.support = support;
+    }
+
     public boolean equals(Object o) {
-        // maybe throw exception here if nodes equal but flags different
+        // maybe throw exception here if nodes equal but flags different => don't cz that should never happen
         if(!(o instanceof FlagNode))
             return false;
         FlagNode fn = (FlagNode) o;
