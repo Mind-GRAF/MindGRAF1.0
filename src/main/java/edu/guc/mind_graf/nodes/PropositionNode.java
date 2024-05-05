@@ -1,11 +1,8 @@
 package edu.guc.mind_graf.nodes;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
+import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.matching.Match;
@@ -22,6 +19,7 @@ import edu.guc.mind_graf.cables.UpCable;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.support.Pair;
 import edu.guc.mind_graf.support.Support;
 
 public class PropositionNode extends Node {
@@ -307,18 +305,35 @@ public class PropositionNode extends Node {
      * is called to check whether a PropositionNode
      * is
      * supported in a specific attitude in a desired context or not.
-     * 
-     * 
+     *
+     *
      * @param desiredContextName
      * @param desiredAttitudeID
      * @return boolean
      */
 
     public boolean supported(String desiredContextName, int desiredAttitudeID) {
-        return true;
+        boolean supported = false;
+        Context desiredContext = ContextController.getContext(desiredContextName);
+
+        for(HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>> currSupport : this.support.getAssumptionSupport().getFirst().get(desiredAttitudeID)) {
+            for(Integer key : currSupport.keySet()) {
+                if(currSupport.get(key).getFirst().isSubset(desiredContext.getAttitudeProps(key).getFirst()) && currSupport.get(key).getSecond().isSubset(desiredContext.getAttitudeProps(key).getSecond())) {
+                    supported = true;
+                }
+                else {
+                    supported = false;
+                    break;
+                }
+            }
+            if(supported) {
+                return supported;
+            }
+        }
+
+        return supported;
 
     }
-    // TODO Ahmed
 
     /***
      * Helper method responsible for establishing channels between this current node
@@ -1008,4 +1023,10 @@ public class PropositionNode extends Node {
         return knownInstances;
     }
 
+    public int getGradeFromParent() {
+        //TODO: wael handle nulls
+        PropositionNode parentNode = (PropositionNode) this.getUpCable("prop").getNodeSet().iterator().next();
+        Node gradeNode = parentNode.getDownCable("grade").getNodeSet().iterator().next();
+        return Integer.parseInt(gradeNode.getName());
+    }
 }

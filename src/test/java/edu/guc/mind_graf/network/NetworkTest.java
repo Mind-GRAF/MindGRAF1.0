@@ -15,11 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 class NetworkTest {
-	Network n;
-	
+
 	@BeforeEach
 	void setUp() {
-		n = new Network();
 		System.out.println("Testing Network");
 		Set<String,Integer> attitudeNames = new Set<>();
 		attitudeNames.add( "beliefs",0);
@@ -70,7 +68,6 @@ class NetworkTest {
 			
 			
 //			Node ruleNode1 = Network.createNode("ruleNode1", "rulenode");
-			n.printNodes();
 		}catch (Exception e){
 			e.printStackTrace();
 		}

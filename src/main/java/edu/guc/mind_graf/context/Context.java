@@ -12,20 +12,18 @@ import edu.guc.mind_graf.support.Pair;
 
 public class Context {
 
-    private Hashtable<Integer, Pair<PropositionNodeSet,PropositionNodeSet>> attitudes;
-    private String name;
+    private final Hashtable<Integer, Pair<PropositionNodeSet,PropositionNodeSet>> attitudes;
+    //TODO change this to hashmap
+    private final String name;
     private Set<Integer, BitSet> AttitudesBitset;
 
     
     public Context(String name, Set<String,Integer> attitudeNames){
         this.name=name;
-        //TODO Wael: set the attitude names
+        this.attitudes = new Hashtable<>();
         for(Map.Entry<String,Integer> entry: attitudeNames.getSet().entrySet()){
-            PropositionNodeSet[] attitudeNodeSet = new PropositionNodeSet[2];
-            attitudeNodeSet[0] = new PropositionNodeSet();
-            attitudeNodeSet[1] = new PropositionNodeSet();
-
-            attitudes.put(entry.getValue(),  attitudeNodeSet);
+            Pair<PropositionNodeSet, PropositionNodeSet> p = new Pair<>(new PropositionNodeSet(),new PropositionNodeSet());
+            this.attitudes.put(entry.getValue(), p);
         }
     }
     public Integer getPropositionAttitude(Integer prop) {
@@ -49,16 +47,23 @@ public class Context {
 //        return this.attitudes.get(attitude);
 //    }
 
-    public static void addHypothesisToContext(Context c, int attitudeNumber, PropositionNode node) {
-        c.attitudes.get(attitudeNumber)[0].add(node);
+    public void addHypothesisToContext(int attitudeNumber, PropositionNode node) {
+//        node.setHyp();
+//        TODO: wael complete merge
+        this.attitudes.get(attitudeNumber).getFirst().add(node);
     }
 
-    public static void removeHypothesisFromContext(Context c, int attitudeNumber, PropositionNode node) {
-        c.attitudes.get(attitudeNumber)[0]  .remove(node);
+    public void removeHypothesisFromContext(int attitudeNumber, PropositionNode node) {
+        //TODO: wael handle graded
+        this.attitudes.get(attitudeNumber).getSecond().remove(node);
     }
 
     public boolean isHypothesis(int attitudeNumber, PropositionNode node){
         return this.attitudes.get(attitudeNumber).getFirst().contains(node) || this.attitudes.get(attitudeNumber).getSecond().contains(node);
+    }
+
+    public Pair<PropositionNodeSet,PropositionNodeSet> getAttitudeProps(int attitudeID){
+        return this.attitudes.get(attitudeID);
     }
 
 

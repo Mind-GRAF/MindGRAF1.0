@@ -496,7 +496,7 @@ public class Support {
 		
 		for(Integer Attitude : justificationSupport.keySet()) {
 			if(!isTreeCalculatetd.contains(Attitude))
-			supportsTree.put(Attitude, calculateSupportTreeForAttitude(Attitude));
+				supportsTree.put(Attitude, calculateSupportTreeForAttitude(Attitude));
 		}
 		
 	}
