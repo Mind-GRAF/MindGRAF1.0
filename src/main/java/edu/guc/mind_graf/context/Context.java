@@ -48,9 +48,8 @@ public class Context {
 //    }
 
     public void addHypothesisToContext(int attitudeNumber, PropositionNode node) {
-//        node.setHyp();
-//        TODO: wael complete merge
         this.attitudes.get(attitudeNumber).getFirst().add(node);
+        node.getSupport().setHyp(attitudeNumber);
     }
 
     public void removeHypothesisFromContext(int attitudeNumber, PropositionNode node) {

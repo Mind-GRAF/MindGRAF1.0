@@ -2,11 +2,11 @@ package edu.guc.mind_graf.revision;
 
 import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
-import edu.guc.mind_graf.caseFrames.Adjustability;
 import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.nodes.Node;
+import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.relations.Relation;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.Set;
@@ -17,8 +17,6 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class RevisionTest {
     Network n;
@@ -77,7 +75,7 @@ class RevisionTest {
 
         Node notP = Network.createNode("propositionnode", downCableSet);
         System.out.println(Network.getNodes());
-        ContextController.addToContext("guc",0,68); //p
-        ContextController.addToContext("guc",0,69); //!p
+        ContextController.addHypothesisToContext("guc",0, (PropositionNode) p); //p
+        ContextController.addHypothesisToContext("guc",0, (PropositionNode) notP); //!p
     }
 }

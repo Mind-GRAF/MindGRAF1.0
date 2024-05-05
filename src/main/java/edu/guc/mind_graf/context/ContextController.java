@@ -90,10 +90,9 @@ public class ContextController {
         return automaticHandlingEnabled;
     }
 
-    public static void addToContext(String contextName, int attitudeNumber, int nodeId) {
+    public static void addHypothesisToContext(String contextName, int attitudeNumber, PropositionNode node) {
         Context c = ContextController.getContext(contextName);
-        PropositionNode n = (PropositionNode) Network.getNodeById(nodeId);
-        c.addHypothesisToContext(attitudeNumber, n);
+        c.addHypothesisToContext(attitudeNumber, node);
         //TODO : wael this causes errors as the support is not initialised correctly
 //        Revision.checkContradiction(c,attitudeNumber,n);
     }

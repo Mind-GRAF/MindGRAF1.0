@@ -170,23 +170,23 @@ public class Revision {
 	}
 
 	public static int getGradeOfNode(Context c,int attitudeNumber, PropositionNode node){
-		int grade = 0;
-		for(HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> assumptionSupport : node.getSupport().getAssumptionSupport().getFirst().get(attitudeNumber)) {
-			int gradeForThisSupport = 0;
-			for(Map.Entry<Integer,Pair<PropositionNodeSet,PropositionNodeSet>> support: assumptionSupport.entrySet()) {
-				if (supportIsInvalid(c, attitudeNumber, support.getValue().getFirst())) {
-					continue;
-				}
-				gradeForThisSupport = 0;
-				support.getValue().getSecond().getNodes().stream().mapToInt(((Node n)-> (PropositionNode) n).getGradeFromParent())
-				for(PropositionNode supportNode :support.getValue().getSecond()){
-					//This merges grades of nodes in a single support for example: g(g(p,2),3)
-					gradeForThisSupport = ContextController.max(gradeForThisSupport, supportNode.getGradeFromParent());
-				}
-			}
-			//This merges grades between multiple supports
-			grade = ContextController.max(grade,gradeForThisSupport);
-		}
+//		int grade = 0;
+//		for(HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> assumptionSupport : node.getSupport().getAssumptionSupport().getFirst().get(attitudeNumber)) {
+//			int gradeForThisSupport = 0;
+//			for(Map.Entry<Integer,Pair<PropositionNodeSet,PropositionNodeSet>> support: assumptionSupport.entrySet()) {
+//				if (supportIsInvalid(c, attitudeNumber, support.getValue().getFirst())) {
+//					continue;
+//				}
+//				gradeForThisSupport = 0;
+//				support.getValue().getSecond().getNodes().stream().mapToInt(((Node n)-> (PropositionNode) n).getGradeFromParent())
+//				for(PropositionNode supportNode :support.getValue().getSecond()){
+//					//This merges grades of nodes in a single support for example: g(g(p,2),3)
+//					gradeForThisSupport = ContextController.max(gradeForThisSupport, supportNode.getGradeFromParent());
+//				}
+//			}
+//			//This merges grades between multiple supports
+//			grade = ContextController.max(grade,gradeForThisSupport);
+//		}
 		return 0;
 	}
 

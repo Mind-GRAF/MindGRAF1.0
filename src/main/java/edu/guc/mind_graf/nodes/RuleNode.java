@@ -2,6 +2,7 @@ package edu.guc.mind_graf.nodes;
 
 import java.util.Collection;
 
+import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.reports.KnownInstance;
@@ -25,6 +26,7 @@ import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
+import edu.guc.mind_graf.support.Support;
 
 public abstract class RuleNode extends PropositionNode {
     private boolean forwardReport;
@@ -74,14 +76,15 @@ public abstract class RuleNode extends PropositionNode {
     public void sendInferenceReports(RuleInfoSet[] inferrable, int attitude) {
          for (int i = 0; i < inferrable.length; i++) {
              for(RuleInfo ri : inferrable[i]) {
-                 PropositionNodeSet supports = new PropositionNodeSet();   // probably wrong (maybe should make new support of the flag nodes and rule node
-                 for (FlagNode fn : ri.getFns()) {
-                     supports.add(fn.getNode());
-                 }
-                 supports.add(this);
-                 Report newReport = new Report(ri.getSubs() == null ? new Substitutions() : ri.getSubs(), supports, attitude,
-                         (i == 0), InferenceType.FORWARD, null, this);
-                 putInferenceReportOnQueue(newReport);
+                 //TODO: sara, changed by wael to merge supports
+//                 Support supports = new Support();   // probably wrong (maybe should make new support of the flag nodes and rule node
+//                 for (FlagNode fn : ri.getFns()) {
+//                     supports.add(fn.getNode());
+//                 }
+//                 supports.add(this);
+//                 Report newReport = new Report(ri.getSubs() == null ? new Substitutions() : ri.getSubs(), supports, attitude,
+//                         (i == 0), InferenceType.FORWARD, null, this);
+//                 putInferenceReportOnQueue(newReport);
              }
          }
     }
@@ -241,7 +244,7 @@ public abstract class RuleNode extends PropositionNode {
      * @param currentRequest
      * @return
      */
-    protected void processSingleRequests(Request currentRequest) {
+    protected void processSingleRequests(Request currentRequest) throws DirectCycleException {
         System.out.println(this.getName() + " Processing Requests as a Rule node");
         Channel currentChannel = currentRequest.getChannel();
         if (currentChannel instanceof AntecedentToRuleChannel || currentChannel instanceof MatchChannel)
@@ -317,7 +320,7 @@ public abstract class RuleNode extends PropositionNode {
      * @param currentReport
      * @return
      */
-    protected void processSingleReports(Report currentReport) throws NoSuchTypeException {
+    protected void processSingleReports(Report currentReport) throws NoSuchTypeException, DirectCycleException {
         System.out.println(this.getName() + " Processing Reports as a Rule node");
 
         String currentReportContextName = currentReport.getContextName();
@@ -466,11 +469,15 @@ public abstract class RuleNode extends PropositionNode {
     // method for any of the children rules to call whenever it needs to act as a
     // normal proposition node
     public void grandparentMethodRequest(Request currentRequest) {
-        super.processSingleRequests(currentRequest);
+//        super.processSingleRequests(currentRequest);
+        //TODO: sara, changed by wael to merge supports
+
     }
 
     public void grandparentMethodReport(Report currentReport) throws NoSuchTypeException {
-        super.processSingleReports(currentReport);
+//        super.processSingleReports(currentReport);
+        //TODO: sara, changed by wael to merge supports
+
     }
 
     public boolean isForwardReport() {
