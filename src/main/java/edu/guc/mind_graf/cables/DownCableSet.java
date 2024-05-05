@@ -98,4 +98,7 @@ public class DownCableSet {
 		}
 		return result;
 	}
+	public Object[] keySet() {
+		return downCables.keySet().toArray();
+	}
 }

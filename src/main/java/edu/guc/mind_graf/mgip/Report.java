@@ -2,15 +2,13 @@ package edu.guc.mind_graf.mgip;
 
 import edu.guc.mind_graf.mgip.requests.ChannelType;
 import edu.guc.mind_graf.components.Substitutions;
-import edu.guc.mind_graf.mgip.ReportType;
-import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.nodes.Node;
-import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.set.PropositionNodeSet;
+import edu.guc.mind_graf.support.Support;
 
 public class Report {
     private Substitutions substitutions;
-    private PropositionNodeSet support;
+    private Support support;
     private boolean sign;
     private InferenceType inferenceType;
     private Node requesterNode;
@@ -18,7 +16,7 @@ public class Report {
     private String contextName;
     private ReportType reportType;
 
-    public Report(Substitutions substitution, PropositionNodeSet suppt, int attitudeid,
+    public Report(Substitutions substitution, Support suppt, int attitudeid,
             boolean sign, InferenceType inference, Node requesterNode) {
         this.substitutions = substitution;
         this.attitude = attitudeid;
@@ -69,11 +67,11 @@ public class Report {
         this.substitutions = substitutions;
     }
 
-    public PropositionNodeSet getSupport() {
+    public Support getSupport() {
         return support;
     }
 
-    public void setSupport(PropositionNodeSet support) {
+    public void setSupport(Support support) {
         this.support = support;
     }
 
@@ -127,6 +125,12 @@ public class Report {
                 break;
             case RuleCons:
                 this.setReportType(ReportType.RuleCons);
+                break;
+            case WhenRule:
+                this.setReportType(ReportType.WhenRule);
+                break;
+            case IfRule:
+                this.setReportType(ReportType.IfRule);
                 break;
             default:
                 // handle error or do nothing

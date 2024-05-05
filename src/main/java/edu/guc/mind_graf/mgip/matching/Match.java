@@ -2,6 +2,7 @@ package edu.guc.mind_graf.mgip.matching;
 
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.nodes.Node;
+import edu.guc.mind_graf.support.Support;
 
 public class Match {
     private Substitutions filterSubs; // whquestion atleastone free not bound
@@ -11,6 +12,7 @@ public class Match {
     private Substitutions switchSubs;
     private Node node;
     private int matchType;
+    private Support support;
 
     public Match(Substitutions filterSubs, Substitutions switchSubs, Node node, int matchType) {
         this.filterSubs = filterSubs;
@@ -49,5 +51,18 @@ public class Match {
 
     public void setMatchType(int matchType) {
         this.matchType = matchType;
+    }
+
+    public boolean isDuplicate(Match other) {
+        return this != other && node.equals(other.node) && matchType == other.matchType
+                && filterSubs.equals(other.filterSubs) && switchSubs.equals(other.switchSubs);
+    }
+
+    public Match clone() {
+        return new Match(filterSubs.clone(), switchSubs.clone(), node, matchType);
+    }
+
+    public Support getSupport() {
+        return support;
     }
 }
