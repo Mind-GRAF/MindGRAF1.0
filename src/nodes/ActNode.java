@@ -24,6 +24,7 @@ public abstract class ActNode extends Node {
     protected ChannelSet outgoingChannels;
     private Agenda agenda;
 	private int count;
+    private int achieveCount;
 	private Node variable;
 	private ArrayList<Report> reports;
 

@@ -86,7 +86,7 @@ public class Scheduler {
                 ActNode toRunNext = actQueue.pop();
                 // System.out.println(toRunNext + " agenda: " + toRunNext.getAgenda());
                 System.out.println("\n\n");
-                toRunNext.processIntends();
+                //toRunNext.processIntends();
                 sequence += "A ";
                 if (!highQueue.isEmpty() || !lowQueue.isEmpty()) {
                     continue main;
