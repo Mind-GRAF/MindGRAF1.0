@@ -12,6 +12,9 @@ import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 public class AndOr extends RuleNode {
 
     private int min;
@@ -40,14 +43,8 @@ public class AndOr extends RuleNode {
         return inferrable;
     }
 
-    public void putInferenceReportOnQueue(Report report) {
-        //TODO: sara, changed by wael to merge supports
-//        for(Node node : arg) {
-//            if(!report.getSupport().contains(node)) {
-//                report.setRequesterNode(node);
-//                Scheduler.addToHighQueue(report);
-//            }
-//        }
+    public void sendInferenceReports(HashMap<RuleInfo, Report> reports) {
+        sendResponseToArgs(reports, arg);
     }
 
 }

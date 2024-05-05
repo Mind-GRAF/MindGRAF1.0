@@ -15,8 +15,8 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
     public Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> negativeKInstances;
 
     public KnownInstanceSet() {
-        positiveKInstances = new Hashtable<Integer, Hashtable<Substitutions, KnownInstance>>();
-        negativeKInstances = new Hashtable<Integer, Hashtable<Substitutions, KnownInstance>>();
+        positiveKInstances = new Hashtable<>();
+        negativeKInstances = new Hashtable<>();
 
     }
 
@@ -46,12 +46,10 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
 
                         } else {
                             Support supportSet = targetKnownInstance.getSupports();
-                            //TODO: sara, changed by wael to merge supports
-//                            targetKnownInstance.setSupports(Supports.union(supportSet));
+                            targetKnownInstance.setSupports(Supports.union(supportSet));
                             targetSet.put(ReportSubs, targetKnownInstance);
                             positiveKInstances.put(attitude, targetSet);
                             return true;
-
                         }
 
                     }
@@ -64,7 +62,7 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
         else {
             Hashtable<Substitutions, KnownInstance> targetSet = negativeKInstances.remove(attitude);
             if (targetSet == null) {
-                targetSet = new Hashtable<Substitutions, KnownInstance>();
+                targetSet = new Hashtable<>();
                 KnownInstance targetKnownInstance = new KnownInstance(ReportSubs, Supports, attitude);
                 targetSet.put(ReportSubs, targetKnownInstance);
                 negativeKInstances.put(attitude, targetSet);
@@ -82,8 +80,7 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
                             return false;
                         } else {
                             Support supportSet = targetKnownInstance.getSupports();
-                            //TODO: sara, changed by wael to merge supports
-//                            targetKnownInstance.setSupports(Supports.union(supportSet));
+                            targetKnownInstance.setSupports(Supports.union(supportSet));
                             targetSet.put(ReportSubs, targetKnownInstance);
                             positiveKInstances.put(attitude, targetSet);
                             return true;

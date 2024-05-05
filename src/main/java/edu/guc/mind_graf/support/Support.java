@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import edu.guc.mind_graf.exceptions.DirectCycleException;
+import edu.guc.mind_graf.nodes.RuleNode;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.nodes.Node;
@@ -55,6 +56,43 @@ public class Support {
 		isHyp = new HashSet<>();
 		isTreeCalculatetd = new HashSet<>();
 		supportsTree = new HashMap<>();
+	}
+
+	public Support union(Support support) {
+		Support newSupport = new Support(this.nodeID);
+//		newSupport.justificationSupport.putAll(this.justificationSupport);
+//		newSupport.justificationSupport.putAll(support.justificationSupport);
+//		newSupport.assumptionSupport.getFirst().putAll(this.assumptionSupport.getFirst());
+//		newSupport.assumptionSupport.getFirst().putAll(support.assumptionSupport.getFirst());
+//		newSupport.isHyp.addAll(this.isHyp);
+//		newSupport.isHyp.addAll(support.isHyp);
+//		newSupport.isTreeCalculatetd.addAll(this.isTreeCalculatetd);
+//		newSupport.isTreeCalculatetd.addAll(support.isTreeCalculatetd);
+//		newSupport.supportsTree.putAll(this.supportsTree);
+//		newSupport.supportsTree.putAll(support.supportsTree);
+		return newSupport;
+	}
+
+	public Support clone(){
+		Support newSupport = new Support(this.nodeID);
+//		for(Integer Attitude : this.getJustificationSupport().keySet()) {
+//			newSupport.addJustificatoinSupportForAttitude(Attitude, this.getAssumptionSupport().get(Attitude));
+//		}
+//		newSupport.justificationSupport.putAll(this.justificationSupport);
+//		newSupport.assumptionSupport.getFirst().putAll(this.assumptionSupport.getFirst());
+//		newSupport.assumptionSupport.getSecond().putAll(this.assumptionSupport.getSecond().getValues());
+//		newSupport.isHyp.addAll(this.isHyp);
+//		newSupport.isTreeCalculatetd.addAll(this.isTreeCalculatetd);
+//		newSupport.supportsTree.putAll(this.supportsTree);
+		return newSupport;
+	}
+
+	public void addNode(Node node, int attitude){
+
+	}
+
+	public Support(int nodeId, int attitude, HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> map){
+
 	}
 
 	/**

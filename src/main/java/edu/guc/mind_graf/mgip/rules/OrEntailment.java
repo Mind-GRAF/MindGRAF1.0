@@ -3,12 +3,15 @@ package edu.guc.mind_graf.mgip.rules;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.reports.Report;
-import edu.guc.mind_graf.mgip.ruleHandlers.Orentailhandler;
+import edu.guc.mind_graf.mgip.ruleHandlers.OrEntailhandler;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.RuleNode;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class OrEntailment  extends RuleNode {
 
@@ -19,22 +22,18 @@ public class OrEntailment  extends RuleNode {
         super(downcableSet);
         ant = downcableSet.get("ant").getNodeSet();
         cq = downcableSet.get("cq").getNodeSet();
-        this.ruleInfoHandler = new Orentailhandler();
+        this.ruleInfoHandler = new OrEntailhandler();
     }
 
     public RuleInfoSet[] mayInfer() {
         RuleInfoSet[] inferrable = {new RuleInfoSet()};  // at index 0 the set of positively inferred, at index 1 the set of negatively inferred
-        if(((Orentailhandler)this.ruleInfoHandler).getUsedToInfer().getPcount() > 0) {
-            inferrable[0].addRuleInfo(((Orentailhandler)this.ruleInfoHandler).getUsedToInfer());
+        if(((OrEntailhandler)this.ruleInfoHandler).getUsedToInfer().getPcount() > 0) {
+            inferrable[0].addRuleInfo(((OrEntailhandler)this.ruleInfoHandler).getUsedToInfer());
         }
         return inferrable;
     }
 
-    public void putInferenceReportOnQueue(Report report) {
-        for(Node node : cq) {
-            report.setRequesterNode(node);
-            Scheduler.addToHighQueue(report);
-        }
+    public void sendInferenceReports(HashMap<RuleInfo, Report> reports) {
+        sendInferenceToCq(reports, cq);
     }
-
 }

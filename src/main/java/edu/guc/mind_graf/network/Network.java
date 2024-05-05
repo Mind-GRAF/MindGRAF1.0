@@ -57,20 +57,20 @@ public class Network {
 	}
 
 	public void addBasicRelations() {
-		Network.createRelation("forall", "propositionnode", Adjustability.EXPAND, 2);
+		Network.createRelation("forall", "propositionnode", Adjustability.NONE, 1);
 		Network.createRelation("min", "individualnode", Adjustability.NONE, 1);
 		Network.createRelation("max", "individualnode", Adjustability.NONE, 1);
 		Network.createRelation("arg", "propositionnode", Adjustability.NONE, 1);
-		Network.createRelation("object", "", Adjustability.EXPAND, 2);
-		Network.createRelation("member", "", Adjustability.EXPAND, 2);
-		Network.createRelation("class", "", Adjustability.EXPAND, 2);
-		Network.createRelation("i", "individualnode", Adjustability.EXPAND, 2);
-		Network.createRelation("cq", "propositionnode", Adjustability.EXPAND, 2);
-		Network.createRelation("ant", "propositionnode", Adjustability.EXPAND, 2);
-		Network.createRelation("&ant", "propositionnode", Adjustability.EXPAND, 2);
-		Network.createRelation("thresh", "propositionnode", Adjustability.EXPAND, 2);
-		Network.createRelation("threshmax", "propositionnode", Adjustability.EXPAND, 2);
-		Network.createRelation("threshmax", "propositionnode", Adjustability.EXPAND, 2);
+		Network.createRelation("obj", "", Adjustability.NONE, 1);
+		Network.createRelation("member", "", Adjustability.NONE, 1);
+		Network.createRelation("class", "", Adjustability.NONE, 1);
+		Network.createRelation("i", "individualnode", Adjustability.NONE, 1);
+		Network.createRelation("cq", "propositionnode", Adjustability.NONE, 1);
+		Network.createRelation("ant", "propositionnode", Adjustability.NONE, 1);
+		Network.createRelation("thresh", "propositionnode", Adjustability.NONE, 1);
+		Network.createRelation("threshmax", "propositionnode", Adjustability.NONE, 1);
+		Network.createRelation("action", "propositionnode", Adjustability.NONE, 1);
+		Network.createRelation("do", "actnode", Adjustability.NONE, 1);
 		Network.createRelation("grade", "individualNode", Adjustability.NONE, 0);
 		Network.createRelation("prop", "pro positionnode", Adjustability.NONE, 0);
 

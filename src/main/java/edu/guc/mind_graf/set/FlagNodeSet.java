@@ -4,14 +4,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 import edu.guc.mind_graf.nodes.FlagNode;
+import edu.guc.mind_graf.nodes.Node;
 
 public class FlagNodeSet implements Iterable<FlagNode>{
 
     private HashSet<FlagNode> flagNodes;
-
-    public FlagNodeSet() {
-        flagNodes = new HashSet<FlagNode>();
-    }
 
     public FlagNodeSet(FlagNode... fns) {
         this.flagNodes = new HashSet<>();
@@ -36,7 +33,11 @@ public class FlagNodeSet implements Iterable<FlagNode>{
     }
 
     public boolean contains(FlagNode fn) {
-        return flagNodes.contains(fn);
+        for(FlagNode flagNode : flagNodes){
+            if(flagNode.equals(fn))
+                return true;
+        }
+        return false;
     }  
 
     public void clear() {
@@ -49,7 +50,7 @@ public class FlagNodeSet implements Iterable<FlagNode>{
 
     public boolean disjoint(FlagNodeSet fns) {
         return flagNodes.stream().noneMatch(fn -> fns.contains(fn));
-    } //The noneMatch method returns true if none of the elements match the given condition, and false otherwise. mthod exists cz fns have to be disjoint for ris to be compatible
+    } //The noneMatch method returns true if none of the elements match the given condition, and false otherwise. method exists cz fns have to be disjoint for ris to be compatible
 
     public void addFlagNodes(FlagNodeSet fns) {
         flagNodes.addAll(fns.getFlagNodes());
@@ -58,7 +59,10 @@ public class FlagNodeSet implements Iterable<FlagNode>{
     public FlagNodeSet combine(FlagNodeSet fns) {
         FlagNodeSet newFns = new FlagNodeSet();
         newFns.addFlagNodes(this);
-        newFns.addFlagNodes(fns);
+        for(FlagNode fn : fns.getFlagNodes()){
+            if(!newFns.contains(fn))
+                newFns.addFlagNode(fn);
+        }
         return newFns;
     }
 
@@ -67,6 +71,14 @@ public class FlagNodeSet implements Iterable<FlagNode>{
         flagNodes.stream().filter(fn -> fns.contains(fn)).forEach(fn -> newFns.addFlagNode(fn));
         return newFns;
     } // should return a flag node set of the common flag nodes between the two sets
+
+    public boolean containsNode(Node node){
+        for(FlagNode fn : flagNodes){
+            if(fn.getNode().equals(node))
+                return true;
+        }
+        return false;
+    }
 
     @Override
     public boolean equals(Object obj) {

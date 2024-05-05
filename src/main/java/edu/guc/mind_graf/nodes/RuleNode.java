@@ -1,7 +1,9 @@
 package edu.guc.mind_graf.nodes;
 
 import java.util.Collection;
+import java.util.HashMap;
 
+import edu.guc.mind_graf.exceptions.InvalidRuleInfoException;
 import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.Scheduler;
@@ -24,20 +26,14 @@ import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
-import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
+import edu.guc.mind_graf.support.Support;
 import edu.guc.mind_graf.support.Support;
 
 public abstract class RuleNode extends PropositionNode {
     private boolean forwardReport;
     protected RuleInfoHandler ruleInfoHandler;
     protected RuleInfoSet rootRuleInfos;
-
-//    public RuleNode(String name, Boolean isVariable) {
-//        super(name, isVariable);
-//        this.forwardReport = false;
-//        // TODO Auto-generated constructor stub
-//    }
 
     public RuleNode(DownCableSet downCableSet) {
         super(downCableSet);
@@ -47,49 +43,75 @@ public abstract class RuleNode extends PropositionNode {
     }
 
     public void applyRuleHandler(Report report) {
-        // if (this.isForwardReport() == true) {
-        // this.setForwardReport(false);
-        // report.setInferenceType(InferenceType.FORWARD);
-        // NodeSet downCons = getDownConsNodeSet();
-        // sendReportToCons(downCons, report);
-
-        // } else {
-        // for (Channel outChnl : outgoingChannels)
-        // putInferenceReportOnQueue(report, outChnl);
-        // }
 
         try{
             RuleInfoSet inserted = ruleInfoHandler.insertRI(RuleInfo.createRuleInfo(report));
-            rootRuleInfos.addRootRuleInfo(inserted);
-            if(inserted != null && inserted.size() > 0){
+            if(inserted != null && !inserted.isEmpty()){
+                rootRuleInfos.addRootRuleInfo(inserted);
                 RuleInfoSet[] mayInfer = mayInfer();
-                sendInferenceReports(mayInfer, report.getAttitude());
+                createInferenceReports(mayInfer);
             }
-        } catch (Exception e){
-
+        } catch (InvalidRuleInfoException e){
+            System.out.println("Inserting RI failed");
         }
 
     }
 
     public abstract RuleInfoSet[] mayInfer();
 
-    public void sendInferenceReports(RuleInfoSet[] inferrable, int attitude) {
+    public void createInferenceReports(RuleInfoSet[] inferrable) {
+        HashMap<RuleInfo, Report> reports = new HashMap<>();
          for (int i = 0; i < inferrable.length; i++) {
              for(RuleInfo ri : inferrable[i]) {
-                 //TODO: sara, changed by wael to merge supports
-//                 Support supports = new Support();   // probably wrong (maybe should make new support of the flag nodes and rule node
-//                 for (FlagNode fn : ri.getFns()) {
-//                     supports.add(fn.getNode());
-//                 }
-//                 supports.add(this);
-//                 Report newReport = new Report(ri.getSubs() == null ? new Substitutions() : ri.getSubs(), supports, attitude,
-//                         (i == 0), InferenceType.FORWARD, null, this);
-//                 putInferenceReportOnQueue(newReport);
+                 rootRuleInfos.removeRuleInfo(ri);
+                 ri.removeNullSubs();
+                 Support supports = new Support(-1);   // probably wrong (maybe should make new support of the flag nodes and rule node
+                 supports.addNode(this, ri.getAttitude());
+                 if(this.isOpen()){
+                     Collection<KnownInstance> theKnownInstanceSet = knownInstances.mergeKInstancesBasedOnAtt(
+                             ri.getAttitude());
+                     knownInstances.printKnownInstanceSet(theKnownInstanceSet);
+                     for (KnownInstance currentKnownInstance : theKnownInstanceSet) {
+                         Substitutions currentKISubs = currentKnownInstance.getSubstitutions();
+                         boolean compatibilityCheck = currentKISubs.compatible(onlyRelevantSubs(ri.getSubs()));
+                         boolean supportCheck = currentKnownInstance.anySupportSupportedInAttitudeContext(
+                                 ri.getContext(),
+                                 ri.getAttitude());
+                         if (compatibilityCheck && supportCheck) {
+                                supports.union(currentKnownInstance.getSupports());
+                         }
+                     }
+                 }
+                 Report newReport = new Report(ri.getSubs() == null ? new Substitutions() : ri.getSubs(), supports, ri.getAttitude(),
+                         (i == 0), InferenceType.FORWARD, null, this);
+                 newReport.setContextName(ri.getContext());
+                 newReport.setReportType(ReportType.RuleCons);
+                 reports.put(ri, newReport);
              }
          }
+        sendInferenceReports(reports);
     }
 
-    public abstract void putInferenceReportOnQueue(Report report);
+    public void sendResponseToArgs(HashMap<RuleInfo, Report> reports, NodeSet arg) {
+        for(RuleInfo ri : reports.keySet()) {
+            Report report = reports.get(ri);
+            NodeSet filteredArgs = new NodeSet();
+            for(Node node : arg) {
+                if(!ri.getFns().containsNode(node)) {
+                    filteredArgs.add(node);
+                }
+            }
+            this.sendReportToConsequents(filteredArgs, report);
+        }
+    }
+
+    public void sendInferenceToCq(HashMap<RuleInfo, Report> reports, NodeSet cq) {
+        for(Report report : reports.values()) {
+            this.sendReportToConsequents(cq, report);
+        }
+    }
+
+    public abstract void sendInferenceReports(HashMap<RuleInfo, Report> reports);
 
     /***
      * this method gets all the consequents and arguments that this node is a rule
@@ -100,8 +122,8 @@ public abstract class RuleNode extends PropositionNode {
 
     public NodeSet getDownConsNodeSet() {
         NodeSet ret = new NodeSet();
-        DownCable consequentCable = this.getDownCableSet().get("consequent");
-        DownCable argsCable = this.getDownCableSet().get("args");
+        DownCable consequentCable = this.getDownCableSet().get("cq");
+        DownCable argsCable = this.getDownCableSet().get("arg");
         if (argsCable != null) {
             argsCable.getNodeSet().addAllTo(ret);
         }
@@ -367,6 +389,7 @@ public abstract class RuleNode extends PropositionNode {
                                 currentReportContextName,
                                 currentReportAttitudeID);
                         if (compatibilityCheck && supportCheck) {
+
                             if (notBound) {
                                 if (!this.isForwardReport()) {
                                     this.setForwardReport(true);
@@ -429,7 +452,6 @@ public abstract class RuleNode extends PropositionNode {
 
                 for (Channel outMatchChannel : outgoingMatchedChannels) {
                     sendReport(currentReport, outMatchChannel);
-
                 }
                 for (Channel outAntChannel : outgoingAntRuleChannels) {
                     sendReport(currentReport, outAntChannel);
