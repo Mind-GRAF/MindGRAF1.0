@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 
 import edu.guc.mind_graf.mgip.rules.*;
 import edu.guc.mind_graf.paths.AndPath;
@@ -27,6 +28,8 @@ import edu.guc.mind_graf.exceptions.CannotRemoveNodeException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.exceptions.NodeNotInNetworkException;
 import edu.guc.mind_graf.nodes.AchieveNode;
+import edu.guc.mind_graf.mgip.matching.Match;
+import edu.guc.mind_graf.mgip.matching.Matcher;
 import edu.guc.mind_graf.nodes.ActNode;
 import edu.guc.mind_graf.nodes.DoAllNode;
 import edu.guc.mind_graf.nodes.DoOneNode;
@@ -745,7 +748,6 @@ public class Network {
 		// AndPath and2 = new AndPath(pCompose2);
 		//
 		// NodeSet oss = new NodeSet();
-
 	}
 
 }

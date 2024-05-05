@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import edu.guc.mind_graf.cables.Cable;
 import edu.guc.mind_graf.caseFrames.Adjustability;
@@ -16,8 +17,6 @@ import edu.guc.mind_graf.nodes.Syntactic;
 import edu.guc.mind_graf.paths.AndPath;
 import edu.guc.mind_graf.paths.BUnitPath;
 import edu.guc.mind_graf.paths.BangPath;
-import edu.guc.mind_graf.paths.CFResBUnitPath;
-import edu.guc.mind_graf.paths.CFResFUnitPath;
 import edu.guc.mind_graf.paths.ComposePath;
 import edu.guc.mind_graf.paths.ConversePath;
 import edu.guc.mind_graf.paths.DomainRestrictPath;
@@ -36,33 +35,26 @@ import edu.guc.mind_graf.set.NodeSet;
 /*
 TODO:
 
-path based inference
-Test (PBI)
-
 change the uvbr constant to uvbr in Network
+
+replace NodeSet with Support
 
 */
 
 public class Matcher {
     static ArrayList<Match> matchList;
     static boolean uvbr = true;
-    static Context context = null;
 
-    // static Context context = Network.getGlobalContext();
-    // public static List<Match> match(Node queryNode, Context context) {
-    // Matcher.context = context;
-    // List<Match> list = match(queryNode);
-    // context = Network.getGlobalContext();
-    // return list;
-    // }
-
-    public static List<Match> match(Node queryNode) {
+    public static List<Match> match(Node queryNode, Context ctx, int attitude) {
         matchList = new ArrayList<>();
         if (queryNode.getSyntacticType() == Syntactic.VARIABLE) {
             for (Node node : Network.getNodes().values()) {
-                if (node.equals(queryNode))
+                if (node.equals(queryNode) || !queryNode.getClass().isAssignableFrom(node.getClass()))
                     continue;
-                Match match = new Match(new Substitutions(), new Substitutions(), node, 0);
+                Match match = new Match(new Substitutions(), new Substitutions(), node, 0, new NodeSet()); // replace
+                                                                                                           // NodeSet
+                                                                                                           // with
+                                                                                                           // Support
                 if (node.getSyntacticType() == Syntactic.VARIABLE) {
                     match.getFilterSubs().add(node, queryNode);
                 } else if (node.getSyntacticType() == Syntactic.MOLECULAR) {
@@ -78,10 +70,13 @@ public class Matcher {
 
         if (queryNode.getSyntacticType() == Syntactic.BASE) {
             for (Node node : Network.getNodes().values()) {
-                if (node.equals(queryNode))
+                if (node.equals(queryNode) || !queryNode.getClass().isAssignableFrom(node.getClass()))
                     continue;
                 if (node.getSyntacticType() == Syntactic.VARIABLE) {
-                    Match match = new Match(new Substitutions(), new Substitutions(), node, 0);
+                    Match match = new Match(new Substitutions(), new Substitutions(), node, 0, new NodeSet()); // replace
+                                                                                                               // NodeSet
+                                                                                                               // with
+                                                                                                               // Support
                     match.getFilterSubs().add(node, queryNode);
                     matchList.add(match);
                 }
@@ -93,13 +88,18 @@ public class Matcher {
             for (Node molecular : molecularSet.values()) {
                 if (molecular.equals(queryNode))
                     continue;
-                Match match = new Match(new Substitutions(), new Substitutions(), molecular, -1);
+                Match match = new Match(new Substitutions(), new Substitutions(), molecular, -1, new NodeSet()); // replace
+                                                                                                                 // NodeSet
+                                                                                                                 // with
+                                                                                                                 // Support
                 matchList.add(match);
-                unify(queryNode, molecular, match);
+                unify(queryNode, molecular, match, ctx, attitude);
             }
         }
 
         for (Match match : matchList) {
+            // match.setSupport(new Support(match.getSupport(), attitude)); // replace
+            // NodeSet with Support
             if (match.getMatchType() == -1) {
                 match.setMatchType(0);
             }
@@ -107,7 +107,11 @@ public class Matcher {
         return matchList;
     }
 
-    private static boolean unify(Node queryNode, Node node, Match match) {
+    private static boolean unify(Node queryNode, Node node, Match match, Context ctx, int attitude) {
+        if (!queryNode.getClass().isAssignableFrom(node.getClass())) {
+            matchList.remove(match);
+            return false;
+        }
         if (queryNode.getSyntacticType() == Syntactic.BASE && node.getSyntacticType() == Syntactic.BASE) {
             if (!queryNode.getName().equals(node.getName())) {
                 matchList.remove(match);
@@ -115,12 +119,14 @@ public class Matcher {
             }
         } else if (queryNode.getSyntacticType() == Syntactic.VARIABLE
                 || node.getSyntacticType() == Syntactic.VARIABLE) {
-            return unifyVariable(queryNode, node, match);
+            return unifyVariable(queryNode, node, match, ctx, attitude);
         } else if (queryNode.getSyntacticType() == Syntactic.MOLECULAR
                 && node.getSyntacticType() == Syntactic.MOLECULAR) {
-            pathBasedInference(queryNode, node, match.clone());
+            pathBasedInference(queryNode, node, match, ctx, attitude);
+            if (!matchList.contains(match)) {
+                matchList.add(match);
+            }
             Object[] downRelationList = queryNode.getDownCableSet().keySet();
-            // Object[] upRelationList = queryNode.getUpCableSet().keySet();
             List<Match> molecularMatchList = new ArrayList<>();
             molecularMatchList.add(match);
             boolean nullCables = true;
@@ -141,7 +147,7 @@ public class Matcher {
                                     queryNodePermutation,
                                     nodePermutation,
                                     Network.getRelations().get(downRelation),
-                                    tempMatch) != null)
+                                    tempMatch, ctx, attitude) != null)
                                 tempMatchList.add(tempMatch);
                         }
                     }
@@ -156,49 +162,30 @@ public class Matcher {
             if (!nullCables) {
                 matchList.addAll(molecularMatchList);
             }
-            // for (Object upRelation : upRelationList) {
-            // List<Match> tempMatchList = new ArrayList<>();
-            // Cable cable = node.getUpCableSet().get((String) upRelation);
-            // List<List<Node>> nodePermutations =
-            // getAllPermutations(cable.getNodeSet().getValues());
-            // for (List<Node> nodePermutation : nodePermutations) {
-            // List<List<Node>> queryNodePermutations = getAllPermutations(
-            // queryNode.getUpCableSet().get((String) upRelation).getNodeSet().getValues());
-            // for (List<Node> queryNodePermutation : queryNodePermutations) {
-            // for (Match molecularMatch : molecularMatchList) {
-            // Match tempMatch = molecularMatch.clone();
-            // if (unifyMolecular(
-            // queryNodePermutation,
-            // nodePermutation,
-            // Network.getRelations().get(upRelation),
-            // tempMatch) != null)
-            // tempMatchList.add(tempMatch);
-            // }
-            // }
-            // }
-            // }
             matchList.remove(match);
         }
         return true;
     }
 
-    private static boolean unifyVariable(Node queryNode, Node node, Match match) {
-        if (queryNode.getSyntacticType() == Syntactic.VARIABLE) {
-            if (match.getSwitchSubs().getMap().get(queryNode) != null)
-                return unify(match.getSwitchSubs().get(queryNode), node, match);
-        }
-        if (node.getSyntacticType() == Syntactic.VARIABLE) {
-            if (match.getFilterSubs().getMap().get(node) != null) {
-                return unify(queryNode, match.getFilterSubs().get(node), match);
-            }
-        }
+    private static boolean unifyVariable(Node queryNode, Node node, Match match, Context ctx, int attitude) {
         if ((queryNode.getSyntacticType() == Syntactic.MOLECULAR
                 && occursCheck(node, queryNode, match))
                 || (node.getSyntacticType() == Syntactic.MOLECULAR && occursCheck(queryNode, node, match))) {
             matchList.remove(match);
             return false;
         }
-        if (node.getSyntacticType() != Syntactic.VARIABLE)
+
+        if (queryNode.getSyntacticType() == Syntactic.VARIABLE) {
+            if (match.getSwitchSubs().getMap().get(queryNode) != null)
+                return unify(match.getSwitchSubs().get(queryNode), node, match, ctx, attitude);
+        }
+        if (node.getSyntacticType() == Syntactic.VARIABLE) {
+            if (match.getFilterSubs().getMap().get(node) != null) {
+                return unify(queryNode, match.getFilterSubs().get(node), match, ctx, attitude);
+            }
+        }
+
+        if (queryNode.getSyntacticType() == Syntactic.VARIABLE)
             if (!uvbr || (uvbr && !uvbrTrap(queryNode, node, match.getSwitchSubs())))
                 match.getSwitchSubs().add(queryNode, node);
             else {
@@ -215,7 +202,7 @@ public class Matcher {
     }
 
     private static Match unifyMolecular(List<Node> queryNodeList, List<Node> nodeList, Relation relation,
-            Match match) {
+            Match match, Context ctx, int attitude) {
         if (queryNodeList.size() != nodeList.size()) {
             // wire based inference
             if (relation.getAdjust() == Adjustability.NONE)
@@ -245,7 +232,7 @@ public class Matcher {
             if (!nonUnifiedNodes.isEmpty()) {
                 Node n = nonUnifiedNodes.iterator().next();
                 nonUnifiedNodes.remove(n);
-                if (unify(queryNode, n, match)) {
+                if (unify(queryNode, n, match, ctx, attitude)) {
                     isUnified = true;
                 }
             }
@@ -293,94 +280,99 @@ public class Matcher {
         return match;
     }
 
-    private static void pathBasedInference(Node queryNode, Node node, Match match) {
+    private static void pathBasedInference(Node queryNode, Node node, Match match, Context ctx, int attitude) {
+        List<Match> molecularMatchList = new ArrayList<>();
+        molecularMatchList.add(match);
+        boolean nullCables = true;
         for (Cable downCable : queryNode.getDownCableSet().getValues()) {
+            List<Match> tempMatchList = new ArrayList<>();
             Relation relation = downCable.getRelation();
             Path path = relation.getPath();
-            if (path != null && passPathFirstCheck(queryNode, node, match, path)) {
-                PathTrace pathTrace = new PathTrace();
-                LinkedList<Object[]> listOfNodeList = path.follow(node, pathTrace, context);
+            if (downCable == null)
+                continue;
+            nullCables = false;
+            if (path != null && passPathFirstCheck(node, match, path)) {
+                LinkedList<Object[]> listOfNodeList = path.follow(node, new PathTrace(), ctx, attitude);
                 if (listOfNodeList == null || listOfNodeList.isEmpty()) {
-                    return;
+                    continue;
                 } else {
-                    for (Object[] nodeList : listOfNodeList) {
-                        for (Object n : nodeList) {
-                            Node node1 = (Node) n;
-                            Match m = match.clone();
-                            if (unify(queryNode, node1, m)) {
-                                matchList.add(m);
-                                // matchList.getSupports().add(pathTrace.getSupports());
+                    Collection<Node> coll = new ArrayList<>();
+                    NodeSet support = new NodeSet();
+                    for (int i = 0; i < listOfNodeList.size(); i++) {
+                        Object[] arr = listOfNodeList.get(i);
+                        ((PathTrace) arr[1]).getSupports().addAllTo(support);
+                        if (arr[0] != node) {
+                            coll.add(((Node) arr[0]));
+                        }
+                    }
+                    if (coll.isEmpty()) {
+                        support.addAllTo((NodeSet) match.getSupport());
+                        for (Match molecularMatch : molecularMatchList) {
+                            support.addAllTo((NodeSet) molecularMatch.getSupport());
+                        }
+                    }
+                    List<List<Node>> nodePermutations = getAllPermutations(coll);
+                    for (List<Node> nodePermutation : nodePermutations) {
+                        List<List<Node>> queryNodePermutations = getAllPermutations(
+                                queryNode.getDownCableSet().get(relation.getName()).getNodeSet().getValues());
+                        for (List<Node> queryNodePermutation : queryNodePermutations) {
+                            for (Match molecularMatch : molecularMatchList) {
+                                Match tempMatch = molecularMatch.clone();
+                                if (unifyMolecular(
+                                        queryNodePermutation,
+                                        nodePermutation,
+                                        relation,
+                                        tempMatch, ctx, attitude) != null) {
+                                    support.addAllTo((NodeSet) tempMatch.getSupport());
+                                    tempMatchList.add(tempMatch);
+                                }
                             }
                         }
                     }
                 }
             }
+            molecularMatchList.addAll(new ArrayList<>(removeDuplicates(tempMatchList)));
         }
+        if (!nullCables) {
+            matchList.addAll(molecularMatchList);
+        }
+        matchList.remove(match);
     }
 
-    private static boolean passPathFirstCheck(Node queryNode, Node node, Match match, Path path) {
-        if (path instanceof FUnitPath) {
+    private static boolean passPathFirstCheck(Node node, Match match, Path path) {
+        if (path instanceof EmptyPath || path instanceof BangPath || path instanceof KStarPath) {
+            return true;
+        } else if (path instanceof FUnitPath) {
             return node.getDownCable(((FUnitPath) path).getRelation().getName()) != null;
         } else if (path instanceof BUnitPath) {
             return node.getUpCable(((BUnitPath) path).getRelation().getName()) != null;
-        } else if (path instanceof CFResFUnitPath) {
-            return node.getDownCable(((CFResFUnitPath) path).getRelation().getName()) != null;
-        } else if (path instanceof CFResBUnitPath) {
-            return node.getUpCable(((CFResBUnitPath) path).getRelation().getName()) != null;
-        } else if (path instanceof EmptyPath) {
-            return true;
-        } else if (path instanceof BangPath) {
-            return true;
         } else if (path instanceof AndPath) {
             for (Path p : ((AndPath) path).getPaths()) {
-                if (!passPathFirstCheck(queryNode, node, match, p)) {
+                if (!passPathFirstCheck(node, match, p)) {
                     return false;
                 }
             }
         } else if (path instanceof OrPath) {
             for (Path p : ((OrPath) path).getPaths()) {
-                if (passPathFirstCheck(queryNode, node, match, p)) {
+                if (passPathFirstCheck(node, match, p)) {
                     return true;
                 }
             }
             return false;
-        } else if (path instanceof ComposePath) {
-            for (Path p : ((ComposePath) path).getPaths()) {
-                if (passPathFirstCheck(queryNode, node, match, p)) {
-                    return true;
-                }
-            }
+        } else if (path instanceof ComposePath
+                && !passPathFirstCheck(node, match, ((ComposePath) path).getPaths().getFirst())) {
             return false;
         } else if (path instanceof ConversePath) {
-            return passPathFirstCheck(queryNode, node, match, ((ConversePath) path).getPath().converse());
+            return passPathFirstCheck(node, match, ((ConversePath) path).getPath().converse());
         } else if (path instanceof IrreflexiveRestrictPath) {
-            return passPathFirstCheck(queryNode, node, match, ((IrreflexiveRestrictPath) path).getPath());
+            return passPathFirstCheck(node, match, ((IrreflexiveRestrictPath) path).getPath());
         } else if (path instanceof DomainRestrictPath) {
-            return passPathFirstCheck(queryNode, node, match, ((DomainRestrictPath) path).getP())
-                    && passPathFirstCheck(queryNode, node, match, ((DomainRestrictPath) path).getQ());
+            return passPathFirstCheck(node, match, ((DomainRestrictPath) path).getP())
+                    && passPathFirstCheck(node, match, ((DomainRestrictPath) path).getQ());
         } else if (path instanceof RangeRestrictPath) {
-            return passPathFirstCheck(queryNode, node, match, ((RangeRestrictPath) path).getP());
-            // if (!passPathFirstCheck(queryNode, node, match, ((RangeRestrictPath)
-            // path).getP()))
-            // return false;
-            // LinkedList<Object[]> listOfNodeList = ((RangeRestrictPath)
-            // path).getP().follow(node, new PathTrace(),
-            // context);
-            // if (listOfNodeList == null || listOfNodeList.isEmpty())
-            // return false;
-            // for (Object[] nodeList : listOfNodeList) {
-            // for (Object n : nodeList) {
-            // Node node1 = (Node) n;
-            // if (passPathFirstCheck(queryNode, node1, match, ((RangeRestrictPath)
-            // path).getQ()))
-            // return true;
-            // }
-            // }
-            // return false;
+            return passPathFirstCheck(node, match, ((RangeRestrictPath) path).getP());
         } else if (path instanceof KPlusPath) {
-            return passPathFirstCheck(queryNode, node, match, ((KPlusPath) path).getPath());
-        } else if (path instanceof KStarPath) {
-            return true;
+            return passPathFirstCheck(node, match, ((KPlusPath) path).getPath());
         }
         return true;
     }

@@ -37,14 +37,14 @@ public void setCaseFrame(CaseFrame caseFrame) {
 	this.caseFrame = caseFrame;
 }
 	@Override
-	public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context) {
+	public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context, int attitude) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public LinkedList<Object[]> followConverse(Node node, PathTrace trace,
-			Context context) {
+			Context context, int attitude) {
 		// TODO Auto-generated method stub
 		return null;
 	}

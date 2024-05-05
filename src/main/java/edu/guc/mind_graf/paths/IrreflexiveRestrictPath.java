@@ -21,8 +21,8 @@ public class IrreflexiveRestrictPath extends Path {
 	}
 
 	@Override
-	public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context) {
-		LinkedList<Object[]> result = this.path.follow(node, trace, context);
+	public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context, int attitude) {
+		LinkedList<Object[]> result = this.path.follow(node, trace, context, attitude);
 		for (int i = 0; i < result.size(); i++){
 			if(((Node)result.get(i)[0]).equals(node)){
 				result.remove(i);
@@ -34,8 +34,8 @@ public class IrreflexiveRestrictPath extends Path {
 
 	@Override
 	public LinkedList<Object[]> followConverse(Node node, PathTrace trace,
-			Context context) {
-			LinkedList<Object[]> result = this.path.followConverse(node, trace, context);
+			Context context, int attitude) {
+			LinkedList<Object[]> result = this.path.followConverse(node, trace, context, attitude);
 			for (int i = 0; i < result.size(); i++){
 				if(((Node)result.get(i)[0]).equals(node)){
 					result.remove(i);

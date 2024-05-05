@@ -85,7 +85,7 @@ public abstract class Node {
 	public NodeSet getDirectParents() {
 		NodeSet nodeSet = new NodeSet();
 		for (Cable c : this.getUpCableSet().getValues()) {
-			nodeSet.union(c.getNodeSet());
+			nodeSet = nodeSet.union(c.getNodeSet());
 		}
 
 		return nodeSet;

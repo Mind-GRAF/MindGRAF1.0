@@ -1,6 +1,7 @@
 package edu.guc.mind_graf.components;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import edu.guc.mind_graf.nodes.Node;
@@ -31,10 +32,6 @@ public class Substitutions {
 
     public void clear() {
         map.clear();
-    }
-
-    public Substitutions getSubs(Substitutions sub) {
-        return sub;
     }
 
     public void addSubs(Substitutions subs) {
@@ -122,6 +119,18 @@ public class Substitutions {
 
     public void setMap(Map<Node, Node> map) {
         this.map = map;
+    }
+
+    public boolean equals(Substitutions otherSubs) {
+        return map.equals(otherSubs.map);
+    }
+
+    public static boolean testContains(List<Substitutions> list, Substitutions subs) {
+        for (Substitutions s : list) {
+            if (s.equals(subs))
+                return true;
+        }
+        return false;
     }
 
     @Override

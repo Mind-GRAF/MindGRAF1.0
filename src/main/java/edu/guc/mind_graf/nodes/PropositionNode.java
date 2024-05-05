@@ -642,7 +642,7 @@ public class PropositionNode extends Node {
         for (Match currentMatch : matchesList) {
             int matchType = currentMatch.getMatchType();
             PropositionNode matchedNode = (PropositionNode) currentMatch.getNode();
-            Support support=currentMatch.getSupport();
+            //Support support=currentMatch.getSupport();
             //pass support to establish channel
 
             Request newRequest = establishChannel(channelType, matchedNode,

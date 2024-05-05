@@ -43,7 +43,7 @@ public class OrPath extends Path {
 	}
 
 	@Override
-	public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context) {
+	public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context, int attitude) {
 		if (this.paths.isEmpty())
 			return new LinkedList<Object[]>();
 		LinkedList<Path> pList = new LinkedList<Path>();
@@ -51,15 +51,15 @@ public class OrPath extends Path {
 		Path p = pList.removeFirst();
 		OrPath orPath = new OrPath(pList);
 		if (pList.size() > 0)
-			return union(p.follow(node, trace, context), orPath.follow(node, trace, context));
+			return union(p.follow(node, trace, context, attitude), orPath.follow(node, trace, context, attitude));
 		else
-			return p.follow(node, trace, context);
+			return p.follow(node, trace, context, attitude);
 
 	}
 
 	@Override
 	public LinkedList<Object[]> followConverse(Node node, PathTrace trace,
-			Context context) {
+			Context context, int attitude) {
 		if (this.paths.isEmpty())
 			return new LinkedList<Object[]>();
 		LinkedList<Path> pList = new LinkedList<Path>();
@@ -67,9 +67,9 @@ public class OrPath extends Path {
 		Path p = pList.removeFirst();
 		OrPath orPath = new OrPath(pList);
 		if (pList.size() > 0)
-			return union(p.followConverse(node, trace, context), orPath.followConverse(node, trace, context));
+			return union(p.followConverse(node, trace, context, attitude), orPath.followConverse(node, trace, context, attitude));
 		else
-			return p.followConverse(node, trace, context);
+			return p.followConverse(node, trace, context, attitude);
 
 	}
 
