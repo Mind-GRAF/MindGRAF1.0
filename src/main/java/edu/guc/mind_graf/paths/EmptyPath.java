@@ -36,10 +36,8 @@ public class EmptyPath extends Path {
 	@Override
 	public boolean equals(Object obj) {
 		// TODO Auto-generated method stub
-		if (obj instanceof EmptyPath)
-			return true;
-		return false;
-	}
+        return obj instanceof EmptyPath;
+    }
 
 	@Override
 	public Path converse() {

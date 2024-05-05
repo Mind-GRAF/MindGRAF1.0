@@ -1,7 +1,10 @@
 package edu.guc.mind_graf.nodes;
 
 import java.util.Collection;
+import java.util.HashMap;
 
+import edu.guc.mind_graf.exceptions.InvalidRuleInfoException;
+import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.reports.KnownInstance;
@@ -13,6 +16,8 @@ import edu.guc.mind_graf.mgip.requests.ChannelSet;
 import edu.guc.mind_graf.mgip.requests.ChannelType;
 import edu.guc.mind_graf.mgip.requests.MatchChannel;
 import edu.guc.mind_graf.mgip.requests.Request;
+import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
+import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfoHandler;
 import edu.guc.mind_graf.mgip.rules.AndOr;
 import edu.guc.mind_graf.mgip.rules.Thresh;
 import edu.guc.mind_graf.network.Network;
@@ -21,39 +26,92 @@ import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
+import edu.guc.mind_graf.set.RuleInfoSet;
+import edu.guc.mind_graf.support.Support;
+import edu.guc.mind_graf.support.Support;
 
-public class RuleNode extends PropositionNode {
+public abstract class RuleNode extends PropositionNode {
     private boolean forwardReport;
-
-    public RuleNode(String name, Boolean isVariable) {
-        super(name, isVariable);
-        this.forwardReport = false;
-        // TODO Auto-generated constructor stub
-    }
+    protected RuleInfoHandler ruleInfoHandler;
+    protected RuleInfoSet rootRuleInfos;
 
     public RuleNode(DownCableSet downCableSet) {
         super(downCableSet);
         this.name = "P" + (Network.MolecularCount);
         this.forwardReport = false;
-
-        // TODO Auto-generated constructor stub
+        rootRuleInfos = new RuleInfoSet();
     }
 
-    public void applyRuleHandler(Report report, RuleNode ruleNode) {
-        // if (this.isForwardReport() == true) {
-        // this.setForwardReport(false);
-        // report.setInferenceType(InferenceType.FORWARD);
-        // NodeSet downCons = getDownConsNodeSet();
-        // sendReportToCons(downCons, report);
+    public void applyRuleHandler(Report report) {
 
-        // } else {
-        // for (Channel outChnl : outgoingChannels)
-        // sendReport(report, outChnl);
-        // }
-
-        // TODO Sara
+        try{
+            RuleInfoSet inserted = ruleInfoHandler.insertRI(RuleInfo.createRuleInfo(report));
+            if(inserted != null && !inserted.isEmpty()){
+                rootRuleInfos.addRootRuleInfo(inserted);
+                RuleInfoSet[] mayInfer = mayInfer();
+                createInferenceReports(mayInfer);
+            }
+        } catch (InvalidRuleInfoException e){
+            System.out.println("Inserting RI failed");
+        }
 
     }
+
+    public abstract RuleInfoSet[] mayInfer();
+
+    public void createInferenceReports(RuleInfoSet[] inferrable) {
+        HashMap<RuleInfo, Report> reports = new HashMap<>();
+         for (int i = 0; i < inferrable.length; i++) {
+             for(RuleInfo ri : inferrable[i]) {
+                 rootRuleInfos.removeRuleInfo(ri);
+                 ri.removeNullSubs();
+                 Support supports = new Support(-1);   // probably wrong (maybe should make new support of the flag nodes and rule node
+                 supports.addNode(this, ri.getAttitude());
+                 if(this.isOpen()){
+                     Collection<KnownInstance> theKnownInstanceSet = knownInstances.mergeKInstancesBasedOnAtt(
+                             ri.getAttitude());
+                     knownInstances.printKnownInstanceSet(theKnownInstanceSet);
+                     for (KnownInstance currentKnownInstance : theKnownInstanceSet) {
+                         Substitutions currentKISubs = currentKnownInstance.getSubstitutions();
+                         boolean compatibilityCheck = currentKISubs.compatible(onlyRelevantSubs(ri.getSubs()));
+                         boolean supportCheck = currentKnownInstance.anySupportSupportedInAttitudeContext(
+                                 ri.getContext(),
+                                 ri.getAttitude());
+                         if (compatibilityCheck && supportCheck) {
+                                supports.union(currentKnownInstance.getSupports());
+                         }
+                     }
+                 }
+                 Report newReport = new Report(ri.getSubs() == null ? new Substitutions() : ri.getSubs(), supports, ri.getAttitude(),
+                         (i == 0), InferenceType.FORWARD, null, this);
+                 newReport.setContextName(ri.getContext());
+                 newReport.setReportType(ReportType.RuleCons);
+                 reports.put(ri, newReport);
+             }
+         }
+        sendInferenceReports(reports);
+    }
+
+    public void sendResponseToArgs(HashMap<RuleInfo, Report> reports, NodeSet arg) {
+        for(RuleInfo ri : reports.keySet()) {
+            Report report = reports.get(ri);
+            NodeSet filteredArgs = new NodeSet();
+            for(Node node : arg) {
+                if(!ri.getFns().containsNode(node)) {
+                    filteredArgs.add(node);
+                }
+            }
+            this.sendReportToConsequents(filteredArgs, report);
+        }
+    }
+
+    public void sendInferenceToCq(HashMap<RuleInfo, Report> reports, NodeSet cq) {
+        for(Report report : reports.values()) {
+            this.sendReportToConsequents(cq, report);
+        }
+    }
+
+    public abstract void sendInferenceReports(HashMap<RuleInfo, Report> reports);
 
     /***
      * this method gets all the consequents and arguments that this node is a rule
@@ -64,8 +122,8 @@ public class RuleNode extends PropositionNode {
 
     public NodeSet getDownConsNodeSet() {
         NodeSet ret = new NodeSet();
-        DownCable consequentCable = this.getDownCableSet().get("consequent");
-        DownCable argsCable = this.getDownCableSet().get("args");
+        DownCable consequentCable = this.getDownCableSet().get("cq");
+        DownCable argsCable = this.getDownCableSet().get("arg");
         if (argsCable != null) {
             argsCable.getNodeSet().addAllTo(ret);
         }
@@ -208,7 +266,7 @@ public class RuleNode extends PropositionNode {
      * @param currentRequest
      * @return
      */
-    protected void processSingleRequests(Request currentRequest) {
+    protected void processSingleRequests(Request currentRequest) throws DirectCycleException {
         System.out.println(this.getName() + " Processing Requests as a Rule node");
         Channel currentChannel = currentRequest.getChannel();
         if (currentChannel instanceof AntecedentToRuleChannel || currentChannel instanceof MatchChannel)
@@ -257,7 +315,6 @@ public class RuleNode extends PropositionNode {
 
                 }
                 super.processSingleRequests(currentRequest);
-                return;
 
             }
 
@@ -285,7 +342,7 @@ public class RuleNode extends PropositionNode {
      * @param currentReport
      * @return
      */
-    protected void processSingleReports(Report currentReport) throws NoSuchTypeException {
+    protected void processSingleReports(Report currentReport) throws NoSuchTypeException, DirectCycleException {
         System.out.println(this.getName() + " Processing Reports as a Rule node");
 
         String currentReportContextName = currentReport.getContextName();
@@ -306,7 +363,7 @@ public class RuleNode extends PropositionNode {
                 if (!this.isOpen()) {
                     /** Close Type Implementation */
                     if (assertedInContext) {
-                        if (this.isForwardReport() == false) {
+                        if (!this.isForwardReport()) {
                             this.setForwardReport(true);
                             requestAntecedentsNotAlreadyWorkingOn(tempRequest);
                         }
@@ -332,14 +389,15 @@ public class RuleNode extends PropositionNode {
                                 currentReportContextName,
                                 currentReportAttitudeID);
                         if (compatibilityCheck && supportCheck) {
+
                             if (notBound) {
-                                if (this.isForwardReport() == false) {
+                                if (!this.isForwardReport()) {
                                     this.setForwardReport(true);
                                     requestAntecedentsNotAlreadyWorkingOn(tempRequest, currentKnownInstance);
                                     return;
                                 }
                             } else {
-                                if (this.isForwardReport() == false) {
+                                if (!this.isForwardReport()) {
                                     this.setForwardReport(true);
                                     requestAntecedentsNotAlreadyWorkingOn(tempRequest);
                                     return;
@@ -353,7 +411,7 @@ public class RuleNode extends PropositionNode {
                     // i removed the apply rule handler here because i call it only when the
                     // antecedents report back replying to my request thus whenever its a backward
                     // inference
-                    if (this.isForwardReport() == false) {
+                    if (!this.isForwardReport()) {
                         this.setForwardReport(true);
                         super.processSingleRequests(tempRequest);
 
@@ -361,8 +419,7 @@ public class RuleNode extends PropositionNode {
                 }
             } else {
                 /** Backward Inference */
-                applyRuleHandler(currentReport, this);
-
+                applyRuleHandler(currentReport);
             }
         } else {
             Substitutions switchSubs = new Substitutions();
@@ -395,7 +452,6 @@ public class RuleNode extends PropositionNode {
 
                 for (Channel outMatchChannel : outgoingMatchedChannels) {
                     sendReport(currentReport, outMatchChannel);
-
                 }
                 for (Channel outAntChannel : outgoingAntRuleChannels) {
                     sendReport(currentReport, outAntChannel);
@@ -435,11 +491,15 @@ public class RuleNode extends PropositionNode {
     // method for any of the children rules to call whenever it needs to act as a
     // normal proposition node
     public void grandparentMethodRequest(Request currentRequest) {
-        super.processSingleRequests(currentRequest);
+//        super.processSingleRequests(currentRequest);
+        //TODO: sara, changed by wael to merge supports
+
     }
 
     public void grandparentMethodReport(Report currentReport) throws NoSuchTypeException {
-        super.processSingleReports(currentReport);
+//        super.processSingleReports(currentReport);
+        //TODO: sara, changed by wael to merge supports
+
     }
 
     public boolean isForwardReport() {
@@ -448,6 +508,18 @@ public class RuleNode extends PropositionNode {
 
     public void setForwardReport(boolean forwardReport) {
         this.forwardReport = forwardReport;
+    }
+
+    public RuleInfoSet getRootRuleInfos() {
+        return rootRuleInfos;
+    }
+
+    public void setRootRuleInfos(RuleInfoSet rootRuleInfos) {
+        this.rootRuleInfos = rootRuleInfos;
+    }
+
+    public RuleInfoHandler getRuleInfoHandler() {
+        return ruleInfoHandler;
     }
 
 }

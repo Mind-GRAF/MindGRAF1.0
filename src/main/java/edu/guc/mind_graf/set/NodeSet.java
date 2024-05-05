@@ -129,8 +129,15 @@ public class NodeSet implements Iterable<Node> {
         return result;
     }
 
-    public boolean equals(NodeSet n) {
-        return this.getNames().equals(n.getNames());
+    public boolean equals(Object n) {
+        NodeSet ns = (NodeSet) n;// changed because it makes more sense this way
+        if(this.size() != ns.size())
+            return false;
+        for(Node node : this.nodes.values()){
+            if(!ns.contains(node))
+                return false;
+        }
+        return true;
     }
 
     @Override
@@ -145,12 +152,14 @@ public class NodeSet implements Iterable<Node> {
         return clone;
     }
 
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (!(obj instanceof NodeSet))
-            return false;
-        NodeSet n = (NodeSet) obj;
-        return this.getNames().equals(n.getNames());
+    public void clear() {
+        if(!isFinal)
+            nodes.clear();
+    }
+
+    public int getIntValue() {
+        if(this.getNames().size() != 1)
+            throw new IllegalArgumentException("NodeSet doesn't represent a number");
+        return Integer.parseInt(this.getNames().get(0));
     }
 }

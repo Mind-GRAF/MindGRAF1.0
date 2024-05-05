@@ -55,11 +55,8 @@ public class IrreflexiveRestrictPath extends Path {
 	public boolean equals(Object obj) {
 		if(! (obj instanceof IrreflexiveRestrictPath)) 
 			return false;
-		if(!((IrreflexiveRestrictPath)obj).getPath().equals(this.path)){
-			return false;
-		}
-		return true;
-	}
+        return ((IrreflexiveRestrictPath) obj).getPath().equals(this.path);
+    }
 
 	public String toString(){
 		return "IrreflexiveRestrict(" + this.path.toString() + ")";

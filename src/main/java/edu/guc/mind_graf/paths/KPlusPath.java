@@ -87,10 +87,8 @@ public class KPlusPath extends Path {
 
 	@Override
 	public boolean equals(Object obj) {
-		if(obj instanceof KPlusPath && ((KPlusPath) obj).getPath().equals(this.getPath()))
-			return true;
-		return false;
-	}
+        return obj instanceof KPlusPath && ((KPlusPath) obj).getPath().equals(this.getPath());
+    }
 
 	@Override
 	public Path converse() {

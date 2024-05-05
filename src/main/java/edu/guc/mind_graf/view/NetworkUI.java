@@ -404,9 +404,9 @@ public class NetworkUI extends JFrame {
 				// Adjustability.EXPAND, 2);
 				// Relation property = Network.createRelation("property", "",
 				// Adjustability.EXPAND, 2);
-				// Relation antecedent = Network.createRelation("antecedent", "",
+				// Relation antecedent = Network.createRelation("ant", "",
 				// Adjustability.EXPAND, 2);
-				// Relation cons = Network.createRelation("consequent", "",
+				// Relation cons = Network.createRelation("cq", "",
 				// Adjustability.EXPAND, 2);
 				// Network.quantifiers.put("forall", "forall");
 				//

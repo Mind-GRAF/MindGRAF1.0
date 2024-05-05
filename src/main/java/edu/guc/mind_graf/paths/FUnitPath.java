@@ -48,10 +48,8 @@ public class FUnitPath extends Path {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof FUnitPath && ((FUnitPath) obj).getRelation().equals(this.getRelation()))
-			return true;
-		return false;
-	}
+        return obj instanceof FUnitPath && ((FUnitPath) obj).getRelation().equals(this.getRelation());
+    }
 
 	@Override
 	public Path converse() {

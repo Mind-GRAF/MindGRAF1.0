@@ -125,21 +125,53 @@ public class Substitutions {
         return map.equals(otherSubs.map);
     }
 
-    public Substitutions clone() {
-        Substitutions clone = new Substitutions();
-        for (Node var : map.keySet()) {
-            Node value = map.get(var);
-            clone.add(var, value);
-        }
-        return clone;
-    }
-
     public static boolean testContains(List<Substitutions> list, Substitutions subs) {
         for (Substitutions s : list) {
             if (s.equals(subs))
                 return true;
         }
         return false;
-
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Substitutions) {
+            Substitutions other = (Substitutions) obj;
+            if (map.size() != other.size())
+                return false; 
+            for(Node var : map.keySet()) {
+                if (!other.contains(var) || !other.get(var).equals(map.get(var))) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public Substitutions clone() {
+        Substitutions copy = new Substitutions();
+        for (Node var : map.keySet()) {
+            copy.add(var, map.get(var));
+        }
+        return copy;
+    }
+
+    public boolean isDisjoint(Substitutions otherSubs) {
+        for (Node var : map.keySet()) {
+            if (otherSubs.contains(var)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean containsVar(Node var) {
+        return map.containsKey(var);
+    }
+
+    public boolean isEmpty() {
+        return map.isEmpty();
+    }
+
 }

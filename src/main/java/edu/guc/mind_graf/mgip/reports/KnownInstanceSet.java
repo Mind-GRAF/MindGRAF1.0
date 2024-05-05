@@ -7,6 +7,7 @@ import java.util.Iterator;
 
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.set.PropositionNodeSet;
+import edu.guc.mind_graf.support.Support;
 
 public class KnownInstanceSet implements Iterable<KnownInstance> {
 
@@ -14,15 +15,15 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
     public Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> negativeKInstances;
 
     public KnownInstanceSet() {
-        positiveKInstances = new Hashtable<Integer, Hashtable<Substitutions, KnownInstance>>();
-        negativeKInstances = new Hashtable<Integer, Hashtable<Substitutions, KnownInstance>>();
+        positiveKInstances = new Hashtable<>();
+        negativeKInstances = new Hashtable<>();
 
     }
 
     public boolean addKnownInstance(Report Report) {
         Boolean ReportSign = Report.isSign();
         Substitutions ReportSubs = Report.getSubstitutions();
-        PropositionNodeSet Supports = Report.getSupport();
+        Support Supports = Report.getSupport();
         int attitude = Report.getAttitude();
         if (ReportSign) {
             Hashtable<Substitutions, KnownInstance> targetSet = positiveKInstances.remove(attitude);
@@ -44,12 +45,11 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
                             return false;
 
                         } else {
-                            PropositionNodeSet supportSet = targetKnownInstance.getSupports();
+                            Support supportSet = targetKnownInstance.getSupports();
                             targetKnownInstance.setSupports(Supports.union(supportSet));
                             targetSet.put(ReportSubs, targetKnownInstance);
                             positiveKInstances.put(attitude, targetSet);
                             return true;
-
                         }
 
                     }
@@ -62,7 +62,7 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
         else {
             Hashtable<Substitutions, KnownInstance> targetSet = negativeKInstances.remove(attitude);
             if (targetSet == null) {
-                targetSet = new Hashtable<Substitutions, KnownInstance>();
+                targetSet = new Hashtable<>();
                 KnownInstance targetKnownInstance = new KnownInstance(ReportSubs, Supports, attitude);
                 targetSet.put(ReportSubs, targetKnownInstance);
                 negativeKInstances.put(attitude, targetSet);
@@ -79,7 +79,7 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
 
                             return false;
                         } else {
-                            PropositionNodeSet supportSet = targetKnownInstance.getSupports();
+                            Support supportSet = targetKnownInstance.getSupports();
                             targetKnownInstance.setSupports(Supports.union(supportSet));
                             targetSet.put(ReportSubs, targetKnownInstance);
                             positiveKInstances.put(attitude, targetSet);

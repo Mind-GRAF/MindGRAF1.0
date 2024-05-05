@@ -35,8 +35,6 @@ import edu.guc.mind_graf.set.NodeSet;
 /*
 TODO:
 
-Test BangPath
-
 change the uvbr constant to uvbr in Network
 
 replace NodeSet with Support
