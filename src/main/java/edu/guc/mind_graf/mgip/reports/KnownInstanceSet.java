@@ -7,6 +7,7 @@ import java.util.Iterator;
 
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.set.PropositionNodeSet;
+import edu.guc.mind_graf.support.Support;
 
 public class KnownInstanceSet implements Iterable<KnownInstance> {
 
@@ -22,7 +23,7 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
     public boolean addKnownInstance(Report Report) {
         Boolean ReportSign = Report.isSign();
         Substitutions ReportSubs = Report.getSubstitutions();
-        PropositionNodeSet Supports = Report.getSupport();
+        Support Supports = Report.getSupport();
         int attitude = Report.getAttitude();
         if (ReportSign) {
             Hashtable<Substitutions, KnownInstance> targetSet = positiveKInstances.remove(attitude);
@@ -44,8 +45,9 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
                             return false;
 
                         } else {
-                            PropositionNodeSet supportSet = targetKnownInstance.getSupports();
-                            targetKnownInstance.setSupports(Supports.union(supportSet));
+                            Support supportSet = targetKnownInstance.getSupports();
+                            //TODO: sara, changed by wael to merge supports
+//                            targetKnownInstance.setSupports(Supports.union(supportSet));
                             targetSet.put(ReportSubs, targetKnownInstance);
                             positiveKInstances.put(attitude, targetSet);
                             return true;
@@ -79,8 +81,9 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
 
                             return false;
                         } else {
-                            PropositionNodeSet supportSet = targetKnownInstance.getSupports();
-                            targetKnownInstance.setSupports(Supports.union(supportSet));
+                            Support supportSet = targetKnownInstance.getSupports();
+                            //TODO: sara, changed by wael to merge supports
+//                            targetKnownInstance.setSupports(Supports.union(supportSet));
                             targetSet.put(ReportSubs, targetKnownInstance);
                             positiveKInstances.put(attitude, targetSet);
                             return true;

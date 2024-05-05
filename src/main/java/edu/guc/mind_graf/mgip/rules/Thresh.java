@@ -41,12 +41,13 @@ public class Thresh extends RuleNode {
     }
 
     public void putInferenceReportOnQueue(Report report) {
-        for(Node node : arg) {
-            if(!report.getSupport().contains(node)) {
-                report.setRequesterNode(node);
-                Scheduler.addToHighQueue(report);
-            }
-        }
+        //TODO: sara, changed by wael to merge supports
+//        for(Node node : arg) {
+//            if(!report.getSupport().contains(node)) {
+//                report.setRequesterNode(node);
+//                Scheduler.addToHighQueue(report);
+//            }
+//        }
     }
 
 }
