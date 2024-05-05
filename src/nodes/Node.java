@@ -16,12 +16,14 @@ import cables.UpCable;
 import cables.UpCableSet;
 import components.Substitutions;
 import exceptions.NoSuchTypeException;
+import mgip.requests.ActChannel;
 import mgip.requests.AntecedentToRuleChannel;
 import mgip.requests.Channel;
 import mgip.Scheduler;
 import mgip.requests.ChannelSet;
 import mgip.requests.ChannelType;
 import mgip.requests.MatchChannel;
+import mgip.requests.Request;
 import mgip.requests.RuleToConsequentChannel;
 
 public abstract class Node {
@@ -427,6 +429,90 @@ public abstract class Node {
 
 	}
 
+	    protected Request establishChannel(ChannelType type, Node targetNode,
+            Substitutions switchSubs,
+            Substitutions filterSubs, String contextName,
+            int attitudeId,
+            int matchType, Node requesterNode) {
+        /* BEGIN - Helpful Prints */
+        String reporterIdent = targetNode.getName();
+        String requesterIdent = requesterNode.getName();
+        System.out.println("Trying to establish a channel from " + requesterIdent + " to " + reporterIdent);
+        /* END - Helpful Prints */
+        Substitutions switchSubstitutions = switchSubs == null ? new Substitutions()
+                : switchSubs;
+        Substitutions filterSubstitutions = filterSubs == null ? new Substitutions()
+                : filterSubs;
+        Channel newChannel;
+        switch (type) {
+            case Matched:
+                newChannel = new MatchChannel(switchSubstitutions, filterSubstitutions,
+                        contextName, attitudeId,
+                        matchType, requesterNode);
+                break;
+            case AntRule:
+                newChannel = new AntecedentToRuleChannel(switchSubstitutions,
+                        filterSubstitutions, contextName,
+                        attitudeId,
+                        requesterNode);
+                break;
+            case RuleCons:
+                newChannel = new RuleToConsequentChannel(switchSubstitutions,
+                        filterSubstitutions, contextName,
+                        attitudeId,
+                        requesterNode);
+                break;
+            default:
+                newChannel = new ActChannel(switchSubstitutions,
+                        filterSubstitutions, contextName,
+                        attitudeId,
+                        requesterNode);
+                break;
+
+        }
+        Channel currentChannel;
+        if (type == ChannelType.Act) {
+            currentChannel = ((ActNode) targetNode).getOutgoingChannels().getChannel(newChannel);
+			
+        } else {
+            currentChannel = ((PropositionNode) targetNode).getOutgoingChannels().getChannel(newChannel);
+
+        }
+        if (currentChannel == null) {
+            /* BEGIN - Helpful Prints */
+            System.out.println("Channel of type " + newChannel.getChannelType()
+                    + " is successfully created and used for further operations");
+            /* END - Helpful Prints */
+            Request newRequest = new Request(newChannel, targetNode);
+            if (type == ChannelType.Act) {
+                ((ActNode) targetNode).addToOutgoingChannels(newChannel);
+
+            } else {
+                ((PropositionNode) targetNode).addToOutgoingChannels(newChannel);
+
+            }
+            return newRequest;
+        }
+
+        /* BEGIN - Helpful Prints */
+        System.out.println(
+                "Channel of type " + currentChannel.getChannelType()
+                        + " was already established and re-enqueued for further operations");
+        /* END - Helpful Prints */
+        return new Request(currentChannel, targetNode);
+
+    }
+
+	protected void sendRequestsToNodeSet(NodeSet nodeSet, Substitutions filterSubs,
+		Substitutions switchSubs, String contextName, int attitudeId,
+		ChannelType channelType, Node requesterNode) {
+		for (Node sentTo : nodeSet) {
+			Request newRequest = establishChannel(channelType, sentTo, switchSubs, filterSubs,
+					contextName, attitudeId, -1, requesterNode);
+			Scheduler.addToLowQueue(newRequest);
+		}
+	}
+
 	public void processReports() {
 		// TODO Auto-generated method stub
 
@@ -438,35 +524,12 @@ public abstract class Node {
 	}
 
 	public boolean needsDeliberation() {
-		switch(this.getDownCableSet().get("action").getNodeSet().getNode(0).getName().contains()) {
-		case "SNIF":
-		case "SNITERATE":
-		case "ACHIEVE":
+		if(this.getDownCableSet().get("action").getNodeSet().getNode(0).getName().contains("SNIF") ||
+		this.getDownCableSet().get("action").getNodeSet().getNode(0).getName().contains("SNITERATE") ||
+		this.getDownCableSet().get("action").getNodeSet().getNode(0).getName().contains("ACHIEVE")) {
 			return true;
-			default: return false;
 		}
-	}
-
-	public void sendRequests(NodeSet ns, Substitutions filterSubs, int contextID, ChannelType channelType) {
-		for (Node sentTo : ns) {
-			Channel newChannel = null;
-			if (channelType == ChannelType.Matched) {
-				newChannel = new MatchChannel(new LinearSubstitutions(), filterSubs, contextID, this, sentTo, true);
-			} else if (channelType == ChannelType.AntRule) {
-				newChannel = new AntecedentToRuleChannel(new LinearSubstitutions(), filterSubs, contextID, this, sentTo,
-						true);
-			} else {
-				newChannel = new RuleToConsequentChannel(new LinearSubstitutions(), filterSubs, contextID, this, sentTo,
-						true);
-			}
-			incomingChannels.addChannel(newChannel);
-			sentTo.receiveRequest(newChannel);
-		}
-	}
-
-	public void receiveRequest(Channel channel) {
-		outgoingChannels.addChannel(channel);
-		Runner.addToLowQueue(this);
+		return false;
 	}
 
 }

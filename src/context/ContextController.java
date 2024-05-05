@@ -5,6 +5,7 @@ import java.util.*;
 import set.ContextSet;
 import set.Set;
 import network.Network;
+import nodes.PropositionNode;
 
 public class ContextController {
     private static Context currContext;

@@ -55,8 +55,13 @@ public class Scheduler {
                 System.out.println("\n\u2202 Runner: In HighQueue");
                 Report toRunNext = highQueue.peek();
                 System.out.println("Processing report with " + toRunNext.stringifyReport() + ".");
-                Node requesterNode = toRunNext.getRequesterNode();
-                requesterNode.processReports();
+                if(toRunNext.getRequesterNode() instanceof ActNode) {
+                    ((ActNode) toRunNext.getRequesterNode()).addReport(highQueue.poll());
+                    System.out.println("Report added successfully to act node"+toRunNext.getRequesterNode().getName()+"'s set of reports");
+                } else {
+                    Node requesterNode = toRunNext.getRequesterNode();
+                    requesterNode.processReports();
+                }
 
                 sequence += "H ";
             }

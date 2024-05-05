@@ -74,7 +74,7 @@ public abstract class ActNode extends Node {
 		NodeSet nodes = new NodeSet();
 		for (Report report : reports) {
 			if (report.isSign()) {
-				Node resultNode = report.getSubstitutions().get(variable); //TODO: Fix it with marwa
+				Node resultNode = report.getSubstitutions().get(variable);
 				nodes.add(resultNode);
 			}
 		}
@@ -93,4 +93,9 @@ public abstract class ActNode extends Node {
         doOneMolecularNode.restartAgenda();
         Scheduler.addToActQueue(doOneMolecularNode);
     }
+
+    public void addReport(Report report) {
+        this.reports.add(report);
+    }
+
 }

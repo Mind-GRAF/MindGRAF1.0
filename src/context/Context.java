@@ -3,6 +3,7 @@ package context;
 import java.util.BitSet;
 import java.util.Hashtable;
 
+import nodes.PropositionNode;
 import set.PropositionNodeSet;
 
 public class Context {
@@ -27,6 +28,11 @@ public class Context {
     public String getName() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getName'");
+    }
+
+        public void addHypothesisToContext(int attitudeNumber, PropositionNode node) {
+        this.attitudes.get(attitudeNumber).getFirst().add(node);
+        node.getSupport().setHyp(attitudeNumber);
     }
 
 }

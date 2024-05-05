@@ -5,8 +5,11 @@ import java.util.*;
 import cables.DownCable;
 import cables.DownCableSet;
 import caseFrames.Adjustability;
+import components.Substitutions;
+import context.ContextController;
 import exceptions.NoSuchTypeException;
 import mgip.Scheduler;
+import mgip.requests.ChannelType;
 import mgip.requests.MatchChannel;
 import network.Network;
 import relations.Relation;
@@ -29,10 +32,8 @@ public class SNIFNode extends ActNode {
 				for(Node n: getDownCableSet().get("obj").getNodeSet()) {
 					guards.addAllTo(n.getDownCableSet().get("guard").getNodeSet());
 				}
-				for(Node guard: guards) {
-					guard.receiveRequest(new MatchChannel(new LinearSubstitutions(), new LinearSubstitutions(),
-							SNeBR.getCurrentContext().getId(), this, guard, true));
-				}
+                this.sendRequestsToNodeSet(guards, new Substitutions(), new Substitutions(),
+                ContextController.getCurrContextName(), 1, ChannelType.Act, this);
 				break;
 			case TEST:
 				try{
