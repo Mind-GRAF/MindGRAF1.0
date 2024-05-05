@@ -46,11 +46,7 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
                             return false;
 
                         } else {
-                            Support support = targetKnownInstance.getSupports();
-                            for(Integer Attitude : support.getJustificationSupport().getFirst().keySet()) {
-                            	Supports.addJustificatoinSupportForAttitude(attitude, support.getAssumptionSupport().getFirst().get(key));
-                            }
-                            targetKnownInstance.setSupports(Supports);
+                            targetKnownInstance.getSupports().union(Supports);
                             targetSet.put(ReportSubs, targetKnownInstance);
                             positiveKInstances.put(attitude, targetSet);
                             return true;
@@ -84,11 +80,7 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
 
                             return false;
                         } else {
-                        	Support support = targetKnownInstance.getSupports();
-                            for(Integer Attitude : support.getJustificationSupport().getFirst().keySet()) {
-                            	Supports.addJustificatoinSupportForAttitude(attitude, support.getAssumptionSupport().getFirst().get(key));
-                            }
-                            targetKnownInstance.setSupports(Supports);
+                        	targetKnownInstance.getSupports().union(Supports);
                             targetSet.put(ReportSubs, targetKnownInstance);
                             positiveKInstances.put(attitude, targetSet);
                             return true;

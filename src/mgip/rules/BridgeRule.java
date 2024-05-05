@@ -96,7 +96,7 @@ public class BridgeRule extends RuleNode {
             Substitutions switchRuleSubs = currentChannel.getSwitcherSubstitutions();
 
             if (!this.isOpen()) {
-                if (this.supported(currentContext, currentAttitude)) {
+                if (this.supported(currentContext, currentAttitude,0)) {
                     NodeSet antArgCloseToMe = getDownAntArgNodeSet();
                     NodeSet antArgNodesToConiderClose = removeAlreadyEstablishedChannels(antArgCloseToMe,
                             currentRequest,
@@ -152,7 +152,7 @@ public class BridgeRule extends RuleNode {
         Substitutions currentReportSubs = currentReport.getSubstitutions();
         boolean forwardReportType = currentReport.getInferenceType() == InferenceType.FORWARD;
 
-        boolean assertedInContext = supported(currentReportContextName, currentReportAttitudeID);
+        boolean assertedInContext = supported(currentReportContextName, currentReportAttitudeID,0);
         Substitutions onlySubsBindFreeVar = onlyRelevantSubs(currentReportSubs);
 
         if (currentReport.getReportType() == ReportType.AntRule) {
