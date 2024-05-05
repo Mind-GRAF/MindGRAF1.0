@@ -4,7 +4,7 @@ import java.util.BitSet;
 import java.util.Hashtable;
 import java.util.Map;
 
-import javafx.util.Pair;
+import support.Pair;
 import nodes.PropositionNode;
 import set.PropositionNodeSet;
 import set.Set;
