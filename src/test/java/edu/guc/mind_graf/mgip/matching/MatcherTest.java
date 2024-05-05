@@ -546,7 +546,57 @@ public class MatcherTest {
 
     @Test
     void BangPath() {
-        assertNotNull(null);
+        try {
+            Context ctx = ContextController.getContext("guc");
+
+            Node cs = Network.createNode("cs", "propositionnode");
+            Node phy = Network.createNode("phy", "propositionnode");
+            Node fun = Network.createNode("fun", "propositionnode");
+            Node var1 = Network.createVariableNode("var1", "propositionnode");
+            Node var2 = Network.createVariableNode("var2", "propositionnode");
+
+            Relation obj = Network.createRelation("obj", "", Adjustability.NONE, 0);
+            Relation prop = Network.createRelation("prop", "", Adjustability.NONE, 0);
+
+            obj.setPath(new edu.guc.mind_graf.paths.BangPath());
+
+            DownCable d1 = new DownCable(obj, new NodeSet(cs, phy));
+            DownCable d2 = new DownCable(prop, new NodeSet(fun));
+
+            DownCable d3 = new DownCable(obj, new NodeSet(var1, var2));
+
+            Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2));
+            Node M1 = Network.createNode("propositionnode", new DownCableSet(d3, d2));
+
+            List<Match> matchList = Matcher.match(M1, ctx, 0);
+
+            assertEquals(2, matchList.size());
+
+            Substitutions switch1 = new Substitutions();
+            switch1.add(var1, cs);
+            switch1.add(var2, phy);
+
+            Substitutions switch2 = new Substitutions();
+            switch2.add(var1, phy);
+            switch2.add(var2, cs);
+
+            List<Substitutions> switchSubs = new ArrayList<>();
+            switchSubs.add(switch1);
+            switchSubs.add(switch2);
+
+            int matchType = 0;
+
+            for (Match m : matchList) {
+                assertTrue(m.getFilterSubs().getMap().isEmpty());
+                assertTrue(Substitutions.testContains(switchSubs, m.getSwitchSubs()));
+                assertEquals(M0, m.getNode());
+                assertEquals(matchType, m.getMatchType());
+                assertTrue(((NodeSet) m.getSupport()).contains(M0));
+            }
+        } catch (NoSuchTypeException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     @Test

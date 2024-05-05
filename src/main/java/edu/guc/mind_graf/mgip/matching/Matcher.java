@@ -124,7 +124,10 @@ public class Matcher {
             return unifyVariable(queryNode, node, match, ctx, attitude);
         } else if (queryNode.getSyntacticType() == Syntactic.MOLECULAR
                 && node.getSyntacticType() == Syntactic.MOLECULAR) {
-            pathBasedInference(queryNode, node, match.clone(), ctx, attitude);
+            pathBasedInference(queryNode, node, match, ctx, attitude);
+            if (!matchList.contains(match)) {
+                matchList.add(match);
+            }
             Object[] downRelationList = queryNode.getDownCableSet().keySet();
             List<Match> molecularMatchList = new ArrayList<>();
             molecularMatchList.add(match);
@@ -296,17 +299,22 @@ public class Matcher {
                     continue;
                 } else {
                     Collection<Node> coll = new ArrayList<>();
-                    Map<Node, NodeSet> nodeSupportMap = new HashMap<>();
+                    NodeSet support = new NodeSet();
                     for (int i = 0; i < listOfNodeList.size(); i++) {
                         Object[] arr = listOfNodeList.get(i);
+                        ((PathTrace) arr[1]).getSupports().addAllTo(support);
                         if (arr[0] != node) {
                             coll.add(((Node) arr[0]));
-                            nodeSupportMap.put(((Node) arr[0]), ((PathTrace) arr[1]).getSupports());
+                        }
+                    }
+                    if (coll.isEmpty()) {
+                        support.addAllTo((NodeSet) match.getSupport());
+                        for (Match molecularMatch : molecularMatchList) {
+                            support.addAllTo((NodeSet) molecularMatch.getSupport());
                         }
                     }
                     List<List<Node>> nodePermutations = getAllPermutations(coll);
-                    for (int i = 0; i < nodePermutations.size(); i++) {
-                        List<Node> nodePermutation = nodePermutations.get(i);
+                    for (List<Node> nodePermutation : nodePermutations) {
                         List<List<Node>> queryNodePermutations = getAllPermutations(
                                 queryNode.getDownCableSet().get(relation.getName()).getNodeSet().getValues());
                         for (List<Node> queryNodePermutation : queryNodePermutations) {
@@ -317,8 +325,7 @@ public class Matcher {
                                         nodePermutation,
                                         relation,
                                         tempMatch, ctx, attitude) != null) {
-                                    nodeSupportMap.get(nodePermutation.get(i))
-                                            .addAllTo((NodeSet) tempMatch.getSupport());
+                                    support.addAllTo((NodeSet) tempMatch.getSupport());
                                     tempMatchList.add(tempMatch);
                                 }
                             }
@@ -326,7 +333,7 @@ public class Matcher {
                     }
                 }
             }
-            molecularMatchList = new ArrayList<>(removeDuplicates(tempMatchList));
+            molecularMatchList.addAll(new ArrayList<>(removeDuplicates(tempMatchList)));
         }
         if (!nullCables) {
             matchList.addAll(molecularMatchList);

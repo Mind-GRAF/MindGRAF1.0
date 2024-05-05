@@ -16,10 +16,10 @@ public class BangPath extends Path {
 		// TODO Auto-generated method stub
 		LinkedList<Object[]> result = new LinkedList<Object[]>();
 		// if(node instanceof PropositionNode && node.isSupported(attitude)){
-		// PathTrace pt = trace.clone();
-		// pt.addSupport(node);
-		// Object [] o = {node,pt};
-		// result.add(o);
+		PathTrace pt = trace.clone();
+		pt.addSupport(node);
+		Object[] o = { node, pt };
+		result.add(o);
 		// }
 		return result;
 	}
