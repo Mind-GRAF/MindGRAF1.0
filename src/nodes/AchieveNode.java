@@ -26,8 +26,7 @@ public class AchieveNode extends ActNode {
 			case START:
 				PropositionNode goal = (PropositionNode) node.getDownCableSet().get("obj").getNodeSet().getNode(0);
 				ContextSet cs = ContextController.getContextSet();
-				
-				//TODO Check if p is asserted
+				for
 				boolean asserted = true;
 				if(asserted) {
 					return;

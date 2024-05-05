@@ -11,7 +11,7 @@ public class AttitudeNode extends ActNode {
     }
 
     public void runActuator(ActNode node) {
-        Context context = new Context(ContextController.getCurrContextName(), ContextController.getAttitudes());
+        Context context = ContextController.getContext(ContextController.getCurrContextName());
         PropositionNode prop = (PropositionNode) node.getDownCableSet().get("obj").getNodeSet().getNode(0);
         ActNode action = (ActNode) node.getDownCableSet().get("action").getNodeSet().getNode(0);
         int attitudeID = ContextController.getAttitudeNumber(action.getName());
