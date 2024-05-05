@@ -581,6 +581,8 @@ public class PropositionNode extends Node {
 
     protected void sendReportToConsequents(NodeSet nodeset, Report toBeSent) {
         for (Node sentTo : nodeset) {
+            if(sentTo == null)
+                System.out.println("sent to is null");
             Substitutions reportSubs = toBeSent.getSubstitutions();
             Substitutions switchSubs = new Substitutions();
             Report newReport = new Report(reportSubs, toBeSent.getSupport(), toBeSent.getAttitude(), toBeSent.isSign(),
@@ -594,7 +596,7 @@ public class PropositionNode extends Node {
                 forwardChannels.addChannel(newChannel);
 
             }
-            sendReport(toBeSent, newChannel);
+            sendReport(newReport, newChannel);
         }
     }
 
