@@ -5,10 +5,12 @@ import java.util.Stack;
 import cables.DownCable;
 import cables.DownCableSet;
 import caseFrames.Adjustability;
+import context.ContextController;
 import exceptions.NoSuchTypeException;
 import mgip.Scheduler;
 import network.Network;
 import relations.Relation;
+import set.ContextSet;
 import set.NodeSet;
 
 public class AchieveNode extends ActNode {
@@ -23,7 +25,8 @@ public class AchieveNode extends ActNode {
         switch(controlAgenda){
 			case START:
 				PropositionNode goal = (PropositionNode) node.getDownCableSet().get("obj").getNodeSet().getNode(0);
-				//hwa ana hacheck beliefs bs wala kol el attitudes eza kanet asserted?
+				ContextSet cs = ContextController.getContextSet();
+				
 				//TODO Check if p is asserted
 				boolean asserted = true;
 				if(asserted) {
