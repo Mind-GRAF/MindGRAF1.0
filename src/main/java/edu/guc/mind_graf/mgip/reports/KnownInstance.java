@@ -1,11 +1,6 @@
 package edu.guc.mind_graf.mgip.reports;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import edu.guc.mind_graf.components.Substitutions;
-import edu.guc.mind_graf.network.Network;
-import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.support.Support;
 

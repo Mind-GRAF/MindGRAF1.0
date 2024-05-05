@@ -6,7 +6,9 @@ import java.util.Hashtable;
 import java.util.Iterator;
 
 import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.set.PropositionNodeSet;
+import edu.guc.mind_graf.support.Support;
 import edu.guc.mind_graf.support.Support;
 
 public class KnownInstanceSet implements Iterable<KnownInstance> {
@@ -20,7 +22,7 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
 
     }
 
-    public boolean addKnownInstance(Report Report) {
+    public boolean addKnownInstance(Report Report) throws DirectCycleException {
         Boolean ReportSign = Report.isSign();
         Substitutions ReportSubs = Report.getSubstitutions();
         Support Supports = Report.getSupport();
