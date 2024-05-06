@@ -99,4 +99,8 @@ public abstract class ActNode extends Node {
         this.reports.add(report);
     }
 
+    public ArrayList<Report> getReports() {
+        return this.reports;
+    }
+
 }

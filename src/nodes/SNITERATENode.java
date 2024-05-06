@@ -2,15 +2,12 @@ package nodes;
 
 import java.util.*;
 
-import cables.DownCable;
 import cables.DownCableSet;
-import caseFrames.Adjustability;
-import caseFrames.CaseFrame;
-import exceptions.NoSuchTypeException;
+import components.Substitutions;
+import context.ContextController;
+import mgip.Report;
 import mgip.Scheduler;
-import mgip.requests.MatchChannel;
-import network.Network;
-import relations.Relation;
+import mgip.requests.ChannelType;
 import set.NodeSet;
 
 public class SNITERATENode extends ActNode {
@@ -32,10 +29,8 @@ public class SNITERATENode extends ActNode {
 				for(Node n: getDownCableSet().get("obj").getNodeSet()) {
 					guards.addAllTo(n.getDownCableSet().get("guard").getNodeSet());
 				}
-				for(Node guard: guards) {
-					guard.receiveRequest(new MatchChannel(new LinearSubstitutions(), new LinearSubstitutions(),
-							SNeBR.getCurrentContext().getId(), this, guard, true));
-				}
+                this.sendRequestsToNodeSet(guards, new Substitutions(), new Substitutions(),
+                ContextController.getCurrContextName(), 0, ChannelType.Act, this);
 				break;
 			case TEST:
 				try{
@@ -44,6 +39,12 @@ public class SNITERATENode extends ActNode {
 					NodeSet possibleActs = new NodeSet();
 					ArrayList<PropositionNode> satisfiedGaurds = new ArrayList<>();
 					for(Node act: allActs) {
+						ArrayList<Report> reports = ((ActNode) act).getReports();
+						for(Report report: reports){
+							if(report.isSign()==true){
+								satisfiedGaurds.add((PropositionNode) report.getReporterNode());
+							}
+						}
 						boolean containsAll = true;
 						for(Node n: act.getDownCableSet().get("guard").getNodeSet()) {
 							if(!satisfiedGaurds.contains(n)) {

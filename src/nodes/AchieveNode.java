@@ -1,16 +1,10 @@
 package nodes;
 
-import java.util.Stack;
-
-import cables.DownCable;
 import cables.DownCableSet;
-import caseFrames.Adjustability;
 import context.Context;
 import context.ContextController;
 import exceptions.NoSuchTypeException;
 import mgip.Scheduler;
-import network.Network;
-import relations.Relation;
 import set.ContextSet;
 import set.NodeSet;
 

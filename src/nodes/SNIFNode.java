@@ -2,17 +2,12 @@ package nodes;
 
 import java.util.*;
 
-import cables.DownCable;
 import cables.DownCableSet;
-import caseFrames.Adjustability;
 import components.Substitutions;
 import context.ContextController;
-import exceptions.NoSuchTypeException;
+import mgip.Report;
 import mgip.Scheduler;
 import mgip.requests.ChannelType;
-import mgip.requests.MatchChannel;
-import network.Network;
-import relations.Relation;
 import set.NodeSet;
 
 public class SNIFNode extends ActNode {
@@ -33,7 +28,7 @@ public class SNIFNode extends ActNode {
 					guards.addAllTo(n.getDownCableSet().get("guard").getNodeSet());
 				}
                 this.sendRequestsToNodeSet(guards, new Substitutions(), new Substitutions(),
-                ContextController.getCurrContextName(), 1, ChannelType.Act, this);
+                ContextController.getCurrContextName(), 0, ChannelType.Act, this);
 				break;
 			case TEST:
 				try{
@@ -42,6 +37,12 @@ public class SNIFNode extends ActNode {
 					NodeSet possibleActs = new NodeSet();
 					ArrayList<PropositionNode> satisfiedGaurds = new ArrayList<>();
 					for(Node act: allActs) {
+						ArrayList<Report> reports = ((ActNode) act).getReports();
+						for(Report report: reports){
+							if(report.isSign()==true){
+								satisfiedGaurds.add((PropositionNode) report.getReporterNode());
+							}
+						}
 						boolean containsAll = true;
 						for(Node n: act.getDownCableSet().get("guard").getNodeSet()) {
 							if(!satisfiedGaurds.contains(n)) {
