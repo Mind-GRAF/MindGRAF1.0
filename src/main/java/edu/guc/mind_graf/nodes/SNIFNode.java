@@ -12,7 +12,7 @@ import edu.guc.mind_graf.set.NodeSet;
 
 public class SNIFNode extends ActNode {
 
-    private Agenda controlAgenda;
+    private ActAgenda controlAgenda;
 
     public SNIFNode(DownCableSet downCables) {
         super(downCables);

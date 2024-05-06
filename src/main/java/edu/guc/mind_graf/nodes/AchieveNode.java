@@ -10,7 +10,7 @@ import edu.guc.mind_graf.set.NodeSet;
 
 public class AchieveNode extends ActNode {
 
-    private Agenda controlAgenda;
+    private ActAgenda controlAgenda;
 
     public AchieveNode(DownCableSet downCables) {
         super(downCables);

@@ -12,7 +12,7 @@ import edu.guc.mind_graf.set.NodeSet;
 
 public class SNITERATENode extends ActNode {
 
-    private Agenda controlAgenda;
+    private ActAgenda controlAgenda;
 
     public SNITERATENode(DownCableSet downCables) {
         super(downCables);
