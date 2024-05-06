@@ -12,6 +12,9 @@ import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 public class NumEntailment extends RuleNode {
 
     private int i;
@@ -21,11 +24,12 @@ public class NumEntailment extends RuleNode {
     public NumEntailment(DownCableSet downcableSet) {
         super(downcableSet);
         i = downcableSet.get("i").getNodeSet().getIntValue();
-        ant = downcableSet.get("&ant").getNodeSet();
+        ant = downcableSet.get("ant").getNodeSet();
         cq = downcableSet.get("cq").getNodeSet();
         PropositionNodeSet antecedents = RuleInfoHandler.getVariableAntecedents(ant);
         int cAnt = ant.size() - antecedents.size();
         this.ruleInfoHandler = Ptree.constructPtree(antecedents, Math.max(0, i - cAnt), Integer.MAX_VALUE, 1);
+        this.ruleInfoHandler.setcMin(1);
     }
 
     public RuleInfoSet[] mayInfer() {
@@ -38,11 +42,8 @@ public class NumEntailment extends RuleNode {
         return inferrable;
     }
 
-    public void putInferenceReportOnQueue(Report report) {
-        for(Node node : cq) {
-            report.setRequesterNode(node);
-        }
-        Scheduler.addToHighQueue(report);
+    public void sendInferenceReports(HashMap<RuleInfo, Report> reports) {
+        sendInferenceToCq(reports, cq);
     }
 
 }

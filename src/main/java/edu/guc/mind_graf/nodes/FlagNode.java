@@ -27,9 +27,17 @@ public class FlagNode {
         return flag;
     }
 
-    public void setFlag(boolean flag) {
-        this.flag = flag;
-    }
+//    public void setFlag(boolean flag) {
+//        this.flag = flag;
+//    }
+//
+//    public PropositionNodeSet getSupport() {
+//        return support;
+//    }
+//
+//    public void setSupport(PropositionNodeSet support) {
+//        this.support = support;
+//    }
 
     public Support getSupport() {
         return support;
@@ -39,9 +47,12 @@ public class FlagNode {
         this.support = support;
     }
 
-    public boolean equals(FlagNode fn) {
-        // maybe throw exception here if nodes equal but flags different
-        return this.node.equals(fn.getNode());
+    public boolean equals(Object o) {
+        // maybe throw exception here if nodes equal but flags different => don't cz that should never happen
+        if(!(o instanceof FlagNode))
+            return false;
+        FlagNode fn = (FlagNode) o;
+        return this.node.equals(fn.node);
     }
 
     @Override

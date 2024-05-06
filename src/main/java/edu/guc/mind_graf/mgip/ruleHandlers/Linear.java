@@ -9,10 +9,6 @@ public class Linear extends SIndex{
 
     HashMap<Integer, RuleInfoSet> ruleInfoMap;
 
-    public Linear() {
-        ruleInfoMap = new HashMap<>();
-    }
-
     public Linear(NodeSet commonVariables) {
         super(commonVariables);
         ruleInfoMap = new HashMap<>();

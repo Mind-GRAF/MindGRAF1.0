@@ -13,7 +13,18 @@ import edu.guc.mind_graf.cables.UpCable;
 import edu.guc.mind_graf.cables.UpCableSet;
 import edu.guc.mind_graf.caseFrames.Adjustability;
 import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
+import edu.guc.mind_graf.mgip.Scheduler;
+import edu.guc.mind_graf.mgip.requests.ActChannel;
+import edu.guc.mind_graf.mgip.requests.AntecedentToRuleChannel;
+import edu.guc.mind_graf.mgip.requests.Channel;
+import edu.guc.mind_graf.mgip.requests.ChannelType;
+import edu.guc.mind_graf.mgip.requests.IfToRuleChannel;
+import edu.guc.mind_graf.mgip.requests.MatchChannel;
+import edu.guc.mind_graf.mgip.requests.Request;
+import edu.guc.mind_graf.mgip.requests.RuleToConsequentChannel;
+import edu.guc.mind_graf.mgip.requests.WhenToRuleChannel;
 
 public abstract class Node {
 
@@ -75,7 +86,7 @@ public abstract class Node {
 	public NodeSet getDirectParents() {
 		NodeSet nodeSet = new NodeSet();
 		for (Cable c : this.getUpCableSet().getValues()) {
-			nodeSet.union(c.getNodeSet());
+			nodeSet = nodeSet.union(c.getNodeSet());
 		}
 
 		return nodeSet;
@@ -453,12 +464,100 @@ public abstract class Node {
 
 	}
 
+	protected Request establishChannel(ChannelType type, Node targetNode,
+			Substitutions switchSubs,
+			Substitutions filterSubs, String contextName,
+			int attitudeId,
+			int matchType, Node requesterNode) {
+		/* BEGIN - Helpful Prints */
+		String reporterIdent = targetNode.getName();
+		String requesterIdent = requesterNode.getName();
+		System.out.println("Trying to establish a channel from " + requesterIdent + " to " + reporterIdent);
+		/* END - Helpful Prints */
+		Substitutions switchSubstitutions = switchSubs == null ? new Substitutions()
+				: switchSubs;
+		Substitutions filterSubstitutions = filterSubs == null ? new Substitutions()
+				: filterSubs;
+		Channel newChannel;
+		switch (type) {
+			case Matched:
+				newChannel = new MatchChannel(switchSubstitutions, filterSubstitutions,
+						contextName, attitudeId,
+						matchType, requesterNode);
+				break;
+			case AntRule:
+				newChannel = new AntecedentToRuleChannel(switchSubstitutions,
+						filterSubstitutions, contextName,
+						attitudeId,
+						requesterNode);
+				break;
+			case RuleCons:
+				newChannel = new RuleToConsequentChannel(switchSubstitutions,
+						filterSubstitutions, contextName,
+						attitudeId,
+						requesterNode);
+				break;
+			case IfRule:
+				newChannel = new IfToRuleChannel(switchSubstitutions,
+						filterSubstitutions, contextName,
+						attitudeId,
+						requesterNode);
+				break;
+			case WhenRule:
+				newChannel = new WhenToRuleChannel(switchSubstitutions,
+						filterSubstitutions, contextName,
+						attitudeId,
+						requesterNode);
+				break;
+			default:
+				newChannel = new ActChannel(switchSubstitutions,
+						filterSubstitutions, contextName,
+						attitudeId,
+						requesterNode);
+				break;
+
+		}
+		Channel currentChannel;
+
+		currentChannel = ((PropositionNode) targetNode).getOutgoingChannels().getChannel(newChannel);
+
+		if (currentChannel == null) {
+			/* BEGIN - Helpful Prints */
+			System.out.println("Channel of type " + newChannel.getChannelType()
+					+ " is successfully created and used for further operations");
+			/* END - Helpful Prints */
+			Request newRequest = new Request(newChannel, targetNode);
+
+			((PropositionNode) targetNode).addToOutgoingChannels(newChannel);
+
+			return newRequest;
+		}
+
+		/* BEGIN - Helpful Prints */
+		System.out.println(
+				"Channel of type " + currentChannel.getChannelType()
+						+ " was already established and re-enqueued for further operations");
+		/* END - Helpful Prints */
+		return new Request(currentChannel, targetNode);
+
+	}
+
+	protected void sendRequestsToNodeSet(NodeSet nodeSet, Substitutions filterSubs,
+			Substitutions switchSubs, String contextName, int attitudeId,
+			ChannelType channelType, Node requesterNode) {
+		for (Node sentTo : nodeSet) {
+			Request newRequest = establishChannel(channelType, sentTo, switchSubs, filterSubs,
+					contextName, attitudeId, -1, requesterNode);
+			Scheduler.addToLowQueue(newRequest);
+		}
+	}
+
 	public void processReports() {
 		// TODO Auto-generated method stub
 
 	}
 
-	public void processRequests() {
+	public void processRequests() throws NoSuchTypeException, DirectCycleException {
 		// TODO Auto-generated method stub
 
 	}

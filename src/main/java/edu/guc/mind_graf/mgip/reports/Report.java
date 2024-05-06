@@ -1,5 +1,6 @@
 package edu.guc.mind_graf.mgip.reports;
 
+import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.requests.ChannelType;
 import edu.guc.mind_graf.components.Substitutions;
@@ -19,13 +20,14 @@ public class Report {
     private Node reporterNode;
 
     public Report(Substitutions substitution, Support suppt, int attitudeid,
-                  boolean sign, InferenceType inference, Node requesterNode) {
+                  boolean sign, InferenceType inference, Node requesterNode, Node reporterNode) {
         this.substitutions = substitution;
         this.attitude = attitudeid;
         this.support = suppt;
         this.requesterNode = requesterNode;
         this.sign = sign;
         this.inferenceType = inference;
+        this.reporterNode = reporterNode;
     }
 
     public String stringifyReport() {
@@ -128,6 +130,12 @@ public class Report {
             case RuleCons:
                 this.setReportType(ReportType.RuleCons);
                 break;
+            case WhenRule:
+                this.setReportType(ReportType.WhenRule);
+                break;
+            case IfRule:
+                this.setReportType(ReportType.IfRule);
+                break;
             default:
                 // handle error or do nothing
                 break;
@@ -155,4 +163,9 @@ public class Report {
         // TODO
         return true;
     }
+
+    public Report clone() {
+        return new Report(this.substitutions, this.support, this.attitude, this.sign, this.inferenceType, this.requesterNode, this.reporterNode);
+    }
+
 }

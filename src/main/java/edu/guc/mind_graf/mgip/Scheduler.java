@@ -6,6 +6,9 @@ import java.util.Queue;
 import java.util.Stack;
 
 import edu.guc.mind_graf.mgip.reports.Report;
+import edu.guc.mind_graf.exceptions.DirectCycleException;
+import edu.guc.mind_graf.exceptions.NoPlansExistForTheActException;
+import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.mgip.requests.Channel;
 import edu.guc.mind_graf.mgip.requests.Request;
 import edu.guc.mind_graf.nodes.ActNode;
@@ -17,6 +20,7 @@ public class Scheduler {
     private static Queue<Report> highQueue;
     private static Queue<Request> lowQueue;
     private static Stack<ActNode> actQueue;
+    private static Stack<ActNode> highActQueue;
     private static PropositionNode originOfBackInf;
     private static Hashtable<Report, PropositionNode> forwardAssertedNodes;
     private static Hashtable<Report, PropositionNode> backwardAssertedReplyNodes;
@@ -25,6 +29,8 @@ public class Scheduler {
         highQueue = new ArrayDeque<Report>();
         lowQueue = new ArrayDeque<Request>();
         actQueue = new Stack<ActNode>();
+        highActQueue = new Stack<ActNode>();
+        
         forwardAssertedNodes = new Hashtable<Report, PropositionNode>();
         backwardAssertedReplyNodes = new Hashtable<Report, PropositionNode>();
 
@@ -46,7 +52,7 @@ public class Scheduler {
 
     // The main scheduling method of dequeuing of the queue which request/report
     // will be processed next
-    public static String schedule() {
+    public static String schedule() throws NoSuchTypeException, NoPlansExistForTheActException, DirectCycleException {
         String sequence = "The sequence of the scheduler is ";
         main: while (!highQueue.isEmpty() || !lowQueue.isEmpty() || !actQueue.isEmpty()) {
             while (!highQueue.isEmpty()) {
@@ -56,9 +62,13 @@ public class Scheduler {
                 System.out.println("\n\u2202 Runner: In HighQueue");
                 Report toRunNext = highQueue.peek();
                 System.out.println("Processing report with " + toRunNext.stringifyReport() + ".");
-                Node requesterNode = toRunNext.getRequesterNode();
-                requesterNode.processReports();
-
+                if (toRunNext.getRequesterNode() instanceof ActNode) {
+                    ((ActNode) toRunNext.getRequesterNode()).addReport(highQueue.poll());
+                    System.out.println("Report added successfully to act node"+toRunNext.getRequesterNode().getName()+"'s set of reports");
+                } else {
+                    Node requesterNode = toRunNext.getRequesterNode();
+                    requesterNode.processReports();
+                }
                 sequence += "H ";
             }
             while (!lowQueue.isEmpty()) {
@@ -74,6 +84,20 @@ public class Scheduler {
                 if (!highQueue.isEmpty())
                     continue main;
             }
+            while (!highActQueue.isEmpty()) {
+                System.out.println(
+                        "------------------------------------------------------------------------------------------------------------------------------------");
+
+                System.out.println("AT High ACT QUEUE");
+                ActNode toRunNext = highActQueue.pop();
+                // System.out.println(toRunNext + " agenda: " + toRunNext.getAgenda());
+                System.out.println("\n\n");
+                toRunNext.processIntends(true);
+                sequence += "HA ";
+                if (!highQueue.isEmpty() || !lowQueue.isEmpty()) {
+                    continue main;
+                }
+            }
             while (!actQueue.isEmpty()) {
                 System.out.println(
                         "------------------------------------------------------------------------------------------------------------------------------------");
@@ -82,9 +106,9 @@ public class Scheduler {
                 ActNode toRunNext = actQueue.pop();
                 // System.out.println(toRunNext + " agenda: " + toRunNext.getAgenda());
                 System.out.println("\n\n");
-                toRunNext.processIntends();
+                toRunNext.processIntends(false);
                 sequence += "A ";
-                if (!highQueue.isEmpty() || !lowQueue.isEmpty()) {
+                if (!highQueue.isEmpty() || !lowQueue.isEmpty()|| !actQueue.isEmpty()) {
                     continue main;
                 }
             }
@@ -111,6 +135,15 @@ public class Scheduler {
      */
     public static void addToLowQueue(Request newRequest) {
         lowQueue.add(newRequest);
+    }
+
+    /***
+     * Method to add an act node to high act queue
+     * 
+     * @param actNode
+     */
+    public static void addToHighActQueue(ActNode actNode) {
+        highActQueue.add(actNode);
     }
 
     /***
@@ -181,6 +214,9 @@ public class Scheduler {
 
     public static Stack<ActNode> getActQueue() {
         return actQueue;
+    }
+    public static Stack<ActNode> getHighActQueue() {
+        return highActQueue;
     }
 
     public static void setActQueue(Stack<ActNode> actQueue) {

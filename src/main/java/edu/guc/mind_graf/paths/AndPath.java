@@ -44,7 +44,7 @@ public class AndPath extends Path {
 	}
 
 	@Override
-	public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context) {
+	public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context, int attitude) {
 		if (this.paths.isEmpty())
 			return new LinkedList<Object[]>();
 		LinkedList<Path> pList = new LinkedList<Path>();
@@ -52,15 +52,15 @@ public class AndPath extends Path {
 		Path p = pList.removeFirst();
 		AndPath andPath = new AndPath(pList);
 		if (pList.size() > 0)
-			return intersection(p.follow(node, trace, context), andPath.follow(node, trace, context));
+			return intersection(p.follow(node, trace, context, attitude), andPath.follow(node, trace, context, attitude));
 		else
-			return p.follow(node, trace, context);
+			return p.follow(node, trace, context, attitude);
 
 	}
 
 	@Override
 	public LinkedList<Object[]> followConverse(Node node, PathTrace trace,
-			Context context) {
+			Context context, int attitude) {
 		if (this.paths.isEmpty())
 			return new LinkedList<Object[]>();
 		LinkedList<Path> pList = new LinkedList<Path>();
@@ -68,20 +68,20 @@ public class AndPath extends Path {
 		Path p = pList.removeFirst();
 		AndPath andPath = new AndPath(pList);
 		if (pList.size() > 0)
-			return intersection(p.followConverse(node, trace, context), andPath.followConverse(node, trace, context));
+			return intersection(p.followConverse(node, trace, context, attitude), andPath.followConverse(node, trace, context, attitude));
 		else
-			return p.followConverse(node, trace, context);
+			return p.followConverse(node, trace, context, attitude);
 
 	}
 
 	private LinkedList<Object[]> intersection(LinkedList<Object[]> list1, LinkedList<Object[]> list2) {
 		LinkedList<Object[]> result = new LinkedList<Object[]>();
-		HashSet<Object[]> hashedResult = new HashSet<>();
+		HashMap<Node, Object[]> map = new HashMap();
 		for (Object[] objects : list1) {
-			hashedResult.add(objects);
+			map.put(((Node) objects[0]), objects);
 		}
 		for (Object[] objects : list2) {
-			if (hashedResult.contains(objects))
+			if(map.get(((Node) objects[0])) != null)
 				result.add(objects);
 		}
 

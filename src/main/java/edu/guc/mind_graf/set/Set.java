@@ -1,3 +1,4 @@
+
 package edu.guc.mind_graf.set;
 
 import java.util.Collection;

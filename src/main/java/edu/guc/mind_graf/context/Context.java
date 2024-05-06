@@ -17,7 +17,7 @@ public class Context {
     private final String name;
     private Set<Integer, BitSet> AttitudesBitset;
 
-    
+
     public Context(String name, Set<String,Integer> attitudeNames){
         this.name=name;
         this.attitudes = new Hashtable<>();
@@ -38,11 +38,11 @@ public class Context {
         }
         throw new RuntimeException("PropositionNode is not in any attitude");
     }
-    
+
     public String getName() {
         return name;
     }
-    
+
 //    public PropositionNodeSet getAllPropositionsInAnAttitude(int attitude) {
 //        return this.attitudes.get(attitude);
 //    }

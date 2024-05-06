@@ -17,12 +17,9 @@ public class ContextController {
     private static Network network;
     private static boolean uvbrEnabled;
     private static boolean automaticHandlingEnabled;
-    private static int mergeFunctionNumber;
-
-    
-    
+    private static int mergeFunctionNumber;    
     private static ArrayList<ArrayList<Integer>> consistentAttitudes;
-    
+
     public static void setUp(Set<String,Integer> attitudeNames, ArrayList<ArrayList<Integer>> consistentAttitudes, boolean uvbrEnabled){
         ContextController.network = new Network();
         ContextController.attitudes = attitudeNames;
@@ -32,7 +29,7 @@ public class ContextController {
         ContextController.mergeFunctionNumber = 0;
         //TODO: wael update the setup method
         contextSet = new ContextSet();
-        
+
     }
     public static void setCurrContext(String currContext) {
         Context c = contextSet.get(currContext);
@@ -70,11 +67,11 @@ public class ContextController {
     public static ContextSet getContextSet() {
         return contextSet;
     }
-    
+
     public static ArrayList<ArrayList<Integer>> getConsistentAttitudes() {
         return consistentAttitudes;
     }
-    
+
     public static void createNewContext(String name){
         if(contextSet.contains(name)){
             throw new RuntimeException("context Already Exists");
@@ -102,8 +99,6 @@ public class ContextController {
         PropositionNode n = (PropositionNode) Network.getNodeById(nodeId);
         c.removeHypothesisFromContext(attitudeNumber, n);
     }
-
-
 
     public static int max(int x, int y){
         return Math.max(x,y);

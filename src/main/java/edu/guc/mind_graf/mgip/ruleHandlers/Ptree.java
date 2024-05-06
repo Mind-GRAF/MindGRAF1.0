@@ -21,11 +21,6 @@ public class Ptree extends RuleInfoHandler {
     private int ncount = 0; // number of antecedents that reported negatively
     private boolean isPropagating = false;
     private HashMap <Integer, int[]> antecedentRIcount = new HashMap<>(); // keeps track of how many positive/negative report was received from each antecedent
-    ArrayDeque <PtreeNode> roots;
-
-    public HashMap<Integer, PtreeNode> getVarSetLeafMap() {
-        return varSetLeafMap;
-    }
 
     public Ptree (int minPcount, int minNcount){ // should edit: shouldn't have constructors I don't need/want
         varSetLeafMap = new HashMap<>();
@@ -38,7 +33,6 @@ public class Ptree extends RuleInfoHandler {
         HashMap <Node, HashSet<PtreeNode>> vpList = ptree.processAntecedents(antecedents, ptreeNodeMin);
         ArrayDeque <PtreeNode> pSequence = ptree.processVariables(vpList);
         ptree.buildPtree(pSequence, ptreeNodeMin);
-        ptree.roots = pSequence;
         return ptree;
     }
 
@@ -51,7 +45,7 @@ public class Ptree extends RuleInfoHandler {
             int hash = ant.getFreeVariablesHash();
             if(!varSetLeafMap.containsKey(hash)) {
                 Singleton sIndex = new Singleton(ant.getFreeVariables());
-                varSetLeafMap.put(hash, new PtreeNode(null, null, null, null, sIndex, vars, null));
+                varSetLeafMap.put(hash, new PtreeNode(null, null, sIndex, vars, null));
             }
             // insert in vpList
             for(Node n : vars){
@@ -89,7 +83,7 @@ public class Ptree extends RuleInfoHandler {
             PtreeNode p1 = pSequence.pollFirst();
             PtreeNode p2 = pSequence.peekFirst();
             NodeSet intersection = p1.getVars().intersection(p2.getVars());
-            if(intersection.size() == 0){
+            if(intersection.isEmpty()){
                 pSequence.addLast(p1);
                 if(firstMismatched == p1){ // if the first mismatched node is reached again, then the tree is complete, every node left in the pSequence is a disjoint tree
                     break;
@@ -101,17 +95,13 @@ public class Ptree extends RuleInfoHandler {
             else {
                 firstMismatched = null;
                 p2 = pSequence.pollFirst();
-                PtreeNode parent = matchSiblings(p1, p2, intersection);
-                if(ptreeNodeMin < 2) // it's not andentail, 2 is for andentail
-                    parent.setMin(ptreeNodeMin);
-                else
-                    parent.setMin(p1.getMin() + p2.getMin());
+                PtreeNode parent = matchSiblings(p1, p2, intersection, ptreeNodeMin);
                 pSequence.add(parent);
             }
         }
     }
 
-    private PtreeNode matchSiblings(PtreeNode p1, PtreeNode p2, NodeSet intersection){
+    private PtreeNode matchSiblings(PtreeNode p1, PtreeNode p2, NodeSet intersection, int ptreeNodeMin){
         FreeVariableSet siblingIntersection = new FreeVariableSet();
         for(Node n : intersection){
             siblingIntersection.add(n);
@@ -123,9 +113,13 @@ public class Ptree extends RuleInfoHandler {
         // setup parent
         SIndex parentSIndex = new Linear(intersection);
         NodeSet vars = p1.getVars().union(p2.getVars());
-        PtreeNode parent = new PtreeNode(null, null, p1, p2, parentSIndex, vars, null);
+        PtreeNode parent = new PtreeNode(null, null, parentSIndex, vars, null);
         p1.setParent(parent);
         p2.setParent(parent);
+        if(ptreeNodeMin < 2) // it's not andentail, 2 is for andentail
+            parent.setMin(ptreeNodeMin);
+        else
+            parent.setMin(p1.getMin() + p2.getMin());
         return parent;
     }
 
@@ -154,7 +148,7 @@ public class Ptree extends RuleInfoHandler {
 
             int hash = n.getFreeVariablesHash();
             RuleInfoSet mayInfer = varSetLeafMap.get(hash).insertIntoNode(ri, isPropagating);
-            if(mayInfer != null && mayInfer.size() > 0){
+            if(mayInfer != null && !mayInfer.isEmpty()){
                 return mayInfer;
             }
 
@@ -172,8 +166,7 @@ public class Ptree extends RuleInfoHandler {
 
     private RuleInfoSet startPropagation() throws InvalidRuleInfoException {
         HashSet <PtreeNode> visited = new HashSet<>();
-        ArrayDeque <PtreeNode> queue = new ArrayDeque<>();
-        queue.addAll(varSetLeafMap.values());
+        ArrayDeque <PtreeNode> queue = new ArrayDeque<>(varSetLeafMap.values());
         RuleInfoSet rootRuleInfos = new RuleInfoSet();
         while(!queue.isEmpty()){
             PtreeNode p = queue.pollFirst();
@@ -195,10 +188,24 @@ public class Ptree extends RuleInfoHandler {
         return rootRuleInfos;
     }
 
+    public ArrayList<PtreeNode> arrayOfNodes(){  //for testing
+        ArrayList<PtreeNode> arr = new ArrayList<>();
+        ArrayDeque <PtreeNode> queue = new ArrayDeque<>(varSetLeafMap.values());
+        HashSet<PtreeNode> addedToQueue = new HashSet<>(varSetLeafMap.values());
+        while(!queue.isEmpty()){
+            PtreeNode p = queue.pollFirst();
+            arr.add(p);
+            if(p.getParent() != null && !addedToQueue.contains(p.getParent())){
+                queue.addLast(p.getParent());
+                addedToQueue.add(p.getParent());
+            }
+        }
+        return arr;
+    }
+
     public String BFString(){
         StringBuilder sb = new StringBuilder();
-        ArrayDeque <PtreeNode> queue = new ArrayDeque<>();
-        queue.addAll(varSetLeafMap.values());
+        ArrayDeque <PtreeNode> queue = new ArrayDeque<>(varSetLeafMap.values());
         while(!queue.isEmpty()){
             PtreeNode p = queue.pollFirst();
             sb.append(p.toString());
@@ -219,37 +226,8 @@ public class Ptree extends RuleInfoHandler {
                 '}';
     }
 
-    public ArrayList<PtreeNode> arrayOfNodes(){  //for testing
-        ArrayList<PtreeNode> arr = new ArrayList<>();
-        ArrayDeque <PtreeNode> queue = new ArrayDeque<>();
-        HashSet<PtreeNode> addedToQueue = new HashSet<>();
-        queue.addAll(varSetLeafMap.values());
-        addedToQueue.addAll(varSetLeafMap.values());
-        while(!queue.isEmpty()){
-            PtreeNode p = queue.pollFirst();
-            arr.add(p);
-            if(p.getParent() != null && !addedToQueue.contains(p.getParent())){
-                queue.addLast(p.getParent());
-                addedToQueue.add(p.getParent());
-            }
-        }
-        return arr;
-    }
-
-    public ArrayDeque<PtreeNode> getRoots() {
-        return roots;
-    }
-
-    public void setRoots(ArrayDeque<PtreeNode> roots) {
-        this.roots = roots;
-    }
-
-    public RuleInfoSet getAllRuleInfos() {
-        RuleInfoSet allRuleInfos = new RuleInfoSet();
-        for (PtreeNode root : getRoots()) {
-            allRuleInfos = allRuleInfos.combineDisjointSets(root.getSIndex().getAllRuleInfos());
-        }
-        return allRuleInfos;
+    public HashMap<Integer, PtreeNode> getVarSetLeafMap() {
+        return varSetLeafMap;
     }
 
 }

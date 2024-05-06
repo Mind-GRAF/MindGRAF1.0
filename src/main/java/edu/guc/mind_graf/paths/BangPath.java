@@ -12,21 +12,21 @@ public class BangPath extends Path {
 	}
 
 	@Override
-	public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context) {
+	public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context, int attitude) {
 		// TODO Auto-generated method stub
 		LinkedList<Object[]> result = new LinkedList<Object[]>();
 		// if(node instanceof PropositionNode && node.isSupported(attitude)){
-		// PathTrace pt = trace.clone();
-		// pt.addSupport(node);
-		// Object [] o = {node,pt};
-		// result.add(o);
+		PathTrace pt = trace.clone();
+		pt.addSupport(node);
+		Object[] o = { node, pt };
+		result.add(o);
 		// }
 		return result;
 	}
 
 	@Override
 	public LinkedList<Object[]> followConverse(Node node, PathTrace trace,
-			Context context) {
+			Context context, int attitude) {
 		// TODO Auto-generated method stub
 		LinkedList<Object[]> result = new LinkedList<Object[]>();
 		// if(node instanceof PropositionNode && node.isSupported(attitude)){
