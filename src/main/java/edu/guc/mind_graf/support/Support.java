@@ -31,6 +31,7 @@ public class Support {
 		isHyp = new HashSet<>();
 		isTreeCalculatetd = new HashSet<>();
 		supportsTree = new HashMap<>();
+
 	}
 
 	public Support(int nodeID, HashMap<Integer, ArrayList<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>>> justificationSupport) throws DirectCycleException{

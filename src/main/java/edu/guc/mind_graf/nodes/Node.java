@@ -68,7 +68,8 @@ public abstract class Node {
 	}
 
 	public NodeSet getParents(String relation) {
-		return this.getUpCable(relation).getNodeSet();
+		UpCable cable = this.getUpCable(relation);
+		return cable == null? null : cable.getNodeSet();
 	}
 
 	public NodeSet getDirectParents() {
@@ -166,7 +167,7 @@ public abstract class Node {
 	public Node getNegation() {
 
 		NodeSet negation = this.getParents("arg");
-		if (negation != null && negation.size() > 0) {
+		if (negation != null && !negation.isEmpty()) {
 			for (Node node : negation.getValues()) {
 				DownCable min = node.getDownCable("min");
 				DownCable max = node.getDownCable("max");
@@ -176,6 +177,14 @@ public abstract class Node {
 				}
 			}
 		}
+		//this handles the case of !(!P) to find P
+		if(this.getDownCable("min").getNodeSet().contains("0") && this.getDownCable("max").getNodeSet().contains("0")){
+			NodeSet p = this.getDownCable("arg").getNodeSet();
+			if(p != null && !p.isEmpty()){
+				return p.iterator().next();
+			}
+		}
+
 		return null;
 	}
 

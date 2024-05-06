@@ -32,6 +32,7 @@ public class Revision {
 				}
 			}
 		}
+		System.out.println("Found Contradictions: "+ contradictions);
 
 		if(!contradictions.isEmpty()){
 			if(ContextController.automaticHandlingEnabled()){
