@@ -468,7 +468,7 @@ public class PropositionNode extends Node {
 
     public boolean supported(String desiredContextName, int desiredAttitudeID, int level) {
         boolean supported = false;
-        Context desiredContext = Network.getContexts().get(desiredContextName);
+        Context desiredContext = ContextController.getContext(desiredContextName);
 
         for(Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> currSupport : this.support.getAssumptionSupport().get(level).get(desiredAttitudeID)) {
             for(Integer key : currSupport.getFirst().keySet()) {
