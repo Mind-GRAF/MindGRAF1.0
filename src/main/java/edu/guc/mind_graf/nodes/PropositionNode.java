@@ -103,7 +103,7 @@ public class PropositionNode extends Node {
     public NodeSet getUpAntDomRuleNodeSet() {
         NodeSet ret = new NodeSet();
         UpCable argsCable = this.getUpCableSet().get("args");
-        UpCable antCable = this.getUpCableSet().get("antecedent");
+        UpCable antCable = this.getUpCableSet().get("ants");
         if (argsCable != null) {
             argsCable.getNodeSet().addAllTo(ret);
         }
@@ -124,7 +124,7 @@ public class PropositionNode extends Node {
     public NodeSet getDownAntArgNodeSet() {
         NodeSet ret = new NodeSet();
         DownCable argsCable = this.getDownCableSet().get("args");
-        DownCable antCable = this.getDownCableSet().get("antecedent");
+        DownCable antCable = this.getDownCableSet().get("ants");
         if (argsCable != null) {
             argsCable.getNodeSet().addAllTo(ret);
         }

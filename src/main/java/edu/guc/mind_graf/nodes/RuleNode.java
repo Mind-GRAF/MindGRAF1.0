@@ -242,52 +242,7 @@ public abstract class RuleNode extends PropositionNode {
         }
     }
     
-    public boolean processIntroductionRequest(Request currentRequest) throws NoSuchTypeException {
-        //need to check if we already made an introduction request to the same node before
-        // if(this.isOpen()){
-        //     return false;
-        // }
-        String currContextName = currentRequest.getChannel().getName();
-        int attitude = currentRequest.getChannel().getAttitudeID();
-        Substitutions filterSubs = currentRequest.getChannel().getFilterSubstitutions();
-        Substitutions switchSubs = currentRequest.getChannel().getSwitcherSubstitutions();
-        System.out.println("Current Request: " + currentRequest + " Current Context: " + currContextName + 
-        " Attitude: " + attitude + " Filter Subs: " + filterSubs + " Switch Subs: " + switchSubs + 
-        " Requester Node: " + currentRequest.getChannel().getRequesterNode().getName()+"\n");
-        if (this instanceof AndOr || this instanceof Thresh){
-            System.out.println("In AndOr or Thresh Node");
-            NodeSet args = this.getDownAntArgNodeSet();
-            Context newContext = new Context(currContextName,attitude,args);
-            System.out.println("New Context: " + newContext.getName()+ "Modified Attitude: " + attitude + "Assumed Args: " + args+"\n");
-            IntroductionChannel intiatedChannel = initiateIntroChannel(currentRequest.getChannel(), this, newContext.getName());
-            System.out.println("Initiated Channel in Context: " + intiatedChannel.getName()+" Attitude: "+intiatedChannel.getAttitudeID()+" with Rule: "+intiatedChannel.getRequesterNode().getName()+" Filter Subs: "+intiatedChannel.getFilterSubstitutions()+" Switch Subs: "+intiatedChannel.getSwitcherSubstitutions() + " Requester Node: "+intiatedChannel.getRequesterNode().getName()+"\n");
-            RII rii = new RII(currentRequest, null, args , newContext , attitude);
-            System.out.println("RII of new Context: " + rii.getContext().getName()+" Attitude: "+rii.getAttitudeID()+" Request: "+rii.getRequest().getChannel().getRequesterNode().getName()+" Antecedents: "+rii.getAntNodes()+" Consequents: "+rii.getConqArgNodes()+"\n");
-            mcii.addRII(rii);
-            // sendRequestsToNodeSet(args, currentRequest,newContext);// sending requests
-            System.out.println("Sent Requests to NodeSet: "+args+" in Context:"+newContext+" with current request: "+currentRequest+"\n");
-            return true;
-        }
-        //Check if all the nodes are bound by a quantifier
-        else if(this instanceof OrEntailment){
-            System.out.println("In OrEntail or NumEntailment Node");
-            NodeSet ants = this.getDownAntArgNodeSet();
-            System.out.println("Rule Ants"+ants);
-            NodeSet cons = this.getDownConsNodeSet();
-            System.out.println("Rule Cons"+cons);
-            System.out.println("MCII at creation " +mcii );
-            NodeSet subants = new NodeSet();
-            for(Node ant : ants) {
-                ant = ant.applySubstitution(currentRequest.getChannel().getFilterSubstitutions());
-                subants.add(ant);
-                System.out.println("Substituted Ant :"+ant);
-            }
-            if(this instanceof OrEntailment){// It's an OrEntail node
-                
-            }
-           }
-           return false;
-    }
+    public abstract boolean processIntroductionRequest(Request currentRequest) throws NoSuchTypeException;
 
 
     protected Context getContext(String currContextName) {
@@ -440,12 +395,10 @@ public abstract class RuleNode extends PropositionNode {
         }
     }
 
-    protected int introductionHandler(RII rii) {
-        return 1;
-    }
+    protected abstract int introductionHandler(RII rii);
 
     private boolean filterSupport(RII rii, Report report) {
-        // // TODO Auto-generated method stub
+        // // TODO Ahmed Mohsen Auto-generated method stub
         // throw new UnsupportedOperationException("Unimplemented method 'filterSupport'");
         return true;
     }
@@ -463,6 +416,7 @@ public abstract class RuleNode extends PropositionNode {
 
     public static Support combineSupport(RII rii)
     { //Return Sup of the rule instance
+        //TODO Ahmed Mohsen Auto-generated method stub
         Support sup = new Support(1); // ID 1 FOR TESTING
         return sup;
     }

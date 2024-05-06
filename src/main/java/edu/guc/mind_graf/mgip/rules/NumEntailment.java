@@ -33,8 +33,8 @@ public class NumEntailment extends RuleNode {
     public NumEntailment(DownCableSet downcableSet) {
         super(downcableSet);
         i = downcableSet.get("i").getNodeSet().getIntValue();
-        ant = downcableSet.get("&ant").getNodeSet();
-        cq = downcableSet.get("cq").getNodeSet();
+        ant = downcableSet.get("ants").getNodeSet();
+        cq = downcableSet.get("cqs").getNodeSet();
         PropositionNodeSet antecedents = RuleInfoHandler.getVariableAntecedents(ant);
         int cAnt = ant.size() - antecedents.size();
         this.ruleInfoHandler = Ptree.constructPtree(antecedents, Math.max(0, i - cAnt), Integer.MAX_VALUE, 1);
@@ -101,9 +101,11 @@ public class NumEntailment extends RuleNode {
                 System.out.println("Substituted Ant :"+ant);
             }
             System.out.println("In NumEntailment Node");
-            int i = 2; //Gets value of i from the NumEntailment/OrEntail node
+            //Gets value of i from the NumEntailment/OrEntail node
+            System.out.println("NumEntail I is: " + i);
             int n = 1;
             List<NodeSet> combinations = CombinationSet.generateCombinations(subants, i);
+            System.out.println("Combinations are :" + combinations);
             for (NodeSet combination : combinations) {
                 Context newContext = new Context("Context " + String.valueOf(n++), attitude, combination);
                 System.out.println("New Context: " + newContext.getName());

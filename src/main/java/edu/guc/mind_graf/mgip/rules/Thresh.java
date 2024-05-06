@@ -31,7 +31,7 @@ public class Thresh extends RuleNode {
         super(downcableSet);
         thresh = downcableSet.get("thresh").getNodeSet().getIntValue();
         threshmax = downcableSet.get("threshmax").getNodeSet().getIntValue();
-        arg = downcableSet.get("arg").getNodeSet();
+        arg = downcableSet.get("args").getNodeSet();
         PropositionNodeSet antecedents = RuleInfoHandler.getVariableAntecedents(arg);
         int cAnt = arg.size() - antecedents.size(); // number of constants in the antecedents (total args - variable args)
         this.ruleInfoHandler = Ptree.constructPtree(antecedents, Math.max(0, thresh - 1 - cAnt), Math.max(0, arg.size() - threshmax - 1 - cAnt), 0);

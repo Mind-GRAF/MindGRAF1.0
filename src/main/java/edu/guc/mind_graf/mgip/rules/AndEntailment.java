@@ -35,8 +35,8 @@ public class AndEntailment extends RuleNode {
 
     public AndEntailment(DownCableSet downcableSet) {
         super(downcableSet);
-        ant = downcableSet.get("&ant").getNodeSet();
-        cq = downcableSet.get("cq").getNodeSet();
+        ant = downcableSet.get("ants").getNodeSet();
+        cq = downcableSet.get("cqs").getNodeSet();
         PropositionNodeSet antecedents = RuleInfoHandler.getVariableAntecedents(ant);
         cAnt = ant.size() - antecedents.size();
         this.ruleInfoHandler = Ptree.constructPtree(antecedents, antecedents.size(), Integer.MAX_VALUE, 2);

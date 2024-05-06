@@ -31,7 +31,7 @@ public class AndOr extends RuleNode {
         super(downcableSet);
         min = downcableSet.get("min").getNodeSet().getIntValue();
         max = downcableSet.get("max").getNodeSet().getIntValue();
-        arg = downcableSet.get("arg").getNodeSet();
+        arg = downcableSet.get("args").getNodeSet();
         PropositionNodeSet antecedents = RuleInfoHandler.getVariableAntecedents(arg);
         int cAnt = arg.size() - antecedents.size();
         this.ruleInfoHandler = Ptree.constructPtree(antecedents, Math.max(0, max - cAnt), Math.max(0, arg.size() - min - cAnt), 0);

@@ -21,6 +21,7 @@ import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
+import edu.guc.mind_graf.mgip.ruleIntroduction.RII;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.nodes.RuleNode;
@@ -138,6 +139,16 @@ public class BridgeRule extends RuleNode {
             Scheduler.addToLowQueue(newRequest);
         }
 
+    }
+
+    @Override
+    public boolean processIntroductionRequest(Request currentRequest) throws NoSuchTypeException {
+        return false;
+    }
+
+    @Override
+    protected int introductionHandler(RII rii) {
+        return 0;
     }
 
     /***

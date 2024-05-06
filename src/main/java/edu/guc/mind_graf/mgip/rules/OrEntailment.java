@@ -26,8 +26,8 @@ public class OrEntailment  extends RuleNode {
 
     public OrEntailment(DownCableSet downcableSet) {
         super(downcableSet);
-        ant = downcableSet.get("ant").getNodeSet();
-        cq = downcableSet.get("cq").getNodeSet();
+        ant = downcableSet.get("ants").getNodeSet();
+        cq = downcableSet.get("cqs").getNodeSet();
         this.ruleInfoHandler = new Orentailhandler();
     }
 
