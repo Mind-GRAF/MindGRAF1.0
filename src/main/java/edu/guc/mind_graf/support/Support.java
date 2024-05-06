@@ -59,6 +59,21 @@ public class Support {
 		supportsTree = new HashMap<>();
 	}
 
+
+	/**
+	 * @return the nodeID
+	 */
+	public int getNodeID() {
+		return nodeID;
+	}
+
+	/**
+	 * @param nodeID the nodeID to set
+	 */
+	public void setNodeID(int nodeID) {
+		this.nodeID = nodeID;
+	}
+
 	/**
 	 * @return the supportsTree
 	 */
@@ -435,6 +450,33 @@ public class Support {
 		for(Integer level : support.getJustificationSupport().keySet()){
 			for(Integer attitude : support.getJustificationSupport().get(level).keySet()) {
 				this.addJustificatoinSupportForAttitude(attitude, level, support.getJustificationSupport().get(level).get(attitude));
+				if(this.justificationSupport.containsKey(level)) {
+					if(this.justificationSupport.get(level).containsKey(attitude)){
+						this.justificationSupport.get(level).get(attitude).addAll(support.getJustificationSupport().get(level).get(attitude));
+					}
+					else {
+						this.justificationSupport.get(level).put(attitude, support.getJustificationSupport().get(level).get(attitude));
+					}
+				}
+				else {
+					this.justificationSupport.put(level, support.getJustificationSupport().get(level));
+				}
+			}
+		}
+
+		for(Integer level : support.getJustificationSupport().keySet()){
+			for(Integer attitude : support.getJustificationSupport().get(level).keySet()) {
+				if(this.assumptionSupport.containsKey(level)) {
+					if(this.assumptionSupport.get(level).containsKey(attitude)){
+						this.assumptionSupport.get(level).get(attitude).addAll(support.getAssumptionSupport().get(level).get(attitude));
+					}
+					else {
+						this.assumptionSupport.get(level).put(attitude, support.getAssumptionSupport().get(level).get(attitude));
+					}
+				}
+				else {
+					this.assumptionSupport.put(level, support.getAssumptionSupport().get(level));
+				}
 			}
 		}
 	}
@@ -729,9 +771,9 @@ public class Support {
 					sb.append("       In Attitude ").append(innerKey).append(":").append("\n");
 					sb.append("       Origin PropositionNodeSet: ").append(OriginNodeSet.toString()).append("\n");
 
-					PropositionNodeSet GraddedNodeSet = innerEntry.getValue().getSecond();
+					PropositionNodeSet GradedNodeSet = innerEntry.getValue().getSecond();
 
-					sb.append("       Graded PropositionNodeSet: ").append(GraddedNodeSet.toString()).append("\n");
+					sb.append("       Graded PropositionNodeSet: ").append(GradedNodeSet.toString()).append("\n");
 				}
 				sb.append("               Bridge Rules: ").append(innerMap.getSecond().toString()).append("\n");
 			}
