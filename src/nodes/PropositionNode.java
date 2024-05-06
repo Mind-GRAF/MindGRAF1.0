@@ -37,7 +37,7 @@ public class PropositionNode extends Node {
     protected Support support;
     protected PropositionNodeSet justificationSupportDependents;
     protected PropositionNodeSet assumptionSupportDependents;
-    protected ArrayList<Integer> gradded;
+    protected ArrayList<Integer> graded;
     public PropositionNode(String name, Boolean isVariable) {
         super(name, isVariable);
 
@@ -48,7 +48,7 @@ public class PropositionNode extends Node {
         support = new Support(this.getId());
         justificationSupportDependents = new PropositionNodeSet();
         assumptionSupportDependents = new PropositionNodeSet();
-        gradded = new ArrayList<>();
+        graded = new ArrayList<>();
     }
 
     public PropositionNode(DownCableSet downCableSet) {
@@ -61,10 +61,24 @@ public class PropositionNode extends Node {
         support = new Support(this.getId());
         justificationSupportDependents = new PropositionNodeSet();
         assumptionSupportDependents = new PropositionNodeSet();
-        gradded = new ArrayList<>();
+        graded = new ArrayList<>();
     }
     
     /**
+	 * @return the graded
+	 */
+	public ArrayList<Integer> getGraded() {
+		return graded;
+	}
+
+	/**
+	 * @param graded the graded to set
+	 */
+	public void setGraded(ArrayList<Integer> graded) {
+		this.graded = graded;
+	}
+
+	/**
 	 * @return the support
 	 */
 	public Support getSupport() {
