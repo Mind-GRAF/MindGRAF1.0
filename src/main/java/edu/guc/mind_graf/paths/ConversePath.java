@@ -22,14 +22,14 @@ public class ConversePath extends Path {
 	}
 
 	@Override
-	public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context) {
-		return this.path.followConverse(node, trace, context);
+	public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context, int attitude) {
+		return this.path.followConverse(node, trace, context, attitude);
 	}
 
 	@Override
 	public LinkedList<Object[]> followConverse(Node node, PathTrace trace,
-			Context context) {
-		return this.path.follow(node, trace, context);
+			Context context, int attitude) {
+		return this.path.follow(node, trace, context, attitude);
 	}
 
 	@Override

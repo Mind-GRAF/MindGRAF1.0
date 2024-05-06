@@ -6,6 +6,7 @@ import java.util.function.IntBinaryOperator;
 
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.nodes.PropositionNode;
+import edu.guc.mind_graf.revision.Revision;
 import edu.guc.mind_graf.set.ContextSet;
 import edu.guc.mind_graf.set.Set;
 
@@ -90,8 +91,7 @@ public class ContextController {
     public static void addHypothesisToContext(String contextName, int attitudeNumber, PropositionNode node) {
         Context c = ContextController.getContext(contextName);
         c.addHypothesisToContext(attitudeNumber, node);
-        //TODO : wael this causes errors as the support is not initialised correctly
-//        Revision.checkContradiction(c,attitudeNumber,n);
+        Revision.checkContradiction(c,attitudeNumber,node);
     }
 
     public static void removeFromContext(String contextName, int attitudeNumber, int nodeId) {

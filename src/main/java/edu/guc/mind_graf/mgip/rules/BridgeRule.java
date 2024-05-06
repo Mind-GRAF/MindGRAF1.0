@@ -22,6 +22,7 @@ import edu.guc.mind_graf.mgip.ruleHandlers.PtreeNode;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.context.ContextController;
+import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.set.NodeSet;
@@ -85,7 +86,7 @@ public class BridgeRule extends RuleNode {
         return inferrable;
     }
 
-    public void applyRuleHandler(Report report) {
+    public void applyRuleHandler(Report report) throws NoSuchTypeException {
         if(attitudeToAnt.containsKey(report.getAttitude()) && attitudeToAnt.get(report.getAttitude()).contains(report.getReporterNode())){
             report.setAttitude(-1);
             super.applyRuleHandler(report);
@@ -147,8 +148,10 @@ public class BridgeRule extends RuleNode {
      * Request handling in Rule proposition nodes.
      * 
      * @param currentRequest
+     * @throws NoSuchTypeException 
+     * @throws DirectCycleException 
      */
-    protected void processSingleRequests(Request currentRequest) throws DirectCycleException {
+    protected void processSingleRequests(Request currentRequest) throws DirectCycleException, NoSuchTypeException {
         Channel currentChannel = currentRequest.getChannel();
         if (currentChannel instanceof AntecedentToRuleChannel || currentChannel instanceof MatchChannel)
             super.processSingleRequests(currentRequest);
@@ -160,7 +163,7 @@ public class BridgeRule extends RuleNode {
             Substitutions switchRuleSubs = currentChannel.getSwitcherSubstitutions();
 
             if (!this.isOpen()) {
-                if (this.supported(currentContext, currentAttitude)) {
+                if (this.supported(currentContext, currentAttitude,0)) {
                     NodeSet antArgCloseToMe = getDownAntArgNodeSet();
                     NodeSet antArgNodesToConiderClose = removeAlreadyEstablishedChannels(antArgCloseToMe,
                             currentRequest,
@@ -208,13 +211,13 @@ public class BridgeRule extends RuleNode {
 
     }
 
-    protected void processSingleReports(Report currentReport) throws NoSuchTypeException {
+    protected void processSingleReports(Report currentReport) throws NoSuchTypeException, DirectCycleException {
         String currentReportContextName = currentReport.getContextName();
         int currentReportAttitudeID = currentReport.getAttitude();
         Substitutions currentReportSubs = currentReport.getSubstitutions();
         boolean forwardReportType = currentReport.getInferenceType() == InferenceType.FORWARD;
 
-        boolean assertedInContext = supported(currentReportContextName, currentReportAttitudeID);
+        boolean assertedInContext = supported(currentReportContextName, currentReportAttitudeID,0);
         Substitutions onlySubsBindFreeVar = onlyRelevantSubs(currentReportSubs);
 
         if (currentReport.getReportType() == ReportType.AntRule) {

@@ -100,6 +100,11 @@ public class DownCableSet implements Iterable<DownCable>{
 		return result;
 	}
 
+
+	public Object[] keySet() {
+		return downCables.keySet().toArray();
+	}
+	
 	@Override
 	public Iterator<DownCable> iterator() {
 		return downCables.values().iterator();

@@ -17,7 +17,7 @@ public class BUnitPath extends Path {
 	}
 
 	@Override
-	public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context) {
+	public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context, int attitude) {
 		LinkedList<Object[]> result = new LinkedList<Object[]>();
 
 		UpCable d = node.getUpCable(relation.getName());
@@ -36,8 +36,8 @@ public class BUnitPath extends Path {
 
 	@Override
 	public LinkedList<Object[]> followConverse(Node node, PathTrace trace,
-			Context context) {
-		return new FUnitPath(this.relation).follow(node, trace, context);
+			Context context, int attitude) {
+		return new FUnitPath(this.relation).follow(node, trace, context, attitude);
 	}
 
 	@Override
