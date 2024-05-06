@@ -71,8 +71,8 @@ public class Context {
         return false;
     }
 
-    public Pair<PropositionNodeSet, PropositionNodeSet>[] getAttitudeProps(int attitudeID){
-        return this.hypotheses.get(attitudeID);
+    public Pair<PropositionNodeSet, PropositionNodeSet> getAttitudeProps(int level, int attitudeID){
+        return this.hypotheses.get(level)[attitudeID];
     }
 
 

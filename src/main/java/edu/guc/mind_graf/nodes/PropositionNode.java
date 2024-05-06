@@ -472,7 +472,7 @@ public class PropositionNode extends Node {
 
         for(Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> currSupport : this.support.getAssumptionSupport().get(level).get(desiredAttitudeID)) {
             for(Integer key : currSupport.getFirst().keySet()) {
-                if(currSupport.getFirst().get(key).getFirst().isSubset(desiredContext.getAttitudeProps(key).getFirst()) && currSupport.getFirst().get(key).getSecond().isSubset(desiredContext.getAttitudeProps(key).getSecond())) {
+                if(currSupport.getFirst().get(key).getFirst().isSubset(desiredContext.getAttitudeProps(level, key).getFirst()) && currSupport.getFirst().get(key).getSecond().isSubset(desiredContext.getAttitudeProps(level, key).getSecond()) && currSupport.getSecond().isSubset(desiredContext.getAttitudeProps(level, key).getFirst())) {
                     supported = true;
                 }
                 else {
@@ -499,7 +499,7 @@ public class PropositionNode extends Node {
      */
     public void setHyp(String desiredContextName, int attitude) {
         Context desiredContext = ContextController.getContext(desiredContextName);
-        desiredContext.getAttitudeProps(attitude).getSecond().add(this.getId());
+        desiredContext.getAttitudeProps(0, attitude).getFirst().add(this.getId());
         this.support.setHyp(attitude);
     }
 

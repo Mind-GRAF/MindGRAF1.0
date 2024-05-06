@@ -541,7 +541,7 @@ public class Support {
 		}
 		//Add itself to its own assumptionSupport
 		PropositionNodeSet hypSet = new PropositionNodeSet(this.nodeID);
-		Pair<PropositionNodeSet,PropositionNodeSet> hypPair = new Pair<>(new PropositionNodeSet(), hypSet);
+		Pair<PropositionNodeSet,PropositionNodeSet> hypPair = new Pair<>(hypSet, new PropositionNodeSet());
 		HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>> Hyp = new HashMap<>();
 		Hyp.put(attitudeID, hypPair);
 		Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> pair = new Pair<>(Hyp, new PropositionNodeSet());
