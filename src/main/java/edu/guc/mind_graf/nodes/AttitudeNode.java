@@ -1,8 +1,8 @@
-package nodes;
+package edu.guc.mind_graf.nodes;
 
-import cables.DownCableSet;
-import context.ContextController;
-import context.Context;
+import edu.guc.mind_graf.cables.DownCableSet;
+import edu.guc.mind_graf.context.ContextController;
+import edu.guc.mind_graf.context.Context;
 
 public class AttitudeNode extends ActNode {
 

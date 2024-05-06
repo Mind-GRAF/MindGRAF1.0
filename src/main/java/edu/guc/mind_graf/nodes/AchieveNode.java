@@ -1,12 +1,12 @@
-package nodes;
+package edu.guc.mind_graf.nodes;
 
-import cables.DownCableSet;
-import context.Context;
-import context.ContextController;
-import exceptions.NoSuchTypeException;
-import mgip.Scheduler;
-import set.ContextSet;
-import set.NodeSet;
+import edu.guc.mind_graf.cables.DownCableSet;
+import edu.guc.mind_graf.context.Context;
+import edu.guc.mind_graf.context.ContextController;
+import edu.guc.mind_graf.exceptions.NoSuchTypeException;
+import edu.guc.mind_graf.mgip.Scheduler;
+import edu.guc.mind_graf.set.ContextSet;
+import edu.guc.mind_graf.set.NodeSet;
 
 public class AchieveNode extends ActNode {
 

@@ -1,10 +1,10 @@
-package nodes;
+package edu.guc.mind_graf.nodes;
 
 import java.util.Stack;
 
-import cables.DownCable;
-import cables.DownCableSet;
-import mgip.Scheduler;
+import edu.guc.mind_graf.cables.DownCable;
+import edu.guc.mind_graf.cables.DownCableSet;
+import edu.guc.mind_graf.mgip.Scheduler;
 
 public class SNSequenceNode extends ActNode {
 

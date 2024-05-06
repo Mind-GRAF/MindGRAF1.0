@@ -1,14 +1,14 @@
-package nodes;
+package edu.guc.mind_graf.nodes;
 
 import java.util.*;
 
-import cables.DownCableSet;
-import components.Substitutions;
-import context.ContextController;
-import mgip.Report;
-import mgip.Scheduler;
-import mgip.requests.ChannelType;
-import set.NodeSet;
+import edu.guc.mind_graf.cables.DownCableSet;
+import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.context.ContextController;
+import edu.guc.mind_graf.mgip.Report;
+import edu.guc.mind_graf.mgip.Scheduler;
+import edu.guc.mind_graf.mgip.requests.ChannelType;
+import edu.guc.mind_graf.set.NodeSet;
 
 public class SNITERATENode extends ActNode {
 

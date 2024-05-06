@@ -1,10 +1,10 @@
-package nodes;
+package edu.guc.mind_graf.nodes;
 
 import java.util.Random;
 
-import cables.DownCableSet;
-import mgip.Scheduler;
-import set.NodeSet;
+import edu.guc.mind_graf.cables.DownCableSet;
+import edu.guc.mind_graf.mgip.Scheduler;
+import edu.guc.mind_graf.set.NodeSet;
 
 public class DoOneNode extends ActNode {
 
