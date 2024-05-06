@@ -1,6 +1,7 @@
 package edu.guc.mind_graf.mgip.rules;
 
 import edu.guc.mind_graf.cables.DownCableSet;
+import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.reports.Report;
 import edu.guc.mind_graf.mgip.ruleHandlers.Ptree;
@@ -61,7 +62,7 @@ public class Thresh extends RuleNode {
     @Override
     public boolean processIntroductionRequest(Request currentRequest) throws NoSuchTypeException {
         String currContextName = currentRequest.getChannel().getName();
-        Context currContext = getContext(currContextName);
+        Context currContext = ContextController.getContext(currContextName);
         int attitude = currentRequest.getChannel().getAttitudeID();
         Substitutions filterSubs = currentRequest.getChannel().getFilterSubstitutions();
         Substitutions switchSubs = currentRequest.getChannel().getSwitcherSubstitutions();

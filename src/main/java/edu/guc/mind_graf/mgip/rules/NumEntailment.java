@@ -4,6 +4,7 @@ import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.context.Context;
+import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.Scheduler;
@@ -75,60 +76,54 @@ public class NumEntailment extends RuleNode {
         " Attitude: " + attitude + " Filter Subs: " + filterSubs + " Switch Subs: " + switchSubs + 
         " Requester Node: " + currentRequest.getChannel().getRequesterNode().getName()+"\n");
         System.out.println("In NumEntailment Node");
-            NodeSet ants = this.getDownAntArgNodeSet();
-            System.out.println("Rule Ants"+ants);
-            NodeSet cons = this.getDownConsNodeSet();
-            System.out.println("Rule Cons"+cons);
-            System.out.println("MCII at creation " +mcii );
-            NodeSet subants = new NodeSet();
-            for(Node ant : ants) {
-                // System.out.println("Ant" + ant);
-                // System.out.println("Ant is FREEEE "+ ant.isFree(this));
-                if(ant.isFree(this)){
-                    for(Node freeVar : this.getFreeVariables())
-                    {
-                        if(filterSubs.contains(freeVar)){
-                            System.out.println("Free Variable: "+freeVar);
-                            System.out.println("Filter Subs Contain ant: "+filterSubs.contains(freeVar));
-                        }
-                        else{
-                          return false;  
-                        };
-                    }
-                }
-                ant = ant.applySubstitution(currentRequest.getChannel().getFilterSubstitutions());
-                subants.add(ant);
-                System.out.println("Substituted Ant :"+ant);
-            }
-            System.out.println("In NumEntailment Node");
-            //Gets value of i from the NumEntailment/OrEntail node
-            System.out.println("NumEntail I is: " + i);
-            int n = 1;
-            List<NodeSet> combinations = CombinationSet.generateCombinations(subants, i);
-            System.out.println("Combinations are :" + combinations);
-            for (NodeSet combination : combinations) {
-                Context newContext = new Context("Context " + String.valueOf(n++), attitude, combination);
-                System.out.println("New Context: " + newContext.getName());
-                RII rii = new RII(currentRequest, combination, cons , newContext , attitude);
-                System.out.println("RII of new Context: " + rii.getContext().getName() + " Attitude: "
-                        + rii.getAttitudeID() + " Request: " + rii.getRequest() + " Antecedents: " + rii.getAntNodes() 
-                        + " Consequents: " + rii.getConqArgNodes() + "Requester"+ currentRequest.getChannel().getRequesterNode().getName() + "\n");
-                mcii.addRII(rii);
-                System.out.println("MCII" + mcii);
-                sendRequestsToNodeSet(cons,filterSubs,switchSubs,newContext.getName(),attitude, ChannelType.Introduction,this);
-            }
-            return true;
+        NodeSet ants = this.getDownAntArgNodeSet();
+        System.out.println("Rule Ants"+ants);
+        NodeSet cons = this.getDownConsNodeSet();
+        System.out.println("Rule Cons"+cons);
+        System.out.println("MCII at creation " +mcii );
+        NodeSet subants = new NodeSet();
+//            for(Node ant : ants) {
+//                // System.out.println("Ant" + ant);
+//                // System.out.println("Ant is FREEEE "+ ant.isFree(this));
+//                if(ant.isFree(this)){
+//                    for(Node freeVar : this.getFreeVariables())
+//                    {
+//                        if(filterSubs.contains(freeVar)){
+//                            System.out.println("Free Variable: "+freeVar);
+//                            System.out.println("Filter Subs Contain ant: "+filterSubs.contains(freeVar));
+//                        }
+//                        else{
+//                          return false;
+//                        };
+//                    }
+//                }
+        if(isOpenNodeNotBound(filterSubs)) {
+                    return false;
+        }
+        for (Node ant : ants) {
+            ant = ant.applySubstitution(currentRequest.getChannel().getFilterSubstitutions());
+            subants.add(ant);
+            System.out.println("Substituted Ant :" + ant);
+        }
+        System.out.println("In NumEntailment Node");
+        //Gets value of i from the NumEntailment/OrEntail node
+        System.out.println("NumEntail I is: " + i);
+        int n = 1;
+        List<NodeSet> combinations = CombinationSet.generateCombinations(subants, i);
+        System.out.println("Combinations are :" + combinations);
+        for (NodeSet combination : combinations) {
+            Context newContext = new Context("Context " + String.valueOf(n++), attitude, combination);
+            System.out.println("New Context: " + newContext.getName());
+            RII rii = new RII(currentRequest, combination, cons , newContext , attitude);
+            System.out.println("RII of new Context: " + rii.getContext().getName() +
+                    " Attitude: " + rii.getAttitudeID() + " Request: " + rii.getRequest() + " Antecedents: " + rii.getAntNodes() +
+                    " Consequents: " + rii.getConqArgNodes() + "Requester"+ currentRequest.getChannel().getRequesterNode().getName() + "\n");
+            mcii.addRII(rii);
+            System.out.println("MCII" + mcii);
+            sendRequestsToNodeSet(cons,filterSubs,switchSubs,newContext.getName(),attitude, ChannelType.Introduction,this);
+        }
+        return true;
     }
-
-    // public int processIntroductionReport(Report report)
-    // {
-        
-    //     if (report.getReportType() == ReportType.Introduction)
-    //     try {
-    //         //Procssing the report
-    //     } catch (Exception e) {
-    //     }
-    // }
 
     public static Node buildPosInstance(RII rii, NodeSet Subs){
         System.out.println("\n In buildPosInstance");
@@ -179,7 +174,7 @@ public class NumEntailment extends RuleNode {
                 RuleNode builtInstace = (RuleNode) buildPosInstance(rii,rii.getAntNodes());
                 System.out.println("Positive Instance Built: " + builtInstace + " Antecedents: " + rii.getAntNodes());
                 //send a report declaring this instance in the context of the original request having the support Sup.
-                Report report = new Report(null, supp, rii.getAttitudeID(), true, InferenceType.INTRO, null, builtInstace);
+                Report report = new Report(null, supp, rii.getAttitudeID(), true, InferenceType.INTRO, rii.getRequest().getChannel().getRequesterNode(), builtInstace);
                 builtInstace.broadcastReport(report);
                 System.out.println("Report broadcasted:" + report + "in context:" + rii.getContext().getName());
                 Substitutions subs = new Substitutions();
@@ -200,7 +195,7 @@ public class NumEntailment extends RuleNode {
                 RuleNode builtInstace =(RuleNode) buildNegInstance(rii,rii.getAntNodes());
                 System.out.println("Negative Instance Built: " + builtInstace + " Antecedents: " + rii.getAntNodes());
                 //send a report declaring this instance in the context of the original request having the support Sup.
-                Report report = new Report(null, supp, rii.getAttitudeID(), false, InferenceType.INTRO, null, builtInstace);
+                Report report = new Report(null, supp, rii.getAttitudeID(), false, InferenceType.INTRO, rii.getRequest().getChannel().getRequesterNode(), builtInstace);
                 report.setContextName(rii.getRequest().getChannel().getName()); 
                 builtInstace.broadcastReport(report);
                 System.out.println("Report broadcasted:" + report + " in context:" + rii.getRequest().getChannel().getName());

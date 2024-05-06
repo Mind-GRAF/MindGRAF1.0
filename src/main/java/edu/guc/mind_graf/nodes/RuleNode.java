@@ -5,6 +5,7 @@ import java.util.Collection;
 
 import edu.guc.mind_graf.caseFrames.Adjustability;
 import edu.guc.mind_graf.context.Context;
+import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.reports.KnownInstance;
@@ -29,6 +30,7 @@ import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
+import edu.guc.mind_graf.set.Set;
 import edu.guc.mind_graf.support.Support;
 
 public abstract class RuleNode extends PropositionNode {
@@ -244,11 +246,6 @@ public abstract class RuleNode extends PropositionNode {
     
     public abstract boolean processIntroductionRequest(Request currentRequest) throws NoSuchTypeException;
 
-
-    protected Context getContext(String currContextName) {
-        return new Context(currContextName,1,new NodeSet());
-    }
-
     public static void main(String[] args) throws NoSuchTypeException {
         //Testing Begin Algo.
         Scheduler S = new Scheduler();
@@ -289,7 +286,12 @@ public abstract class RuleNode extends PropositionNode {
 
         NumEntailment ruleNode = new NumEntailment(new DownCableSet(d1, d2, d3));
 
-        Context currContext = new Context("Original Context", 1, new NodeSet(ruleNode));
+        Set<String,Integer> attitudes = new Set<String,Integer>();
+        attitudes.add("Belief",1);
+        attitudes.add("Fear",2);
+        attitudes.add("Desire",3);
+
+        Context currContext = new Context("Original Context", attitudes);
 
         System.out.println("DownCableSet ants: " + ruleNode.getDownCableSet().get("antecedent"));
         
@@ -426,10 +428,12 @@ public abstract class RuleNode extends PropositionNode {
         return combineSupport(mcii.getRii(0));
     }
 
-    public static IntroductionChannel initiateIntroChannel(Channel channel, RuleNode rule, String contextName) {
-        IntroductionChannel introChannel = new IntroductionChannel(channel.getSwitcherSubstitutions(), channel.getFilterSubstitutions(), contextName, channel.getAttitudeID(), rule);
-        return introChannel;
+    protected static Context getContext(String name)
+    {
+        return new Context("Context " , 1, new NodeSet());
+//        return ContextController.getContext(name);
     }
+
 
     /***
      * Request handling in Rule proposition nodes.

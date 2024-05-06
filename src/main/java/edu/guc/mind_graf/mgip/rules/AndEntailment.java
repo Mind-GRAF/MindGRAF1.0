@@ -2,6 +2,7 @@ package edu.guc.mind_graf.mgip.rules;
 
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.reports.Report;
@@ -76,7 +77,7 @@ public class AndEntailment extends RuleNode {
         int attitude = currentRequest.getChannel().getAttitudeID();
         Substitutions filterSubs = currentRequest.getChannel().getFilterSubstitutions();
         Substitutions switchSubs = currentRequest.getChannel().getSwitcherSubstitutions();
-        Context currContext = getContext(currContextName);
+        Context currContext = ContextController.getContext(currContextName);
         System.out.println("Current Request: " + currentRequest + " Current Context: " + currContextName + 
         " Attitude: " + attitude + " Filter Subs: " + filterSubs + " Switch Subs: " + switchSubs + 
         " Requester Node: " + currentRequest.getChannel().getRequesterNode().getName()+"\n");

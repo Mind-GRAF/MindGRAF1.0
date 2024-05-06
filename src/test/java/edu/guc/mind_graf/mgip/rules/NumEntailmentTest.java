@@ -20,10 +20,7 @@ import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.nodes.RuleNode;
 import edu.guc.mind_graf.relations.Relation;
-import edu.guc.mind_graf.set.FlagNodeSet;
-import edu.guc.mind_graf.set.NodeSet;
-import edu.guc.mind_graf.set.PropositionNodeSet;
-import edu.guc.mind_graf.set.RuleInfoSet;
+import edu.guc.mind_graf.set.*;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -102,7 +99,12 @@ class NumEntailmentTest {
 
         NumEntailment ruleNode = new NumEntailment(new DownCableSet(d1, d2, d3, d4));
 
-        Context currContext = new Context("Original Context", 1, new NodeSet(ruleNode));
+        Set<String,Integer> attitudes = new Set<String,Integer>();
+        attitudes.add("Belief",1);
+        attitudes.add("Fear",2);
+        attitudes.add("Desire",3);
+
+        Context currContext = new Context("Original Context", attitudes);
 
         //Makes node an open Formula
         NodeSet fetchedFreeVar = ruleNode.fetchFreeVariables();
@@ -110,10 +112,10 @@ class NumEntailmentTest {
 
         Substitutions sub = new Substitutions();
         sub.add(varant, A);
-        Request currentRequest = new Request(new Channel(new Substitutions(), sub, currContext.getName(), 1, ruleNode), ruleNode);
+        Request IntroRequest = new Request(new Channel(new Substitutions(), sub, currContext.getName(), 1, ruleNode), ruleNode);
 
 
-        assertTrue(ruleNode.processIntroductionRequest(currentRequest));
+        assertTrue(ruleNode.processIntroductionRequest(IntroRequest));
 //            ruleNode.processReports();
             // System.out.println("Processing Report in "+ rep.getName());
             System.out.println("\n Scheduler after reqs: " + S.getLowQueue());

@@ -4,6 +4,7 @@ import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.context.Context;
+import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.Scheduler;
@@ -61,7 +62,7 @@ public class AndOr extends RuleNode {
     @Override
     public boolean processIntroductionRequest(Request currentRequest) throws NoSuchTypeException {
         String currContextName = currentRequest.getChannel().getName();
-        Context currContext = getContext(currContextName);
+        Context currContext = ContextController.getContext(currContextName);
         int attitude = currentRequest.getChannel().getAttitudeID();
         Substitutions filterSubs = currentRequest.getChannel().getFilterSubstitutions();
         Substitutions switchSubs = currentRequest.getChannel().getSwitcherSubstitutions();
