@@ -35,13 +35,19 @@ public interface MindGRAF_ParserConstants {
   /** RegularExpression Id. */
   int ANDOR_THRESH = 16;
   /** RegularExpression Id. */
-  int VARIABLE = 17;
+  int WHENDO_DOIF = 17;
   /** RegularExpression Id. */
-  int WFF_NAME = 18;
+  int QUANTIFIER = 18;
   /** RegularExpression Id. */
-  int STRING = 19;
+  int ENTAILMENT = 19;
   /** RegularExpression Id. */
-  int PREDICATE_NAME_BRACKET = 20;
+  int VARIABLE = 20;
+  /** RegularExpression Id. */
+  int WFF_NAME = 21;
+  /** RegularExpression Id. */
+  int STRING = 22;
+  /** RegularExpression Id. */
+  int PREDICATE_NAME_BRACKET = 23;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -65,16 +71,52 @@ public interface MindGRAF_ParserConstants {
     "<LETTER>",
     "<DIGIT>",
     "<ANDOR_THRESH>",
+    "<WHENDO_DOIF>",
+    "\"forall(\"",
+    "<ENTAILMENT>",
     "\"?\"",
     "<WFF_NAME>",
     "<STRING>",
     "<PREDICATE_NAME_BRACKET>",
-    "\",\"",
     "\")\"",
-    "\"{\"",
+    "\"(\"",
+    "\",\"",
     "\"}\"",
+    "\"=>\"",
+    "\"{\"",
     "\"define-context \"",
     "\"add-to-context\"",
+    "\"[\"",
+    "\"]\"",
+    "\"define-frame\"",
+    "\"define-semantic\"",
+    "\"add-bridge\"",
+    "\"forward-infer\"",
+    "\"get-contexts\"",
+    "\"set-curr-context\"",
+    "\"custom-method\"",
+    "\".\"",
+    "\";\"",
+    "\":\"",
+    "\"<\"",
+    "\">\"",
+    "\"\\\'\"",
+    "\"\\\"\"",
+    "\"-\"",
+    "\"+\"",
+    "\"*\"",
+    "\"/\"",
+    "\"\\\\\"",
+    "\"=\"",
+    "\"&\"",
+    "\"|\"",
+    "\"^\"",
+    "\"!\"",
+    "\"%\"",
+    "\"@\"",
+    "\"#\"",
+    "\"$\"",
+    "\"~\"",
     "\"set-uvbr\"",
     "\"set-attitudes\"",
     "\"set-telescopable \"",

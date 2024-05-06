@@ -6,19 +6,24 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.Set;
+import java.util.HashSet;
 import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.caseFrames.Adjustability;
+import edu.guc.mind_graf.context.Context;
 import java.util.Collection;
+import java.util.Collections;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
+import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.relations.Relation;
+import edu.guc.mind_graf.nodes.PropositionNode;
 
 public class MindGRAF_Parser implements MindGRAF_ParserConstants {
       private ContextController controller = new ContextController();
-      private int mode = 1;
+      private static int  mode = 1;
       static boolean uvbrEnabled;
-
+      private Network network = controller.getNetwork();
 
       //setting the attitudes 
       private static int attitudeNumber = 1;
@@ -44,11 +49,107 @@ public class MindGRAF_Parser implements MindGRAF_ParserConstants {
       private  static ArrayList<Integer> teleAttitudeList = new ArrayList<Integer>();
       private static int currTeleAttitude;
 
-      //mode1 creation of nodes
-      private static  ArrayList<String> NodesNames = new ArrayList<String>();
-      private static boolean isVariable;
+      //creation of nodes
+        //private static ArrayList<Node> molecNodes = new ArrayList<Node>();
+        private static HashMap<String, DownCable> allDCB = new HashMap<String, DownCable>();
+
+      //case frames
+      private static ArrayList<ArrayList<String>> caseFrames = new ArrayList<ArrayList<String>>();
+
+      //semantic type
+      private static String semantic_type;
+      private static String super_class;
+
+      //forall
+      private static HashMap<String,Node> varNodesForall = new HashMap<String,Node>();
+
+      //wffs 
+      private static HashMap<Integer, String> wffs = new HashMap<Integer, String>();
+      private static Integer wffCount = 1;
+
+
+    public static <K, V> HashMap<V, ArrayList<K>> groupByValue(HashMap<K, V> originalMap) {
+    HashMap<V, ArrayList<K>> groupedMap = new HashMap<>();
+    for (HashMap.Entry<K, V> entry : originalMap.entrySet()) {
+        V value = entry.getValue();
+        ArrayList<K> keys = groupedMap.get(value);
+        if (keys == null) {
+            keys = new ArrayList<>();
+            groupedMap.put(value, keys);
+        }
+        keys.add(entry.getKey());
+    }
+    return groupedMap;
+}
+
+
 
         @SuppressWarnings("static-access")
+        public static void removeDuplicates(ArrayList<String> list) {
+        HashSet<String> set = new HashSet<>();
+        for (int i = 0; i < list.size(); i++) {
+            String str = list.get(i);
+            if (!set.add(str)) { // If adding the string returns false, it's a duplicate
+                list.remove(i); // Remove the duplicate string
+                i--; // Decrement i to adjust for the removed element
+            }
+        }
+    }
+
+  public static int indexOfList(ArrayList<ArrayList<String>> listOfLists, ArrayList<String> listToAdd) {
+    // Iterate over the listOfLists and compare each inner list with listToAdd
+    for (int i = 0; i < listOfLists.size(); i++) {
+      ArrayList<String> currentList = listOfLists.get(i);
+      if (areListsEqual(currentList, listToAdd)) {
+        return i; // If found, return the index
+      }
+    }
+    return -1; // If not found, return -1
+  }
+
+  private static boolean areListsEqual(ArrayList<String> list1, ArrayList<String> list2) {
+    // Check if the lists have the same size
+    if (list1.size() != list2.size()) {
+      return false;
+    }
+    // Check if the elements in list1 exist in list2
+    for (String element : list1) {
+      if (!list2.contains(element)) {
+        return false;
+      }
+    }
+    // Check if the elements in list2 exist in list1
+    for (String element : list2) {
+      if (!list1.contains(element)) {
+        return false;
+      }
+    }
+    // If all elements are found in both lists, they are equal
+    return true;
+  }
+  public Node compareMolecularNode(DownCableSet dcs) {
+    Node returnNode = null;
+    for (Node nn : network.getNodes().values()) {
+      DownCableSet downc = nn.getDownCableSet();
+      if (downc != null) {
+        String key = downc.getMolecularSetKey();
+        if (key.equals(dcs.getMolecularSetKey())) {
+          returnNode = nn;
+          Collection<DownCable> dcCollection = downc.getValues();
+          for (DownCable d : dcCollection) {
+            String relName = d.getRelation().getName();
+            ArrayList<String> firstNs = d.getNodeSet().getNames();
+            ArrayList<String> ns = dcs.get(relName).getNodeSet().getNames();
+            if (!firstNs.equals(ns))
+              return null;
+          }
+          break;
+        }
+      }
+    }
+    return returnNode;
+
+  }
 
   public static void main(String[] args) throws ParseException {
     // Instantiate the parser
@@ -66,14 +167,26 @@ public class MindGRAF_Parser implements MindGRAF_ParserConstants {
 
 // Define the grammar
   final public 
-void Expression() throws ParseException {
+Node Expression() throws ParseException, ParseException {Node result = null;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-    case ANDOR_THRESH:{
-      AndOrExpression();
+    case PREDICATE_NAME_BRACKET:{
+      result = Predicate();
       break;
       }
-    case PREDICATE_NAME_BRACKET:{
-      Predicate();
+    case ANDOR_THRESH:{
+      result = AndOrThreshExpression(false);
+      break;
+      }
+    case 29:{
+      result = OrAndEntailment(false);
+      break;
+      }
+    case QUANTIFIER:{
+      result = forall();
+      break;
+      }
+    case WHENDO_DOIF:{
+      result = WhenIfDo();
       break;
       }
     default:
@@ -81,97 +194,281 @@ void Expression() throws ParseException {
       jj_consume_token(-1);
       throw new ParseException();
     }
+{if ("" != null) return result;}
+    throw new Error("Missing return statement in function");
 }
 
-  final public void AndOrExpression() throws ParseException {Token connective;
-    jj_consume_token(ANDOR_THRESH);
-    jj_consume_token(NUMBER);
-    jj_consume_token(21);
-    jj_consume_token(NUMBER);
-    jj_consume_token(22);
-    jj_consume_token(23);
-    ExpressionList();
+  final public Node ForallExpressionList() throws ParseException, ParseException {Node arg;
+    switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+    case ANDOR_THRESH:{
+      arg = AndOrThreshExpression(true);
+      break;
+      }
+    case 29:{
+      arg = OrAndEntailment(true);
+      break;
+      }
+    default:
+      jj_la1[1] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+{if ("" != null) return arg;}
+    throw new Error("Missing return statement in function");
+}
+
+  final public Node forall() throws ParseException, ParseException {Node arg = null;
+  ArrayList<Node> varNodes = new ArrayList<Node>();
+    jj_consume_token(QUANTIFIER);
+    varNodes = variableNodes();
+HashMap<String, Node> nodeSet = new HashMap<String, Node>();
+    for (Node n : varNodes)
+      nodeSet.put(n.getName(), n);
+
+    varNodesForall = nodeSet;
     jj_consume_token(24);
-
+    jj_consume_token(25);
+    arg = ForallExpressionList();
+    jj_consume_token(24);
+{if ("" != null) return arg;}
+    throw new Error("Missing return statement in function");
 }
 
-  final public void ExpressionList() throws ParseException {
-    Expression();
+  final public ArrayList<Node> variableNodes() throws ParseException, ParseException {Node varNode = null;
+  String var = null;
+  ArrayList<Node>varNodes = new ArrayList<Node>();
+    var = jj_consume_token(STRING).image;
+String s = var.trim().toLowerCase();
+    try {
+      varNodes.add(network.createVariableNode(s, "propositionnode"));
+    } catch (NoSuchTypeException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
     label_1:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case 21:{
+      case 26:{
         ;
         break;
         }
       default:
-        jj_la1[1] = jj_gen;
+        jj_la1[2] = jj_gen;
         break label_1;
       }
-      jj_consume_token(21);
-      Expression();
+      jj_consume_token(26);
+      var = jj_consume_token(STRING).image;
+String ss = var.trim().toLowerCase();
+    try {
+      varNodes.add(network.createVariableNode(ss, "propositionnode"));
+    } catch (NoSuchTypeException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
+    }
+{if ("" != null) return varNodes;}
+    throw new Error("Missing return statement in function");
 }
 
-  final public void Predicate() throws ParseException {Token num;
-  Token predicateName;
-    predicateName = jj_consume_token(PREDICATE_NAME_BRACKET);
-    switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-    case NUMBER:{
-      num = jj_consume_token(NUMBER);
-      jj_consume_token(21);
-      break;
-      }
-    default:
-      jj_la1[2] = jj_gen;
-      ;
-    }
-    Arguments();
-    jj_consume_token(22);
-String predName = predicateName.image.trim().toLowerCase();
-  predName = predName.substring(0,predName.length()-1);
-    if (mode == 1) {
-      HashMap<String, DownCable> cableSet = new HashMap<String, DownCable>();
+  final public Node WhenIfDo() throws ParseException, ParseException {Node prop = null;
+  Node actNode = null;
+  String attitude;
+  String ruleType;
+    ruleType = jj_consume_token(WHENDO_DOIF).image;
+    prop = Expression();
+    jj_consume_token(26);
+    attitude = jj_consume_token(STRING).image;
+    jj_consume_token(27);
+    jj_consume_token(28);
+    jj_consume_token(29);
+    Act();
+    jj_consume_token(27);
+ruleType = ruleType.trim().toLowerCase();
+    ruleType = ruleType.substring(0, ruleType.length() - 1);
+    attitude = attitude.trim().toLowerCase();
+    Integer attNum = controller.getAttitudeNumber(attitude);
+    if (attNum == null)
+      {if (true) throw new ParseException("No such attitude.");}
+
+    Relation doRel = network.createRelation("do", "actnode", Adjustability.NONE, 0);
+    DownCable doDC = new DownCable(doRel, new NodeSet(actNode));
+    if (ruleType.equals("whendo")) {
+      // creating when do relations
+      Relation whenRel = network.createRelation(attNum + "-when", "propositionnode", Adjustability.NONE, 0);
+      // downcable
+      DownCable whenDC = new DownCable(whenRel, new NodeSet(prop));
+
+      DownCableSet whenDoDC = new DownCableSet(whenDC, doDC);
+      // creating whenDo Rule Node
+      Node shouldCreate = compareMolecularNode(whenDoDC);
+      Node whenDoNode = null;
       try {
-        Node n = controller.getNetwork().createNode(predName, "propositionnode");
-        Relation r = controller.getNetwork().createRelation("r", "propositionnode",
-            Adjustability.EXPAND, 2);
-        DownCable c = new DownCable(r, new NodeSet(n));
-        cableSet.put(r.getName(), c);
-
-        for (int i = 0; i < NodesNames.size(); i++) {
-          String nodeName = NodesNames.get(i);
-          Node node;
-          if(nodeName.charAt(nodeName.length() - 1)=='?')
-            node = controller.getNetwork().createVariableNode(nodeName.substring(0,nodeName.length()-1), "propositionnode");
-          else
-            node = controller.getNetwork().createNode(nodeName, "propositionnode");
-          Relation relation = controller.getNetwork().createRelation("a" + (i + 1), "propositionnode",
-              Adjustability.EXPAND, 2);
-          DownCable cable = new DownCable(relation, new NodeSet(node));
-          cableSet.put(relation.getName(), cable);
-        }
-        NodesNames.clear();
-        DownCableSet dcSet = new DownCableSet(cableSet);
-        controller.getNetwork().createNode("propositionnode", dcSet);
-
-        //printing
-
+        if (shouldCreate == null)
+          whenDoNode = network.createNode("propositionnode", whenDoDC);
+        else
+          whenDoNode = shouldCreate;
       } catch (NoSuchTypeException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+        // TODO: handle exception
       }
+      {if ("" != null) return whenDoNode;}
 
+    } else {
+      // creating do if relations
+      Relation ifRel = network.createRelation(attNum + "-if", "propositionnode", Adjustability.NONE, 0);
+
+      // downcable
+      DownCable ifDC = new DownCable(ifRel, new NodeSet(prop));
+
+      DownCableSet ifDoDC = new DownCableSet(ifDC, doDC);
+      // creating whenDo Rule Node
+      Node shouldCreate = compareMolecularNode(ifDoDC);
+      Node ifDoNode = null;
+      try {
+        if (shouldCreate == null)
+          ifDoNode = network.createNode("propositionnode", ifDoDC);
+        else
+          ifDoNode = shouldCreate;
+      } catch (NoSuchTypeException e) {
+        // TODO: handle exception
+      }
+      {if ("" != null) return ifDoNode;}
 
     }
+    throw new Error("Missing return statement in function");
 }
 
-  final public void Arguments() throws ParseException {
-    Argument();
+  final public Node Act() throws ParseException, ParseException {String actName;
+    String objName;
+    actName = jj_consume_token(PREDICATE_NAME_BRACKET).image;
+    objName = jj_consume_token(STRING).image;
+    jj_consume_token(24);
+actName = actName.trim().toLowerCase();
+    actName = actName.substring(0,actName.length()-1);
+    objName = actName.trim().toLowerCase();
+
+    // get action and object relations
+    Relation action = network.createRelation("action", "individualnode", Adjustability.NONE, 0);
+    Relation object = network.createRelation("object", "individualnode", Adjustability.NONE, 0);
+
+    // creating the individual nodes
+    Node actionNode = null;
+    Node objectNode = null;
+    Node actNode = null;
+    try {
+      actionNode = network.createNode(actName, "individualnode");
+      objectNode = network.createNode(objName, "individualnode");
+      // creating the act node
+      DownCable actionDC = new DownCable(action, new NodeSet(actionNode));
+      DownCable objectDC = new DownCable(object, new NodeSet(objectNode));
+      DownCableSet actNodeDCS = new DownCableSet(actionDC, objectDC);
+      Node shouldCreate = compareMolecularNode(actNodeDCS);
+      if (shouldCreate == null)
+        actNode = network.createNode("actnode", actNodeDCS);
+      else
+        actNode = shouldCreate;
+
+    } catch (NoSuchTypeException e) {
+      // TODO: handle exception
+    }
+    {if ("" != null) return actNode;}
+    throw new Error("Missing return statement in function");
+}
+
+  final public Node AndOrThreshExpression(boolean quantifier) throws ParseException, ParseException {Token rule;
+  Token i;
+  Token j;
+  Node node = null;
+  ArrayList<Node> nodes = new ArrayList<Node>();
+    rule = jj_consume_token(ANDOR_THRESH);
+    i = jj_consume_token(NUMBER);
+    jj_consume_token(26);
+    j = jj_consume_token(NUMBER);
+    jj_consume_token(24);
+    jj_consume_token(29);
+    nodes = ExpressionList();
+    jj_consume_token(27);
+String ruleType = rule.image.trim().toLowerCase();
+    ruleType = ruleType.substring(0, ruleType.length() - 1);
+    try {
+      if (ruleType.equals("andor")) {
+        Relation min = network.getRelations().get("min");
+        Relation max = network.getRelations().get("max");
+        Node minNode = network.createNode(i.image.trim(), "individualnode");
+        Node maxNode = network.createNode(j.image.trim(), "individualnode");
+        DownCable minCable = new DownCable(min, new NodeSet(minNode));
+        DownCable maxCable = new DownCable(max, new NodeSet(maxNode));
+
+        Relation arg = network.getRelations().get("arg");
+        HashMap<String, Node> objs = new HashMap<String, Node>();
+        for (Node n : nodes)
+          objs.put(n.getName(), n);
+
+        NodeSet set = new NodeSet(objs);
+        DownCable andorDCB = new DownCable(arg, set);
+        HashMap<String, DownCable> sett = new HashMap<String, DownCable>();
+        if (quantifier)
+         {
+          DownCable quant = new DownCable(network.getRelations().get("forall"), new NodeSet(varNodesForall));
+          sett.put(quant.getRelation().getName(), quant);
+        }
+        sett.put(minCable.getRelation().getName(), minCable);
+        sett.put(maxCable.getRelation().getName(), maxCable);
+        sett.put(andorDCB.getRelation().getName(), andorDCB);
+
+        DownCableSet dcs = new DownCableSet(sett);
+        Node shouldCreate = compareMolecularNode(dcs);
+        if (shouldCreate == null)
+        node = network.createNode("andor", new DownCableSet(sett));
+        else
+        node = shouldCreate;
+
+      } else {
+        Relation threshMax = network.getRelations().get("threshmax");
+        Relation thresh = network.getRelations().get("thresh");
+        Node threshMaxNode = network.createNode(i.image.trim(), "propositionnode");
+        Node threshNode = network.createNode(j.image.trim(), "propositionnode");
+        DownCable threshMaxCable = new DownCable(threshMax, new NodeSet(threshMaxNode));
+        DownCable threshCable = new DownCable(thresh, new NodeSet(threshNode));
+
+        Relation arg = network.getRelations().get("arg");
+        HashMap<String, Node> objs = new HashMap<String, Node>();
+        for (Node n : nodes)
+          objs.put(n.getName(), n);
+        NodeSet set = new NodeSet(objs);
+        DownCable threshDCB = new DownCable(arg, set);
+        HashMap<String, DownCable> sett = new HashMap<String, DownCable>();
+        if (quantifier)
+         {
+          DownCable quant = new DownCable(network.getRelations().get("forall"), new NodeSet(varNodesForall));
+          sett.put(quant.getRelation().getName(), quant);
+        }
+        sett.put(threshMaxCable.getRelation().getName(), threshMaxCable);
+        sett.put(threshCable.getRelation().getName(), threshCable);
+        sett.put(threshDCB.getRelation().getName(), threshDCB);
+        DownCableSet dcs = new DownCableSet(sett);
+        Node shouldCreate = compareMolecularNode(dcs);
+        if (shouldCreate == null)
+        node = network.createNode("thresh", new DownCableSet(sett));
+        else
+        node = shouldCreate;
+      }
+
+    } catch (NoSuchTypeException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    {if ("" != null) return node;}
+    throw new Error("Missing return statement in function");
+}
+
+  final public ArrayList<Node> ExpressionList() throws ParseException, ParseException {ArrayList<Node> nodes = new ArrayList<Node>();
+  Node arg;
+    arg = Expression();
+nodes.add(arg);
     label_2:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case 21:{
+      case 26:{
         ;
         break;
         }
@@ -179,13 +476,271 @@ String predName = predicateName.image.trim().toLowerCase();
         jj_la1[3] = jj_gen;
         break label_2;
       }
-      jj_consume_token(21);
-      Argument();
+      jj_consume_token(26);
+      arg = Expression();
+nodes.add(arg);
+    }
+{if ("" != null) return nodes;}
+    throw new Error("Missing return statement in function");
+}
+
+  final public Node OrAndEntailment(boolean quantifier) throws ParseException, ParseException {ArrayList<Node> cq = new ArrayList<Node>();
+ArrayList<Node> ant = new ArrayList<Node>();
+Token ent;
+    jj_consume_token(29);
+    ant = ExpressionList();
+    jj_consume_token(27);
+    ent = jj_consume_token(ENTAILMENT);
+    jj_consume_token(29);
+    cq = ExpressionList();
+    jj_consume_token(27);
+HashMap<String, DownCable> sett = new HashMap<String,DownCable>();
+  if(ent.image.trim().toLowerCase().equals("&=>"))
+{
+    Relation antecedent = network.getRelations().get("&ant");
+    Relation consequent = network.getRelations().get("cq");
+    HashMap<String, Node> antHash = new HashMap<String, Node>();
+    HashMap<String, Node> cqHash = new HashMap<String, Node>();
+    Node andEntailmentNode = null;
+    for (Node a : ant)
+      antHash.put(a.getName(), a);
+    DownCable antDC = new DownCable(antecedent, new NodeSet(antHash));
+    for (Node a : cq)
+      cqHash.put(a.getName(), a);
+    DownCable cqDC = new DownCable(consequent, new NodeSet(cqHash));
+   if (quantifier)
+         {
+          DownCable quant = new DownCable(network.getRelations().get("forall"), new NodeSet(varNodesForall));
+          sett.put(quant.getRelation().getName(), quant);
+        }
+      sett.put(antDC.getRelation().getName(), antDC);
+      sett.put(cqDC.getRelation().getName(), cqDC);
+      DownCableSet dcs = new DownCableSet(sett);
+      Node shouldCreate = compareMolecularNode(dcs);
+      try {
+        if(shouldCreate==null)
+        andEntailmentNode = network.createNode("andentailment", new DownCableSet(sett));
+        else
+        andEntailmentNode = shouldCreate;
+      } catch (NoSuchTypeException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+
+    {if ("" != null) return andEntailmentNode;}
+}
+else {
+  if(ent.image.trim().toLowerCase().equals("&=>"))
+{
+    Relation antecedent = network.getRelations().get("ant");
+    Relation consequent = network.getRelations().get("cq");
+    HashMap<String, Node> antHash = new HashMap<String, Node>();
+    HashMap<String, Node> cqHash = new HashMap<String, Node>();
+    Node orEntailmentNode = null;
+    for (Node a : ant)
+      antHash.put(a.getName(), a);
+    DownCable antDC = new DownCable(antecedent, new NodeSet(antHash));
+    for (Node a : cq)
+      cqHash.put(a.getName(), a);
+    DownCable cqDC = new DownCable(consequent, new NodeSet(cqHash));
+    if (quantifier)
+         {
+          DownCable quant = new DownCable(network.getRelations().get("forall"), new NodeSet(varNodesForall));
+          sett.put(quant.getRelation().getName(), quant);
+        }
+      sett.put(antDC.getRelation().getName(), antDC);
+      sett.put(cqDC.getRelation().getName(), cqDC);
+        DownCableSet dcs = new DownCableSet(sett);
+        Node shouldCreate = compareMolecularNode(dcs);
+        try {
+          if (shouldCreate == null)
+            orEntailmentNode = network.createNode("orentailment", new DownCableSet(sett));
+          else
+            orEntailmentNode = shouldCreate;
+        } catch (NoSuchTypeException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
+
+    {if ("" != null) return orEntailmentNode;}
+} else
+{
+        String i = ent.image.trim().toLowerCase().charAt(0) + "";
+        Relation antecedent = network.getRelations().get("&ant");
+        Relation consequent = network.getRelations().get("cq");
+        HashMap<String, Node> antHash = new HashMap<String, Node>();
+        HashMap<String, Node> cqHash = new HashMap<String, Node>();
+        Node iEntailmentNode = null;
+        Node iNode = null;
+        try {
+          iNode = network.createNode(i, "individualNode");
+          DownCable iDC = new DownCable(network.getRelations().get("i"), new NodeSet(iNode));
+          for (Node a : ant)
+            antHash.put(a.getName(), a);
+          DownCable antDC = new DownCable(antecedent, new NodeSet(antHash));
+          for (Node a : cq)
+            cqHash.put(a.getName(), a);
+          DownCable cqDC = new DownCable(consequent, new NodeSet(cqHash));
+
+          if (quantifier)
+         {
+          DownCable quant = new DownCable(network.getRelations().get("forall"), new NodeSet(varNodesForall));
+          sett.put(quant.getRelation().getName(), quant);
+        }
+            sett.put(antDC.getRelation().getName(), antDC);
+            sett.put(cqDC.getRelation().getName(), cqDC);
+            sett.put(iDC.getRelation().getName(), iDC);
+          DownCableSet dcs = new DownCableSet(sett);
+          Node shouldCreate = compareMolecularNode(dcs);
+          if (shouldCreate == null)
+            iEntailmentNode = network.createNode("numentailment", new DownCableSet(sett));
+          else
+            iEntailmentNode = shouldCreate;
+        } catch (NoSuchTypeException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
+        {
+          if ("" != null)
+            {if ("" != null) return iEntailmentNode;}
+        }
+
+      }
+}
+    throw new Error("Missing return statement in function");
+}
+
+  final public Node Predicate() throws ParseException {Token num;
+  Token predicateName;
+    predicateName = jj_consume_token(PREDICATE_NAME_BRACKET);
+    switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+    case NUMBER:{
+      num = jj_consume_token(NUMBER);
+      jj_consume_token(26);
+      break;
+      }
+    default:
+      jj_la1[4] = jj_gen;
+      ;
+    }
+    Arguments(predicateName.image.toLowerCase());
+    jj_consume_token(24);
+String pNodeName = predicateName.image.trim().toLowerCase();
+    pNodeName = pNodeName.substring(0, pNodeName.length() - 1);
+    Node pNode = null;
+    Node molec = null;
+    Relation rel = null ;
+    try {
+       pNode = network.createNode(pNodeName, "propositionnode");
+       if(mode==1)
+           rel = network.createRelation("r", "propositionnode", Adjustability.EXPAND, 2);
+       if(mode == 2)
+           rel = network.createRelation("rel" + pNodeName, "propositionnode", Adjustability.EXPAND, 2);
+        if (rel == null && mode != 3) {
+          {if (true) throw new ParseException("rel is null");}
+      }
+      if (mode != 3)
+      {
+      DownCable lastCable = new DownCable(rel, new NodeSet(pNode));
+      allDCB.put(lastCable.getRelation().getName(), lastCable);
+      }
+      HashMap<String, DownCable> cloneAllDCB = new HashMap<String, DownCable>();
+      for (DownCable x : allDCB.values())
+        cloneAllDCB.put(x.getRelation().getName(), x);
+      DownCableSet dcs = new DownCableSet(cloneAllDCB);
+      Node shouldCreate = compareMolecularNode(dcs);
+      if (shouldCreate == null)
+        molec = network.createNode("propositionnode", dcs);
+      else
+        molec = shouldCreate;
+      allDCB.clear();
+
+    } catch (NoSuchTypeException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+          {if ("" != null) return molec;}
+    throw new Error("Missing return statement in function");
+}
+
+  final public void Arguments(String pName) throws ParseException {ArrayList<Node> leafNodes = new ArrayList<Node>();
+  Node arg;
+  pName = pName.substring(0, pName.length() - 1);
+    arg = Argument();
+leafNodes.add(arg);
+    label_3:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+      case 26:{
+        ;
+        break;
+        }
+      default:
+        jj_la1[5] = jj_gen;
+        break label_3;
+      }
+      jj_consume_token(26);
+      arg = Argument();
+leafNodes.add(arg);
+    }
+if (mode == 3) {
+      ArrayList<String> frame = null;
+      for (ArrayList<String> s : caseFrames) {
+        System.out.println(s.size() - 2);
+        System.out.println(leafNodes.size());
+        System.out.println(s.get(0).trim().toLowerCase());
+        System.out.println(pName.trim().toLowerCase());
+        for (String ss : s)
+          System.out.println(ss);
+
+        if ((s.size() - 2 == leafNodes.size()) && (pName.equals(s.get(0)))) {
+          System.out.print(true);
+          frame = s;
+          break;
+        }
+      }
+      if (frame == null)
+          {if (true) throw new ParseException("No Such Case Frame");}
+
+      Relation firstRel = null;
+      if (frame.get(1) != "null") {
+        firstRel = network.createRelation(frame.get(1), "propositionnode", Adjustability.EXPAND, 2);
+        DownCable dcb = null;
+        try {
+          dcb = new DownCable(firstRel, new NodeSet(network.createNode(pName, "propositionnode")));
+          allDCB.put(dcb.getRelation().getName(), dcb);
+
+        } catch (NoSuchTypeException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
+      }
+      for (int i = 0; i < leafNodes.size(); i++) {
+        Relation r = network.createRelation(frame.get(i + 2), "propositionnode", Adjustability.EXPAND, 2);
+        DownCable dcb = new DownCable(r, new NodeSet(leafNodes.get(i)));
+        allDCB.put(dcb.getRelation().getName(), dcb);
+      }
+
+    } else {
+      for (int i = 0; i < leafNodes.size(); i++) {
+        Node variableN = leafNodes.get(i);
+        Relation rel = null;
+        if (mode == 1)
+          rel = network.createRelation("a" + (i + 1), "propositionnode", Adjustability.EXPAND, 2);
+        if (mode == 2)
+          rel = network.createRelation("rel - arg#" + pName + (i + 1), "propositionnode", Adjustability.EXPAND, 2);
+        if (rel == null)
+          {if (true) throw new ParseException("rel is null");}
+        DownCable dcb = new DownCable(rel, new NodeSet(variableN));
+        allDCB.put(dcb.getRelation().getName(), dcb);
+      }
     }
 }
 
-  final public void Argument() throws ParseException {Token Argument;
+  final public Node Argument() throws ParseException {Token Argument;
 Token var=null;
+Network network = controller.getNetwork();
+Node leafNode = null;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case STRING:{
       Argument = jj_consume_token(STRING);
@@ -195,25 +750,91 @@ Token var=null;
         break;
         }
       default:
-        jj_la1[4] = jj_gen;
+        jj_la1[6] = jj_gen;
         ;
       }
 String argString = Argument.image.trim().toLowerCase();
-  if(var!=null)
-  argString +='?';
-  NodesNames.add(argString);
+  System.out.println(argString);
+        try {
+          if (var != null)
+            leafNode = network.createVariableNode(argString, "propositionnode");
+          else
+            leafNode = network.createNode(argString, "propositionnode");
+        } catch (NoSuchTypeException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
+        {if ("" != null) return leafNode;}
       break;
       }
     case ANDOR_THRESH:
-    case PREDICATE_NAME_BRACKET:{
-      ExpressionList();
+    case WHENDO_DOIF:
+    case QUANTIFIER:
+    case PREDICATE_NAME_BRACKET:
+    case 29:{
+      leafNode = Expression();
+{if ("" != null) return leafNode;}
       break;
       }
     default:
-      jj_la1[5] = jj_gen;
+      jj_la1[7] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
+    throw new Error("Missing return statement in function");
+}
+
+  final public void defineFrame() throws ParseException, ParseException {ArrayList<String> allRelationNames = new ArrayList<String>();
+  String relName;
+  Token predicateName;
+    predicateName = jj_consume_token(PREDICATE_NAME_BRACKET);
+    relName = relationName();
+allRelationNames.add(relName);
+    label_4:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+      case 26:{
+        ;
+        break;
+        }
+      default:
+        jj_la1[8] = jj_gen;
+        break label_4;
+      }
+      jj_consume_token(26);
+      relName = relationName();
+allRelationNames.add(relName);
+    }
+    jj_consume_token(24);
+    jj_consume_token(0);
+String predName = predicateName.image.trim().toLowerCase();
+    predName = predName.substring(0, predName.length() - 1);
+    removeDuplicates(allRelationNames);
+    allRelationNames.add(0, predName);
+    int index = indexOfList(caseFrames, allRelationNames);
+    if (index != -1) {
+      // If listToAdd already exists, remove it
+      caseFrames.remove(index);
+      System.out.println("Removed duplicate list from the list of lists.");
+    }
+
+    // Add listToAdd to listOfLists
+    caseFrames.add(allRelationNames);
+    ArrayList<String> s = caseFrames.getLast();
+    System.out.print("Case frame " + s.get(0) + "(" + s.get(1));
+    if (s.size() > 2) {
+      for (int i = 2; i < s.size(); i++) {
+        System.out.print(", " + s.get(i));
+      }
+    }
+    System.out.println(")" + " has been created.");
+}
+
+  final public String relationName() throws ParseException, ParseException {Token s;
+    s = jj_consume_token(STRING);
+String relationName = s.image.trim().toLowerCase();
+      {if ("" != null) return relationName;}
+    throw new Error("Missing return statement in function");
 }
 
   final public void Command() throws ParseException, ParseException {Token stringToken;
@@ -226,7 +847,7 @@ String argString = Argument.image.trim().toLowerCase();
     case MODE1:
     case MODE2:
     case MODE3:
-    case 25:{
+    case 30:{
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case currContext:{
         jj_consume_token(currContext);
@@ -270,33 +891,503 @@ mode = 3;
       System.out.println(mode);
         break;
         }
-      case 25:{
-        jj_consume_token(25);
+      case 30:{
+        jj_consume_token(30);
         stringToken = jj_consume_token(STRING);
         defineContext();
         break;
         }
       default:
-        jj_la1[6] = jj_gen;
+        jj_la1[9] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
       break;
       }
-    case 26:{
-      jj_consume_token(26);
-      Expression();
+    case 31:{
+Token attitude;
+    String CName;
+    Node node ;
+      jj_consume_token(31);
+      jj_consume_token(32);
+      attitude = jj_consume_token(STRING);
+      jj_consume_token(33);
+      jj_consume_token(32);
+      CName = jj_consume_token(STRING).image;
+      jj_consume_token(33);
+      node = Expression();
+CName = CName.trim().toLowerCase();
+       if(!wffs.containsKey(node.getId()))
+        {
+          wffs.put(node.getId(), CName+"_wff"+wffCount);
+          wffCount++;
+        }
+       for(String s : wffs.values())
+        System.out.print(s);
+       HashMap<String, HashMap<String, Node>> molecN = network.getMolecularNodes();
+      for(HashMap<String, Node> x : molecN.values()){
+       for(Node n : x.values()){
+        System.out.println(n.toString());
+       }
+
+    }
+      break;
+      }
+    case 34:{
+      jj_consume_token(34);
+      defineFrame();
+      break;
+      }
+    case 35:{
+      jj_consume_token(35);
+      defineSemantic();
+      break;
+      }
+    case 36:{
+Token CName;
+      jj_consume_token(36);
+      jj_consume_token(32);
+      CName = jj_consume_token(STRING);
+      jj_consume_token(33);
+      Bridge();
+HashMap<String, HashMap<String, Node>> molecN = network.getMolecularNodes();
+      for(HashMap<String, Node> x : molecN.values()){
+       for(Node n : x.values()){
+        System.out.println(n.toString());
+       }
+
+    }
+      break;
+      }
+    case 39:{
+      setCurrentContext();
+      break;
+      }
+    case 38:{
+      getAllContexts();
+      break;
+      }
+    case 37:{
+      forwardInference();
       break;
       }
     default:
-      jj_la1[7] = jj_gen;
+      jj_la1[10] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
 }
 
-  final public void UVBR() throws ParseException, ParseException {Token value;
+  final public void forwardInference() throws ParseException, ParseException {Node node;
+    jj_consume_token(37);
+    node = Expression();
+PropositionNode prop = (PropositionNode) node;
+   prop.add();
+}
+
+  final public void getAllContexts() throws ParseException, ParseException {
+    jj_consume_token(38);
+HashMap<String, Context> set = controller.getContextSet().getSet();
+     System.out.println("All Contexts Defined:");
+    for(String cName  : set.keySet()){
+      System.out.println(cName);
+    }
+}
+
+  final public void setCurrentContext() throws ParseException, ParseException {String cName;
+    jj_consume_token(39);
+    cName = jj_consume_token(STRING).image;
+cName = jj_consume_token(STRING).image;
+    cName = cName.trim();
+    try {
+      controller.setCurrContext(cName);
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+      // TODO: handle exception
+    }
+}
+
+  final public Node Bridge() throws ParseException, ParseException {HashMap<Node, Integer> antec = new HashMap<Node, Integer>();
+  HashMap<Node, Integer> conseq = new HashMap<Node, Integer>();
+    jj_consume_token(29);
+    antec = bridgeExpressionList();
     jj_consume_token(27);
+    jj_consume_token(29);
+    conseq = bridgeExpressionList();
+    jj_consume_token(27);
+HashMap<Integer, ArrayList<Node>> antecGroupedByAttitude = groupByValue(antec);
+    HashMap<Integer, ArrayList<Node>> conseqGroupedByAttitude = groupByValue(conseq);
+    HashMap<String, DownCable> allDCs = new HashMap<String,DownCable>();
+    for(Integer n : antecGroupedByAttitude.keySet())
+      System.out.println(n+" lol");
+    for (Integer n : antecGroupedByAttitude.keySet()) {
+      ArrayList<Node> nodes = antecGroupedByAttitude.get(n);
+      Relation antRel = network.createRelation(n + "-ant", "propositionnode", Adjustability.EXPAND, 2);
+      NodeSet set = new NodeSet();
+      for (Node node : nodes)
+        set.add(node);
+      DownCable dc = new DownCable(antRel, set);
+      allDCs.put(antRel.getName(), dc);
+    }
+
+    for (Integer n : conseqGroupedByAttitude.keySet()) {
+      ArrayList<Node> nodes = conseqGroupedByAttitude.get(n);
+      Relation conseqRel = network.createRelation(n + "-cq", "propositionnode", Adjustability.EXPAND, 2);
+      NodeSet set = new NodeSet();
+      for (Node node : nodes)
+        set.add(node);
+      DownCable dc = new DownCable(conseqRel, set);
+      allDCs.put(conseqRel.getName(), dc);
+    }
+    Node bridgeNode = null;
+    DownCableSet allDBs = new DownCableSet(allDCs);
+    try {
+      Node shouldCreate = compareMolecularNode(allDBs);
+      if (shouldCreate == null)
+        bridgeNode = network.createNode("bridgerule", allDBs);
+      else
+        bridgeNode = shouldCreate;
+    } catch (NoSuchTypeException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    {if ("" != null) return bridgeNode;}
+    throw new Error("Missing return statement in function");
+}
+
+  final public HashMap<Node, Integer> bridgeExpressionList() throws ParseException {ArrayList<Node> nodes = new ArrayList<Node>();
+  Node arg;
+  ArrayList<String> attitudes = new ArrayList<String>();
+  String attitude;
+    jj_consume_token(29);
+    arg = Expression();
+    jj_consume_token(26);
+    attitude = jj_consume_token(STRING).image;
+    jj_consume_token(27);
+nodes.add(arg); attitudes.add(attitude.trim().toLowerCase());
+    label_5:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+      case 26:{
+        ;
+        break;
+        }
+      default:
+        jj_la1[11] = jj_gen;
+        break label_5;
+      }
+      jj_consume_token(26);
+      jj_consume_token(29);
+      arg = Expression();
+      jj_consume_token(26);
+      attitude = jj_consume_token(STRING).image;
+      jj_consume_token(27);
+nodes.add(arg); attitudes.add(attitude.trim().toLowerCase());
+    }
+ArrayList<Integer> attitudeNo = new ArrayList<Integer>();
+   for(String s  : attitudes) {
+    Integer num = controller.getAttitudeNumber(s);
+    if(num==null)
+      {if (true) throw new ParseException("No such attitude");}
+    attitudeNo.add(num);
+   }
+    HashMap<Node, Integer> node_attitude = new HashMap<Node, Integer>();
+    for(int i = 0; i<nodes.size();i++){
+      node_attitude.put(nodes.get(i),attitudeNo.get(i));
+    }
+    {if ("" != null) return node_attitude;}
+    throw new Error("Missing return statement in function");
+}
+
+  final public void defineSemantic() throws ParseException, ParseException {Token typeName;
+  Token superClass = null;
+  String superName = "";
+    jj_consume_token(32);
+    typeName = jj_consume_token(STRING);
+    jj_consume_token(33);
+    switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+    case 32:{
+      jj_consume_token(32);
+      superClass = jj_consume_token(STRING);
+      jj_consume_token(33);
+      break;
+      }
+    default:
+      jj_la1[12] = jj_gen;
+      ;
+    }
+String semanticName = typeName.image.trim().toLowerCase();
+
+    superName = superClass.image.trim().toLowerCase();
+    semantic_type =  semanticName;
+    if(superName!=null)
+      super_class = superName;
+    CLI.definingSemanticType=true;
+}
+
+  final public void customMethod() throws ParseException, ParseException {Token methodName = null;
+  Token returnType  = null;
+  ArrayList<String> params = new ArrayList<String>();
+  ArrayList<String> args = new ArrayList<String>();
+  String methodCode = null;
+  Token typeName = null;
+    jj_consume_token(40);
+    jj_consume_token(32);
+    typeName = jj_consume_token(STRING);
+    jj_consume_token(33);
+    jj_consume_token(32);
+    params = methodParams();
+    jj_consume_token(33);
+    jj_consume_token(32);
+    args = methodArgs();
+    jj_consume_token(33);
+    jj_consume_token(32);
+    returnType = jj_consume_token(STRING);
+    jj_consume_token(33);
+    methodCode = methodCode();
+String className = typeName.image.trim();
+}
+
+  final public String methodCode() throws ParseException, ParseException {StringBuilder methodCodeBuilder = new StringBuilder();
+    label_6:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+      case STRING:{
+        jj_consume_token(STRING);
+        break;
+        }
+      case 41:{
+        jj_consume_token(41);
+        break;
+        }
+      case 26:{
+        jj_consume_token(26);
+        break;
+        }
+      case 42:{
+        jj_consume_token(42);
+        break;
+        }
+      case 43:{
+        jj_consume_token(43);
+        break;
+        }
+      case 25:{
+        jj_consume_token(25);
+        break;
+        }
+      case 24:{
+        jj_consume_token(24);
+        break;
+        }
+      case 32:{
+        jj_consume_token(32);
+        break;
+        }
+      case 33:{
+        jj_consume_token(33);
+        break;
+        }
+      case 29:{
+        jj_consume_token(29);
+        break;
+        }
+      case 27:{
+        jj_consume_token(27);
+        break;
+        }
+      case 44:{
+        jj_consume_token(44);
+        break;
+        }
+      case 45:{
+        jj_consume_token(45);
+        break;
+        }
+      case 46:{
+        jj_consume_token(46);
+        break;
+        }
+      case 47:{
+        jj_consume_token(47);
+        break;
+        }
+      case 48:{
+        jj_consume_token(48);
+        break;
+        }
+      case 49:{
+        jj_consume_token(49);
+        break;
+        }
+      case 50:{
+        jj_consume_token(50);
+        break;
+        }
+      case 51:{
+        jj_consume_token(51);
+        break;
+        }
+      case 52:{
+        jj_consume_token(52);
+        break;
+        }
+      case 53:{
+        jj_consume_token(53);
+        break;
+        }
+      case 54:{
+        jj_consume_token(54);
+        break;
+        }
+      case 55:{
+        jj_consume_token(55);
+        break;
+        }
+      case 56:{
+        jj_consume_token(56);
+        break;
+        }
+      case 57:{
+        jj_consume_token(57);
+        break;
+        }
+      case VARIABLE:{
+        jj_consume_token(VARIABLE);
+        break;
+        }
+      case 58:{
+        jj_consume_token(58);
+        break;
+        }
+      case 59:{
+        jj_consume_token(59);
+        break;
+        }
+      case 60:{
+        jj_consume_token(60);
+        break;
+        }
+      case 61:{
+        jj_consume_token(61);
+        break;
+        }
+      case 62:{
+        jj_consume_token(62);
+        break;
+        }
+      default:
+        jj_la1[13] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
+      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+      case VARIABLE:
+      case STRING:
+      case 24:
+      case 25:
+      case 26:
+      case 27:
+      case 29:
+      case 32:
+      case 33:
+      case 41:
+      case 42:
+      case 43:
+      case 44:
+      case 45:
+      case 46:
+      case 47:
+      case 48:
+      case 49:
+      case 50:
+      case 51:
+      case 52:
+      case 53:
+      case 54:
+      case 55:
+      case 56:
+      case 57:
+      case 58:
+      case 59:
+      case 60:
+      case 61:
+      case 62:{
+        ;
+        break;
+        }
+      default:
+        jj_la1[14] = jj_gen;
+        break label_6;
+      }
+    }
+methodCodeBuilder.append(token.image);
+    {if ("" != null) return methodCodeBuilder.toString();}
+    throw new Error("Missing return statement in function");
+}
+
+  final public ArrayList<String> methodArgs() throws ParseException, ParseException {ArrayList<String> allArgs = new ArrayList<String>();
+  String arg;
+    arg = methodArg();
+allArgs.add(arg);
+    label_7:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+      case 26:{
+        ;
+        break;
+        }
+      default:
+        jj_la1[15] = jj_gen;
+        break label_7;
+      }
+      jj_consume_token(26);
+      arg = methodArg();
+allArgs.add(arg);
+    }
+{if ("" != null) return allArgs;}
+    throw new Error("Missing return statement in function");
+}
+
+  final public String methodArg() throws ParseException, ParseException {Token arg;
+    arg = jj_consume_token(STRING);
+String a = arg.image.trim();
+    {if ("" != null) return a;}
+    throw new Error("Missing return statement in function");
+}
+
+  final public ArrayList<String> methodParams() throws ParseException, ParseException {ArrayList<String> allParams = new ArrayList<String>();
+  String arg;
+    arg = methodParam();
+allParams.add(arg);
+    label_8:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+      case 26:{
+        ;
+        break;
+        }
+      default:
+        jj_la1[16] = jj_gen;
+        break label_8;
+      }
+      jj_consume_token(26);
+      arg = methodParam();
+allParams.add(arg);
+    }
+{if ("" != null) return allParams;}
+    throw new Error("Missing return statement in function");
+}
+
+  final public String methodParam() throws ParseException, ParseException {Token param;
+    param = jj_consume_token(STRING);
+String p = param.image.trim();
+    {if ("" != null) return p;}
+    throw new Error("Missing return statement in function");
+}
+
+  final public void UVBR() throws ParseException, ParseException {Token value;
+    jj_consume_token(63);
     value = jj_consume_token(BOOL);
 String boolValue = value.image.trim().toLowerCase();
       if (boolValue.equals("true")) {
@@ -320,30 +1411,27 @@ String boolValue = value.image.trim().toLowerCase();
         System.out.println(key+": " +controller.getAttitudeNumber(key));
 }
 
-  final public void Setup() throws ParseException, ParseException {Token attitudeSetToken;
-    HashMap<String, Integer> hash = new HashMap<String, Integer>();
-    //controller.getAttitudes().setSet(hash);
-    initialAttitudes.put("belief",0);
+  final public void setAttitudes() throws ParseException, ParseException {initialAttitudes.put("belief",0);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-    case 28:{
-      jj_consume_token(28);
-      jj_consume_token(23);
+    case 64:{
+      jj_consume_token(64);
+      jj_consume_token(29);
       attitude();
-      label_3:
+      label_9:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-        case 21:{
+        case 26:{
           ;
           break;
           }
         default:
-          jj_la1[8] = jj_gen;
-          break label_3;
+          jj_la1[17] = jj_gen;
+          break label_9;
         }
-        jj_consume_token(21);
+        jj_consume_token(26);
         attitude();
       }
-      jj_consume_token(24);
+      jj_consume_token(27);
 System.out.println("Attitudes Defined:");
     for(String key : initialAttitudes.keySet()){
     System.out.println(key);
@@ -355,39 +1443,39 @@ System.out.println("Attitudes Defined:");
       break;
       }
     default:
-      jj_la1[9] = jj_gen;
+      jj_la1[18] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
 }
 
   final public void defineContext() throws ParseException, ParseException {
-    jj_consume_token(23);
+    jj_consume_token(29);
     wffAttitudeSet();
-    label_4:
+    label_10:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case 21:{
+      case 26:{
         ;
         break;
         }
       default:
-        jj_la1[10] = jj_gen;
-        break label_4;
+        jj_la1[19] = jj_gen;
+        break label_10;
       }
-      jj_consume_token(21);
+      jj_consume_token(26);
       wffAttitudeSet();
     }
-    jj_consume_token(24);
+    jj_consume_token(27);
 
 }
 
   final public void wffAttitudeSet() throws ParseException, ParseException {
-    jj_consume_token(23);
+    jj_consume_token(29);
     jj_consume_token(WFF_NAME);
-    jj_consume_token(21);
+    jj_consume_token(26);
     jj_consume_token(STRING);
-    jj_consume_token(24);
+    jj_consume_token(27);
 }
 
   final public void attitude() throws ParseException, ParseException {Token attitude;
@@ -400,18 +1488,18 @@ attitudeNumber++;
 }
 
   final public void underTeleAttitudes() throws ParseException, ParseException {
-    jj_consume_token(29);
-    label_5:
+    jj_consume_token(65);
+    label_11:
     while (true) {
       teleAttitudeList();
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case 23:{
+      case 29:{
         ;
         break;
         }
       default:
-        jj_la1[11] = jj_gen;
-        break label_5;
+        jj_la1[20] = jj_gen;
+        break label_11;
       }
     }
 for (ArrayList<Integer> list : teleAttitudeLists) {
@@ -423,23 +1511,23 @@ for (ArrayList<Integer> list : teleAttitudeLists) {
 }
 
   final public void teleAttitudeList() throws ParseException, ParseException {Token attitude;
-    jj_consume_token(23);
+    jj_consume_token(29);
     OneAttitudeInTeleList();
-    label_6:
+    label_12:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case 21:{
+      case 26:{
         ;
         break;
         }
       default:
-        jj_la1[12] = jj_gen;
-        break label_6;
+        jj_la1[21] = jj_gen;
+        break label_12;
       }
-      jj_consume_token(21);
+      jj_consume_token(26);
       OneAttitudeInTeleList();
     }
-    jj_consume_token(24);
+    jj_consume_token(27);
 ArrayList<Integer> finalTeleList = new ArrayList<Integer>();
   for(int i = 0;i<teleAttitudeList.size();i++){
     finalTeleList.add(teleAttitudeList.get(i));
@@ -471,18 +1559,18 @@ String s = attitude.image.trim().toLowerCase();
 }
 
   final public void underConsequenceAttitudes() throws ParseException, ParseException {
-    jj_consume_token(30);
-    label_7:
+    jj_consume_token(66);
+    label_13:
     while (true) {
       consequenceAttitudeList();
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case 23:{
+      case 29:{
         ;
         break;
         }
       default:
-        jj_la1[13] = jj_gen;
-        break label_7;
+        jj_la1[22] = jj_gen;
+        break label_13;
       }
     }
 for (ArrayList<Integer> list : consequenceAttitudeLists) {
@@ -494,23 +1582,23 @@ for (ArrayList<Integer> list : consequenceAttitudeLists) {
 }
 
   final public void consequenceAttitudeList() throws ParseException, ParseException {Token attitude;
-    jj_consume_token(23);
+    jj_consume_token(29);
     OneAttitudeInConsequenceList();
-    label_8:
+    label_14:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case 21:{
+      case 26:{
         ;
         break;
         }
       default:
-        jj_la1[14] = jj_gen;
-        break label_8;
+        jj_la1[23] = jj_gen;
+        break label_14;
       }
-      jj_consume_token(21);
+      jj_consume_token(26);
       OneAttitudeInConsequenceList();
     }
-    jj_consume_token(24);
+    jj_consume_token(27);
 ArrayList<Integer> finalConsequenceList = new ArrayList<Integer>();
   for(int i = 0;i<consequenceAttitudeList.size();i++){
     finalConsequenceList.add(consequenceAttitudeList.get(i));
@@ -542,18 +1630,18 @@ String s = attitude.image.trim().toLowerCase();
 }
 
   final public void underConjunctionAttitudes() throws ParseException, ParseException {
-    jj_consume_token(31);
-    label_9:
+    jj_consume_token(67);
+    label_15:
     while (true) {
       conjunctionAttitudeList();
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case 23:{
+      case 29:{
         ;
         break;
         }
       default:
-        jj_la1[15] = jj_gen;
-        break label_9;
+        jj_la1[24] = jj_gen;
+        break label_15;
       }
     }
 for (ArrayList<Integer> list : conjunctionAttitudeLists) {
@@ -565,23 +1653,23 @@ for (ArrayList<Integer> list : conjunctionAttitudeLists) {
 }
 
   final public void conjunctionAttitudeList() throws ParseException, ParseException {Token attitude;
-    jj_consume_token(23);
+    jj_consume_token(29);
     OneAttitudeInConjunctionList();
-    label_10:
+    label_16:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case 21:{
+      case 26:{
         ;
         break;
         }
       default:
-        jj_la1[16] = jj_gen;
-        break label_10;
+        jj_la1[25] = jj_gen;
+        break label_16;
       }
-      jj_consume_token(21);
+      jj_consume_token(26);
       OneAttitudeInConjunctionList();
     }
-    jj_consume_token(24);
+    jj_consume_token(27);
 ArrayList<Integer> finalConjunctionList = new ArrayList<Integer>();
   for(int i = 0;i<conjunctionAttitudeList.size();i++){
     finalConjunctionList.add(conjunctionAttitudeList.get(i));
@@ -613,18 +1701,18 @@ String s = attitude.image.trim().toLowerCase();
 }
 
   final public void consistentAttitudes() throws ParseException, ParseException {
-    jj_consume_token(32);
-    label_11:
+    jj_consume_token(68);
+    label_17:
     while (true) {
       consisAttitudeList();
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case 23:{
+      case 29:{
         ;
         break;
         }
       default:
-        jj_la1[17] = jj_gen;
-        break label_11;
+        jj_la1[26] = jj_gen;
+        break label_17;
       }
     }
 for (ArrayList<Integer> list : consisAttitudeLists) {
@@ -636,23 +1724,23 @@ for (ArrayList<Integer> list : consisAttitudeLists) {
 }
 
   final public void consisAttitudeList() throws ParseException, ParseException {Token attitude;
-    jj_consume_token(23);
+    jj_consume_token(29);
     OneAttitudeInConsisList();
-    label_12:
+    label_18:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case 21:{
+      case 26:{
         ;
         break;
         }
       default:
-        jj_la1[18] = jj_gen;
-        break label_12;
+        jj_la1[27] = jj_gen;
+        break label_18;
       }
-      jj_consume_token(21);
+      jj_consume_token(26);
       OneAttitudeInConsisList();
     }
-    jj_consume_token(24);
+    jj_consume_token(27);
 ArrayList<Integer> finalConsisList = new ArrayList<Integer>();
   for(int i = 0;i<consisAttitudeList.size();i++){
     finalConsisList.add(consisAttitudeList.get(i));
@@ -692,18 +1780,23 @@ String s = attitude.image.trim().toLowerCase();
   public Token jj_nt;
   private int jj_ntk;
   private int jj_gen;
-  final private int[] jj_la1 = new int[19];
+  final private int[] jj_la1 = new int[28];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
+  static private int[] jj_la1_2;
   static {
 	   jj_la1_init_0();
 	   jj_la1_init_1();
+	   jj_la1_init_2();
 	}
 	private static void jj_la1_init_0() {
-	   jj_la1_0 = new int[] {0x110000,0x200000,0x20,0x200000,0x20000,0x190000,0x20007c0,0x60007c0,0x200000,0x10000800,0x200000,0x800000,0x200000,0x800000,0x200000,0x800000,0x200000,0x800000,0x200000,};
+	   jj_la1_0 = new int[] {0x20870000,0x20010000,0x4000000,0x4000000,0x20,0x4000000,0x100000,0x20c70000,0x4000000,0x400007c0,0xc00007c0,0x4000000,0x0,0x2f500000,0x2f500000,0x4000000,0x4000000,0x4000000,0x800,0x4000000,0x20000000,0x4000000,0x20000000,0x4000000,0x20000000,0x4000000,0x20000000,0x4000000,};
 	}
 	private static void jj_la1_init_1() {
-	   jj_la1_1 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
+	   jj_la1_1 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xfc,0x0,0x1,0x7ffffe03,0x7ffffe03,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
+	}
+	private static void jj_la1_init_2() {
+	   jj_la1_2 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
 	}
 
   /** Constructor with InputStream. */
@@ -717,7 +1810,7 @@ String s = attitude.image.trim().toLowerCase();
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 19; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 28; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -731,7 +1824,7 @@ String s = attitude.image.trim().toLowerCase();
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 19; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 28; i++) jj_la1[i] = -1;
   }
 
   /** Constructor. */
@@ -741,7 +1834,7 @@ String s = attitude.image.trim().toLowerCase();
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 19; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 28; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -759,7 +1852,7 @@ String s = attitude.image.trim().toLowerCase();
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 19; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 28; i++) jj_la1[i] = -1;
   }
 
   /** Constructor with generated Token Manager. */
@@ -768,7 +1861,7 @@ String s = attitude.image.trim().toLowerCase();
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 19; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 28; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -777,7 +1870,7 @@ String s = attitude.image.trim().toLowerCase();
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 19; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 28; i++) jj_la1[i] = -1;
   }
 
   private Token jj_consume_token(int kind) throws ParseException {
@@ -828,12 +1921,12 @@ String s = attitude.image.trim().toLowerCase();
   /** Generate ParseException. */
   public ParseException generateParseException() {
 	 jj_expentries.clear();
-	 boolean[] la1tokens = new boolean[33];
+	 boolean[] la1tokens = new boolean[69];
 	 if (jj_kind >= 0) {
 	   la1tokens[jj_kind] = true;
 	   jj_kind = -1;
 	 }
-	 for (int i = 0; i < 19; i++) {
+	 for (int i = 0; i < 28; i++) {
 	   if (jj_la1[i] == jj_gen) {
 		 for (int j = 0; j < 32; j++) {
 		   if ((jj_la1_0[i] & (1<<j)) != 0) {
@@ -842,10 +1935,13 @@ String s = attitude.image.trim().toLowerCase();
 		   if ((jj_la1_1[i] & (1<<j)) != 0) {
 			 la1tokens[32+j] = true;
 		   }
+		   if ((jj_la1_2[i] & (1<<j)) != 0) {
+			 la1tokens[64+j] = true;
+		   }
 		 }
 	   }
 	 }
-	 for (int i = 0; i < 33; i++) {
+	 for (int i = 0; i < 69; i++) {
 	   if (la1tokens[i]) {
 		 jj_expentry = new int[1];
 		 jj_expentry[0] = i;

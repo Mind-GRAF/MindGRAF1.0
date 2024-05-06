@@ -1,5 +1,4 @@
 package edu.guc.mind_graf.mgip.rules;
-
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.reports.Report;
 import edu.guc.mind_graf.mgip.ruleHandlers.Ptree;

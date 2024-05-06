@@ -16,54 +16,36 @@ public class CLI {
     private static boolean conjunctionAttitudes;
     private static boolean consequentAttitudes;
     private static boolean telescopable;
+    static boolean definingSemanticType = false;
+    private static Scanner sc = new Scanner(System.in);
 
     @SuppressWarnings("unchecked")
+    public static String readInput() {
+        String s = sc.nextLine();
+        return s;
+    }
+
+    public static void print(String s) {
+        System.out.println(s);
+    }
 
     public static void main(String[] args) {
-        // boolean hasDuplicates = false;
-        // String s ="ASDFg";
-        // ArrayList<ArrayList<Integer>> finalList = new
-        // ArrayList<ArrayList<Integer>>();
-        // for (int i = 0; i < finalList.size(); i++) {
-        // Collections.sort(finalList.get(i)); // Sort each inner list
-        // }
-        // for (int i = 0; i < finalList.size(); i++) {
-        // for (int j = i + 1; j < finalList.size(); j++) {
-        // if (finalList.get(i).equals(finalList.get(j))) {
-        // hasDuplicates = true;
-        // break;
-        // }
-        // }
-        // if (hasDuplicates) {
-        // break;
-        // }
-        // }
-        // if (hasDuplicates)
-        // System.out.println("ArrayList contains duplicate inner ArrayLists.");
-        // else
-        // System.out.println("ArrayList does not contain duplicate inner ArrayLists.");
-        // ArrayList<String> al = new ArrayList<>();
-        Scanner scanner = new Scanner(System.in);
+
         while (true) {
-            // HashMap<String, Integer> attitudeNames =
-            // ContextController.getAttitudes().getSet();
-            // attitudeNames.put(0, "belief");
-            // attitudeNames.put(1, "desire");
-            // attitudeNames.put(2, "fear");
-            // attitudeNames.put(3, "intention");
-            // attitudeNames.put(4, "regret");
+
             if (attitudesSet) {
                 System.out.println("Enter attitudes or 'N' to proceed:");
-                String input = scanner.nextLine();
-                if (input.trim().toLowerCase().equals("exit")) {
+                // String input = scanner.nextLine();
+                String s = readInput();
+                if (s.trim().toLowerCase().equals("exit")) {
                     System.out.println("Session ended.");
                     break;
                 }
                 MindGRAF_Parser parser = new MindGRAF_Parser(
-                        new StringReader(input.trim()));
+                        new StringReader(s));
 
                 try {
-                    parser.Setup();
+                    parser.setAttitudes();
                     consistentAttitudes = true;
                     attitudesSet = false;
                 } catch (ParseException e) {
@@ -77,13 +59,14 @@ public class CLI {
             } else {
                 if (consistentAttitudes) {
                     System.out.println("Enter sets of consistent attitudes");
-                    String input = scanner.nextLine();
-                    if (input.trim().toLowerCase().equals("exit")) {
+                    // String input = scanner.nextLine();
+                    String s = readInput();
+                    if (s.trim().toLowerCase().equals("exit")) {
                         System.out.println("Session ended.");
                         break;
                     }
                     MindGRAF_Parser parser = new MindGRAF_Parser(
-                            new StringReader(input.trim()));
+                            new StringReader(s.trim()));
                     try {
                         parser.consistentAttitudes();
                         consistentAttitudes = false;
@@ -99,7 +82,7 @@ public class CLI {
                 } else {
                     if (conjunctionAttitudes) {
                         System.out.println("Enter sets of attitudes closed under conjunction");
-                        String input = scanner.nextLine();
+                        String input = readInput();
                         if (input.trim().toLowerCase().equals("exit")) {
                             System.out.println("Session ended.");
                             break;
@@ -121,7 +104,7 @@ public class CLI {
                     } else {
                         if (consequentAttitudes) {
                             System.out.println("Enter sets of attitudes closed under consequence");
-                            String input = scanner.nextLine();
+                            String input = readInput();
                             if (input.trim().toLowerCase().equals("exit")) {
                                 System.out.println("Session ended.");
                                 break;
@@ -144,7 +127,7 @@ public class CLI {
                         {
                             if (telescopable) {
                                 System.out.println("Enter sets of Telescopable Attitudes");
-                                String input = scanner.nextLine();
+                                String input = readInput();
                                 if (input.trim().toLowerCase().equals("exit")) {
                                     System.out.println("Session ended.");
                                     break;
@@ -165,7 +148,7 @@ public class CLI {
                             } else {
                                 if (uvbr) {
                                     System.out.print("set UVBR Variable to \"true\" or \"false\"\n" + ":");
-                                    String input = scanner.nextLine();
+                                    String input = readInput();
                                     MindGRAF_Parser parser = new MindGRAF_Parser(
                                             new StringReader(input.trim()));
                                     try {
@@ -181,13 +164,14 @@ public class CLI {
 
                                     System.out.print("Enter a command (or 'exit' to quit):");
 
-                                    String input = scanner.nextLine();
+                                    String input = readInput();
 
                                     if (input.trim().toLowerCase().equals("exit")) {
                                         System.out.println("Session ended.");
                                         break;
                                     } else {
-                                        MindGRAF_Parser parser = new MindGRAF_Parser(new StringReader(input));
+                                        MindGRAF_Parser parser = new MindGRAF_Parser(
+                                                new StringReader(input.trim().toLowerCase()));
                                         try {
                                             parser.Command();
                                         } catch (ParseException e) {
@@ -208,7 +192,6 @@ public class CLI {
                 }
             }
         }
-        scanner.close();
 
     }
 }
