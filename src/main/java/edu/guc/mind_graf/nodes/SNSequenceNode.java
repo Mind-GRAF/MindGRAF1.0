@@ -12,17 +12,17 @@ public class SNSequenceNode extends ActNode {
         super(downCables);
     }
 
-    public void runActuator(ActNode node) {
+    public void runActuator() {
         Stack<ActNode> acts = new Stack<>();
-        DownCable next = node.getDownCableSet().get("obj" + 1);
+        DownCable next = this.getDownCableSet().get("obj" + 1);
         ActNode act;
-        for(int i=2; next != null; i++) {
-			act = (ActNode) next.getNodeSet().getNode(0);
-			act.restartAgenda();
-			acts.push(act);
-			next = node.getDownCableSet().get("obj" + i);
-		}
-        while(!acts.isEmpty()) {
+        for (int i = 2; next != null; i++) {
+            act = (ActNode) next.getNodeSet().getNode(0);
+            act.restartAgenda();
+            acts.push(act);
+            next = this.getDownCableSet().get("obj" + i);
+        }
+        while (!acts.isEmpty()) {
             Scheduler.addToActQueue(acts.pop());
         }
     }

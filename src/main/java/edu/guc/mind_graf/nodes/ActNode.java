@@ -68,7 +68,7 @@ public class ActNode extends Node {
 
     }
 
-    public void runActuator() {
+    public void runActuator() throws NoSuchTypeException {
         System.out.println("running " + this.getName() + " act's actuator");
 
     }
@@ -90,11 +90,15 @@ public class ActNode extends Node {
         this.supports.addAll(support);
     }
 
-    private void restartAgenda() {
+    public ArrayList<Report> getReports(){
+        return this.reports;
+    }
+
+    protected void restartAgenda() {
         agenda = ActAgenda.START;
     }
 
-    private NodeSet processReportsInAct() {
+    protected NodeSet processReportsInAct() {
         System.out.println(this.getName() + " Processing Reports as act node ");
         if (reports.isEmpty()) {
             return null;
@@ -161,7 +165,8 @@ public class ActNode extends Node {
 
     }
 
-    private void sendDoOneToActQueue(NodeSet nodes) throws NoSuchTypeException {
+
+    protected void sendDoOneToActQueue(NodeSet nodes) throws NoSuchTypeException {
         Relation doOneAction = Network.createRelation("action", "individualNode", Adjustability.NONE, 0);
         Relation doOneobj = Network.createRelation("obj", "actNode", Adjustability.NONE, 0);
         Node doOneBaseNode = Network.createNode("DoOne" + DoOneNode.doOneCount++, "individualnode");
@@ -175,7 +180,7 @@ public class ActNode extends Node {
 
     }
 
-    private void searchForPlansInAchieve(PropositionNode goal) throws NoSuchTypeException {
+    protected void searchForPlansInAchieve(PropositionNode goal) throws NoSuchTypeException {
         Relation planRelation = Network.createRelation("plan", "actNode", Adjustability.NONE, 0);
         Relation goalRelation = Network.createRelation("goal", "propositionNode", Adjustability.NONE, 0);
         variable = Network.createVariableNode("A" + variableCount, "actnode");

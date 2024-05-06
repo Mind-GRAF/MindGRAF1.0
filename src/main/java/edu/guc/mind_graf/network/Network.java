@@ -31,6 +31,7 @@ import edu.guc.mind_graf.nodes.AchieveNode;
 import edu.guc.mind_graf.mgip.matching.Match;
 import edu.guc.mind_graf.mgip.matching.Matcher;
 import edu.guc.mind_graf.nodes.ActNode;
+import edu.guc.mind_graf.nodes.AttitudeNode;
 import edu.guc.mind_graf.nodes.DoAllNode;
 import edu.guc.mind_graf.nodes.DoOneNode;
 import edu.guc.mind_graf.nodes.IndividualNode;
@@ -38,6 +39,9 @@ import edu.guc.mind_graf.nodes.MolecularType;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.nodes.RuleNode;
+import edu.guc.mind_graf.nodes.SNIFNode;
+import edu.guc.mind_graf.nodes.SNITERATENode;
+import edu.guc.mind_graf.nodes.SNSequenceNode;
 
 public class Network {
 	private static HashMap<Integer, Node> nodes;
@@ -145,6 +149,9 @@ public class Network {
 				case "whendonode":
 					node = new WhenDoNode(downCableSet);
 					break;
+				case "attitudenode":
+					node = new AttitudeNode(downCableSet);
+					break;
 				case "doonenode":
 					node = new DoOneNode(downCableSet);
 					break;
@@ -154,6 +161,16 @@ public class Network {
 				case "achievenode":
 					node = new AchieveNode(downCableSet);
 					break;
+				case "snifnode":
+					node = new SNIFNode(downCableSet);
+					break;
+				case "sniteratenode":
+					node = new SNITERATENode(downCableSet);
+					break;
+				case "snsequencenode":
+					node = new SNSequenceNode(downCableSet);
+					break;
+
 				default:
 					if (userDefinedClasses.containsKey(SemanticType)) {
 						CustomClass customClass = userDefinedClasses

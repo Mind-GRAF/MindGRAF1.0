@@ -14,13 +14,13 @@ public class DoOneNode extends ActNode {
         super(downCables);
     }
 
-    public void runActuator(ActNode node) {
+    public void runActuator() {
         Random rand = new Random();
-        NodeSet possibleActs = node.getDownCableSet().get("obj").getNodeSet();
+        NodeSet possibleActs = this.getDownCableSet().get("obj").getNodeSet();
         int actIndex = rand.nextInt(possibleActs.size());
         ActNode act = (ActNode) possibleActs.getNode(actIndex);
         act.restartAgenda();
         Scheduler.addToActQueue(act);
     }
-    
+
 }

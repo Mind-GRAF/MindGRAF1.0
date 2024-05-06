@@ -89,6 +89,17 @@ public class NodeSet implements Iterable<Node> {
             nodes.put(n.getName(), n);
     }
 
+    public Node getNode(int index) {
+        int i = 0;
+        for (Node node : this.nodes.values()) {
+            if (i == index) {
+                return node;
+            }
+            i++;
+        }
+        throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + i);
+    }
+
     public int size() {
         return nodes.size();
     }
