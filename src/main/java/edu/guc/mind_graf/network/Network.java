@@ -115,9 +115,6 @@ public class Network {
 				case "individualnode":
 					node = new IndividualNode(downCableSet);
 					break;
-				// case "rulenode":
-				// node = new RuleNode(downCableSet);
-				// break;
 				case "andor":
 					node = new AndOr(downCableSet);
 					propositionNodes.put(node.getId(), node);

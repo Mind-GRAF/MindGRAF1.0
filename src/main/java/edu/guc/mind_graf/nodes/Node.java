@@ -206,7 +206,7 @@ public abstract class Node {
 		NodeSet negatedSet = new NodeSet(negated);
 		DownCable arg = new DownCable(Network.getRelations().get("arg"), negatedSet);
 		DownCableSet negationDownCableSet = new DownCableSet(min, max, arg);
-		return Network.createNode("rulenode", negationDownCableSet);
+		return Network.createNode("andor", negationDownCableSet);
 	}
 
 	public boolean isFree(Node Node) {
