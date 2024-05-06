@@ -55,16 +55,17 @@ public class DoIfNode extends RuleNode {
             support.add(pair);
         } else {
             if (knownInstanceSupport != null) {
-                for (HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> entry : knownInstanceSupport
-                        .getJustificationSupport().getFirst().get(request.getChannel().getAttitudeID())) {
-                    HashMap<Integer, PropositionNodeSet> temp = new HashMap<Integer, PropositionNodeSet>();
-                    for (Integer attitude : entry.keySet()) {
-                        temp.put(attitude, entry.get(attitude).getFirst());
-                    }
-                    Pair<HashMap<Integer, PropositionNodeSet>, HashMap<Integer, PropositionNodeSet>> pair = new Pair<HashMap<Integer, PropositionNodeSet>, HashMap<Integer, PropositionNodeSet>>(
-                            temp, negativeSupport);
-                    support.add(pair);
-                }
+                //TODO: marwa I commented this as it was causing errors
+//                for (HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> entry : knownInstanceSupport
+//                        .getJustificationSupport().getFirst().get(request.getChannel().getAttitudeID())) {
+//                    HashMap<Integer, PropositionNodeSet> temp = new HashMap<Integer, PropositionNodeSet>();
+//                    for (Integer attitude : entry.keySet()) {
+//                        temp.put(attitude, entry.get(attitude).getFirst());
+//                    }
+//                    Pair<HashMap<Integer, PropositionNodeSet>, HashMap<Integer, PropositionNodeSet>> pair = new Pair<HashMap<Integer, PropositionNodeSet>, HashMap<Integer, PropositionNodeSet>>(
+//                            temp, negativeSupport);
+//                    support.add(pair);
+//                }
             }
         }
         for (Node act : acts) {

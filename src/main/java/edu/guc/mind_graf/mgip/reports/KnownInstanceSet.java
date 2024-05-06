@@ -47,11 +47,11 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
                             return false;
 
                         } else {
-                            Support supportSet = targetKnownInstance.getSupports();
-                            targetKnownInstance.setSupports(Supports.union(supportSet));
+                            targetKnownInstance.getSupports().union(Supports);
                             targetSet.put(ReportSubs, targetKnownInstance);
                             positiveKInstances.put(attitude, targetSet);
                             return true;
+
                         }
 
                     }
@@ -64,7 +64,7 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
         else {
             Hashtable<Substitutions, KnownInstance> targetSet = negativeKInstances.remove(attitude);
             if (targetSet == null) {
-                targetSet = new Hashtable<>();
+                targetSet = new Hashtable<Substitutions, KnownInstance>();
                 KnownInstance targetKnownInstance = new KnownInstance(ReportSubs, Supports, attitude);
                 targetSet.put(ReportSubs, targetKnownInstance);
                 negativeKInstances.put(attitude, targetSet);
@@ -81,8 +81,7 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
 
                             return false;
                         } else {
-                            Support supportSet = targetKnownInstance.getSupports();
-                            targetKnownInstance.setSupports(Supports.union(supportSet));
+                            targetKnownInstance.getSupports().union(Supports);
                             targetSet.put(ReportSubs, targetKnownInstance);
                             positiveKInstances.put(attitude, targetSet);
                             return true;
@@ -96,6 +95,7 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
         return false;
 
     }
+
 
     public Collection<KnownInstance> mergeKInstancesBasedOnAtt(
             int i) {

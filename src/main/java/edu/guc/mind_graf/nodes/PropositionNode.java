@@ -60,6 +60,7 @@ public class PropositionNode extends Node {
     protected Support support;
     protected PropositionNodeSet justificationSupportDependents;
     protected PropositionNodeSet assumptionSupportDependents;
+    protected ArrayList<Integer> gradded;
 
     public PropositionNode(String name, Boolean isVariable) {
         super(name, isVariable);
@@ -74,6 +75,7 @@ public class PropositionNode extends Node {
         support = new Support(this.getId());
         justificationSupportDependents = new PropositionNodeSet();
         assumptionSupportDependents = new PropositionNodeSet();
+        gradded = new ArrayList<>();
     }
 
     public PropositionNode(DownCableSet downCableSet) {
@@ -86,6 +88,7 @@ public class PropositionNode extends Node {
         support = new Support(this.getId());
         justificationSupportDependents = new PropositionNodeSet();
         assumptionSupportDependents = new PropositionNodeSet();
+        gradded = new ArrayList<>();
     }
 
     /**
@@ -437,21 +440,22 @@ public class PropositionNode extends Node {
      * The method is implemented in Context class.
      * is called to check whether a PropositionNode
      * is
-     * supported in a specific attitude in a desired context or not.
+     * supported in a specified grade level in a specific attitude in a desired context or not.
      *
      *
-     * @param desiredContextName
-     * @param desiredAttitudeID
+     *  @param desiredContextName context to check in
+     *  @param desiredAttitudeID attitude to check in
+     *  @param level	level to check in
      * @return boolean
      */
 
-    public boolean supported(String desiredContextName, int desiredAttitudeID) {
+    public boolean supported(String desiredContextName, int desiredAttitudeID, int level) {
         boolean supported = false;
-        Context desiredContext = ContextController.getContext(desiredContextName);
+        Context desiredContext = Network.getContexts().get(desiredContextName);
 
-        for(HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>> currSupport : this.support.getAssumptionSupport().getFirst().get(desiredAttitudeID)) {
-            for(Integer key : currSupport.keySet()) {
-                if(currSupport.get(key).getFirst().isSubset(desiredContext.getAttitudeProps(key).getFirst()) && currSupport.get(key).getSecond().isSubset(desiredContext.getAttitudeProps(key).getSecond())) {
+        for(Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> currSupport : this.support.getAssumptionSupport().get(level).get(desiredAttitudeID)) {
+            for(Integer key : currSupport.getFirst().keySet()) {
+                if(currSupport.getFirst().get(key).getFirst().isSubset(desiredContext.getAttitudeProps(key).getFirst()) && currSupport.getFirst().get(key).getSecond().isSubset(desiredContext.getAttitudeProps(key).getSecond())) {
                     supported = true;
                 }
                 else {
@@ -468,12 +472,24 @@ public class PropositionNode extends Node {
 
     }
 
+
+    /***
+     * Makes this node a hypothesis in the specified attitude in the desired context
+     *
+     *
+     * @param desiredContextName context to make hypothesis in
+     * @param attitude attitude to make hypothesis in
+     */
     public void setHyp(String desiredContextName, int attitude) {
         Context desiredContext = ContextController.getContext(desiredContextName);
         desiredContext.getAttitudeProps(attitude).getSecond().add(this.getId());
         this.support.setHyp(attitude);
     }
 
+
+    /***
+     * Forgets this node from the support of other nodes dependent on it
+     */
     public void removeNodeFromOtherNodesSupport() {
         HashMap<Integer, Node> networkPropositions = Network.getPropositionNodes();
         int[] assumptionDependents = this.getAssumptionSupportDependents().getProps();
@@ -671,13 +687,12 @@ public class PropositionNode extends Node {
                                         Substitutions substitutions, boolean reportSign, InferenceType inferenceType) {
 
         try {
-            Support supportPropSet = new Support(-1);
-            supportPropSet.addNode(this, currentAttitudeID);
+            Support reportSupport = new Support(-1);
+            reportSupport.addNode(currentAttitudeID, this);
             Substitutions subs = substitutions == null ? new Substitutions() : substitutions;
             Substitutions subs2 = new Substitutions();
-            Report toBeSent = new Report(subs, support, currentAttitudeID, reportSign, inferenceType, null, this);
-            toBeSent.setContextName(currentContextName);
-            toBeSent.setReportType(channelType);
+            //TODO: sara check this as I added null as a 7th param.
+            Report toBeSent = new Report(subs, reportSupport, currentAttitudeID, reportSign, inferenceType, null,null);            toBeSent.setReportType(channelType);
             switch (channelType) {
                 case Matched:
                     List<Match> matchesReturned = new ArrayList<>();
@@ -1064,12 +1079,14 @@ public class PropositionNode extends Node {
         Substitutions reportSubstitutions = new Substitutions();
         PropositionNodeSet supportNodeSet = new PropositionNodeSet();
 
-        if (this.supported(currentContext, currentAttitude)) {
+        if (this.supported(currentContext, currentAttitude, 0)) {
             System.out.println(this.getName()+" is supported");
-            supportNodeSet.add((PropositionNode) this);
-            Support support = new Support(-1, new Pair<>(supportNodeSet, new PropositionNodeSet()), currentAttitude);
-            Report NewReport = new Report(reportSubstitutions, support, currentAttitude, true,
-                    InferenceType.BACKWARD, requesterNode, this);
+            Support reportSupport = new Support(-1);
+            reportSupport.addNode(currentAttitude, (PropositionNode) this);
+            Report NewReport = new Report(reportSubstitutions, reportSupport, currentAttitude, true,
+                    InferenceType.BACKWARD, requesterNode, requesterNode);
+            //TODO: sara check if this is correct
+
             // if (((RuleNode) requesterNode).isForwardReport() == true) {
             // NewReport.setInferenceType(InferenceType.FORWARD);
 
@@ -1212,8 +1229,9 @@ public class PropositionNode extends Node {
                     supportNode.addJustificationBasedSupport(reportToBeBroadcasted.getSupport());
                     PropositionNodeSet reportSupportPropSet = new PropositionNodeSet();
                     reportSupportPropSet.add(supportNode);
-                    Support support = new Support(-1, new Pair<>(reportSupportPropSet,new PropositionNodeSet()), reportToBeBroadcasted.getAttitude());
-                    reportToBeBroadcasted.setSupport(support);
+                    Support reportSupport = new Support(-1);
+                    reportSupport.addNode(reportToBeBroadcasted.getAttitude(), supportNode);
+                    reportToBeBroadcasted.setSupport(reportSupport);
                     if (reportToBeBroadcasted.getInferenceType() == InferenceType.FORWARD) {
                         System.out.println(
                                 "A New Fact has been succefully added to the set of forward asserted nodes");
@@ -1257,16 +1275,32 @@ public class PropositionNode extends Node {
 
     }
 
-    private void addJustificationBasedSupport(Support support) {
-        for(Integer key : support.getJustificationSupport().getFirst().keySet()) {
-            try {
-                this.getSupport().addJustificatoinSupportForAttitude(key, support.getJustificationSupport().getFirst().get(key));
-            } catch (DirectCycleException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
 
+    /***
+     * adds the justification support of the specified support to this nodes support in the specified level unless there is a direct cycle
+     * @param support support to be added
+     */
+    private void addJustificationBasedSupport(Support support) {
+        try {
+            this.support.union(support);
+        } catch (DirectCycleException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    /***
+     * adds the specified support to this node's support in the specified level unless there is a direct cycle
+     * @param attitude attitude to add support in
+     * @param level level to add support in
+     * @param support support to be added
+     * @param bridgeRules Bridge Rules used to get this support
+     */
+    public void addJustificationBasedSupport(int attitude, int level, HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>> support, PropositionNodeSet bridgeRules) throws DirectCycleException {
+        Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>, PropositionNodeSet> pair = new Pair<>(support, bridgeRules);
+        ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>, PropositionNodeSet>> list= new ArrayList<>();
+        list.add(pair);
+        this.support.addJustificatoinSupportForAttitude(attitude, level, list);
     }
 
     public ChannelSet getOutgoingChannels() {

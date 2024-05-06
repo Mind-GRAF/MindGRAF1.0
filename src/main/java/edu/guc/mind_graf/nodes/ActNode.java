@@ -223,7 +223,7 @@ public class ActNode extends Node {
             doAct=true;
             for(Integer attitude:support.getFirst().keySet()){
                 for(PropositionNode node:support.getFirst().get(attitude)){
-                    doAct&=node.supported(currentContextName, attitude);
+                    doAct&=node.supported(currentContextName, attitude,0);
                 }
             }
             if(!doAct){
@@ -231,7 +231,7 @@ public class ActNode extends Node {
             }
             for(Integer attitude:support.getSecond().keySet()){
                 for(PropositionNode node:support.getFirst().get(attitude)){
-                    doAct&=!node.supported(currentContextName, attitude);
+                    doAct&=!node.supported(currentContextName, attitude,0);
                 }
             }
             if(doAct){

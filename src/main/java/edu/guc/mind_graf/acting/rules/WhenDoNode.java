@@ -29,16 +29,17 @@ public class WhenDoNode extends RuleNode {
         if (report.isSign()) {
             ArrayList<Pair<HashMap<Integer, PropositionNodeSet>, HashMap<Integer, PropositionNodeSet>>> support = new ArrayList<Pair<HashMap<Integer, PropositionNodeSet>, HashMap<Integer, PropositionNodeSet>>>();
             if (report.getSupport() != null) {
-                for (HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> entry : report.getSupport()
-                        .getJustificationSupport().getFirst().get(report.getAttitude())) {
-                    HashMap<Integer, PropositionNodeSet> temp = new HashMap<Integer, PropositionNodeSet>();
-                    for (Integer attitude : entry.keySet()) {
-                        temp.put(attitude, entry.get(attitude).getFirst());
-                    }
-                    Pair<HashMap<Integer, PropositionNodeSet>, HashMap<Integer, PropositionNodeSet>> pair = new Pair<HashMap<Integer, PropositionNodeSet>, HashMap<Integer, PropositionNodeSet>>(
-                            temp, new HashMap<Integer, PropositionNodeSet>());
-                    support.add(pair);
-                }
+                //TODO: marwa I commented this as it was causing errors
+//                for (HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> entry : report.getSupport()
+//                        .getJustificationSupport().getFirst().get(report.getAttitude())) {
+//                    HashMap<Integer, PropositionNodeSet> temp = new HashMap<Integer, PropositionNodeSet>();
+//                    for (Integer attitude : entry.keySet()) {
+//                        temp.put(attitude, entry.get(attitude).getFirst());
+//                    }
+//                    Pair<HashMap<Integer, PropositionNodeSet>, HashMap<Integer, PropositionNodeSet>> pair = new Pair<HashMap<Integer, PropositionNodeSet>, HashMap<Integer, PropositionNodeSet>>(
+//                            temp, new HashMap<Integer, PropositionNodeSet>());
+//                    support.add(pair);
+//                }
             }
             System.out.println("HEy");
 

@@ -24,7 +24,8 @@ public class Revision {
 		for(ArrayList<Integer> entry : filteredConsistentAttitudes){
 			Contradiction cont = new Contradiction(node);
 			for(int attitudeNumber : entry){
-				if(nodeCompliment.supported(c.getName(), attitudeNumber)){
+				//TODO: wael check level
+				if(nodeCompliment.supported(c.getName(), attitudeNumber,0)){
 					cont.getContradictions().add(attitudeNumber,nodeCompliment);
 				}
 				if(!cont.getContradictions().isEmpty()){
@@ -111,29 +112,29 @@ public class Revision {
 	public static void removeInferredNodeFromContext(Context c, int attitudeNumber, PropositionNode node){
 //		print("Starting removal of node: "+ node.getId()+" from attitude: "+ ContextController.getAttitudeName(attitudeNumber)+" from Context: "+ c.getName());
 
-		for(HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> assumptionSupport : node.getSupport().getAssumptionSupport().getFirst().get(attitudeNumber)){
-			for(Map.Entry<Integer,Pair<PropositionNodeSet,PropositionNodeSet>> support: assumptionSupport.entrySet()){
-				if(supportIsInvalid(c,attitudeNumber,support.getValue().getFirst())) {
-					continue;
-				}
-				print("choose node to remove from this support in attitude: "+ support.getKey());
-                ArrayList<Node> supportNodes = new ArrayList<>(support.getValue().getFirst().getNodes());
-				for(int i =0;i<supportNodes.size();i++){
-					PropositionNode nodeInSupport = (PropositionNode) supportNodes.get(i);
-					print((i+1)+". Node: "+ nodeInSupport.toString());
-				}
-				PropositionNode nodeToRemove = (PropositionNode) supportNodes.get(readInt()-1);
-
-				if(c.isHypothesis(support.getKey(),nodeToRemove)){
-
-					//TODO: wael change these to remove node completely
-					c.removeHypothesisFromContext(attitudeNumber,nodeToRemove);
-				}else{
-					print("this node is inferred, choose how to remove it:");
-					removeInferredNodeFromContext(c,attitudeNumber,nodeToRemove);
-				}
-			}
-		}
+//		for(HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> assumptionSupport : node.getSupport().getAssumptionSupport().getFirst().get(attitudeNumber)){
+//			for(Map.Entry<Integer,Pair<PropositionNodeSet,PropositionNodeSet>> support: assumptionSupport.entrySet()){
+//				if(supportIsInvalid(c,attitudeNumber,support.getValue().getFirst())) {
+//					continue;
+//				}
+//				print("choose node to remove from this support in attitude: "+ support.getKey());
+//                ArrayList<Node> supportNodes = new ArrayList<>(support.getValue().getFirst().getNodes());
+//				for(int i =0;i<supportNodes.size();i++){
+//					PropositionNode nodeInSupport = (PropositionNode) supportNodes.get(i);
+//					print((i+1)+". Node: "+ nodeInSupport.toString());
+//				}
+//				PropositionNode nodeToRemove = (PropositionNode) supportNodes.get(readInt()-1);
+//
+//				if(c.isHypothesis(support.getKey(),nodeToRemove)){
+//
+//					//TODO: wael change these to remove node completely
+//					c.removeHypothesisFromContext(attitudeNumber,nodeToRemove);
+//				}else{
+//					print("this node is inferred, choose how to remove it:");
+//					removeInferredNodeFromContext(c,attitudeNumber,nodeToRemove);
+//				}
+//			}
+//		}
 //		print("successfully removed Node: "+ node+" from attitude: "+ ContextController.getAttitudeName(attitudeNumber)+" from Context: "+ c.getName());
 	}
 
@@ -142,7 +143,8 @@ public class Revision {
 	 */
 	public static boolean supportIsInvalid(Context c, int attitudeNumber, PropositionNodeSet nodes) {
 		for(PropositionNode node:nodes){
-			if(!c.isHypothesis(attitudeNumber,node) && !node.supported(c.getName(),attitudeNumber)){
+			//TODO: wael check level
+			if(!c.isHypothesis(attitudeNumber,node) && !node.supported(c.getName(),attitudeNumber,0)){
 					return true;
 			}
 		}

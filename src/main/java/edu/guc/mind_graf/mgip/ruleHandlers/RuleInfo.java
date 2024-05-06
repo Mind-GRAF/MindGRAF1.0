@@ -96,7 +96,8 @@ public class RuleInfo {
         res.ncount = resNcount;
         res.subs = resSubs;
         res.fns = resFns;
-        res.support = this.support.union(r.support);
+        //TODO: sara this is also causing a problem
+//        res.support = this.support.union(r.support);
         return res;
     }
 
@@ -189,7 +190,8 @@ public class RuleInfo {
         ri.setNcount(this.ncount);
         ri.setSubs(this.subs.clone());
         ri.setFns(this.fns.clone());
-        ri.setSupport(this.support.clone());
+        //TODO: sara this is also causing a problem
+//        ri.setSupport(this.support.clone());
         return ri;
     }
 
