@@ -1,5 +1,6 @@
 package edu.guc.mind_graf.mgip.ruleHandlers;
 
+import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.exceptions.InvalidRuleInfoException;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.set.FreeVariableSet;
@@ -55,7 +56,7 @@ public class PtreeNode {
         this.siblingIntersection = siblingIntersection;
     }
 
-    public RuleInfoSet insertIntoNode(RuleInfo ri, boolean isPropagating) throws InvalidRuleInfoException {
+    public RuleInfoSet insertIntoNode(RuleInfo ri, boolean isPropagating) throws InvalidRuleInfoException, DirectCycleException {
         RuleInfoSet newRuleInfoSet = sIndex.insertVariableRI(ri);
         RuleInfoSet result = new RuleInfoSet();
         if(newRuleInfoSet == null || newRuleInfoSet.isEmpty())
@@ -78,7 +79,7 @@ public class PtreeNode {
         return result;
     }
 
-    RuleInfoSet insertIntoNode(RuleInfoSet ris, boolean isPropagating) throws InvalidRuleInfoException{
+    RuleInfoSet insertIntoNode(RuleInfoSet ris, boolean isPropagating) throws InvalidRuleInfoException, DirectCycleException {
         RuleInfoSet result = new RuleInfoSet();
         for(RuleInfo ri: ris) {
             RuleInfoSet inserted = insertIntoNode(ri, isPropagating);
@@ -89,7 +90,7 @@ public class PtreeNode {
         return result;
     }
 
-    private RuleInfoSet combineWithSibling(RuleInfo newRI) {
+    private RuleInfoSet combineWithSibling(RuleInfo newRI) throws DirectCycleException {
         RuleInfoSet allRuleInfos = new RuleInfoSet();
         for(RuleInfo ri: sibling.getSIndex().getAllRuleInfos()){
             RuleInfo combined = newRI.combine(ri);

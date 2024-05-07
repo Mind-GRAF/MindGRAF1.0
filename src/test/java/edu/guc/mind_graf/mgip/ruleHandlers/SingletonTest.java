@@ -1,6 +1,7 @@
 package edu.guc.mind_graf.mgip.ruleHandlers;
 
 import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.nodes.Node;
@@ -29,7 +30,7 @@ class SingletonTest {
     }
 
     @Test
-    public void testInsertIntoMap() {
+    public void testInsertIntoMap() throws DirectCycleException {
         NodeSet commonVariables = new NodeSet(X, Y);
         Singleton singletonWithCommonVars = new Singleton(commonVariables);
         RuleInfo ri = new RuleInfo("", 0, 1, 2, new Substitutions(), new FlagNodeSet(), new Support(-1));
@@ -39,7 +40,7 @@ class SingletonTest {
     }
 
     @Test
-    public void testGetAllRuleInfos() {
+    public void testGetAllRuleInfos() throws DirectCycleException {
         NodeSet commonVariables = new NodeSet(X, Y);
         Singleton singletonWithCommonVars = new Singleton(commonVariables);
         RuleInfo ri1 = new RuleInfo("", 0, 1, 2, new Substitutions(), new FlagNodeSet(), new Support(-1));

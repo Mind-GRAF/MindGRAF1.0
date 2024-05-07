@@ -470,6 +470,9 @@ public class PropositionNode extends Node {
         boolean supported = false;
         Context desiredContext = ContextController.getContext(desiredContextName);
 
+        if(this.support.getAssumptionSupport().get(level).get(desiredAttitudeID) == null){
+            return false;
+        }
         for(Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> currSupport : this.support.getAssumptionSupport().get(level).get(desiredAttitudeID)) {
             for(Integer key : currSupport.getFirst().keySet()) {
                 if(currSupport.getFirst().get(key).getFirst().isSubset(desiredContext.getAttitudeProps(level, key).getFirst()) && currSupport.getFirst().get(key).getSecond().isSubset(desiredContext.getAttitudeProps(level, key).getSecond()) && currSupport.getSecond().isSubset(desiredContext.getAttitudeProps(level, key).getFirst())) {
@@ -480,8 +483,8 @@ public class PropositionNode extends Node {
                     break;
                 }
             }
-            if(supported == true) {
-                return supported;
+            if(supported) {
+                return true;
             }
         }
 
@@ -708,8 +711,7 @@ public class PropositionNode extends Node {
             reportSupport.addNode(currentAttitudeID, this);
             Substitutions subs = substitutions == null ? new Substitutions() : substitutions;
             Substitutions subs2 = new Substitutions();
-            //TODO: sara check this as I added null as a 7th param.
-            Report toBeSent = new Report(subs, reportSupport, currentAttitudeID, reportSign, inferenceType, null,null);            toBeSent.setReportType(channelType);
+            Report toBeSent = new Report(subs, reportSupport, currentAttitudeID, reportSign, inferenceType, null,this);            toBeSent.setReportType(channelType);
             switch (channelType) {
                 case Matched:
                     List<Match> matchesReturned = new ArrayList<>();
@@ -1094,20 +1096,13 @@ public class PropositionNode extends Node {
         int currentAttitude = currentChannel.getAttitudeID();
         Node requesterNode = currentChannel.getRequesterNode();
         Substitutions reportSubstitutions = new Substitutions();
-        PropositionNodeSet supportNodeSet = new PropositionNodeSet();
 
         if (this.supported(currentContext, currentAttitude, 0)) {
             System.out.println(this.getName()+" is supported");
             Support reportSupport = new Support(-1);
-            reportSupport.addNode(currentAttitude, (PropositionNode) this);
+            reportSupport.addNode(currentAttitude, this);
             Report NewReport = new Report(reportSubstitutions, reportSupport, currentAttitude, true,
                     InferenceType.BACKWARD, requesterNode, requesterNode);
-            //TODO: sara check if this is correct
-
-            // if (((RuleNode) requesterNode).isForwardReport() == true) {
-            // NewReport.setInferenceType(InferenceType.FORWARD);
-
-            // }
             NewReport.setContextName(currentContext);
             NewReport.setReportType(currentChannel.getChannelType());
             sendReport(NewReport, currentRequest.getChannel());

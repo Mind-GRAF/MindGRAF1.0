@@ -27,7 +27,11 @@ public class Support {
 		// Constructor
 		this.nodeID = nodeID;
 		justificationSupport = new HashMap<>();
+		justificationSupport.put(0,new HashMap<>());
+
 		assumptionSupport = new HashMap<>();
+		assumptionSupport.put(0,new HashMap<>());
+
 		isHyp = new HashSet<>();
 		isTreeCalculatetd = new HashMap<>();
 		supportsTree = new HashMap<>();
@@ -783,8 +787,16 @@ public class Support {
 		return sb.toString();
 	}
 
-
-
+	public Support clone(){
+		Support cloned = new Support(nodeID);
+        try {
+            cloned.union(this);
+        } catch (DirectCycleException e) {
+            System.out.println("Couldn't clone");
+        }
+		return cloned;
+	}
+	
 	/*
 	public void calculateSupportsTree() {
 

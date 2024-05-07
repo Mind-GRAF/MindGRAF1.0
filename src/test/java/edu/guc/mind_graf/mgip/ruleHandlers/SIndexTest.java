@@ -1,6 +1,7 @@
 package edu.guc.mind_graf.mgip.ruleHandlers;
 
 import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.exceptions.InvalidRuleInfoException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.nodes.Node;
@@ -57,7 +58,7 @@ class SIndexTest {
     }
 
     @Test
-    void testInsertVariableRI() throws InvalidRuleInfoException {
+    void testInsertVariableRI() throws InvalidRuleInfoException, DirectCycleException {
         Substitutions subs1 = new Substitutions();
         subs1.add(X, null);
         subs1.add(Y, null);
@@ -72,7 +73,7 @@ class SIndexTest {
     }
 
     @Test
-    void testInsertIntoMapSingleton() {
+    void testInsertIntoMapSingleton() throws DirectCycleException {
         RuleInfo ri = new RuleInfo("", 0 );
         int hash = 1;
         Singleton singleton = new Singleton();
@@ -88,7 +89,7 @@ class SIndexTest {
 
 
     @Test
-    void insertIntoMapLinear() {
+    void insertIntoMapLinear() throws DirectCycleException {
         RuleInfo ruleInfo1 = new RuleInfo("", 0, 1, 2, new Substitutions(), new FlagNodeSet(), new Support(-1));
         RuleInfo ruleInfo2 = new RuleInfo("", 0, 2, 1, new Substitutions(), new FlagNodeSet(), new Support(-1));
         linear.insertIntoMap(ruleInfo1, 0);

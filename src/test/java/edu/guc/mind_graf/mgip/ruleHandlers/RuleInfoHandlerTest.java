@@ -3,6 +3,7 @@ package edu.guc.mind_graf.mgip.ruleHandlers;
 import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.exceptions.InvalidRuleInfoException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.network.Network;
@@ -19,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class RuleInfoHandlerTest {
 
     @Test
-    void insertRI_shouldReturnRuleInfoSetWithCombinedConstantRI_whenInputRIHasNoSubstitutions() throws InvalidRuleInfoException, InvalidRuleInfoException {
+    void insertRI_shouldReturnRuleInfoSetWithCombinedConstantRI_whenInputRIHasNoSubstitutions() throws InvalidRuleInfoException, InvalidRuleInfoException, DirectCycleException {
         // Arrange
         RuleInfoHandler handler = new Ptree(0, 0);
         RuleInfo inputRI = new RuleInfo("", 0, 1, 0, new Substitutions(), new FlagNodeSet(), new Support(-1));

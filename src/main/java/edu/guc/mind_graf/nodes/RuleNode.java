@@ -60,8 +60,7 @@ public abstract class RuleNode extends PropositionNode {
         } catch (InvalidRuleInfoException e) {
             System.out.println("Inserting RI failed");
         } catch (DirectCycleException e) {
-            // TODO: sara a new exception, handle it as you like
-            throw new RuntimeException(e);
+            System.out.println("Direct Cycle Exception");
         }
 
     }
@@ -432,7 +431,6 @@ public abstract class RuleNode extends PropositionNode {
      * @throws DirectCycleException
      */
     protected void processSingleReports(Report currentReport) throws NoSuchTypeException, DirectCycleException {
-        // TODO: sara this code contains errors due to changes in the support class
         System.out.println(this.getName() + " Processing Reports as a Rule node");
         String currentReportContextName = currentReport.getContextName();
         int currentReportAttitudeID = currentReport.getAttitude();
@@ -724,16 +722,12 @@ public abstract class RuleNode extends PropositionNode {
 
     // method for any of the children rules to call whenever it needs to act as a
     // normal proposition node
-    public void grandparentMethodRequest(Request currentRequest) {
-        // super.processSingleRequests(currentRequest);
-        // TODO: sara, changed by wael to merge supports
-
+    public void grandparentMethodRequest(Request currentRequest) throws DirectCycleException, NoSuchTypeException {
+        super.processSingleRequests(currentRequest);
     }
 
-    public void grandparentMethodReport(Report currentReport) throws NoSuchTypeException {
-        // super.processSingleReports(currentReport);
-        // TODO: sara, changed by wael to merge supports
-
+    public void grandparentMethodReport(Report currentReport) throws NoSuchTypeException, DirectCycleException {
+        super.processSingleReports(currentReport);
     }
 
     public boolean isForwardReport() {

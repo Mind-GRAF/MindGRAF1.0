@@ -1,6 +1,7 @@
 package edu.guc.mind_graf.mgip.ruleHandlers;
 
 import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.exceptions.InvalidRuleInfoException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.network.Network;
@@ -47,7 +48,7 @@ class PtreeNodeTest {
     }
 
     @Test
-    public void testInsertIntoNode() throws InvalidRuleInfoException {
+    public void testInsertIntoNode() throws InvalidRuleInfoException, DirectCycleException {
 
         Substitutions subs1 = new Substitutions();
         subs1.add(X, Nemo);
@@ -60,7 +61,7 @@ class PtreeNodeTest {
     }
 
     @Test
-    public void testInsertIntoNodeSet() throws InvalidRuleInfoException {
+    public void testInsertIntoNodeSet() throws InvalidRuleInfoException, DirectCycleException {
         Substitutions subs1 = new Substitutions();
         subs1.add(X, Nemo);
         subs1.add(Y, Marlin);
