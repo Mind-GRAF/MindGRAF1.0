@@ -2,6 +2,7 @@ package edu.guc.mind_graf.mgip.ruleHandlers;
 
 import java.util.*;
 
+import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.exceptions.InvalidRuleInfoException;
 import edu.guc.mind_graf.nodes.FlagNode;
 import edu.guc.mind_graf.nodes.Node;
@@ -124,7 +125,7 @@ public class Ptree extends RuleInfoHandler {
     }
 
     @Override
-    public RuleInfoSet insertVariableRI(RuleInfo ri) throws InvalidRuleInfoException {
+    public RuleInfoSet insertVariableRI(RuleInfo ri) throws InvalidRuleInfoException, DirectCycleException {
         // when inserting a rule info into the tree, it should only have one flag node (that of the antecedent that caused it to be sent)
         if (ri.getFns().size() != 1){
             throw new InvalidRuleInfoException("RuleInfo should only have one flag node when being inserted in tree");
@@ -164,7 +165,7 @@ public class Ptree extends RuleInfoHandler {
         return null;
     }
 
-    private RuleInfoSet startPropagation() throws InvalidRuleInfoException {
+    private RuleInfoSet startPropagation() throws InvalidRuleInfoException, DirectCycleException {
         HashSet <PtreeNode> visited = new HashSet<>();
         ArrayDeque <PtreeNode> queue = new ArrayDeque<>(varSetLeafMap.values());
         RuleInfoSet rootRuleInfos = new RuleInfoSet();

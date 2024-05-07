@@ -3,6 +3,7 @@ package edu.guc.mind_graf.mgip.rules;
 import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.exceptions.InvalidRuleInfoException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
@@ -22,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class NumEntailmentTest {
 
     @Test
-    void mayInfer() throws NoSuchTypeException, InvalidRuleInfoException {
+    void mayInfer() throws NoSuchTypeException, InvalidRuleInfoException, DirectCycleException {
         Network network = new Network();
         Node one = Network.createNode("1", "propositionnode");
 
