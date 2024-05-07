@@ -784,8 +784,52 @@ public class Support {
 	}
 
 	public Support clone(){
-		return new Support(-1);
+		Support cloned = new Support(nodeID);
+        try {
+            cloned.union(this);
+        } catch (DirectCycleException e) {
+            System.out.println("Couldn't clone");
+        }
+		return cloned;
 	}
+
+//	private HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>>>> deepCloneMapOfMapsOfListsOfPairsOfMaps(HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>>>> original) {
+//		HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>>>> clonedMap = new HashMap<>();
+//		for (Integer key : original.keySet()) {
+//			HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>>> innerMap = original.get(key);
+//			HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>>> clonedInnerMap = new HashMap<>();
+//			for (Integer innerKey : innerMap.keySet()) {
+//				ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> innerList = innerMap.get(innerKey);
+//				ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> clonedInnerList = new ArrayList<>();
+//				for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> pair : innerList) {
+//					HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> pairFirst = pair.getFirst();
+//					HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> firstCloned = new HashMap<>();
+//					for(Integer i : pairFirst.keySet()){
+//						firstCloned.put(i, new Pair(pairFirst.get(i).getFirst().clone(), pairFirst.get(i).getSecond().clone()));
+//					}
+//					PropositionNodeSet secondCloned = pair.getSecond().clone();
+//					clonedInnerList.add(new Pair<>(firstCloned, secondCloned));
+//				}
+//				clonedInnerMap.put(innerKey, clonedInnerList);
+//			}
+//			clonedMap.put(key, clonedInnerMap);
+//		}
+//		return clonedMap;
+//	}
+//
+//	private HashMap<Integer, HashMap<Integer, SupportTree>> deepCloneMapOfMapsOfSupportTree(HashMap<Integer, HashMap<Integer, SupportTree>> original) {
+//		HashMap<Integer, HashMap<Integer, SupportTree>> clonedMap = new HashMap<>();
+//		for (Integer key : original.keySet()) {
+//			HashMap<Integer, SupportTree> innerMap = original.get(key);
+//			HashMap<Integer, SupportTree> clonedInnerMap = new HashMap<>();
+//			for (Integer innerKey : innerMap.keySet()) {
+//				SupportTree supportTree = innerMap.get(innerKey);
+//				clonedInnerMap.put(innerKey, supportTree.clone());
+//			}
+//			clonedMap.put(key, clonedInnerMap);
+//		}
+//		return clonedMap;
+//	}
 
 
 
