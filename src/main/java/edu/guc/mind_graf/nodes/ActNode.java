@@ -19,6 +19,7 @@ import edu.guc.mind_graf.support.Support;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Queue;
+import java.util.Scanner;
 import java.util.Stack;
 
 import edu.guc.mind_graf.cables.DownCable;
@@ -26,6 +27,7 @@ import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.cables.UpCable;
 import edu.guc.mind_graf.caseFrames.Adjustability;
 import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.exceptions.NoPlansExistForTheActException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 
@@ -219,6 +221,25 @@ public class ActNode extends Node {
         sendRequestsToNodeSet(new NodeSet(molecularNode), null, null, ContextController.getCurrContextName(), 0,
                 ChannelType.Act, this);
         variableCount++;
+    }
+
+    public void perform() throws NoSuchTypeException, NoPlansExistForTheActException, DirectCycleException{
+        /* BEGIN - Helpful Prints */
+        System.out.println("perform() method initated.\n");
+        System.out.println("-------------------------");
+        /* END - Helpful Prints */
+        Scheduler.initiate();
+        String currentContextName = ContextController.getCurrContextName();
+
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter your desired attitude: ");
+        String att = scanner.nextLine();
+        scanner.close();
+        int currentAttitudeID = 0;
+        System.out.println("Performing an act initiated in Context: " + currentContextName + " & Attitude: "
+                + currentAttitudeID);
+        Scheduler.addToActQueue(this);
+        System.out.println(Scheduler.schedule());
     }
 
     public void processIntends(boolean isHighStack) throws NoSuchTypeException, NoPlansExistForTheActException {
