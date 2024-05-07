@@ -1,6 +1,7 @@
 package edu.guc.mind_graf.mgip.rules;
 
 import edu.guc.mind_graf.cables.DownCableSet;
+import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.reports.Report;
 import edu.guc.mind_graf.mgip.ruleHandlers.OrEntailhandler;
@@ -35,5 +36,11 @@ public class OrEntailment  extends RuleNode {
 
     public void sendInferenceReports(HashMap<RuleInfo, Report> reports) {
         sendInferenceToCq(reports, cq);
+    }
+
+    public void applyRuleHandler(Report report) throws NoSuchTypeException {
+        if(report.isSign()){
+            super.applyRuleHandler(report);
+        }
     }
 }
