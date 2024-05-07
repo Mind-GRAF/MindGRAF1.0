@@ -2,20 +2,18 @@ package edu.guc.mind_graf.revision;
 
 import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.context.ContextController;
-import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.set.PropositionNodeSet;
-import edu.guc.mind_graf.support.Pair;
 
 import java.util.*;
 
 public class Revision {
-	public static void checkContradiction(Context c, int attitudeNumberOfAddedNode, PropositionNode node) {
+	public static ArrayList<Contradiction> checkContradiction(Context c, int attitudeNumberOfAddedNode, PropositionNode node) {
 		System.out.println("checking contradictions");
 		PropositionNode nodeCompliment = (PropositionNode) node.getNegation();
 		if(nodeCompliment == null){
 			//node complement is not in the network so a contradiction can never happen
-			return;
+			return null;
 		}
 		System.out.println("found negation"+ nodeCompliment);
 		//TODO: wael cache
@@ -35,13 +33,16 @@ public class Revision {
 		}
 		System.out.println("Found Contradictions: "+ contradictions);
 
-		if(!contradictions.isEmpty()){
-			if(ContextController.automaticHandlingEnabled()){
-				automaticContradictionHandling(c,attitudeNumberOfAddedNode,contradictions);
-			}else{
-				manualContradictionHandling(c,attitudeNumberOfAddedNode,contradictions);
-			}
-		}
+
+		//TODO: wael add a parent method
+		return contradictions;
+//		if(!contradictions.isEmpty()){
+//			if(ContextController.automaticHandlingEnabled()){
+//				automaticContradictionHandling(c,attitudeNumberOfAddedNode,contradictions);
+//			}else{
+//				manualContradictionHandling(c,attitudeNumberOfAddedNode,contradictions);
+//			}
+//		}
 
 	}
 
