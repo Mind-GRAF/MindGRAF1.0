@@ -24,7 +24,7 @@ public class KStarPath extends Path {
 	}
 
 	@Override
-	public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context) {
+	public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context, int attitude) {
 		LinkedList<Object[]> visited = new LinkedList<>();
 		HashSet<Node> seen = new HashSet<>();
 		LinkedList<Object[]> queue = new LinkedList<>();
@@ -39,7 +39,7 @@ public class KStarPath extends Path {
 				visited.add(current);
 				seen.add(current_node);
 
-				LinkedList<Object[]> neighbors = this.path.follow(current_node, current_trace, context);
+				LinkedList<Object[]> neighbors = this.path.follow(current_node, current_trace, context, attitude);
 				queue.addAll(neighbors);
 			}
 		}
@@ -48,7 +48,7 @@ public class KStarPath extends Path {
 	}
 
 	@Override
-	public LinkedList<Object[]> followConverse(Node node, PathTrace trace, Context context) {
+	public LinkedList<Object[]> followConverse(Node node, PathTrace trace, Context context, int attitude) {
 		LinkedList<Object[]> visited = new LinkedList<>();
 		HashSet<Node> seen = new HashSet<>();
 		LinkedList<Object[]> queue = new LinkedList<>();
@@ -63,7 +63,7 @@ public class KStarPath extends Path {
 				visited.add(current);
 				seen.add(current_node);
 
-				LinkedList<Object[]> neighbors = this.path.followConverse(current_node, current_trace, context);
+				LinkedList<Object[]> neighbors = this.path.followConverse(current_node, current_trace, context, attitude);
 				queue.addAll(neighbors);
 			}
 		}

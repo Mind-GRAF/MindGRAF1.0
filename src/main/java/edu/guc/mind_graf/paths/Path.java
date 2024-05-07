@@ -7,9 +7,9 @@ import edu.guc.mind_graf.nodes.Node;
 
 abstract public class Path {
 
-	abstract public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context);
+	abstract public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context, int attitude);
 
-	abstract public LinkedList<Object[]> followConverse(Node node, PathTrace trace, Context context);
+	abstract public LinkedList<Object[]> followConverse(Node node, PathTrace trace, Context context, int attitude);
 
 	abstract public Path clone();
 

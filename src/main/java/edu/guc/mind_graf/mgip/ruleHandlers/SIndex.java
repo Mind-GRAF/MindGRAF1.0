@@ -20,19 +20,6 @@ public abstract class SIndex extends RuleInfoHandler {
         this.commonVariables = commonVariables;
     }
 
-    public NodeSet getCommonVariables() {
-        return commonVariables;
-    }
-
-    public void setCommonVariables(NodeSet commonVariables) {
-        this.commonVariables = commonVariables;
-    }
-
-//    public SIndex createSIndex(PropositionNodeSet antecedents) {
-//        NodeSet commonVariables = antecedents.getCommonVariables();
-//        return new Linear(commonVariables);
-//    }
-
     protected int customHash(Substitutions subs) throws InvalidRuleInfoException {
         int hash = 0;
         int factor = 1;
@@ -65,6 +52,8 @@ public abstract class SIndex extends RuleInfoHandler {
             }
             return allRuleInfos;
     }
+
+    public abstract RuleInfoSet getAllRuleInfos();
 
     public abstract RuleInfoSet insertIntoMap(RuleInfo ri, int hash);
 

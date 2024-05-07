@@ -42,15 +42,15 @@ public class DomainRestrictPath extends Path {
 
 	@Override
 	public LinkedList<Object[]> follow(Node node, PathTrace trace,
-			Context context) {
+			Context context, int attitude) {
 		LinkedList<Object[]> result = new LinkedList<Object[]>();
-		LinkedList<Object[]> temp = q.follow(node, trace, context);
+		LinkedList<Object[]> temp = q.follow(node, trace, context, attitude);
 		for (Object[] objects : temp) {
 			Node n = (Node) objects[0];
 			PathTrace pt = (PathTrace) objects[1];
 			if (n.equals(this.zNode)) {
 				trace.addAllSupports(pt.getSupports());
-				result = p.follow(node, trace, context);
+				result = p.follow(node, trace, context, attitude);
 			}
 		}
 		return result;
@@ -58,9 +58,9 @@ public class DomainRestrictPath extends Path {
 
 	@Override
 	public LinkedList<Object[]> followConverse(Node node, PathTrace trace,
-			Context context) {
+			Context context, int attitude) {
 		return new RangeRestrictPath(this.q, this.p.converse(),
-				this.zNode).follow(node, trace, context);
+				this.zNode).follow(node, trace, context, attitude);
 
 	}
 

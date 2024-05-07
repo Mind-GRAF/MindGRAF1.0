@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 
 import edu.guc.mind_graf.mgip.rules.*;
 import edu.guc.mind_graf.paths.AndPath;
@@ -14,6 +15,8 @@ import edu.guc.mind_graf.paths.Path;
 import edu.guc.mind_graf.paths.PathTrace;
 import edu.guc.mind_graf.relations.Relation;
 import edu.guc.mind_graf.set.NodeSet;
+import edu.guc.mind_graf.acting.rules.DoIfNode;
+import edu.guc.mind_graf.acting.rules.WhenDoNode;
 import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.caseFrames.Adjustability;
@@ -24,7 +27,12 @@ import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.exceptions.CannotRemoveNodeException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.exceptions.NodeNotInNetworkException;
+import edu.guc.mind_graf.nodes.AchieveNode;
+import edu.guc.mind_graf.mgip.matching.Match;
+import edu.guc.mind_graf.mgip.matching.Matcher;
 import edu.guc.mind_graf.nodes.ActNode;
+import edu.guc.mind_graf.nodes.DoAllNode;
+import edu.guc.mind_graf.nodes.DoOneNode;
 import edu.guc.mind_graf.nodes.IndividualNode;
 import edu.guc.mind_graf.nodes.MolecularType;
 import edu.guc.mind_graf.nodes.Node;
@@ -37,10 +45,12 @@ public class Network {
 	private static HashMap<String, Node> baseNodes;
 	private static HashMap<String, Relation> relations;
 	private static HashMap<Integer, Node> propositionNodes;
+	private static HashMap<String, Context> Contexts;
 	public static HashMap<String, String> quantifiers = new HashMap<String, String>();
 	public static HashMap<String, CustomClass> userDefinedClasses = new HashMap<String, CustomClass>();
 	public static int MolecularCount;
-
+	
+	
 	public Network() {
 		nodes = new HashMap<Integer, Node>();
 		molecularNodes = new HashMap<String, HashMap<String, Node>>();
@@ -57,19 +67,24 @@ public class Network {
 	}
 
 	public void addBasicRelations() {
-		Network.createRelation("forall", "propositionnode", Adjustability.EXPAND, 2);
+		Network.createRelation("forall", "propositionnode", Adjustability.NONE, 1);
 		Network.createRelation("min", "individualnode", Adjustability.NONE, 1);
 		Network.createRelation("max", "individualnode", Adjustability.NONE, 1);
 		Network.createRelation("arg", "propositionnode", Adjustability.NONE, 1);
-		Network.createRelation("object", "", Adjustability.EXPAND, 2);
-		Network.createRelation("member", "", Adjustability.EXPAND, 2);
-		Network.createRelation("class", "", Adjustability.EXPAND, 2);
-		Network.createRelation("i", "individualnode", Adjustability.EXPAND, 2);
-		Network.createRelation("cq", "propositionnode", Adjustability.EXPAND, 2);
-		Network.createRelation("ant", "propositionnode", Adjustability.EXPAND, 2);
-		Network.createRelation("&ant", "propositionnode", Adjustability.EXPAND, 2);
-		Network.createRelation("thresh", "propositionnode", Adjustability.EXPAND, 2);
-		Network.createRelation("threshmax", "propositionnode", Adjustability.EXPAND, 2);
+		Network.createRelation("obj", "", Adjustability.NONE, 1);
+		Network.createRelation("member", "", Adjustability.NONE, 1);
+		Network.createRelation("class", "", Adjustability.NONE, 1);
+		Network.createRelation("i", "individualnode", Adjustability.NONE, 1);
+		Network.createRelation("cq", "propositionnode", Adjustability.NONE, 1);
+		Network.createRelation("ant", "propositionnode", Adjustability.NONE, 1);
+		Network.createRelation("thresh", "propositionnode", Adjustability.NONE, 1);
+		Network.createRelation("threshmax", "propositionnode", Adjustability.NONE, 1);
+		Network.createRelation("action", "propositionnode", Adjustability.NONE, 1);
+		Network.createRelation("do", "actnode", Adjustability.NONE, 1);
+		Network.createRelation("grade", "individualNode", Adjustability.NONE, 0);
+		Network.createRelation("prop", "propositionnode", Adjustability.NONE, 0);
+
+	
 	}
 
 	public void addBasicNodes() throws NoSuchTypeException {
@@ -102,9 +117,6 @@ public class Network {
 				case "individualnode":
 					node = new IndividualNode(downCableSet);
 					break;
-				// case "rulenode":
-				// node = new RuleNode(downCableSet);
-				// break;
 				case "andor":
 					node = new AndOr(downCableSet);
 					propositionNodes.put(node.getId(), node);
@@ -128,6 +140,21 @@ public class Network {
 				case "bridgerule":
 					node = new BridgeRule(downCableSet);
 					propositionNodes.put(node.getId(), node);
+					break;
+				case "doifnode":
+					node = new DoIfNode(downCableSet);
+					break;
+				case "whendonode":
+					node = new WhenDoNode(downCableSet);
+					break;
+				case "doonenode":
+					node = new DoOneNode(downCableSet);
+					break;
+				case "doallnode":
+					node = new DoAllNode(downCableSet);
+					break;
+				case "achievenode":
+					node = new AchieveNode(downCableSet);
 					break;
 				default:
 					if (userDefinedClasses.containsKey(SemanticType)) {
@@ -373,6 +400,8 @@ public class Network {
 		Class<?> newClass = c.createClass(methods, constructors);
 		userDefinedClasses.put(name, c);
 		return c;
+
+			
 	}
 
 	public static void RemoveNode(Node node) throws NodeNotInNetworkException,
@@ -456,6 +485,10 @@ public class Network {
 
 	public static HashMap<Integer, Node> getPropositionNodes() {
 		return propositionNodes;
+	}
+
+	public static HashMap<String, Context> getContexts() {
+		return Contexts;
 	}
 
 	public static void setQuantifiers(HashMap<String, String> quantifiers) {
@@ -720,7 +753,6 @@ public class Network {
 		// AndPath and2 = new AndPath(pCompose2);
 		//
 		// NodeSet oss = new NodeSet();
-
 	}
 
 }

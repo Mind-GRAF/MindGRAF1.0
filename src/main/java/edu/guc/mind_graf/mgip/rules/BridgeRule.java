@@ -1,10 +1,12 @@
 package edu.guc.mind_graf.mgip.rules;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 import edu.guc.mind_graf.cables.DownCable;
+import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.reports.KnownInstance;
@@ -20,6 +22,7 @@ import edu.guc.mind_graf.mgip.ruleHandlers.PtreeNode;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.context.ContextController;
+import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.set.NodeSet;
@@ -31,71 +34,72 @@ import edu.guc.mind_graf.set.RuleInfoSet;
 
 public class BridgeRule extends RuleNode {
 
-    private HashMap <Node, Integer> antToAttitude;
-    private  HashMap <Node, Integer> cqToAttitude;
+    private HashMap <Integer, NodeSet> attitudeToAnt;
+    private  HashMap <Integer, NodeSet> attitudeToCq;
     private int cAnt;
+    private int allAntecedents;
 
     public BridgeRule(DownCableSet downCableSet) {
         super(downCableSet);
-        antToAttitude = new HashMap<>();
-        cqToAttitude = new HashMap<>();
+        attitudeToAnt = new HashMap<>();
+        attitudeToCq = new HashMap<>();
         for(DownCable downCable : downCableSet){
             if(downCable.getRelation().getName().contains("-ant")){ // assuming all antecedents of a bridge rule would be of the form 1-ant where 1 is the attitude id
                 int attitude =  Integer.parseInt(downCable.getRelation().getName().split("-")[0]);
-                for(Node nodeAnt : downCable.getNodeSet()){
-                    antToAttitude.put(nodeAnt, attitude);
-                }
+                downCable.getNodeSet().addAllTo(attitudeToAnt.computeIfAbsent(attitude, k -> new NodeSet()));
             }
             else if(downCable.getRelation().getName().contains("-cq")){ // assuming all consequents of a bridge rule would be of the form 1-cq where 1 is the attitude id
                 int attitude =  Integer.parseInt(downCable.getRelation().getName().split("-")[0]);
-                for(Node nodeCq : downCable.getNodeSet()){
-                    cqToAttitude.put(nodeCq, attitude);
-                }
+                downCable.getNodeSet().addAllTo(attitudeToCq.computeIfAbsent(attitude, k -> new NodeSet()));
             }
         }
         PropositionNodeSet antecedents = new PropositionNodeSet();
-        for(Node antNode : antToAttitude.keySet()){
-            if(antNode.isOpen())
-                antecedents.add(antNode);
-        }
-        cAnt = antToAttitude.keySet().size() - antecedents.size();
-        this.ruleInfoHandler = Ptree.constructPtree(antecedents, antecedents.size(), Integer.MAX_VALUE, 2);
-    }
-
-    public boolean mayTryToInfer() {
-        if(cAnt < this.ruleInfoHandler.getConstantAntecedents().getPcount())
-            return false;
-        for(PtreeNode root : ((Ptree)ruleInfoHandler).getRoots()) {
-            if(root.getSIndex().getAllRuleInfos().isEmpty()) {  // maybe should also check pcount of roots?
-                return false;
+        for(int att: attitudeToAnt.keySet()){
+            for(Node antNode : attitudeToAnt.get(att)){
+                if(antNode.isOpen())
+                    antecedents.add(antNode);
+                allAntecedents++;
             }
         }
-        return true;
+        cAnt = allAntecedents - antecedents.size();
+        this.ruleInfoHandler = Ptree.constructPtree(antecedents, antecedents.size(), Integer.MAX_VALUE, 2);
+        this.ruleInfoHandler.setcMin(cAnt);
     }
+
+//    public boolean mayTryToInfer() {
+//        if(cAnt < this.ruleInfoHandler.getConstantAntecedents().getPcount())
+//            return false;
+//        for(PtreeNode root : ((Ptree)ruleInfoHandler).getRoots()) {
+//            if(root.getSIndex().getAllRuleInfos().isEmpty()) {  // maybe should also check pcount of roots?
+//                return false;
+//            }
+//        }
+//        return true;
+//    }
 
     public RuleInfoSet[] mayInfer() {
         RuleInfoSet[] inferrable = {new RuleInfoSet()};  // at index 0 the set of positively inferred, at index 1 the set of negatively inferred
-        if(mayTryToInfer()) {
-//            for (RuleInfo ri : ruleInfoHandler.getInferrableRuleInfos()) {
-            for(RuleInfo ri : this.getRootRuleInfos()){
-                if (ri.getPcount() == antToAttitude.size())
-                    inferrable[0].addRuleInfo(ri);
-            }
+        for(RuleInfo ri : this.getRootRuleInfos()){
+            if (ri.getPcount() == allAntecedents)
+                inferrable[0].addRuleInfo(ri);
         }
         return inferrable;
     }
 
-    public void applyRuleHandler(Report report) {
-        if(report.anySupportSupportedInAttitude(antToAttitude.get(report.getReporterNode()))) {
+    public void applyRuleHandler(Report report) throws NoSuchTypeException {
+        if(attitudeToAnt.containsKey(report.getAttitude()) && attitudeToAnt.get(report.getAttitude()).contains(report.getReporterNode())){
+            report.setAttitude(-1);
             super.applyRuleHandler(report);
         }
     }
 
-    public void putInferenceReportOnQueue(Report report) {
-        for(Node node : cqToAttitude.keySet()) {
-            report.setAttitude(cqToAttitude.get(node));
-            report.setRequesterNode(node);
-            Scheduler.addToHighQueue(report);
+    public void sendInferenceReports(HashMap<RuleInfo, Report> reports) {
+        for(Report report : reports.values()) {
+            for(int att : attitudeToCq.keySet()){
+                Report newReportInAttitude = report.clone();
+                newReportInAttitude.setAttitude(att);
+                sendReportToConsequents(attitudeToCq.get(att), newReportInAttitude);
+            }
         }
     }
 
@@ -144,8 +148,10 @@ public class BridgeRule extends RuleNode {
      * Request handling in Rule proposition nodes.
      * 
      * @param currentRequest
+     * @throws NoSuchTypeException 
+     * @throws DirectCycleException 
      */
-    protected void processSingleRequests(Request currentRequest) {
+    protected void processSingleRequests(Request currentRequest) throws DirectCycleException, NoSuchTypeException {
         Channel currentChannel = currentRequest.getChannel();
         if (currentChannel instanceof AntecedentToRuleChannel || currentChannel instanceof MatchChannel)
             super.processSingleRequests(currentRequest);
@@ -157,7 +163,7 @@ public class BridgeRule extends RuleNode {
             Substitutions switchRuleSubs = currentChannel.getSwitcherSubstitutions();
 
             if (!this.isOpen()) {
-                if (this.supported(currentContext, currentAttitude)) {
+                if (this.supported(currentContext, currentAttitude,0)) {
                     NodeSet antArgCloseToMe = getDownAntArgNodeSet();
                     NodeSet antArgNodesToConiderClose = removeAlreadyEstablishedChannels(antArgCloseToMe,
                             currentRequest,
@@ -205,13 +211,13 @@ public class BridgeRule extends RuleNode {
 
     }
 
-    protected void processSingleReports(Report currentReport) throws NoSuchTypeException {
+    protected void processSingleReports(Report currentReport) throws NoSuchTypeException, DirectCycleException {
         String currentReportContextName = currentReport.getContextName();
         int currentReportAttitudeID = currentReport.getAttitude();
         Substitutions currentReportSubs = currentReport.getSubstitutions();
         boolean forwardReportType = currentReport.getInferenceType() == InferenceType.FORWARD;
 
-        boolean assertedInContext = supported(currentReportContextName, currentReportAttitudeID);
+        boolean assertedInContext = supported(currentReportContextName, currentReportAttitudeID,0);
         Substitutions onlySubsBindFreeVar = onlyRelevantSubs(currentReportSubs);
 
         if (currentReport.getReportType() == ReportType.AntRule) {

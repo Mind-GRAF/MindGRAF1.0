@@ -1,14 +1,15 @@
 package edu.guc.mind_graf.nodes;
 
 import edu.guc.mind_graf.set.PropositionNodeSet;
+import edu.guc.mind_graf.support.Support;
 
 public class FlagNode {
 
     private Node node; // would normally be an antecedent
     private boolean flag;
-    private PropositionNodeSet support; //the support supporting the report the node sent
+    private Support support; //the support supporting the report the node sent
 
-    public FlagNode(Node node, boolean flag, PropositionNodeSet support) {
+    public FlagNode(Node node, boolean flag, Support support) {
         this.node = node;
         this.flag = flag;
         this.support = support;
@@ -26,21 +27,32 @@ public class FlagNode {
         return flag;
     }
 
-    public void setFlag(boolean flag) {
-        this.flag = flag;
-    }
+//    public void setFlag(boolean flag) {
+//        this.flag = flag;
+//    }
+//
+//    public PropositionNodeSet getSupport() {
+//        return support;
+//    }
+//
+//    public void setSupport(PropositionNodeSet support) {
+//        this.support = support;
+//    }
 
-    public PropositionNodeSet getSupport() {
+    public Support getSupport() {
         return support;
     }
 
-    public void setSupport(PropositionNodeSet support) {
+    public void setSupport(Support support) {
         this.support = support;
     }
 
-    public boolean equals(FlagNode fn) {
-        // maybe throw exception here if nodes equal but flags different
-        return this.node.equals(fn.getNode());
+    public boolean equals(Object o) {
+        // maybe throw exception here if nodes equal but flags different => don't cz that should never happen
+        if(!(o instanceof FlagNode))
+            return false;
+        FlagNode fn = (FlagNode) o;
+        return this.node.equals(fn.node);
     }
 
     @Override

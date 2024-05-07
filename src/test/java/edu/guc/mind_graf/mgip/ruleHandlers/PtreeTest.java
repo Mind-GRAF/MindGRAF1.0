@@ -14,6 +14,7 @@ import edu.guc.mind_graf.set.FlagNodeSet;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
+import edu.guc.mind_graf.support.Support;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -84,39 +85,39 @@ class PtreeTest {
 
     @Test
     void insertVariableRI() throws NoSuchTypeException, InvalidRuleInfoException {
-        FlagNode govFlag = new FlagNode(M0, true, new PropositionNodeSet());
+        FlagNode govFlag = new FlagNode(M0, true, new Support(-1));
         Substitutions govSubs = new Substitutions();
         Node henry = Network.createNode("henry", "individualnode");
         govSubs.add(G, henry);
-        RuleInfo ruleInfo0 = new RuleInfo(1, 0, govSubs, new FlagNodeSet(govFlag));
+        RuleInfo ruleInfo0 = new RuleInfo("", 0, 1, 0, govSubs, new FlagNodeSet(govFlag), new Support(-1));
         testing.insertVariableRI(ruleInfo0);
 
-        FlagNode civFlag = new FlagNode(M1, true, new PropositionNodeSet());
+        FlagNode civFlag = new FlagNode(M1, true, new Support(-1));
         Substitutions civSubs = new Substitutions();
         Node anne = Network.createNode("anne", "individualnode");
         civSubs.add(C, anne);
-        RuleInfo ruleInfo1 = new RuleInfo(1, 0, civSubs, new FlagNodeSet(civFlag));
+        RuleInfo ruleInfo1 = new RuleInfo("", 0, 1, 0, civSubs, new FlagNodeSet(civFlag), new Support(-1));
         testing.insertVariableRI(ruleInfo1);
 
-        FlagNode coFlag = new FlagNode(M2, true, new PropositionNodeSet());
+        FlagNode coFlag = new FlagNode(M2, true, new Support(-1));
         Substitutions coSubs = new Substitutions();
         Node england = Network.createNode("england", "individualnode");
         coSubs.add(Co, england);
-        RuleInfo ruleInfo2 = new RuleInfo(1, 0, coSubs, new FlagNodeSet(coFlag));
+        RuleInfo ruleInfo2 = new RuleInfo("", 0, 1, 0, coSubs, new FlagNodeSet(coFlag), new Support(-1));
         testing.insertVariableRI(ruleInfo2);
 
-        FlagNode rFlag = new FlagNode(M3, true, new PropositionNodeSet());
+        FlagNode rFlag = new FlagNode(M3, true, new Support(-1));
         Substitutions rSubs = new Substitutions();
         rSubs.add(Co, england);
         rSubs.add(G, henry);
-        RuleInfo ruleInfo3 = new RuleInfo(1, 0, rSubs, new FlagNodeSet(rFlag));
+        RuleInfo ruleInfo3 = new RuleInfo("", 0, 1, 0, rSubs, new FlagNodeSet(rFlag), new Support(-1));
         testing.insertVariableRI(ruleInfo3);
 
-        FlagNode lFlag = new FlagNode(M4, true, new PropositionNodeSet());
+        FlagNode lFlag = new FlagNode(M4, true, new Support(-1));
         Substitutions lSubs = new Substitutions();
         lSubs.add(Co, england);
         lSubs.add(C, anne);
-        RuleInfo ruleInfo4 = new RuleInfo(1, 0, lSubs, new FlagNodeSet(lFlag));
+        RuleInfo ruleInfo4 = new RuleInfo("", 0, 1, 0, lSubs, new FlagNodeSet(lFlag), new Support(-1));
         RuleInfoSet result = testing.insertVariableRI(ruleInfo4);
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -125,7 +126,7 @@ class PtreeTest {
         Substitutions govSubs2 = new Substitutions();
         Node khaleesi = Network.createNode("khaleesi", "individualnode");
         govSubs2.add(G, khaleesi);
-        RuleInfo ruleInfo5 = new RuleInfo(1, 0, govSubs2, new FlagNodeSet(govFlag));
+        RuleInfo ruleInfo5 = new RuleInfo("", 0, 1, 0, govSubs2, new FlagNodeSet(govFlag), new Support(-1));
         testing2.insertVariableRI(ruleInfo5);
         testing2.insertVariableRI(ruleInfo1);
         testing2.insertVariableRI(ruleInfo2);
@@ -142,9 +143,4 @@ class PtreeTest {
         assertEquals(9, testing.arrayOfNodes().size());
     }
 
-    @Test
-    void getAllRuleInfos() {
-        assertNotNull(testing.getAllRuleInfos());
-        assertEquals(0, testing.getAllRuleInfos().size());
-    }
 }

@@ -6,7 +6,10 @@ import java.util.Hashtable;
 import java.util.Iterator;
 
 import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.set.PropositionNodeSet;
+import edu.guc.mind_graf.support.Support;
+import edu.guc.mind_graf.support.Support;
 
 public class KnownInstanceSet implements Iterable<KnownInstance> {
 
@@ -14,15 +17,15 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
     public Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> negativeKInstances;
 
     public KnownInstanceSet() {
-        positiveKInstances = new Hashtable<Integer, Hashtable<Substitutions, KnownInstance>>();
-        negativeKInstances = new Hashtable<Integer, Hashtable<Substitutions, KnownInstance>>();
+        positiveKInstances = new Hashtable<>();
+        negativeKInstances = new Hashtable<>();
 
     }
 
-    public boolean addKnownInstance(Report Report) {
+    public boolean addKnownInstance(Report Report) throws DirectCycleException {
         Boolean ReportSign = Report.isSign();
         Substitutions ReportSubs = Report.getSubstitutions();
-        PropositionNodeSet Supports = Report.getSupport();
+        Support Supports = Report.getSupport();
         int attitude = Report.getAttitude();
         if (ReportSign) {
             Hashtable<Substitutions, KnownInstance> targetSet = positiveKInstances.remove(attitude);
@@ -44,8 +47,7 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
                             return false;
 
                         } else {
-                            PropositionNodeSet supportSet = targetKnownInstance.getSupports();
-                            targetKnownInstance.setSupports(Supports.union(supportSet));
+                            targetKnownInstance.getSupports().union(Supports);
                             targetSet.put(ReportSubs, targetKnownInstance);
                             positiveKInstances.put(attitude, targetSet);
                             return true;
@@ -79,8 +81,7 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
 
                             return false;
                         } else {
-                            PropositionNodeSet supportSet = targetKnownInstance.getSupports();
-                            targetKnownInstance.setSupports(Supports.union(supportSet));
+                            targetKnownInstance.getSupports().union(Supports);
                             targetSet.put(ReportSubs, targetKnownInstance);
                             positiveKInstances.put(attitude, targetSet);
                             return true;
@@ -94,6 +95,7 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
         return false;
 
     }
+
 
     public Collection<KnownInstance> mergeKInstancesBasedOnAtt(
             int i) {

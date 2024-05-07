@@ -1,19 +1,15 @@
 package edu.guc.mind_graf.mgip.reports;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import edu.guc.mind_graf.components.Substitutions;
-import edu.guc.mind_graf.network.Network;
-import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.set.PropositionNodeSet;
+import edu.guc.mind_graf.support.Support;
 
 public class KnownInstance {
     private Substitutions substitutions;
-    private PropositionNodeSet supports;
+    private Support supports;
     private int attitudeID;
 
-    public KnownInstance(Substitutions substitutions, PropositionNodeSet supports, int attitudeID) {
+    public KnownInstance(Substitutions substitutions, Support supports, int attitudeID) {
         this.substitutions = substitutions;
         this.supports = supports;
         this.attitudeID = attitudeID;
@@ -65,11 +61,11 @@ public class KnownInstance {
         this.attitudeID = attitudeID;
     }
 
-    public PropositionNodeSet getSupports() {
+    public Support getSupports() {
         return supports;
     }
 
-    public void setSupports(PropositionNodeSet supports) {
+    public void setSupports(Support supports) {
         this.supports = supports;
     }
 

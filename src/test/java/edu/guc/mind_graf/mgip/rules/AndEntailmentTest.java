@@ -17,6 +17,7 @@ import edu.guc.mind_graf.set.FlagNodeSet;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
+import edu.guc.mind_graf.support.Support;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -69,42 +70,42 @@ class AndEntailmentTest {
         DownCable brainwashedC = new DownCable(brainwashed, new NodeSet(C));
         Node M5 = Network.createNode("propositionnode", new DownCableSet(brainwashG, brainwashedC));
 
-        Node P0 = Network.createNode("andentailment", new DownCableSet(new DownCable(Network.getRelations().get("&ant"), new NodeSet(M0, M1, M2, M3, M4)),
+        Node P0 = Network.createNode("andentailment", new DownCableSet(new DownCable(Network.getRelations().get("ant"), new NodeSet(M0, M1, M2, M3, M4)),
                 new DownCable(Network.getRelations().get("cq"), new NodeSet(M5))));
 
-        FlagNode govFlag = new FlagNode(M0, true, new PropositionNodeSet());
+        FlagNode govFlag = new FlagNode(M0, true, new Support(-1));
         Substitutions govSubs = new Substitutions();
         Node henry = Network.createNode("henry", "individualnode");
         govSubs.add(G, henry);
-        RuleInfo ruleInfo0 = new RuleInfo(1, 0, govSubs, new FlagNodeSet(govFlag));
+        RuleInfo ruleInfo0 = new RuleInfo("", 0, 1, 0, govSubs, new FlagNodeSet(govFlag), new Support(-1));
         ((RuleNode)P0).getRuleInfoHandler().insertRI(ruleInfo0);
 
-        FlagNode civFlag = new FlagNode(M1, true, new PropositionNodeSet());
+        FlagNode civFlag = new FlagNode(M1, true, new Support(-1));
         Substitutions civSubs = new Substitutions();
         Node anne = Network.createNode("anne", "individualnode");
         civSubs.add(C, anne);
-        RuleInfo ruleInfo1 = new RuleInfo(1, 0, civSubs, new FlagNodeSet(civFlag));
+        RuleInfo ruleInfo1 = new RuleInfo("", 0, 1, 0, civSubs, new FlagNodeSet(civFlag), new Support(-1));
         ((RuleNode)P0).getRuleInfoHandler().insertRI(ruleInfo1);
 
-        FlagNode coFlag = new FlagNode(M2, true, new PropositionNodeSet());
+        FlagNode coFlag = new FlagNode(M2, true, new Support(-1));
         Substitutions coSubs = new Substitutions();
         Node england = Network.createNode("england", "individualnode");
         coSubs.add(Co, england);
-        RuleInfo ruleInfo2 = new RuleInfo(1, 0, coSubs, new FlagNodeSet(coFlag));
+        RuleInfo ruleInfo2 = new RuleInfo("", 0, 1, 0, coSubs, new FlagNodeSet(coFlag), new Support(-1));
         ((RuleNode)P0).getRuleInfoHandler().insertRI(ruleInfo2);
 
-        FlagNode rFlag = new FlagNode(M3, true, new PropositionNodeSet());
+        FlagNode rFlag = new FlagNode(M3, true, new Support(-1));
         Substitutions rSubs = new Substitutions();
         rSubs.add(Co, england);
         rSubs.add(G, henry);
-        RuleInfo ruleInfo3 = new RuleInfo(1, 0, rSubs, new FlagNodeSet(rFlag));
+        RuleInfo ruleInfo3 = new RuleInfo("", 0, 1, 0, rSubs, new FlagNodeSet(rFlag), new Support(-1));
         ((RuleNode)P0).getRuleInfoHandler().insertRI(ruleInfo3);
 
-        FlagNode lFlag = new FlagNode(M4, true, new PropositionNodeSet());
+        FlagNode lFlag = new FlagNode(M4, true, new Support(-1));
         Substitutions lSubs = new Substitutions();
         lSubs.add(Co, england);
         lSubs.add(C, anne);
-        RuleInfo ruleInfo4 = new RuleInfo(1, 0, lSubs, new FlagNodeSet(lFlag));
+        RuleInfo ruleInfo4 = new RuleInfo("", 0, 1, 0, lSubs, new FlagNodeSet(lFlag), new Support(-1));
         RuleInfoSet inserted = ((RuleNode)P0).getRuleInfoHandler().insertRI(ruleInfo4);
         ((RuleNode)P0).setRootRuleInfos(inserted);
 

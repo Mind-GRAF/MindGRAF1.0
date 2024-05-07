@@ -25,29 +25,27 @@ public interface MindGRAF_ParserConstants {
   /** RegularExpression Id. */
   int N = 11;
   /** RegularExpression Id. */
-  int BOOL = 12;
+  int IDENTIFIER = 12;
   /** RegularExpression Id. */
-  int IDENTIFIER = 13;
+  int LETTER = 13;
   /** RegularExpression Id. */
-  int LETTER = 14;
+  int DIGIT = 14;
   /** RegularExpression Id. */
-  int DIGIT = 15;
+  int ANDOR_THRESH = 15;
   /** RegularExpression Id. */
-  int ANDOR_THRESH = 16;
+  int WHENDO_DOIF = 16;
   /** RegularExpression Id. */
-  int WHENDO_DOIF = 17;
+  int QUANTIFIER = 17;
   /** RegularExpression Id. */
-  int QUANTIFIER = 18;
+  int ENTAILMENT = 18;
   /** RegularExpression Id. */
-  int ENTAILMENT = 19;
+  int VARIABLE = 19;
   /** RegularExpression Id. */
-  int VARIABLE = 20;
+  int WFF_NAME = 20;
   /** RegularExpression Id. */
-  int WFF_NAME = 21;
+  int STRING = 21;
   /** RegularExpression Id. */
-  int STRING = 22;
-  /** RegularExpression Id. */
-  int PREDICATE_NAME_BRACKET = 23;
+  int PREDICATE_NAME_BRACKET = 22;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -66,7 +64,6 @@ public interface MindGRAF_ParserConstants {
     "\"set-mode-2\"",
     "\"set-mode-3\"",
     "<N>",
-    "<BOOL>",
     "<IDENTIFIER>",
     "<LETTER>",
     "<DIGIT>",
@@ -78,19 +75,30 @@ public interface MindGRAF_ParserConstants {
     "<WFF_NAME>",
     "<STRING>",
     "<PREDICATE_NAME_BRACKET>",
-    "\")\"",
-    "\"(\"",
+    "\"g{\"",
     "\",\"",
     "\"}\"",
+    "\")\"",
+    "\"(\"",
     "\"=>\"",
     "\"{\"",
-    "\"define-context \"",
-    "\"add-to-context\"",
-    "\"[\"",
-    "\"]\"",
+    "\"snsequence{\"",
+    "\"attitude{\"",
+    "\"achieve{\"",
+    "\"doone{\"",
+    "\"do-one{\"",
+    "\"guard{\"",
+    "\"snif{\"",
+    "\"sniterate{\"",
     "\"define-frame\"",
     "\"define-semantic\"",
     "\"add-bridge\"",
+    "\"[\"",
+    "\"]\"",
+    "\"describe-context\"",
+    "\"remove-from-context\"",
+    "\"add-to-context\"",
+    "\"back-infer\"",
     "\"forward-infer\"",
     "\"get-contexts\"",
     "\"set-curr-context\"",
@@ -119,6 +127,7 @@ public interface MindGRAF_ParserConstants {
     "\"~\"",
     "\"set-uvbr\"",
     "\"set-attitudes\"",
+    "\"define-context\"",
     "\"set-telescopable \"",
     "\"set-closed-consequence \"",
     "\"set-closed-conjunction \"",

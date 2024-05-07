@@ -1,16 +1,15 @@
 package edu.guc.mind_graf.mgip.rules;
 
 import edu.guc.mind_graf.cables.DownCableSet;
-import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.reports.Report;
 import edu.guc.mind_graf.mgip.ruleHandlers.Ptree;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfoHandler;
-import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.RuleNode;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
+import java.util.HashMap;
 
 public class Thresh extends RuleNode {
 
@@ -34,19 +33,14 @@ public class Thresh extends RuleNode {
         for(RuleInfo ri : this.getRootRuleInfos()){
             if(ri.getPcount() == thresh - 1 && ri.getNcount() == arg.size() - threshmax)
                 inferrable[1].addRuleInfo(ri);
-            else if(ri.getPcount() >= thresh && ri.getNcount() >= (arg.size() - threshmax - 1))
+            else if(ri.getPcount() >= thresh && ri.getNcount() == (arg.size() - threshmax - 1))
                 inferrable[0].addRuleInfo(ri);
         }
         return inferrable;
     }
 
-    public void putInferenceReportOnQueue(Report report) {
-        for(Node node : arg) {
-            if(!report.getSupport().contains(node)) {
-                report.setRequesterNode(node);
-                Scheduler.addToHighQueue(report);
-            }
-        }
+    public void sendInferenceReports(HashMap<RuleInfo, Report> reports) {
+        sendResponseToArgs(reports, arg);
     }
 
 }

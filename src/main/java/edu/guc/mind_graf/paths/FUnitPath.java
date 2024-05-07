@@ -17,7 +17,7 @@ public class FUnitPath extends Path {
 	}
 
 	@Override
-	public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context) {
+	public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context, int attitude) {
 		LinkedList<Object[]> result = new LinkedList<Object[]>();
 		if (node.isMolecular()) {
 			DownCable d = node.getDownCable(relation.getName());
@@ -36,8 +36,8 @@ public class FUnitPath extends Path {
 
 	@Override
 	public LinkedList<Object[]> followConverse(Node node, PathTrace trace,
-			Context context) {
-		return new BUnitPath(this.relation).follow(node, trace, context);
+			Context context, int attitude) {
+		return new BUnitPath(this.relation).follow(node, trace, context, attitude);
 
 	}
 

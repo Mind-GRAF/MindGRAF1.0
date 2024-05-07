@@ -11,6 +11,7 @@ import edu.guc.mind_graf.set.FlagNodeSet;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
+import edu.guc.mind_graf.support.Support;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -18,32 +19,14 @@ import static org.junit.jupiter.api.Assertions.*;
 class RuleInfoHandlerTest {
 
     @Test
-    void getConstantAntecedents() {
-        // Arrange
-        RuleInfoHandler handler = new Orentailhandler();
-
-        // Act
-        RuleInfo constantRI = handler.getConstantAntecedents();
-
-        // Assert
-        assertNotNull(constantRI);
-        assertEquals(0, constantRI.getPcount());
-        assertEquals(0, constantRI.getNcount());
-        assertNotNull(constantRI.getSubs());
-        assertTrue(constantRI.getSubs().isEmpty());
-        assertNotNull(constantRI.getFns());
-        assertTrue(constantRI.getFns().isEmpty());
-    }
-
-    @Test
     void insertRI_shouldReturnRuleInfoSetWithCombinedConstantRI_whenInputRIHasNoSubstitutions() throws InvalidRuleInfoException, InvalidRuleInfoException {
         // Arrange
         RuleInfoHandler handler = new Ptree(0, 0);
-        RuleInfo inputRI = new RuleInfo(1, 0, new Substitutions(), new FlagNodeSet());
+        RuleInfo inputRI = new RuleInfo("", 0, 1, 0, new Substitutions(), new FlagNodeSet(), new Support(-1));
 
         // Act
         RuleInfoSet result = handler.insertRI(inputRI);
-        RuleInfo constantRI = handler.getConstantAntecedents();
+        RuleInfo constantRI = handler.getConstantAntecedents("", 0);
 
         // Assert
         assertNotNull(result);

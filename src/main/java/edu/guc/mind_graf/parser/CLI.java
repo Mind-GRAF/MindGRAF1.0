@@ -16,7 +16,7 @@ public class CLI {
     private static boolean conjunctionAttitudes;
     private static boolean consequentAttitudes;
     private static boolean telescopable;
-    static boolean definingSemanticType = false;
+    //static boolean definingSemanticType = false;
     private static Scanner sc = new Scanner(System.in);
 
     @SuppressWarnings("unchecked")

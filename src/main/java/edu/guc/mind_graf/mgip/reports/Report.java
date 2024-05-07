@@ -1,14 +1,16 @@
 package edu.guc.mind_graf.mgip.reports;
 
+import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.requests.ChannelType;
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.set.PropositionNodeSet;
+import edu.guc.mind_graf.support.Support;
 
 public class Report {
     private Substitutions substitutions;
-    private PropositionNodeSet support;
+    private Support support;
     private boolean sign;
     private InferenceType inferenceType;
     private Node requesterNode;
@@ -17,7 +19,7 @@ public class Report {
     private ReportType reportType;
     private Node reporterNode;
 
-    public Report(Substitutions substitution, PropositionNodeSet suppt, int attitudeid,
+    public Report(Substitutions substitution, Support suppt, int attitudeid,
                   boolean sign, InferenceType inference, Node requesterNode, Node reporterNode) {
         this.substitutions = substitution;
         this.attitude = attitudeid;
@@ -69,11 +71,11 @@ public class Report {
         this.substitutions = substitutions;
     }
 
-    public PropositionNodeSet getSupport() {
+    public Support getSupport() {
         return support;
     }
 
-    public void setSupport(PropositionNodeSet support) {
+    public void setSupport(Support support) {
         this.support = support;
     }
 
@@ -128,6 +130,12 @@ public class Report {
             case RuleCons:
                 this.setReportType(ReportType.RuleCons);
                 break;
+            case WhenRule:
+                this.setReportType(ReportType.WhenRule);
+                break;
+            case IfRule:
+                this.setReportType(ReportType.IfRule);
+                break;
             default:
                 // handle error or do nothing
                 break;
@@ -155,4 +163,9 @@ public class Report {
         // TODO
         return true;
     }
+
+    public Report clone() {
+        return new Report(this.substitutions, this.support, this.attitude, this.sign, this.inferenceType, this.requesterNode, this.reporterNode);
+    }
+
 }

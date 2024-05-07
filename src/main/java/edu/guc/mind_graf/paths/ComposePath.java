@@ -37,51 +37,51 @@ public class ComposePath extends Path {
 	}
 
 	@Override
-	public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context) {
+	public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context, int attitude) {
 		if (this.paths.isEmpty())
 			return new LinkedList<Object[]>();
 
 		LinkedList<Path> paths = new LinkedList<Path>(this.paths);
 		Path p = paths.removeFirst();
 		ComposePath cPath = new ComposePath(paths);
-		LinkedList<Object[]> pathList = p.follow(node, trace, context);
-		return follow(pathList, cPath, context);
+		LinkedList<Object[]> pathList = p.follow(node, trace, context, attitude);
+		return follow(pathList, cPath, context, attitude);
 	}
 
-	private LinkedList<Object[]> follow(LinkedList<Object[]> pathList, ComposePath cPath, Context context) {
+	private LinkedList<Object[]> follow(LinkedList<Object[]> pathList, ComposePath cPath, Context context, int attitude) {
 		if (cPath.getPaths().isEmpty())
 			return pathList;
 		LinkedList<Object[]> result = new LinkedList<Object[]>();
 		for (int i = 0; i < pathList.size(); i++) {
 			Node node = (Node) pathList.get(i)[0];
 			PathTrace pt = (PathTrace) pathList.get(i)[1];
-			LinkedList<Object[]> fList = cPath.follow(node, pt, context);
+			LinkedList<Object[]> fList = cPath.follow(node, pt, context, attitude);
 			result.addAll(fList);
 		}
 		return result;
 	}
 
 	@Override
-	public LinkedList<Object[]> followConverse(Node node, PathTrace trace, Context context) {
+	public LinkedList<Object[]> followConverse(Node node, PathTrace trace, Context context, int attitude) {
 		if (this.paths.isEmpty())
 			return new LinkedList<Object[]>();
 
 		LinkedList<Path> paths = new LinkedList<Path>(this.paths);
 		Path p = paths.removeFirst();
 		ComposePath cPath = new ComposePath(paths);
-		LinkedList<Object[]> pathList = p.followConverse(node, trace, context);
-		return followConverse(pathList, cPath, context);
+		LinkedList<Object[]> pathList = p.followConverse(node, trace, context, attitude);
+		return followConverse(pathList, cPath, context, attitude);
 
 	}
 
-	private LinkedList<Object[]> followConverse(LinkedList<Object[]> pathList, ComposePath cPath, Context context) {
+	private LinkedList<Object[]> followConverse(LinkedList<Object[]> pathList, ComposePath cPath, Context context, int attitude) {
 		if (cPath.getPaths().isEmpty())
 			return pathList;
 		LinkedList<Object[]> result = new LinkedList<Object[]>();
 		for (int i = 0; i < pathList.size(); i++) {
 			Node node = (Node) pathList.get(i)[0];
 			PathTrace pt = (PathTrace) pathList.get(i)[1];
-			LinkedList<Object[]> fList = cPath.followConverse(node, pt, context);
+			LinkedList<Object[]> fList = cPath.followConverse(node, pt, context, attitude);
 			result.addAll(fList);
 		}
 		return result;
