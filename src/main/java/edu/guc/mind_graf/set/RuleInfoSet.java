@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.PropositionNode;
@@ -22,7 +23,7 @@ public class RuleInfoSet implements Iterable<RuleInfo>{
         ris.add(ri);
     }
 
-    public void combine(RuleInfo ri) {
+    public void combine(RuleInfo ri) throws DirectCycleException {
         HashSet<RuleInfo> result = new HashSet<>();
         for (RuleInfo r : ris) {
             RuleInfo combined = r.combine(ri);
@@ -34,7 +35,7 @@ public class RuleInfoSet implements Iterable<RuleInfo>{
         this.ris = result;
     } // for every ruleinfo in the set, combine it with the given ruleinfo and add the result to the set
 
-    public RuleInfoSet combineAdd(RuleInfo ri) {
+    public RuleInfoSet combineAdd(RuleInfo ri) throws DirectCycleException {
         RuleInfoSet newInfo = new RuleInfoSet();
         HashSet<RuleInfo> newRIS = new HashSet<>();
         for(RuleInfo r : ris) {
@@ -52,7 +53,7 @@ public class RuleInfoSet implements Iterable<RuleInfo>{
         return newInfo;    // return only the ruleinfo affected by the addition
     }
 
-    public RuleInfoSet combineAdd(RuleInfoSet combineWith) {
+    public RuleInfoSet combineAdd(RuleInfoSet combineWith) throws DirectCycleException {
         RuleInfoSet newInfo = new RuleInfoSet();
         HashSet combinedSet = new HashSet();
         for(RuleInfo r1 : combineWith.getRIS()) {
@@ -86,7 +87,7 @@ public class RuleInfoSet implements Iterable<RuleInfo>{
         return result;
     }
 
-    public RuleInfoSet combineDisjointSets(RuleInfoSet combineWith){
+    public RuleInfoSet combineDisjointSets(RuleInfoSet combineWith) throws DirectCycleException {
         RuleInfoSet result = new RuleInfoSet();
         for(RuleInfo ofSet1 : this){
             for(RuleInfo ofSet2 : this){
@@ -100,7 +101,7 @@ public class RuleInfoSet implements Iterable<RuleInfo>{
         ris.remove(toRemove);
     }
 
-    public void addRootRuleInfo(RuleInfoSet inserted) {
+    public void addRootRuleInfo(RuleInfoSet inserted) throws DirectCycleException {
         for(RuleInfo rInserted : inserted){
             for(RuleInfo rRoot : ris){
                 if(rInserted.getSubs().isDisjoint(rRoot.getSubs())){

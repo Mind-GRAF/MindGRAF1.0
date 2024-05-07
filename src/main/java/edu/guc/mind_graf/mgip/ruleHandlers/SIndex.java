@@ -1,6 +1,7 @@
 package edu.guc.mind_graf.mgip.ruleHandlers;
 
 import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.exceptions.InvalidRuleInfoException;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.set.NodeSet;
@@ -37,12 +38,12 @@ public abstract class SIndex extends RuleInfoHandler {
     }
 
     @Override
-    public RuleInfoSet insertVariableRI(RuleInfo ri) throws InvalidRuleInfoException {
+    public RuleInfoSet insertVariableRI(RuleInfo ri) throws InvalidRuleInfoException, DirectCycleException {
         int hash = customHash(ri.getSubs());
         return insertIntoMap(ri, hash);
     }
 
-    public RuleInfoSet insertVariableRI(RuleInfoSet ri) throws InvalidRuleInfoException {
+    public RuleInfoSet insertVariableRI(RuleInfoSet ri) throws InvalidRuleInfoException, DirectCycleException {
            RuleInfoSet allRuleInfos = new RuleInfoSet();
             for(RuleInfo r : ri){
                 RuleInfoSet inserted = insertVariableRI(r);
@@ -55,7 +56,7 @@ public abstract class SIndex extends RuleInfoHandler {
 
     public abstract RuleInfoSet getAllRuleInfos();
 
-    public abstract RuleInfoSet insertIntoMap(RuleInfo ri, int hash);
+    public abstract RuleInfoSet insertIntoMap(RuleInfo ri, int hash) throws DirectCycleException;
 
     public int getMin() {
         return min;

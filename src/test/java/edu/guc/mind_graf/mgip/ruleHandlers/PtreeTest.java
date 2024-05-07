@@ -4,6 +4,7 @@ import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.caseFrames.Adjustability;
 import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.exceptions.InvalidRuleInfoException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.network.Network;
@@ -84,7 +85,7 @@ class PtreeTest {
     }
 
     @Test
-    void insertVariableRI() throws NoSuchTypeException, InvalidRuleInfoException {
+    void insertVariableRI() throws NoSuchTypeException, InvalidRuleInfoException, DirectCycleException {
         FlagNode govFlag = new FlagNode(M0, true, new Support(-1));
         Substitutions govSubs = new Substitutions();
         Node henry = Network.createNode("henry", "individualnode");

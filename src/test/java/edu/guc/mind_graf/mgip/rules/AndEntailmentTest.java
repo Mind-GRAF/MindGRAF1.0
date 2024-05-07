@@ -4,6 +4,7 @@ import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.caseFrames.Adjustability;
 import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.exceptions.InvalidRuleInfoException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.mgip.ruleHandlers.Ptree;
@@ -25,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class AndEntailmentTest {
 
     @Test
-    void mayInfer() throws NoSuchTypeException, InvalidRuleInfoException {
+    void mayInfer() throws NoSuchTypeException, InvalidRuleInfoException, DirectCycleException {
         Network network = new Network();
         Node G = Network.createVariableNode("G", "propositionnode");
         Node C = Network.createVariableNode("C", "propositionnode");

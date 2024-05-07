@@ -783,6 +783,10 @@ public class Support {
 		return sb.toString();
 	}
 
+	public Support clone(){
+		return new Support(-1);
+	}
+
 
 
 	/*

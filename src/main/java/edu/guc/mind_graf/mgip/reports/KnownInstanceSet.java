@@ -1,9 +1,6 @@
 package edu.guc.mind_graf.mgip.reports;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Hashtable;
-import java.util.Iterator;
+import java.util.*;
 
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.exceptions.DirectCycleException;
@@ -11,7 +8,7 @@ import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.support.Support;
 import edu.guc.mind_graf.support.Support;
 
-public class KnownInstanceSet implements Iterable<KnownInstance> {
+public class KnownInstanceSet{
 
     public Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> positiveKInstances;
     public Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> negativeKInstances;
@@ -240,11 +237,15 @@ public class KnownInstanceSet implements Iterable<KnownInstance> {
 
     }
 
-    @Override
-    public Iterator<KnownInstance> iterator() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'iterator'");
-    }
+//    @Override
+//    public Iterator<KnownInstance> iterator() {
+//        ArrayList<KnownInstance> allInstances = new ArrayList<KnownInstance>();
+//        for(Hashtable<Substitutions, KnownInstance> instances : positiveKInstances.values())
+//        {
+//            allInstances.addAll(instances.values());
+//        }
+//        return allInstances.iterator();
+//    }
 
     public void printKnownInstances(
             Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> positiveKInstances,

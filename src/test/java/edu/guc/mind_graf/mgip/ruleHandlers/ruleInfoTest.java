@@ -1,5 +1,6 @@
 package edu.guc.mind_graf.mgip.ruleHandlers;
 
+import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.set.FreeVariableSet;
 import edu.guc.mind_graf.support.Support;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +42,7 @@ class RuleInfoTest {
     }
 
     @Test
-    void testCombine() throws NoSuchTypeException {
+    void testCombine() throws NoSuchTypeException, DirectCycleException {
 
         Node Nemo = Network.createNode("nemo", "propositionnode");
         Node Marlin = Network.createNode("marlin", "propositionnode");
