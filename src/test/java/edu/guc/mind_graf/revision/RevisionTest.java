@@ -79,6 +79,7 @@ class RevisionTest {
 
         ContextController.addHypothesisToContext("guc",0, p);
         ContextController.addHypothesisToContext("guc",0,  notP);
-        Assertions.assertEquals(0,Revision.checkContradiction(ContextController.getContext("guc"),0, p).size());
+
+        Assertions.assertEquals(1,Revision.checkContradiction(ContextController.getContext("guc"),0, p).size());
     }
 }

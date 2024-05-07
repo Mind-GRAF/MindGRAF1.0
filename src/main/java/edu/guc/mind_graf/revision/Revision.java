@@ -15,7 +15,7 @@ public class Revision {
 			//node complement is not in the network so a contradiction can never happen
 			return null;
 		}
-		System.out.println("found negation"+ nodeCompliment);
+		System.out.println("found negation: "+ nodeCompliment.getName());
 		//TODO: wael cache
 		ArrayList<ArrayList<Integer>> filteredConsistentAttitudes = filterAttitudes(ContextController.getConsistentAttitudes(),attitudeNumberOfAddedNode);
 		ArrayList<Contradiction> contradictions = new ArrayList<>();
@@ -26,9 +26,9 @@ public class Revision {
 				if(nodeCompliment.supported(c.getName(), attitudeNumber,0)){
 					cont.getContradictions().add(attitudeNumber,nodeCompliment);
 				}
-				if(!cont.getContradictions().isEmpty()){
-					contradictions.add(cont);
-				}
+			}
+			if(!cont.getContradictions().isEmpty() && !contradictions.contains(cont)){
+				contradictions.add(cont);
 			}
 		}
 		System.out.println("Found Contradictions: "+ contradictions);
