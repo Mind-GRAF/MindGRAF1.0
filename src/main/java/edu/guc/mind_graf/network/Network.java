@@ -60,14 +60,14 @@ public class Network {
 		Network.createRelation("forall", "propositionnode", Adjustability.EXPAND, 2);
 		Network.createRelation("min", "individualnode", Adjustability.NONE, 1);
 		Network.createRelation("max", "individualnode", Adjustability.NONE, 1);
-		Network.createRelation("arg", "propositionnode", Adjustability.NONE, 1);
+		Network.createRelation("args", "propositionnode", Adjustability.NONE, 1);
 		Network.createRelation("object", "", Adjustability.EXPAND, 2);
 		Network.createRelation("member", "", Adjustability.EXPAND, 2);
 		Network.createRelation("class", "", Adjustability.EXPAND, 2);
 		Network.createRelation("i", "individualnode", Adjustability.EXPAND, 2);
-		Network.createRelation("cq", "propositionnode", Adjustability.EXPAND, 2);
-		Network.createRelation("ant", "propositionnode", Adjustability.EXPAND, 2);
-		Network.createRelation("&ant", "propositionnode", Adjustability.EXPAND, 2);
+		Network.createRelation("cqs", "propositionnode", Adjustability.EXPAND, 2);
+		Network.createRelation("ants", "propositionnode", Adjustability.EXPAND, 2);
+//		Network.createRelation("&ant", "propositionnode", Adjustability.EXPAND, 2);
 		Network.createRelation("thresh", "propositionnode", Adjustability.EXPAND, 2);
 		Network.createRelation("threshmax", "propositionnode", Adjustability.EXPAND, 2);
 	}
@@ -109,7 +109,7 @@ public class Network {
 					node = new AndOr(downCableSet);
 					propositionNodes.put(node.getId(), node);
 					break;
-				case "AndEntailment":
+				case "andentailment":
 					node = new AndEntailment(downCableSet);
 					propositionNodes.put(node.getId(), node);
 					break;
@@ -121,7 +121,7 @@ public class Network {
 					node = new Thresh(downCableSet);
 					propositionNodes.put(node.getId(), node);
 					break;
-				case "NumEntailment":
+				case "numentailment":
 					node = new NumEntailment(downCableSet);
 					propositionNodes.put(node.getId(), node);
 					break;

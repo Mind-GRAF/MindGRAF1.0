@@ -38,6 +38,7 @@ public abstract class RuleNode extends PropositionNode {
     protected RuleInfoHandler ruleInfoHandler;
     protected RuleInfoSet rootRuleInfos;
     protected MCII mcii = new MCII();
+    protected static int instanceCount = 0;
     protected boolean introduced = false;
 
 //    public RuleNode(String name, Boolean isVariable) {
@@ -106,7 +107,7 @@ public abstract class RuleNode extends PropositionNode {
 
     public NodeSet getDownConsNodeSet() {
         NodeSet ret = new NodeSet();
-        DownCable consequentCable = this.getDownCableSet().get("consequent");
+        DownCable consequentCable = this.getDownCableSet().get("cqs");
         DownCable argsCable = this.getDownCableSet().get("args");
         if (argsCable != null) {
             argsCable.getNodeSet().addAllTo(ret);
@@ -368,12 +369,22 @@ public abstract class RuleNode extends PropositionNode {
     }
 
     ArrayList<Report> introReps = new ArrayList<Report>();
-    public int processIntroductionReport(Report introReport) {
-        // Find matching RII based on report information (rule, context, etc.)
+
+    private void beginEndAlgo(Report introReport) throws NoSuchTypeException {
         introReps.add(introReport);
+        if(introReps.size() < mcii.getExpectedReportsCount()){
+            if(Scheduler.getLowQueue().isEmpty() && Scheduler.getHighQueue().isEmpty()){
+                processIntroductionReport(introReps);
+            }
+        }
+        else processIntroductionReport(introReps);
+    }
+    public int processIntroductionReport(ArrayList<Report> introReps) throws NoSuchTypeException {
+        // Find matching RII based on report information (rule, context, etc.)
+        System.out.println("Began End Algo");
         int res = 0;
-        System.out.println(mcii.getExpectedReportsCount());
-        System.out.println(introReps.size());
+        System.out.println("Expected Reports count " + mcii.getExpectedReportsCount());
+        System.out.println("Actual Report count " +introReps.size());
         if(introReps.size()< mcii.getExpectedReportsCount())
         {
             System.out.println("Not enough " + res);
@@ -382,12 +393,15 @@ public abstract class RuleNode extends PropositionNode {
         else{
             for(Report report : introReps)
             {
+                System.out.println("Enough Reports");
                 RII rii = findMatchingRII(report);
                 Substitutions riiFilterSubs = rii.getRequest().getChannel().getFilterSubstitutions();
                 if(report.getSubstitutions().compatible(riiFilterSubs)&&(report.getContext(report.getName()).isSubset(rii.getContext()))&& !mcii.isSufficient()){
                 if(filterSupport(rii, report)){
-                    System.out.println("Report to be added: "+report);
+                    System.out.println("Report to be added: "+report.stringifyReport());
                         rii.update(report);
+                    System.out.println("New rii report count "+ rii.getReportSet() +
+                            " with positive count "+ rii.getPosCount() + " and neg count "+ rii.getNegCount());
                         res =  introductionHandler(rii);
                     }
                 }
@@ -397,7 +411,7 @@ public abstract class RuleNode extends PropositionNode {
         }
     }
 
-    protected abstract int introductionHandler(RII rii);
+    protected abstract int introductionHandler(RII rii) throws NoSuchTypeException;
 
     private boolean filterSupport(RII rii, Report report) {
         // // TODO Ahmed Mohsen Auto-generated method stub
@@ -419,7 +433,7 @@ public abstract class RuleNode extends PropositionNode {
     public static Support combineSupport(RII rii)
     { //Return Sup of the rule instance
         //TODO Ahmed Mohsen Auto-generated method stub
-        Support sup = new Support(1); // ID 1 FOR TESTING
+        Support sup = new Support(-1); // ID 1 FOR TESTING
         return sup;
     }
 
@@ -511,7 +525,7 @@ public abstract class RuleNode extends PropositionNode {
             if (reportHasTurn.getInferenceType() == InferenceType.INTRO)
             {
                 System.out.println("Adding Intro Report in " + reportHasTurn.getName());
-                processIntroductionReport(reportHasTurn);
+                beginEndAlgo(reportHasTurn);
             }
             else{
                 System.out.println("Not an Intro Report");

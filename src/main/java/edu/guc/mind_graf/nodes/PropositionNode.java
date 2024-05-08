@@ -183,6 +183,12 @@ public class PropositionNode extends Node {
                         attitudeId,
                         requesterNode);
                 break;
+            case Introduction:
+                newChannel = new IntroductionChannel(switchSubstitutions,
+                        filterSubstitutions, contextName,
+                        attitudeId,
+                        requesterNode);
+                break;
             default:
                 newChannel = new ActChannel(switchSubstitutions,
                         filterSubstitutions, contextName,
@@ -396,7 +402,9 @@ public class PropositionNode extends Node {
         for (Node sentTo : nodeSet) {
             Request newRequest = establishChannel(channelType, sentTo, switchSubs, filterSubs,
                     contextName, attitudeId, -1, requesterNode);
+            System.out.println("Sent new req: " + newRequest);
             Scheduler.addToLowQueue(newRequest);
+            System.out.println(Scheduler.getLowQueue());
         }
     }
 
@@ -632,7 +640,7 @@ public class PropositionNode extends Node {
             boolean flag;
             boolean channelCheck = report.getReportType() == ReportType.Matched
                     || report.getReportType() == ReportType.RuleCons
-                    || report.getReportType() == ReportType.Introduction;//need to check
+                    || report.getReportType() == ReportType.Introduction;//NEED TO CHECK
             if (channelCheck) {
                 flag = knownInstances.addKnownInstance(report);
                 System.out.println(
@@ -786,16 +794,27 @@ public class PropositionNode extends Node {
      * @return
      */
     protected void processSingleRequests(Request currentRequest) throws NoSuchTypeException {
+        System.out.println("ProcessSingleReq Proposition Node");
         System.out.println(this.getName() + " Processing Requests as a Proposition node");
 
         Channel currentChannel = currentRequest.getChannel();
         String currentContext = currentChannel.getName();
         int currentAttitude = currentChannel.getAttitudeID();
         Node requesterNode = currentChannel.getRequesterNode();
-        Substitutions reportSubstitutions = new Substitutions();
+//        Substitutions reportSubstitutions = new Substitutions();
+        Substitutions reportSubstitutions = currentRequest.getChannel().getFilterSubstitutions();
         PropositionNodeSet supportNodeSet = new PropositionNodeSet();
         if (this.supported(currentContext, currentAttitude)) {
+            System.out.println("Node is in Supported");
             supportNodeSet.add(this);
+            if(currentChannel.getChannelType() == ChannelType.Introduction){
+                Report NewReport = new Report(reportSubstitutions, supportNodeSet, currentAttitude, true,
+                        InferenceType.INTRO, requesterNode, this);
+                NewReport.setContextName(currentContext);
+                System.out.println("ChannelType : " + currentChannel.getChannelType());
+                NewReport.setReportType(currentChannel.getChannelType());
+                sendReport(NewReport, currentRequest.getChannel());
+            }else{
             Report NewReport = new Report(reportSubstitutions, supportNodeSet, currentAttitude, true,
                     InferenceType.BACKWARD, requesterNode, this);
             // if (((RuleNode) requesterNode).isForwardReport() == true) {
@@ -803,10 +822,13 @@ public class PropositionNode extends Node {
 
             // }
             NewReport.setContextName(currentContext);
+            System.out.println("ChannelType : " + currentChannel.getChannelType());
             NewReport.setReportType(currentChannel.getChannelType());
             sendReport(NewReport, currentRequest.getChannel());
+            }
 
         } else {
+            System.out.println("Node is not in supported");
             boolean sentSuccessfully = false;
 
             if (!(this instanceof RuleNode)) {
@@ -851,6 +873,15 @@ public class PropositionNode extends Node {
 
                     }
                 }
+            }
+            else{ //QUESTIONABLEEEE
+                Report NewReport = new Report(reportSubstitutions, supportNodeSet, currentAttitude, true,
+                        InferenceType.INTRO, requesterNode, this);
+                NewReport.setContextName(currentContext);
+                System.out.println("ChannelType : " + currentChannel.getChannelType());
+                NewReport.setReportType(currentChannel.getChannelType());
+                sendReport(NewReport, currentRequest.getChannel());
+                sentSuccessfully |= sendReport(NewReport, currentRequest.getChannel());
             }
 
             Substitutions filterSubs = currentChannel.getFilterSubstitutions();

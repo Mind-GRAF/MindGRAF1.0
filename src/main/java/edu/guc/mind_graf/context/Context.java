@@ -25,7 +25,9 @@ public class Context {
     }
     public Context(String name, int attitude, NodeSet assumedNodes){ //Constructor for assumed contexts in NumEntailment
         //TODO Wael: set the attitude names and Supported Nodes Set adjustment
+        this.name = name;
     }
+
     public Integer getPropositionAttitude(Integer prop) {
 
         // loop through all the Integer keys of attitudesBitset

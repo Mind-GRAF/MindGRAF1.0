@@ -5,6 +5,7 @@ import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.Scheduler;
+import edu.guc.mind_graf.mgip.reports.KnownInstance;
 import edu.guc.mind_graf.mgip.reports.Report;
 import edu.guc.mind_graf.mgip.requests.Channel;
 import edu.guc.mind_graf.mgip.ruleHandlers.Ptree;
@@ -77,14 +78,11 @@ public class AndEntailment extends RuleNode {
         int attitude = currentRequest.getChannel().getAttitudeID();
         Substitutions filterSubs = currentRequest.getChannel().getFilterSubstitutions();
         Substitutions switchSubs = currentRequest.getChannel().getSwitcherSubstitutions();
-        Context currContext = ContextController.getContext(currContextName);
-        System.out.println("Current Request: " + currentRequest + " Current Context: " + currContextName + 
+        System.out.println("Current Request: " + currentRequest + " Current Context: " + currContextName +
         " Attitude: " + attitude + " Filter Subs: " + filterSubs + " Switch Subs: " + switchSubs + 
         " Requester Node: " + currentRequest.getChannel().getRequesterNode().getName()+"\n");
-        System.out.println("In NumEntailment Node");
-        System.out.println("In AndEntailment Node");
         NodeSet ants = this.getDownAntArgNodeSet();
-        System.out.println("Antecedents: "+ants);
+        System.out.println("Antecedents: "+ants +" of node "+ this);
         NodeSet subants = new NodeSet();
         for(Node ant : ants) {
            if(ant.isFree(this)){ 
@@ -104,21 +102,33 @@ public class AndEntailment extends RuleNode {
             System.out.println("Substituted Ant :"+ant);
        }  
        NodeSet cons = this.getDownConsNodeSet();
+        System.out.println("Consequents are :" + cons);
        Context newContext = new Context("Context 2 new",attitude,subants);//clone of the current context in addition to the assumed antecedents
        // boolean validContext = newContext.checkValidity(ants);
+        System.out.println("New Context is" + newContext.getName());
         RII rii = new RII(currentRequest, subants, cons , newContext , attitude);
+        System.out.println("RII created "+ rii);
         mcii.addRII(rii);
+        System.out.println("MCII contains" + mcii);
         sendRequestsToNodeSet(cons,filterSubs,switchSubs,newContext.getName(),attitude,ChannelType.Introduction,this);
         return true;
     }
 
-    public static Node buildPosInstance(RII rii, NodeSet Subs){
+    public static Node buildPosInstance(RII rii, NodeSet Subs) throws NoSuchTypeException {
         Node node = rii.getReportSet().getReport().getRequesterNode();
         Node newNode = new AndEntailment(node.getDownCableSet());
         DownCableSet oldDownCableSet = newNode.getDownCableSet();
-        DownCable oldAntDownCable = oldDownCableSet.get("ant");
+        DownCable oldAntDownCable = oldDownCableSet.get("ants");
+        DownCable oldCqDownCable = oldDownCableSet.get("cqs");
         oldAntDownCable.replaceNodeSet(Subs);
-        newNode.setName(node.getName()+"_instance");
+        NodeSet newCqs =new NodeSet();
+        for (Node n : rii.getConqArgNodes())
+        {
+            n = n.applySubstitution(rii.getRequest().getChannel().getFilterSubstitutions());
+            newCqs.add(n);
+        }
+        oldCqDownCable.replaceNodeSet(newCqs);
+        newNode.setName(node.getName()+"_instance "+ ++instanceCount);
         return newNode;
     }
 
@@ -126,28 +136,54 @@ public class AndEntailment extends RuleNode {
         Node node = rii.getReportSet().getReport().getRequesterNode();
         Node newNode = new AndEntailment(node.getDownCableSet());
         DownCableSet oldDownCableSet = newNode.getDownCableSet();
-        DownCable oldAntDownCable = oldDownCableSet.get("ant");
+        DownCable oldAntDownCable = oldDownCableSet.get("ants");
+        DownCable oldCqDownCable = oldDownCableSet.get("cqs");
         oldAntDownCable.replaceNodeSet(Subs);
-        newNode.setName(node.getName()+"_instance");
+        NodeSet newCqs =new NodeSet();
+        for (Node n : rii.getConqArgNodes())
+        {
+            n = n.applySubstitution(rii.getRequest().getChannel().getFilterSubstitutions());
+            newCqs.add(n);
+        }
+        oldCqDownCable.replaceNodeSet(newCqs);
+        newNode.setName(node.getName()+"_instance " + ++instanceCount);
         Node negatedNode = createNegation(newNode);
         return negatedNode;
     }
 
-    public int introductionHandler(RII rii)
-    {
+    public int introductionHandler(RII rii) throws NoSuchTypeException {
+        System.out.println("In introHandler");
+        Substitutions KIsubs = rii.getRequest().getChannel().getFilterSubstitutions();
+        Node reqsterNode = rii.getRequest().getChannel().getRequesterNode();
+        System.out.println("Conq nodes size " + rii.getConqArgNodes().size());
         if( (rii.getPosCount() == rii.getConqArgNodes().size())){
+            System.out.println("In pos instance");
             rii.setSufficent();
+            System.out.println("Starting to build");
 //            Support sup = combineSupport(rii);
-            PropositionNodeSet supp = new PropositionNodeSet();
+            PropositionNodeSet supp = new PropositionNodeSet(rii.getAntNodes());
             //Build an instance of the rule using the substitutions found in the original request.
+            System.out.println("Ant Nodes" + rii.getAntNodes());
+            System.out.println("Ant Node 1" + rii.getAntNodes().get("M10"));
+            System.out.println("Ant Node 2" + rii.getAntNodes().get("M11"));
+            System.out.println("Cq Node 1" + rii.getConqArgNodes().get("P3"));
+            System.out.println("Cq Node 2" + rii.getConqArgNodes().get("P4"));
             RuleNode instance = (RuleNode) buildPosInstance(rii, rii.getAntNodes());
+            System.out.println("Built instance " + instance);
+            System.out.println("New Cq Node 1" + instance.getDownCable("cqs").getNodeSet().get("M12"));
+            System.out.println("New Cq Node 2" + instance.getDownCable("cqs").getNodeSet().get("M13"));
             //send a report declaring this instance in the context of the original request having the support Sup.
-            Report report = new Report(null, supp, rii.getAttitudeID(), true, InferenceType.INTRO, null, instance);
+            Report report = new Report(KIsubs, supp, rii.getAttitudeID(), true, InferenceType.INTRO, reqsterNode , instance);
+            System.out.println("Report used to create KI " + report.stringifyReport());
+            this.knownInstances.addKnownInstance(report);
+            Collection<KnownInstance> KIs= knownInstances.mergeKInstancesBasedOnAtt(rii.getAttitudeID());
+            this.knownInstances.printKnownInstanceSet(KIs);
             instance.broadcastReport(report);
             return 1;
         }
         else if(rii.getNegCount()>0)
         {
+            System.out.println("In Negative instance");
             rii.setSufficent();
 //            Support sup = combineSupport(rii);
             PropositionNodeSet supp = new PropositionNodeSet();
@@ -155,8 +191,13 @@ public class AndEntailment extends RuleNode {
             RuleNode instance;
             try {
                 instance = (RuleNode) buildNegInstance(rii, rii.getAntNodes());
+                System.out.println("Built instance " + instance);
                 //send a report declaring this instance in the context of the original request having the support Sup.
-                Report report = new Report(null, supp, rii.getAttitudeID(), false, InferenceType.INTRO, null, instance);
+                Report report = new Report(KIsubs, supp, rii.getAttitudeID(), false, InferenceType.INTRO, reqsterNode, instance);
+                this.knownInstances.addKnownInstance(report);
+                Collection<KnownInstance> KIs= knownInstances.mergeKInstancesBasedOnAtt(rii.getAttitudeID());
+                System.out.println("Report used to create KI" + report.stringifyReport());
+                this.knownInstances.printKnownInstanceSet(KIs);
                 instance.broadcastReport(report);
                 return -1;
             } catch (NoSuchTypeException e) {

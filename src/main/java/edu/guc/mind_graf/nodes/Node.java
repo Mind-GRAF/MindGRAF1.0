@@ -327,7 +327,7 @@ public abstract class Node {
 				n = Network.createVariableNode(this.getName() + "temp",
 						Semantic);
 			else
-				n = Network.createNode(this.getName() + "temp", Semantic);
+				n = Network.createNode(this.getName(), Semantic);
 
 			builtNodes.put(n.getName(), n);
 			pathTrace.removeLast();
