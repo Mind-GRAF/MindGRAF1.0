@@ -75,8 +75,9 @@ public abstract class RuleNode extends PropositionNode {
                 ri.removeNullSubs();
                 Support supports = new Support(-1); // probably wrong (maybe should make new support of the flag nodes
                                                     // and rule node
-                supports.addNode(ri.getAttitude(), this);
-                if (this.isOpen()) {
+                if(!this.isOpen())
+                    supports.addNode(ri.getAttitude(), this);
+                else {
                     Collection<KnownInstance> theKnownInstanceSet = knownInstances.mergeKInstancesBasedOnAtt(
                             ri.getAttitude());
                     knownInstances.printKnownInstanceSet(theKnownInstanceSet);

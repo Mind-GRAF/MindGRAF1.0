@@ -792,7 +792,7 @@ public class Support {
         }
 		return cloned;
 	}
-	
+
 	/*
 	public void calculateSupportsTree() {
 
