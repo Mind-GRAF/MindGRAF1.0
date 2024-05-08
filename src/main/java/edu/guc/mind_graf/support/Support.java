@@ -27,7 +27,11 @@ public class Support {
 		// Constructor
 		this.nodeID = nodeID;
 		justificationSupport = new HashMap<>();
+		justificationSupport.put(0,new HashMap<>());
+
 		assumptionSupport = new HashMap<>();
+		assumptionSupport.put(0,new HashMap<>());
+
 		isHyp = new HashSet<>();
 		isTreeCalculatetd = new HashMap<>();
 		supportsTree = new HashMap<>();
