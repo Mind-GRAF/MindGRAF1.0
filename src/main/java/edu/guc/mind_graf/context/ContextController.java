@@ -95,6 +95,10 @@ public class ContextController {
 //        Revision.checkContradiction(c,attitudeNumber,node);
     }
 
+    public static void addHypothesisToContext(int attitudeNumber, PropositionNode node) {
+       ContextController.addHypothesisToContext(ContextController.currContext.getName(),attitudeNumber,node);
+    }
+
     public static void removeFromContext(String contextName, int attitudeNumber, int nodeId) {
         Context c = ContextController.getContext(contextName);
         PropositionNode n = (PropositionNode) Network.getNodeById(nodeId);
@@ -106,16 +110,11 @@ public class ContextController {
     }
 
     public static IntBinaryOperator mergeGrades() {
-        switch (ContextController.mergeFunctionNumber) {
-            case 1:
-                return Math::max;
-            case 2:
-                return Math::min;
-            case 3:
-                return (a, b) -> (a + b) / 2;
-            default:
-                throw new IllegalArgumentException("Invalid choice");
-        }
+        return switch (ContextController.mergeFunctionNumber) {
+            case 2 -> Math::min;
+            case 3 -> (a, b) -> (a + b) / 2;
+            default -> Math::max;
+        };
     }
 
 }

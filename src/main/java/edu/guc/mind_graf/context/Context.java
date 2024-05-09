@@ -1,9 +1,10 @@
 package edu.guc.mind_graf.context;
 
-import java.util.BitSet;
-import java.util.HashMap;
+import java.util.*;
 
+import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.PropositionNode;
+import edu.guc.mind_graf.revision.Revision;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.Set;
 import edu.guc.mind_graf.support.Pair;
@@ -75,5 +76,39 @@ public class Context {
         return this.hypotheses.get(level)[attitudeID];
     }
 
+    public void completelyRemoveNodeFromContext(int attitudeNumber, PropositionNode node){
+        if(this.isHypothesis(attitudeNumber,node)){
+            this.removeHypothesisFromContext(attitudeNumber,node);
+        }
+        this.removeInferredNodeFromContext(attitudeNumber,node);
+    }
 
+    public void removeInferredNodeFromContext(int attitudeNumber, PropositionNode node){
+//		print("Starting removal of node: "+ node.getId()+" from attitude: "+ ContextController.getAttitudeName(attitudeNumber)+" from Context: "+ c.getName());
+        //TODO
+//        for(HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> assumptionSupport : node.getSupport().getAssumptionSupport().getFirst().get(attitudeNumber)){
+//            for(Map.Entry<Integer,Pair<PropositionNodeSet,PropositionNodeSet>> support: assumptionSupport.entrySet()){
+//                if(Revision.supportIsInvalid(this,attitudeNumber,support.getValue().getFirst())) {
+//                    continue;
+//                }
+//                Revision.print("choose node to remove from this support in attitude: "+ support.getKey());
+//                ArrayList<Node> supportNodes = new ArrayList<>(support.getValue().getFirst().getNodes());
+//                for(int i =0;i<supportNodes.size();i++){
+//                    PropositionNode nodeInSupport = (PropositionNode) supportNodes.get(i);
+//                    Revision.print((i+1)+". Node: "+ nodeInSupport.toString());
+//                }
+//                PropositionNode nodeToRemove = (PropositionNode) supportNodes.get(Revision.readInt()-1);
+//
+//                if(this.isHypothesis(support.getKey(),nodeToRemove)){
+//
+//                    //TODO: wael change these to remove node completely
+//                    this.removeHypothesisFromContext(attitudeNumber,nodeToRemove);
+//                }else{
+//                    Revision.print("this node is inferred, choose how to remove it:");
+//                    this.removeInferredNodeFromContext(attitudeNumber,nodeToRemove);
+//                }
+//            }
+//        }
+//		print("successfully removed Node: "+ node+" from attitude: "+ ContextController.getAttitudeName(attitudeNumber)+" from Context: "+ c.getName());
+    }
 }

@@ -2,8 +2,10 @@ package edu.guc.mind_graf.revision;
 
 import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.context.ContextController;
+import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.set.PropositionNodeSet;
+import edu.guc.mind_graf.support.Pair;
 
 import java.util.*;
 
@@ -15,7 +17,7 @@ public class Revision {
 			//node complement is not in the network so a contradiction can never happen
 			return null;
 		}
-		System.out.println("found negation: "+ nodeCompliment.getName());
+		System.out.println("found negation"+ nodeCompliment);
 		//TODO: wael cache
 		ArrayList<ArrayList<Integer>> filteredConsistentAttitudes = filterAttitudes(ContextController.getConsistentAttitudes(),attitudeNumberOfAddedNode);
 		ArrayList<Contradiction> contradictions = new ArrayList<>();
@@ -67,7 +69,7 @@ public class Revision {
 		if(nodeIsHyp && !contradictingIsHyp){
 			for (Contradiction cont : contradictions) {
 				for (Map.Entry<Integer, PropositionNode> entry : cont.getContradictions().getSet().entrySet()) {
-					removeInferredNodeFromContext(c, entry.getKey(), entry.getValue());
+					c.removeInferredNodeFromContext(entry.getKey(), entry.getValue());
 				}
 			}
 		}
@@ -93,50 +95,14 @@ public class Revision {
 
 	public static void handleDecision(Context c, int attitudeNumber, ArrayList<Contradiction> contradictions, boolean removeNode){
 		if (removeNode) {
-			CompletelyRemoveNodeFromContext(c,attitudeNumber, contradictions.getFirst().getNode());
+			c.completelyRemoveNodeFromContext(attitudeNumber, contradictions.getFirst().getNode());
 		} else {
 			for (Contradiction cont : contradictions) {
 				for (Map.Entry<Integer, PropositionNode> entry : cont.getContradictions().getSet().entrySet()) {
-					CompletelyRemoveNodeFromContext(c,entry.getKey(), entry.getValue());
+					c.completelyRemoveNodeFromContext(entry.getKey(), entry.getValue());
 				}
 			}
 		}
-	}
-
-	public static void CompletelyRemoveNodeFromContext(Context c, int attitudeNumber, PropositionNode node){
-		if(c.isHypothesis(attitudeNumber,node)){
-			c.removeHypothesisFromContext(attitudeNumber,node);
-		}
-		removeInferredNodeFromContext(c,attitudeNumber,node);
-	}
-
-	public static void removeInferredNodeFromContext(Context c, int attitudeNumber, PropositionNode node){
-//		print("Starting removal of node: "+ node.getId()+" from attitude: "+ ContextController.getAttitudeName(attitudeNumber)+" from Context: "+ c.getName());
-
-//		for(HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> assumptionSupport : node.getSupport().getAssumptionSupport().getFirst().get(attitudeNumber)){
-//			for(Map.Entry<Integer,Pair<PropositionNodeSet,PropositionNodeSet>> support: assumptionSupport.entrySet()){
-//				if(supportIsInvalid(c,attitudeNumber,support.getValue().getFirst())) {
-//					continue;
-//				}
-//				print("choose node to remove from this support in attitude: "+ support.getKey());
-//                ArrayList<Node> supportNodes = new ArrayList<>(support.getValue().getFirst().getNodes());
-//				for(int i =0;i<supportNodes.size();i++){
-//					PropositionNode nodeInSupport = (PropositionNode) supportNodes.get(i);
-//					print((i+1)+". Node: "+ nodeInSupport.toString());
-//				}
-//				PropositionNode nodeToRemove = (PropositionNode) supportNodes.get(readInt()-1);
-//
-//				if(c.isHypothesis(support.getKey(),nodeToRemove)){
-//
-//					//TODO: wael change these to remove node completely
-//					c.removeHypothesisFromContext(attitudeNumber,nodeToRemove);
-//				}else{
-//					print("this node is inferred, choose how to remove it:");
-//					removeInferredNodeFromContext(c,attitudeNumber,nodeToRemove);
-//				}
-//			}
-//		}
-//		print("successfully removed Node: "+ node+" from attitude: "+ ContextController.getAttitudeName(attitudeNumber)+" from Context: "+ c.getName());
 	}
 
 	/**
@@ -162,8 +128,8 @@ public class Revision {
 		return result;
 	}
 
-	private static boolean containsHyp(Context c, ArrayList<Contradiction> Contradictions){
-		for(Contradiction contradiction: Contradictions){
+	private static boolean containsHyp(Context c, ArrayList<Contradiction> contradictions){
+		for(Contradiction contradiction: contradictions){
 			for(Map.Entry<Integer, PropositionNode> entry : contradiction.getContradictions().getSet().entrySet()){
 				if(c.isHypothesis(entry.getKey(), entry.getValue())){
 					return true;

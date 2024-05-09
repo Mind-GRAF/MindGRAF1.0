@@ -24,7 +24,7 @@ class NodeTest {
     @BeforeEach
     void setUp() {
         n = new Network();
-        System.out.println("Testing Revision");
+        System.out.println("Testing Nodes");
         Set<String,Integer> attitudeNames = new Set<>();
         attitudeNames.add( "beliefs",0);
         attitudeNames.add("obligations",1);
