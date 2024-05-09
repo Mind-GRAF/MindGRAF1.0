@@ -1,13 +1,10 @@
 package edu.guc.mind_graf.set;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
 import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
-import edu.guc.mind_graf.nodes.Node;
-import edu.guc.mind_graf.nodes.PropositionNode;
 
 public class RuleInfoSet implements Iterable<RuleInfo>{
     

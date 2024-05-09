@@ -4,7 +4,6 @@ import java.util.LinkedList;
 
 import edu.guc.mind_graf.relations.Relation;
 import edu.guc.mind_graf.set.NodeSet;
-import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.UpCable;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.context.Context;

@@ -2,12 +2,12 @@ package edu.guc.mind_graf.revision;
 
 import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.context.ContextController;
-import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.set.PropositionNodeSet;
-import edu.guc.mind_graf.support.Pair;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Scanner;
 
 public class Revision {
 	public static ArrayList<Contradiction> checkContradiction(Context c, int attitudeNumberOfAddedNode, PropositionNode node) {

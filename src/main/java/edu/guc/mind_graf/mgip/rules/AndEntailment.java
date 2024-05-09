@@ -11,7 +11,6 @@ import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class AndEntailment extends RuleNode {

@@ -1,5 +1,6 @@
 package edu.guc.mind_graf.nodes;
 
+import edu.guc.mind_graf.acting.rules.WhenDoNode;
 import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.cables.UpCable;
@@ -7,14 +8,8 @@ import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.exceptions.DirectCycleException;
+import edu.guc.mind_graf.exceptions.NoPlansExistForTheActException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Scanner;
-
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.matching.Match;
@@ -24,33 +19,12 @@ import edu.guc.mind_graf.mgip.reports.Report;
 import edu.guc.mind_graf.mgip.reports.ReportType;
 import edu.guc.mind_graf.mgip.requests.*;
 import edu.guc.mind_graf.network.Network;
-import edu.guc.mind_graf.nodes.Node;
-import edu.guc.mind_graf.context.ContextController;
-import edu.guc.mind_graf.network.Network;
-import edu.guc.mind_graf.relations.Relation;
 import edu.guc.mind_graf.set.NodeSet;
-import edu.guc.mind_graf.acting.rules.WhenDoNode;
-import edu.guc.mind_graf.cables.DownCable;
-import edu.guc.mind_graf.cables.DownCableSet;
-import edu.guc.mind_graf.cables.UpCable;
-import edu.guc.mind_graf.caseFrames.Adjustability;
-import edu.guc.mind_graf.exceptions.DirectCycleException;
-import edu.guc.mind_graf.exceptions.NoPlansExistForTheActException;
-import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.support.Pair;
 import edu.guc.mind_graf.support.Support;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Scanner;
-
-import edu.guc.mind_graf.context.Context;
-import edu.guc.mind_graf.support.Pair;
-import edu.guc.mind_graf.support.Support;
+import java.util.*;
 
 public class PropositionNode extends Node {
     protected ChannelSet outgoingChannels;

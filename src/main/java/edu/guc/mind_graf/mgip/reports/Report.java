@@ -1,11 +1,9 @@
 package edu.guc.mind_graf.mgip.reports;
 
-import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.requests.ChannelType;
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.nodes.Node;
-import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.support.Support;
 
 public class Report {

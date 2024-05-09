@@ -1,6 +1,5 @@
 package edu.guc.mind_graf.nodes;
 
-import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.support.Support;
 
 public class FlagNode {

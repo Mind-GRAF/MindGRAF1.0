@@ -9,12 +9,10 @@ import edu.guc.mind_graf.mgip.reports.Report;
 import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.exceptions.NoPlansExistForTheActException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
-import edu.guc.mind_graf.mgip.requests.Channel;
 import edu.guc.mind_graf.mgip.requests.Request;
 import edu.guc.mind_graf.nodes.ActNode;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.PropositionNode;
-import edu.guc.mind_graf.nodes.RuleNode;
 
 public class Scheduler {
     private static Queue<Report> highQueue;

@@ -1,14 +1,13 @@
 package edu.guc.mind_graf.context;
 
+import edu.guc.mind_graf.network.Network;
+import edu.guc.mind_graf.nodes.PropositionNode;
+import edu.guc.mind_graf.set.ContextSet;
+import edu.guc.mind_graf.set.Set;
+
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.function.IntBinaryOperator;
-
-import edu.guc.mind_graf.network.Network;
-import edu.guc.mind_graf.nodes.PropositionNode;
-import edu.guc.mind_graf.revision.Revision;
-import edu.guc.mind_graf.set.ContextSet;
-import edu.guc.mind_graf.set.Set;
 
 public class ContextController {
     private static Context currContext;

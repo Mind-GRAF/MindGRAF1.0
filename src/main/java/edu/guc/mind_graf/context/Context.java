@@ -1,13 +1,12 @@
 package edu.guc.mind_graf.context;
 
-import java.util.*;
-
-import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.PropositionNode;
-import edu.guc.mind_graf.revision.Revision;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.Set;
 import edu.guc.mind_graf.support.Pair;
+
+import java.util.BitSet;
+import java.util.HashMap;
 
 
 public class Context {
@@ -101,7 +100,8 @@ public class Context {
 //
 //                if(this.isHypothesis(support.getKey(),nodeToRemove)){
 //
-//                    //TODO: wael change these to remove node completely
+        //TODO: wael change these to remove node completely
+
 //                    this.removeHypothesisFromContext(attitudeNumber,nodeToRemove);
 //                }else{
 //                    Revision.print("this node is inferred, choose how to remove it:");

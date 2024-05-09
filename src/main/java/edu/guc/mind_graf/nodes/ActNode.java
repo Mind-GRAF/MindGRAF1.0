@@ -1,32 +1,24 @@
 package edu.guc.mind_graf.nodes;
 
-import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.reports.Report;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.requests.Channel;
 import edu.guc.mind_graf.mgip.requests.ChannelSet;
 import edu.guc.mind_graf.mgip.requests.ChannelType;
-import edu.guc.mind_graf.mgip.requests.Request;
-import edu.guc.mind_graf.mgip.rules.AndOr;
 import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.relations.Relation;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.support.Pair;
-import edu.guc.mind_graf.support.Support;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Queue;
 import java.util.Scanner;
-import java.util.Stack;
 
 import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
-import edu.guc.mind_graf.cables.UpCable;
 import edu.guc.mind_graf.caseFrames.Adjustability;
-import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.exceptions.NoPlansExistForTheActException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
