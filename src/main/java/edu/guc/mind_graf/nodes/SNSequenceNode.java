@@ -10,6 +10,7 @@ public class SNSequenceNode extends ActNode {
 
     public SNSequenceNode(DownCableSet downCables) {
         super(downCables);
+        this.setPrimitive(true);
     }
 
     public void runActuator() {

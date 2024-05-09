@@ -1038,10 +1038,10 @@ public class PropositionNode extends Node {
         Scheduler.initiate();
         String currentContextName = ContextController.getCurrContextName();
 
-        // Scanner scanner = new Scanner(System.in);
-        // System.out.print("Enter your desired attitude: ");
-        // String att = scanner.nextLine();
-        // scanner.close();
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter your desired attitude: ");
+        String att = scanner.nextLine();
+        scanner.close();
         int currentAttitudeID = 0;
         // given by the user
         boolean reportSign = true;
