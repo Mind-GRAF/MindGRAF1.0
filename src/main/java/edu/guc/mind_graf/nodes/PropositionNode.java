@@ -443,7 +443,10 @@ public class PropositionNode extends Node {
     public boolean supported(String desiredContextName, int desiredAttitudeID, int level) {
         boolean supported = false;
         Context desiredContext = ContextController.getContext(desiredContextName);
-
+        if(desiredContext.isHypothesis(level,desiredAttitudeID,this)){
+            return true;
+        }
+        //TODO: mohsen get(level) might return null;
         if(this.support.getAssumptionSupport().get(level).get(desiredAttitudeID) == null){
             return false;
         }

@@ -49,6 +49,7 @@ public class Context {
     }
 
     public void addHypothesisToContext(int attitudeNumber, PropositionNode node, int grade) {
+        //TODO: wael handle creating a new level
         this.hypotheses.get(grade)[attitudeNumber].getFirst().add(node);
         node.getSupport().setHyp(attitudeNumber);
     }
@@ -64,14 +65,10 @@ public class Context {
         }
     }
 
-    public boolean isHypothesis(int attitudeNumber, PropositionNode node){
-        //TODO: level
-        for(Pair<PropositionNodeSet, PropositionNodeSet>[] hypsForThisGrade : this.hypotheses.values()) {
-            for (Pair<PropositionNodeSet, PropositionNodeSet> hypsForThisAttitude : hypsForThisGrade) {
-                if(hypsForThisAttitude.getFirst().contains(node) || hypsForThisAttitude.getSecond().contains(node)){
-                    return true;
-                }
-            }
+    public boolean isHypothesis(int level, int attitudeId, PropositionNode node){
+        Pair<PropositionNodeSet,PropositionNodeSet>[] pairArr = this.hypotheses.get(level);
+        if(pairArr !=null) {
+            return pairArr[attitudeId].getFirst().contains(node);
         }
         return false;
     }
@@ -81,7 +78,7 @@ public class Context {
     }
 
     public void completelyRemoveNodeFromContext(int level, int attitudeNumber, PropositionNode node){
-        if(this.isHypothesis(attitudeNumber,node)){
+        if(this.isHypothesis(level,attitudeNumber,node)){
             this.removeHypothesisFromContext(level,attitudeNumber,node);
         }
         //TODO make this node remove manually and automatically
