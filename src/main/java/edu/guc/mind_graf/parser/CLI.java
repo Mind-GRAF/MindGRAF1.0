@@ -74,8 +74,8 @@ public class CLI {
                         // uvbr = true;
                     } catch (ParseException e) {
                         // TODO Auto-generated catch block
-                        e.printStackTrace();
-                        System.out.println("Wrong Command.");
+                        //e.printStackTrace();
+                        System.out.println(e.getMessage());
                         continue;
 
                     }
@@ -96,8 +96,8 @@ public class CLI {
                             // uvbr = true;
                         } catch (ParseException e) {
                             // TODO Auto-generated catch block
-                            e.printStackTrace();
-                            System.out.println("Wrong Command.");
+                           // e.printStackTrace();
+                            System.out.println(e.getMessage());
                             continue;
 
                         }
@@ -117,8 +117,8 @@ public class CLI {
                                 telescopable = true;
                             } catch (ParseException e) {
                                 // TODO Auto-generated catch block
-                                e.printStackTrace();
-                                System.out.println("Wrong Command.");
+                                //e.printStackTrace();
+                                System.out.println(e.getMessage());
                                 continue;
 
                             }
@@ -135,13 +135,13 @@ public class CLI {
                                 MindGRAF_Parser parser = new MindGRAF_Parser(
                                         new StringReader(input.trim()));
                                 try {
-                                    parser.underTeleAttitudes();
+                                    parser.TelescopableAttitudes();
                                     telescopable = false;
                                     uvbr = true;
                                 } catch (ParseException e) {
                                     // TODO Auto-generated catch block
-                                    e.printStackTrace();
-                                    System.out.println("Wrong Command.");
+                                    //e.printStackTrace();
+                                    System.out.println(e.getMessage());
                                     continue;
 
                                 }
@@ -177,8 +177,8 @@ public class CLI {
                                         } catch (ParseException e) {
                                             // TODO Auto-generated catch block
                                             System.out.println();
-                                            System.out.println("Invalid Command.");
-                                            System.out.println(e);
+                                            // System.out.println("Invalid Command.");
+                                            System.out.println(e.getMessage());
 
                                             continue;
                                         }

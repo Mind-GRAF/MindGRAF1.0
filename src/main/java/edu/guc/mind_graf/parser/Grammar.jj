@@ -45,21 +45,14 @@ public class MindGRAF_Parser {
       private static ArrayList<ArrayList<Integer>> consisAttitudeLists = new ArrayList<ArrayList<Integer>>();
       private  static ArrayList<Integer> consisAttitudeList = new ArrayList<Integer>();
       private static int currConsisAttitude;
-
       //setting closed under conjunction Attitudes
-      private static ArrayList<ArrayList<Integer>> conjunctionAttitudeLists = new ArrayList<ArrayList<Integer>>();
-      private  static ArrayList<Integer> conjunctionAttitudeList = new ArrayList<Integer>();
-      private static int currConjunctionAttitude;
+      private static ArrayList<Integer> finalConjList;
 
       //setting closed under consequence Attitudes
-      private static ArrayList<ArrayList<Integer>> consequenceAttitudeLists = new ArrayList<ArrayList<Integer>>();
-      private  static ArrayList<Integer> consequenceAttitudeList = new ArrayList<Integer>();
-      private static int currConseqAttitude;
+      private  static ArrayList<Integer> finalConseqList;
 
        //setting telescopable Attitudes
-      private static ArrayList<ArrayList<Integer>> teleAttitudeLists = new ArrayList<ArrayList<Integer>>();
-      private  static ArrayList<Integer> teleAttitudeList = new ArrayList<Integer>();
-      private static int currTeleAttitude;
+        private  static ArrayList<Integer> finalTelList;
       
       //creation of nodes
         //private static ArrayList<Node> molecNodes = new ArrayList<Node>();
@@ -77,7 +70,7 @@ public class MindGRAF_Parser {
 
       // wffs
       private static HashMap<Integer, ArrayList<String>> wffs = new HashMap<Integer, ArrayList<String>>();
-
+      private static Integer wffCount = 1;
 
 
     public static <K, V> HashMap<V, ArrayList<K>> groupByValue(HashMap<K, V> originalMap) {
@@ -222,7 +215,7 @@ Node Expression() throws ParseException : {
 }
 {(
      result = Predicate() | result = AndOrThreshExpression(false) | result = OrAndEntailment(false) | result = forall()
-    | result = WhenIfDo() | result = gradedProp()
+    | result = WhenIfDo() | result = gradedProp() | result = negatedProp()
 )
     {
       return result;
@@ -241,6 +234,24 @@ Node andOrThreshEnt() throws ParseException :
   }
   
 }
+Node negatedAndOrThreshEnt() throws ParseException :
+{
+Node node = null;
+}
+{
+"~"node = andOrThreshEnt()
+  {
+      Node negatedNode = null;
+      try {
+         negatedNode = node.createNegation(node);
+      } catch (NoSuchTypeException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    return negatedNode;
+  } 
+}
+
 
 Node gradedAndOrThreshEnt() : 
 {
@@ -284,7 +295,7 @@ Node ForallExpressionList() throws ParseException :
   Node arg;
 }
 {
- arg = andOrThreshEnt() | arg = gradedAndOrThreshEnt()
+ arg = andOrThreshEnt() | arg = gradedAndOrThreshEnt() | arg = negatedAndOrThreshEnt()
 
   {
     return arg;
@@ -453,9 +464,13 @@ Node SNSequence() throws ParseException:
       DownCable actionDC = new DownCable(action, new NodeSet(snSeqIndividual));
       DownCable obj1DC = new DownCable(obj1, new NodeSet(actNodeOne));
       DownCable obj2DC = new DownCable(obj2, new NodeSet(actNodeTwo));
-
+      DownCableSet alldcs = new DownCableSet(actionDC, obj1DC, obj2DC);
       // snsequence act node creation
-      snsequenceNode = network.createNode("actnode", new DownCableSet(actionDC, obj1DC, obj2DC));
+      Node shouldCreate = compareMolecularNode(alldcs);
+      if(shouldCreate == null)
+        snsequenceNode = network.createNode("actnode", new DownCableSet(actionDC, obj1DC, obj2DC));
+      else
+        snsequenceNode = shouldCreate;
     } catch (NoSuchTypeException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -486,8 +501,13 @@ Node Attitude() throws ParseException :
       // cables
       DownCable objDC = new DownCable(obj, new NodeSet(prop));
       DownCable actionDC = new DownCable(action, new NodeSet(attitudeIndividual));
+      DownCableSet alldcs = new DownCableSet(objDC, actionDC);
       // attitude act node
-      attitudeActNode = network.createNode("actnode", new DownCableSet(objDC, actionDC));
+      Node shouldCreate = compareMolecularNode(alldcs);
+      if(shouldCreate == null)
+        attitudeActNode = network.createNode("actnode", new DownCableSet(objDC, actionDC));
+      else 
+        attitudeActNode = shouldCreate;
 
     } catch (NoSuchTypeException e) {
       // TODO Auto-generated catch block
@@ -519,8 +539,13 @@ Node Achieve() throws ParseException :
       // cables
       DownCable objDC = new DownCable(obj, new NodeSet(prop));
       DownCable actionDC = new DownCable(action, new NodeSet(achieveIndividual));
+      DownCableSet alldcs = new DownCableSet(objDC, actionDC);
       // achieve act node
-      achieveActNode = network.createNode("actnode", new DownCableSet(objDC, actionDC));
+      Node shouldCreate = compareMolecularNode(alldcs);
+      if(shouldCreate == null)
+        achieveActNode = network.createNode("actnode", new DownCableSet(objDC, actionDC));
+      else 
+        achieveActNode = shouldCreate;
 
     } catch (NoSuchTypeException e) {
       // TODO Auto-generated catch block
@@ -937,6 +962,25 @@ else {
 
 }
 
+Node negatedProp() : 
+{
+  Node node = null;
+}
+{ 
+  "~"node = Expression()
+  {
+    Node negatedNode = null;
+      try {
+        negatedNode = node.createNegation(node);
+      } catch (NoSuchTypeException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    return negatedNode;
+  }    
+  }
+
+
 Node gradedProp() : 
 {
   Node node = null;
@@ -1265,7 +1309,42 @@ void Command() throws ParseException :
     RemoveFromContext()
     |
     DescribeContext()
+    |
+    getAllSupported()
+    |
+    backInferSub()
     }
+
+
+void backInferSub() throws ParseException :
+{}
+{
+  "back-infer-sub"
+  {
+    String x;
+  }
+}
+
+void getAllSupported() throws ParseException :
+{}
+{
+  "get-supported"
+  {
+    HashMap<Integer, ArrayList<String>> allWffs = wffs;
+    if (allWffs != null) {
+      for (ArrayList<String> list : allWffs.values()) {
+        for (int i = 0; i < list.size(); i++) {
+          if (i == 0)
+            CLI.print(list.getFirst() + " is Supported in :");
+          else
+            CLI.print(list.get(i));
+        }
+      }
+    } else 
+      CLI.print("No Hypothesis Supported in Any Context.");
+  }
+}
+
 
   void DescribeContext() throws ParseException :
 {
@@ -1274,30 +1353,82 @@ void Command() throws ParseException :
 {
 "describe-context" (CName = <STRING>.image)?
 {
-  if(CName == null)
-    CName = controller.getCurrContextName();
-  CName = CName.trim();
-  
+    if (CName == null) {
+      try{
+      CName = controller.getCurrContextName();
+      CName = CName.trim();
+      }catch(Exception e){
+        CLI.print("Set Default Context First.");
+      }
+      
+    }
+    else{
+      CName = CName.trim();
+      if(!controller.getContextSet().getSet().containsKey(CName.trim()))
+        throw new ParseException("Context Does Not Exist.");
+          CLI.print("Hypothesis in Context " + CName + ":");
+    for (ArrayList<String> contexts : wffs.values()) {
+      String wffName = contexts.get(0);
+      for (int i = 1; i < contexts.size(); i++) {
+        String cxt = contexts.get(i);
+        String[] name_attitude = cxt.split("_");
+        CLI.print(wffName + " supported in attitude " + name_attitude[1]);
+      }
+
+    }
+    }
+
+
+   
+
 }
 }
 
 
 void RemoveFromContext() throws ParseException :
 {
-  String CName;
+  String CName = null;
   String attitude;
   Node node = null;
 }
 {
-  "remove-from-context" "["CName = <STRING>.image"]" "["attitude = <STRING>.image"]""["node = Expression()"]"
+  "remove-from-context"  "["node = Expression()"]" "["attitude = <STRING>.image"]" ("["CName = <STRING>.image"]")?
   {
-    Integer attNum = controller.getAttitudeNumber(attitude.trim());
-    controller.removeFromContext(CName, controller.getAttitudeNumber(attitude.trim()), node.getId());
-    ArrayList<String> contexts = wffs.get(node.getId());
-    contexts.remove(CName + attNum);
-    if (contexts.size() == 0)
-      wffs.remove(node.getId());
-    CLI.print("Hypothesis Removed from Context " + CName + " in Attitude " + attitude.trim());
+    try {
+
+      Integer attNum = controller.getAttitudeNumber(attitude.trim());
+    if (CName == null) {
+      try{
+      CName = controller.getCurrContextName();
+      CName = CName.trim();
+      }catch(Exception e){
+        CLI.print("Set Default Context First.");
+      }
+    }
+    else{
+      CName = CName.trim();
+      if(!controller.getContextSet().getSet().containsKey(CName.trim()))
+        throw new ParseException("Context Does Not Exist.");
+    }
+      if (attNum != null) {
+        controller.removeFromContext(CName, attNum, node.getId());
+        if (wffs.containsKey(node.getId())) {
+          ArrayList<String> contexts = wffs.get(node.getId());
+          contexts.remove(CName + "_" + attNum);
+          if (contexts.size() == 1)
+            wffs.remove(node.getId());
+          else
+            wffs.put(node.getId(), contexts);
+          CLI.print("Hypothesis Removed from Context " + CName + " in Attitude " + attitude.trim());
+        } else
+          CLI.print("Hypothesis Does Not Exist in " + CName + " in Attitude " + attitude.trim());
+      } else
+        CLI.print("No Such Attitude.");
+
+    } catch (Exception e) {
+      CLI.print(e.getMessage());
+      // TODO: handle exception
+    }
   }
 }
 
@@ -1306,13 +1437,26 @@ void RemoveFromContext() throws ParseException :
 void AddToContext() throws ParseException :
 {
     String attitude;
-    String CName;
+    String CName = null;
     Node nn;
 }
  {  (
-      "add-to-context" "["CName = <STRING>.image"]" "[" attitude = <STRING>.image"]" "["nn = Expression()"]" 
+      "add-to-context" "["nn = Expression()"]" "[" attitude = <STRING>.image"]"  ("["CName = <STRING>.image"]")?
     ){
-    
+      
+      if (CName == null) {
+        try{
+        CName = controller.getCurrContextName();
+        CName = CName.trim();
+        }catch(Exception e){
+          CLI.print("Set Default Context First.");
+        }
+    }
+    else{
+      CName = CName.trim();
+      if(!controller.getContextSet().getSet().containsKey(CName.trim()))
+        throw new ParseException("Context Does Not Exist.");
+    }
     PropositionNode node = (PropositionNode) nn;
     Integer attNum = controller.getAttitudeNumber(attitude);
     CName = CName.trim().toLowerCase();
@@ -1322,29 +1466,35 @@ void AddToContext() throws ParseException :
     if (wffs.containsKey(node.getId())) {
       ArrayList<String> wffName = wffs.get(node.getId());
       for (int i = 1; i < wffName.size(); i++) {
-        if (wffName.get(i).equals(CName + attNum)) {
-          if (true)
-            throw new ParseException("Already Supported in Context " + CName + " in attitude " + attitude);
+        if (wffName.get(i).equals(CName + "_" + attNum)) {
+          if (true) {
+            if (true)
+              throw new ParseException("Already Supported in Context " + CName + " in attitude " + attitude);
+          }
         }
       }
     }
 
     try {
+      CLI.print(node.toString()+" is supported in " + CName +" in attitude " + attitude+".");
       controller.addHypothesisToContext(CName, attNum, node);
+      if (wffs.containsKey(node.getId())) {
+        ArrayList<String> wffName = wffs.get(node.getId());
+        wffName.addLast(CName + "_" + attNum);
+        wffs.put(node.getId(), wffName);
+    } else {
+        ArrayList<String> list = new ArrayList<String>();
+        list.add("wff_" + wffCount);
+        wffCount++;
+        list.add(CName + "_" + attNum);
+        wffs.put(node.getId(), list);
+    }
     } catch (Exception e) {
       // TODO Auto-generated catch block
       CLI.print(e.getMessage());
 
     }
-    if (wffs.containsKey(node.getId())) {
-      ArrayList<String> wffName = wffs.get(node.getId());
-      wffName.addLast(CName + attNum);
-    } else {
-      ArrayList<String> list = new ArrayList<String>();
-      list.add("wff" + (wffs.size() + 1));
-      list.add(CName + attNum);
-      wffs.put(node.getId(), list);
-    }
+
     HashMap<String, HashMap<String, Node>> molecN = network.getMolecularNodes();
     for (HashMap<String, Node> x : molecN.values()) {
       for (Node n : x.values()) {
@@ -1360,22 +1510,40 @@ void AddToContext() throws ParseException :
 void backwardInference() throws ParseException :
 {
   Node node;
+  String CName = null;
 }
 {
-  "back-infer" node = Expression()
+  "back-infer"  "["node = Expression()"]"("["CName = <STRING>.image"]")?
   {
-   PropositionNode prop = (PropositionNode) node;
-   try {
+    PropositionNode prop = (PropositionNode) node;
+
+    if (CName == null) {
+      try {
+        CName = controller.getCurrContextName();
+        CName = CName.trim();
+      } catch (Exception e) {
+        CLI.print("Set Default Context First.");
+      }
+
+    } else {
+      CName = CName.trim();
+      if (!controller.getContextSet().getSet().containsKey(CName.trim())) 
+          throw new ParseException("Context Does Not Exist.");
+    }
+    try {
+      String oldCurrContext = controller.getCurrContextName();
+      controller.setCurrContext(CName);
       prop.deduce();
+      controller.setCurrContext(oldCurrContext);
     } catch (NoSuchTypeException e) {
       // TODO Auto-generated catch block
-      e.printStackTrace();
+         CLI.print(e.getMessage());
     } catch (NoPlansExistForTheActException e) {
       // TODO Auto-generated catch block
-      e.printStackTrace();
+         CLI.print(e.getMessage());
     } catch (DirectCycleException e) {
       // TODO Auto-generated catch block
-      e.printStackTrace();
+         CLI.print(e.getMessage());
     }
   }
 }    
@@ -1383,13 +1551,34 @@ void backwardInference() throws ParseException :
 void forwardInference() throws ParseException :
 {
   Node node;
+  String CName = null; 
 }
 {
-  "forward-infer" node = Expression()
+  "forward-infer"  "["node = Expression()"]" ("["CName = <STRING>.image"]")?
   {
-   PropositionNode prop = (PropositionNode) node;
-   try {
+    PropositionNode prop = (PropositionNode) node;
+
+    if (CName == null) {
+      try {
+        CName = controller.getCurrContextName();
+        CName = CName.trim();
+      } catch (Exception e) {
+        CLI.print("Set Default Context First.");
+      }
+
+    } else {
+      CName = CName.trim();
+      if (!controller.getContextSet().getSet().containsKey(CName.trim())) {
+        if (true)
+          throw new ParseException("Context Does Not Exist.");
+      }
+
+    }
+    try {
+      String oldCurrContext = controller.getCurrContextName();
+      controller.setCurrContext(CName);
       prop.add();
+      controller.setCurrContext(oldCurrContext);
     } catch (NoSuchTypeException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -1424,10 +1613,10 @@ void setCurrentContext() throws ParseException :
 {
   "set-curr-context" cName = <STRING>.image
   {
-    cName = jj_consume_token(STRING).image;
-    cName = cName.trim();
+    cName = cName.trim().toLowerCase();
     try {
       controller.setCurrContext(cName);
+      CLI.print("Current Context is Set to " + cName);
     } catch (Exception e) {
       System.out.println(e.getMessage());
       // TODO: handle exception
@@ -1672,15 +1861,10 @@ void UVBR() throws ParseException :
 }
 {
   (
-    "set-uvbr" value=<STRING>
+    "set-uvbr on" 
     {
-      String boolValue = value.image.trim().toLowerCase();
-      if (boolValue.equals("true")) {
-          uvbrEnabled=true;
-      } else if (boolValue.equals("false")) {
-          uvbrEnabled=false;
-      } 
-      System.out.println("UVBR is set to "+uvbrEnabled);
+      uvbrEnabled=true;
+      System.out.println("UVBR is ON");
       Set attitudeNames = new Set();
       attitudeNames.setSet(initialAttitudes);
       controller.setUp(attitudeNames,consisAttitudeLists,uvbrEnabled);
@@ -1688,14 +1872,36 @@ void UVBR() throws ParseException :
       //System.out.print("uvbr: "+controller.isUvbrEnabled());
       System.out.println("consis attitudes:" );
       for(ArrayList<Integer> i : controller.getConsistentAttitudes())
-     { System.out.println("SET " + i+1);
+     { 
+      System.out.println("SET " + i+1);
       for( Integer x : i)
         System.out.print(x+" ");}
          System.out.print("attitudeNumbers");
       for(String key : controller.getAttitudes().getSet().keySet())
         System.out.println(key+": " +controller.getAttitudeNumber(key));
     }
-       
+    
+  )
+  |
+ (   "set-uvbr off"
+    { 
+      uvbrEnabled=false;
+      System.out.println("UVBR is OFF");
+            Set attitudeNames = new Set();
+      attitudeNames.setSet(initialAttitudes);
+      controller.setUp(attitudeNames,consisAttitudeLists,uvbrEnabled);
+
+      //System.out.print("uvbr: "+controller.isUvbrEnabled());
+      System.out.println("consis attitudes:" );
+      for(ArrayList<Integer> i : controller.getConsistentAttitudes())
+     { 
+      System.out.println("SET " + i+1);
+      for( Integer x : i)
+        System.out.print(x+" ");}
+         System.out.print("attitudeNumbers");
+      for(String key : controller.getAttitudes().getSet().keySet())
+        System.out.println(key+": " +controller.getAttitudeNumber(key));
+    }
   )
 }
 
@@ -1770,16 +1976,16 @@ attitudeNumber++;
 
 
 
-void underTeleAttitudes() throws ParseException : 
-{}
+void TelescopableAttitudes() throws ParseException : 
 {
-   "set-telescopable " (teleAttitudeList())+
+  ArrayList<Integer> list = new ArrayList<Integer>();
+}
+{
+   "set-telescopable" (list = telescopableAttitudeList())?
    {
-
-    for (ArrayList<Integer> list : teleAttitudeLists) {
-            for (Integer num : list) {
-                System.out.print(num + " ");
-            }
+    finalTelList = list;
+    for (Integer in : list) {
+                System.out.print(in + " ");
             System.out.println(); // Move to the next line after printing each inner list
         }
    }
@@ -1787,38 +1993,23 @@ void underTeleAttitudes() throws ParseException :
 }
 
 
-void teleAttitudeList() throws ParseException :
+
+ArrayList<Integer> telescopableAttitudeList() throws ParseException :
 {
   Token attitude;
+  ArrayList<Integer> telList = new ArrayList<Integer>();
+  Integer att ;
 }
 {
-("{"OneAttitudeInTeleList()(","OneAttitudeInTeleList())*"}")
+("{"att = OneAttitudeInList(){telList.add(att);}(","att = OneAttitudeInList(){telList.add(att);})*"}")
 {
-  ArrayList<Integer> finalTeleList = new ArrayList<Integer>();
-  for(int i = 0;i<teleAttitudeList.size();i++){
-    finalTeleList.add(teleAttitudeList.get(i));
-  }
+  return telList;
+}
 
-teleAttitudeLists.add(finalTeleList);
-teleAttitudeList.clear();
-
-                System.out.println("now printing all contents:");
-
-    for (ArrayList<Integer> list : teleAttitudeLists) {
-            for (Integer num : list) {
-                System.out.print(num + " ");
-            }
-            System.out.println(); // Move to the next line after printing each inner list
-        }
-System.out.print(teleAttitudeList.size()+" the size..");
-System.out.println(teleAttitudeList.size()+" the size..");
-System.out.println(finalTeleList.size()+" the size of the final list");
 
 }
 
-}
-
-void OneAttitudeInTeleList() throws ParseException :
+Integer OneAttitudeInList() throws ParseException :
 {
   Token attitude;
 }
@@ -1828,8 +2019,8 @@ attitude=<STRING>
   String s = attitude.image.trim().toLowerCase();
   if(!initialAttitudes.containsKey(s))
     throw new ParseException("Not in initially Defined Attitudes");
-  currTeleAttitude = initialAttitudes.get(s);
-  teleAttitudeList.add(currTeleAttitude);
+  
+  return initialAttitudes.get(s);
  
 
 }
@@ -1841,15 +2032,15 @@ attitude=<STRING>
 
 
 void underConsequenceAttitudes() throws ParseException : 
-{}
 {
-   "set-closed-consequence " (consequenceAttitudeList())+
+  ArrayList<Integer> list = new ArrayList<Integer>();
+}
+{
+   "set-closed-consequence" (list = consequenceAttitudeList())?
    {
-
-    for (ArrayList<Integer> list : consequenceAttitudeLists) {
-            for (Integer num : list) {
-                System.out.print(num + " ");
-            }
+    finalConseqList = list;
+    for (Integer in : list) {
+                System.out.print(in + " ");
             System.out.println(); // Move to the next line after printing each inner list
         }
    }
@@ -1857,66 +2048,35 @@ void underConsequenceAttitudes() throws ParseException :
 }
 
 
-void consequenceAttitudeList() throws ParseException :
+
+ArrayList<Integer> consequenceAttitudeList() throws ParseException :
 {
   Token attitude;
+  ArrayList<Integer> conseqList = new ArrayList<Integer>();
+  Integer att ;
 }
 {
-("{"OneAttitudeInConsequenceList()(","OneAttitudeInConsequenceList())*"}")
+("{"att = OneAttitudeInList(){conseqList.add(att);}(","att = OneAttitudeInList(){conseqList.add(att);})*"}")
 {
-  ArrayList<Integer> finalConsequenceList = new ArrayList<Integer>();
-  for(int i = 0;i<consequenceAttitudeList.size();i++){
-    finalConsequenceList.add(consequenceAttitudeList.get(i));
-  }
+  return conseqList;
+}
 
-consequenceAttitudeLists.add(finalConsequenceList);
-consequenceAttitudeList.clear();
-
-                System.out.println("now printing all contents:");
-
-    for (ArrayList<Integer> list : consequenceAttitudeLists) {
-            for (Integer num : list) {
-                System.out.print(num + " ");
-            }
-            System.out.println(); // Move to the next line after printing each inner list
-        }
-System.out.print(consequenceAttitudeList.size()+" the size..");
-System.out.println(consequenceAttitudeList.size()+" the size..");
-System.out.println(finalConsequenceList.size()+" the size of the final list");
 
 }
 
-}
-
-void OneAttitudeInConsequenceList() throws ParseException :
-{
-  Token attitude;
-}
-{
-attitude=<STRING>
-{
-  String s = attitude.image.trim().toLowerCase();
-  if(!initialAttitudes.containsKey(s))
-    throw new ParseException("Not in initially Defined Attitudes");
-  currConseqAttitude = initialAttitudes.get(s);
-  consequenceAttitudeList.add(currConseqAttitude);
- 
-
-}
-}
 
 
 
 void underConjunctionAttitudes() throws ParseException : 
-{}
 {
-   "set-closed-conjunction " (conjunctionAttitudeList())+
+  ArrayList<Integer> list = new ArrayList<Integer>();
+}
+{
+   "set-closed-conjunction" (list = conjunctionAttitudeList())?
    {
-
-    for (ArrayList<Integer> list : conjunctionAttitudeLists) {
-            for (Integer num : list) {
-                System.out.print(num + " ");
-            }
+    finalConjList = list;
+    for (Integer in : list) {
+                System.out.print(in + " ");
             System.out.println(); // Move to the next line after printing each inner list
         }
    }
@@ -1925,53 +2085,21 @@ void underConjunctionAttitudes() throws ParseException :
 
 
 
-void conjunctionAttitudeList() throws ParseException :
+ArrayList<Integer> conjunctionAttitudeList() throws ParseException :
 {
   Token attitude;
+  ArrayList<Integer> conjList = new ArrayList<Integer>();
+  Integer att ;
 }
 {
-("{"OneAttitudeInConjunctionList()(","OneAttitudeInConjunctionList())*"}")
+("{"att = OneAttitudeInList(){conjList.add(att);}(","att = OneAttitudeInList(){conjList.add(att);})*"}")
 {
-  ArrayList<Integer> finalConjunctionList = new ArrayList<Integer>();
-  for(int i = 0;i<conjunctionAttitudeList.size();i++){
-    finalConjunctionList.add(conjunctionAttitudeList.get(i));
-  }
+  return conjList;
+}
 
-conjunctionAttitudeLists.add(finalConjunctionList);
-conjunctionAttitudeList.clear();
-
-                System.out.println("now printing all contents:");
-
-    for (ArrayList<Integer> list : conjunctionAttitudeLists) {
-            for (Integer num : list) {
-                System.out.print(num + " ");
-            }
-            System.out.println(); // Move to the next line after printing each inner list
-        }
-System.out.print(conjunctionAttitudeList.size()+" the size..");
-System.out.println(conjunctionAttitudeList.size()+" the size..");
-System.out.println(finalConjunctionList.size()+" the size of the final list");
 
 }
 
-}
-
-void OneAttitudeInConjunctionList() throws ParseException :
-{
-  Token attitude;
-}
-{
-attitude=<STRING>
-{
-  String s = attitude.image.trim().toLowerCase();
-  if(!initialAttitudes.containsKey(s))
-    throw new ParseException("Not in initially Defined Attitudes");
-  currConsisAttitude = initialAttitudes.get(s);
-  conjunctionAttitudeList.add(currConjunctionAttitude);
- 
-
-}
-}
 
 
 
@@ -2011,7 +2139,7 @@ void consisAttitudeList() throws ParseException :
 consisAttitudeLists.add(finalConsisList);
 consisAttitudeList.clear();
 
-                System.out.println("now printing all contents:");
+  System.out.println("now printing all contents:");
 
     for (ArrayList<Integer> list : consisAttitudeLists) {
             for (Integer num : list) {
