@@ -5,6 +5,7 @@ import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.Set;
 import edu.guc.mind_graf.support.Pair;
 
+import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
 
@@ -52,15 +53,19 @@ public class Context {
         node.getSupport().setHyp(attitudeNumber);
     }
 
-    public void removeHypothesisFromContext(int attitudeNumber, PropositionNode node) {
-        for(Pair<PropositionNodeSet, PropositionNodeSet>[] hypsForThisGrade : this.hypotheses.values()) {
-            for (Pair<PropositionNodeSet, PropositionNodeSet> hypsForThisAttitude : hypsForThisGrade) {
-                hypsForThisAttitude.getFirst().remove(node);
-            }
+    public ArrayList<Integer> getLevels(){
+        return new ArrayList<>(this.hypotheses.keySet());
+    }
+
+    public void removeHypothesisFromContext(int level,int attitudeId, PropositionNode node) {
+        Pair<PropositionNodeSet,PropositionNodeSet>[] pairArr = this.hypotheses.get(level);
+        if(pairArr != null){
+            pairArr[attitudeId].getFirst().remove(node);
         }
     }
 
     public boolean isHypothesis(int attitudeNumber, PropositionNode node){
+        //TODO: level
         for(Pair<PropositionNodeSet, PropositionNodeSet>[] hypsForThisGrade : this.hypotheses.values()) {
             for (Pair<PropositionNodeSet, PropositionNodeSet> hypsForThisAttitude : hypsForThisGrade) {
                 if(hypsForThisAttitude.getFirst().contains(node) || hypsForThisAttitude.getSecond().contains(node)){
@@ -75,10 +80,11 @@ public class Context {
         return this.hypotheses.get(level)[attitudeID];
     }
 
-    public void completelyRemoveNodeFromContext(int attitudeNumber, PropositionNode node){
+    public void completelyRemoveNodeFromContext(int level, int attitudeNumber, PropositionNode node){
         if(this.isHypothesis(attitudeNumber,node)){
-            this.removeHypothesisFromContext(attitudeNumber,node);
+            this.removeHypothesisFromContext(level,attitudeNumber,node);
         }
+        //TODO make this node remove manually and automatically
         this.removeInferredNodeFromContext(attitudeNumber,node);
     }
 

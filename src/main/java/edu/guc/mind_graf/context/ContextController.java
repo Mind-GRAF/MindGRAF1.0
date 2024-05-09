@@ -99,9 +99,10 @@ public class ContextController {
     }
 
     public static void removeFromContext(String contextName, int attitudeNumber, int nodeId) {
-        Context c = ContextController.getContext(contextName);
-        PropositionNode n = (PropositionNode) Network.getNodeById(nodeId);
-        c.removeHypothesisFromContext(attitudeNumber, n);
+        //TODO: level
+//        Context c = ContextController.getContext(contextName);
+//        PropositionNode n = (PropositionNode) Network.getNodeById(nodeId);
+//        c.removeHypothesisFromContext(attitudeNumber, n);
     }
 
     public static int max(int x, int y){
