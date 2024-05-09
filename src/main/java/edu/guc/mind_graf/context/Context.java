@@ -1,8 +1,7 @@
 package edu.guc.mind_graf.context;
 
 import java.util.BitSet;
-import java.util.Hashtable;
-import java.util.Map;
+import java.util.HashMap;
 
 import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.set.PropositionNodeSet;
@@ -12,19 +11,19 @@ import edu.guc.mind_graf.support.Pair;
 
 public class Context {
 
-    private final Hashtable<Integer, Pair<PropositionNodeSet,PropositionNodeSet>> attitudes;
-    //TODO change this to hashmap
+    private final HashMap<Integer,Pair<PropositionNodeSet,PropositionNodeSet>[]> hypotheses;
     private final String name;
     private Set<Integer, BitSet> AttitudesBitset;
 
 
     public Context(String name, Set<String,Integer> attitudeNames){
         this.name=name;
-        this.attitudes = new Hashtable<>();
-        for(Map.Entry<String,Integer> entry: attitudeNames.getSet().entrySet()){
-            Pair<PropositionNodeSet, PropositionNodeSet> p = new Pair<>(new PropositionNodeSet(),new PropositionNodeSet());
-            this.attitudes.put(entry.getValue(), p);
+        this.hypotheses = new HashMap<>();
+        Pair<PropositionNodeSet, PropositionNodeSet>[] hyps = new Pair[attitudeNames.size()];
+        for(int i =0;i<attitudeNames.size();i++){
+            hyps[i] = (new Pair<>(new PropositionNodeSet(), new PropositionNodeSet()));
         }
+        this.hypotheses.put(0, hyps);
     }
     public Integer getPropositionAttitude(Integer prop) {
 
@@ -43,26 +42,37 @@ public class Context {
         return name;
     }
 
-//    public PropositionNodeSet getAllPropositionsInAnAttitude(int attitude) {
-//        return this.attitudes.get(attitude);
-//    }
-
     public void addHypothesisToContext(int attitudeNumber, PropositionNode node) {
-        this.attitudes.get(attitudeNumber).getFirst().add(node);
+        this.hypotheses.get(0)[attitudeNumber].getFirst().add(node);
+        node.getSupport().setHyp(attitudeNumber);
+    }
+
+    public void addHypothesisToContext(int attitudeNumber, PropositionNode node, int grade) {
+        this.hypotheses.get(grade)[attitudeNumber].getFirst().add(node);
         node.getSupport().setHyp(attitudeNumber);
     }
 
     public void removeHypothesisFromContext(int attitudeNumber, PropositionNode node) {
-        //TODO: wael handle graded
-        this.attitudes.get(attitudeNumber).getSecond().remove(node);
+        for(Pair<PropositionNodeSet, PropositionNodeSet>[] hypsForThisGrade : this.hypotheses.values()) {
+            for (Pair<PropositionNodeSet, PropositionNodeSet> hypsForThisAttitude : hypsForThisGrade) {
+                hypsForThisAttitude.getFirst().remove(node);
+            }
+        }
     }
 
     public boolean isHypothesis(int attitudeNumber, PropositionNode node){
-        return this.attitudes.get(attitudeNumber).getFirst().contains(node) || this.attitudes.get(attitudeNumber).getSecond().contains(node);
+        for(Pair<PropositionNodeSet, PropositionNodeSet>[] hypsForThisGrade : this.hypotheses.values()) {
+            for (Pair<PropositionNodeSet, PropositionNodeSet> hypsForThisAttitude : hypsForThisGrade) {
+                if(hypsForThisAttitude.getFirst().contains(node) || hypsForThisAttitude.getSecond().contains(node)){
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
-    public Pair<PropositionNodeSet,PropositionNodeSet> getAttitudeProps(int attitudeID){
-        return this.attitudes.get(attitudeID);
+    public Pair<PropositionNodeSet, PropositionNodeSet> getAttitudeProps(int level, int attitudeID){
+        return this.hypotheses.get(level)[attitudeID];
     }
 
 

@@ -2,22 +2,20 @@ package edu.guc.mind_graf.revision;
 
 import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.context.ContextController;
-import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.set.PropositionNodeSet;
-import edu.guc.mind_graf.support.Pair;
 
 import java.util.*;
 
 public class Revision {
-	public static void checkContradiction(Context c, int attitudeNumberOfAddedNode, PropositionNode node) {
+	public static ArrayList<Contradiction> checkContradiction(Context c, int attitudeNumberOfAddedNode, PropositionNode node) {
 		System.out.println("checking contradictions");
 		PropositionNode nodeCompliment = (PropositionNode) node.getNegation();
 		if(nodeCompliment == null){
 			//node complement is not in the network so a contradiction can never happen
-			return;
+			return null;
 		}
-		System.out.println("found negation"+ nodeCompliment);
+		System.out.println("found negation: "+ nodeCompliment.getName());
 		//TODO: wael cache
 		ArrayList<ArrayList<Integer>> filteredConsistentAttitudes = filterAttitudes(ContextController.getConsistentAttitudes(),attitudeNumberOfAddedNode);
 		ArrayList<Contradiction> contradictions = new ArrayList<>();
@@ -28,20 +26,23 @@ public class Revision {
 				if(nodeCompliment.supported(c.getName(), attitudeNumber,0)){
 					cont.getContradictions().add(attitudeNumber,nodeCompliment);
 				}
-				if(!cont.getContradictions().isEmpty()){
-					contradictions.add(cont);
-				}
+			}
+			if(!cont.getContradictions().isEmpty() && !contradictions.contains(cont)){
+				contradictions.add(cont);
 			}
 		}
 		System.out.println("Found Contradictions: "+ contradictions);
 
-		if(!contradictions.isEmpty()){
-			if(ContextController.automaticHandlingEnabled()){
-				automaticContradictionHandling(c,attitudeNumberOfAddedNode,contradictions);
-			}else{
-				manualContradictionHandling(c,attitudeNumberOfAddedNode,contradictions);
-			}
-		}
+
+		//TODO: wael add a parent method
+		return contradictions;
+//		if(!contradictions.isEmpty()){
+//			if(ContextController.automaticHandlingEnabled()){
+//				automaticContradictionHandling(c,attitudeNumberOfAddedNode,contradictions);
+//			}else{
+//				manualContradictionHandling(c,attitudeNumberOfAddedNode,contradictions);
+//			}
+//		}
 
 	}
 

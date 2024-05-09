@@ -3,6 +3,7 @@ package edu.guc.mind_graf.mgip.ruleHandlers;
 import java.util.Map;
 
 import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.mgip.reports.Report;
 import edu.guc.mind_graf.nodes.FlagNode;
 import edu.guc.mind_graf.nodes.Node;
@@ -70,7 +71,7 @@ public class RuleInfo {
     // substitution I'm assuming it's the same sign; otherwise, BR would've handled
     // it)
 
-    public RuleInfo combine(RuleInfo r) {
+    public RuleInfo combine(RuleInfo r) throws DirectCycleException {
         if (!isCompatible(r))
             return null;
         RuleInfo res = new RuleInfo(r.getContext(), r.getAttitude());
@@ -96,8 +97,9 @@ public class RuleInfo {
         res.ncount = resNcount;
         res.subs = resSubs;
         res.fns = resFns;
-        //TODO: sara this is also causing a problem
-//        res.support = this.support.union(r.support);
+        res.support = new Support(-1);
+        res.support.union(this.support);
+        res.support.union(r.support);
         return res;
     }
 
@@ -190,8 +192,7 @@ public class RuleInfo {
         ri.setNcount(this.ncount);
         ri.setSubs(this.subs.clone());
         ri.setFns(this.fns.clone());
-        //TODO: sara this is also causing a problem
-//        ri.setSupport(this.support.clone());
+        ri.setSupport(this.support.clone());
         return ri;
     }
 

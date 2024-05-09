@@ -8,12 +8,13 @@ public class AttitudeNode extends ActNode {
 
     public AttitudeNode(DownCableSet downCables) {
         super(downCables);
+        this.setPrimitive(true);
     }
 
-    public void runActuator(ActNode node) {
+    public void runActuator() {
         Context context = ContextController.getContext(ContextController.getCurrContextName());
-        PropositionNode prop = (PropositionNode) node.getDownCableSet().get("obj").getNodeSet().getNode(0);
-        ActNode action = (ActNode) node.getDownCableSet().get("action").getNodeSet().getNode(0);
+        PropositionNode prop = (PropositionNode) this.getDownCableSet().get("obj").getNodeSet().getNode(0);
+        ActNode action = (ActNode) this.getDownCableSet().get("action").getNodeSet().getNode(0);
         int attitudeID = ContextController.getAttitudeNumber(action.getName());
         context.addHypothesisToContext(attitudeID, prop);
     }

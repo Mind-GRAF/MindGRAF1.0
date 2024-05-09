@@ -27,7 +27,11 @@ public class Support {
 		// Constructor
 		this.nodeID = nodeID;
 		justificationSupport = new HashMap<>();
+		justificationSupport.put(0,new HashMap<>());
+
 		assumptionSupport = new HashMap<>();
+		assumptionSupport.put(0,new HashMap<>());
+
 		isHyp = new HashSet<>();
 		isTreeCalculatetd = new HashMap<>();
 		supportsTree = new HashMap<>();
@@ -541,7 +545,7 @@ public class Support {
 		}
 		//Add itself to its own assumptionSupport
 		PropositionNodeSet hypSet = new PropositionNodeSet(this.nodeID);
-		Pair<PropositionNodeSet,PropositionNodeSet> hypPair = new Pair<>(new PropositionNodeSet(), hypSet);
+		Pair<PropositionNodeSet,PropositionNodeSet> hypPair = new Pair<>(hypSet, new PropositionNodeSet());
 		HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>> Hyp = new HashMap<>();
 		Hyp.put(attitudeID, hypPair);
 		Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> pair = new Pair<>(Hyp, new PropositionNodeSet());
@@ -783,8 +787,16 @@ public class Support {
 		return sb.toString();
 	}
 
-
-
+	public Support clone(){
+		Support cloned = new Support(nodeID);
+        try {
+            cloned.union(this);
+        } catch (DirectCycleException e) {
+            System.out.println("Couldn't clone");
+        }
+		return cloned;
+	}
+	
 	/*
 	public void calculateSupportsTree() {
 

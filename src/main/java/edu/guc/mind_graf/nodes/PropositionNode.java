@@ -468,11 +468,14 @@ public class PropositionNode extends Node {
 
     public boolean supported(String desiredContextName, int desiredAttitudeID, int level) {
         boolean supported = false;
-        Context desiredContext = Network.getContexts().get(desiredContextName);
+        Context desiredContext = ContextController.getContext(desiredContextName);
 
+        if(this.support.getAssumptionSupport().get(level).get(desiredAttitudeID) == null){
+            return false;
+        }
         for(Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> currSupport : this.support.getAssumptionSupport().get(level).get(desiredAttitudeID)) {
             for(Integer key : currSupport.getFirst().keySet()) {
-                if(currSupport.getFirst().get(key).getFirst().isSubset(desiredContext.getAttitudeProps(key).getFirst()) && currSupport.getFirst().get(key).getSecond().isSubset(desiredContext.getAttitudeProps(key).getSecond())) {
+                if(currSupport.getFirst().get(key).getFirst().isSubset(desiredContext.getAttitudeProps(level, key).getFirst()) && currSupport.getFirst().get(key).getSecond().isSubset(desiredContext.getAttitudeProps(level, key).getSecond()) && currSupport.getSecond().isSubset(desiredContext.getAttitudeProps(level, key).getFirst())) {
                     supported = true;
                 }
                 else {
@@ -480,8 +483,8 @@ public class PropositionNode extends Node {
                     break;
                 }
             }
-            if(supported == true) {
-                return supported;
+            if(supported) {
+                return true;
             }
         }
 
@@ -499,7 +502,7 @@ public class PropositionNode extends Node {
      */
     public void setHyp(String desiredContextName, int attitude) {
         Context desiredContext = ContextController.getContext(desiredContextName);
-        desiredContext.getAttitudeProps(attitude).getSecond().add(this.getId());
+        desiredContext.getAttitudeProps(0, attitude).getFirst().add(this.getId());
         this.support.setHyp(attitude);
     }
 
@@ -708,8 +711,7 @@ public class PropositionNode extends Node {
             reportSupport.addNode(currentAttitudeID, this);
             Substitutions subs = substitutions == null ? new Substitutions() : substitutions;
             Substitutions subs2 = new Substitutions();
-            //TODO: sara check this as I added null as a 7th param.
-            Report toBeSent = new Report(subs, reportSupport, currentAttitudeID, reportSign, inferenceType, null,null);            toBeSent.setReportType(channelType);
+            Report toBeSent = new Report(subs, reportSupport, currentAttitudeID, reportSign, inferenceType, null,this);            toBeSent.setReportType(channelType);
             switch (channelType) {
                 case Matched:
                     List<Match> matchesReturned = new ArrayList<>();
@@ -1036,10 +1038,10 @@ public class PropositionNode extends Node {
         Scheduler.initiate();
         String currentContextName = ContextController.getCurrContextName();
 
-        // Scanner scanner = new Scanner(System.in);
-        // System.out.print("Enter your desired attitude: ");
-        // String att = scanner.nextLine();
-        // scanner.close();
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter your desired attitude: ");
+        String att = scanner.nextLine();
+        scanner.close();
         int currentAttitudeID = 0;
         // given by the user
         boolean reportSign = true;
@@ -1094,20 +1096,13 @@ public class PropositionNode extends Node {
         int currentAttitude = currentChannel.getAttitudeID();
         Node requesterNode = currentChannel.getRequesterNode();
         Substitutions reportSubstitutions = new Substitutions();
-        PropositionNodeSet supportNodeSet = new PropositionNodeSet();
 
         if (this.supported(currentContext, currentAttitude, 0)) {
             System.out.println(this.getName()+" is supported");
             Support reportSupport = new Support(-1);
-            reportSupport.addNode(currentAttitude, (PropositionNode) this);
+            reportSupport.addNode(currentAttitude, this);
             Report NewReport = new Report(reportSubstitutions, reportSupport, currentAttitude, true,
                     InferenceType.BACKWARD, requesterNode, requesterNode);
-            //TODO: sara check if this is correct
-
-            // if (((RuleNode) requesterNode).isForwardReport() == true) {
-            // NewReport.setInferenceType(InferenceType.FORWARD);
-
-            // }
             NewReport.setContextName(currentContext);
             NewReport.setReportType(currentChannel.getChannelType());
             sendReport(NewReport, currentRequest.getChannel());

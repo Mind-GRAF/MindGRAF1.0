@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 class RevisionTest {
     Network n;
 
@@ -53,5 +55,31 @@ class RevisionTest {
         expected.add(new ArrayList<>(List.of(0,2,3)));
 
         Assertions.assertEquals(expected,output);
+    }
+
+    @Test
+    void testDetectingContradictions1() throws NoSuchTypeException {
+        System.out.println("contradiction detection test 1");
+        ContextController.setCurrContext("guc");
+        PropositionNode p = (PropositionNode) Network.createNode("p", "propositionnode");
+        HashMap<String, Relation> relations = Network.getRelations();
+
+        NodeSet ns1 = new NodeSet();
+        ns1.add(p);
+        NodeSet ns2 = new NodeSet();
+        ns2.add(Network.getBaseNodes().get("0"));
+
+        DownCable downCable1 = new DownCable(relations.get("arg"), ns1);
+        DownCable downCable2 = new DownCable(relations.get("min"), ns2);
+        DownCable downCable3 = new DownCable(relations.get("max"), ns2);
+
+        DownCableSet downCableSet = new DownCableSet(downCable1,downCable2,downCable3);
+
+        PropositionNode notP = (PropositionNode) Network.createNode("propositionnode", downCableSet);
+
+        ContextController.addHypothesisToContext("guc",0, p);
+        ContextController.addHypothesisToContext("guc",0,  notP);
+
+        Assertions.assertEquals(1,Revision.checkContradiction(ContextController.getContext("guc"),0, p).size());
     }
 }

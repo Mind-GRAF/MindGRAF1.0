@@ -1,5 +1,6 @@
 package edu.guc.mind_graf.mgip.ruleHandlers;
 
+import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.exceptions.InvalidRuleInfoException;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.set.NodeSet;
@@ -22,7 +23,7 @@ public abstract class RuleInfoHandler {
         return constantRIMap.get(context + attitude);
     }
 
-    public RuleInfoSet insertRI(RuleInfo ri) throws InvalidRuleInfoException {
+    public RuleInfoSet insertRI(RuleInfo ri) throws InvalidRuleInfoException, DirectCycleException {
         if (ri.getSubs() == null || ri.getSubs().isEmpty()) {
             String cHash = ri.getContext() + ri.getAttitude();
             RuleInfo constantRI = constantRIMap.getOrDefault( cHash, new RuleInfo(ri.getContext(), ri.getAttitude())).combine(ri);
@@ -45,7 +46,7 @@ public abstract class RuleInfoHandler {
         return antecedents;
     }
 
-    public abstract RuleInfoSet insertVariableRI(RuleInfo ri) throws InvalidRuleInfoException;
+    public abstract RuleInfoSet insertVariableRI(RuleInfo ri) throws InvalidRuleInfoException, DirectCycleException;
 
     public void setcMin(int cMin) {
         this.cMin = cMin;

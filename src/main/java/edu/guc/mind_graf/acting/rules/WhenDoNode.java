@@ -25,10 +25,19 @@ public class WhenDoNode extends RuleNode {
 
     public void applyRuleHandler(Report report) throws NoSuchTypeException{
         NodeSet acts = this.getDownDoNodeSet();
-
+        int currentAttitudeId=report.getAttitude();
         if (report.isSign()) {
             ArrayList<Pair<HashMap<Integer, PropositionNodeSet>, HashMap<Integer, PropositionNodeSet>>> support = new ArrayList<Pair<HashMap<Integer, PropositionNodeSet>, HashMap<Integer, PropositionNodeSet>>>();
             if (report.getSupport() != null) {
+                for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> currSupport : report.getSupport()
+                        .getJustificationSupport().get(0).get(currentAttitudeId)) {
+                    HashMap<Integer, PropositionNodeSet> hash = new HashMap<>();
+                    for (Integer innerAttitude : currSupport.getFirst().keySet()) {
+                        PropositionNodeSet currNodeSet = currSupport.getFirst().get(currentAttitudeId).getFirst();
+                        hash.put(innerAttitude, currNodeSet);
+                    }
+                    support.add(new Pair(hash, new HashMap<Integer,PropositionNodeSet>()));
+                }
                 //TODO: marwa I commented this as it was causing errors
 //                for (HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> entry : report.getSupport()
 //                        .getJustificationSupport().getFirst().get(report.getAttitude())) {

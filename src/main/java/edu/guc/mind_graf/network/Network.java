@@ -31,6 +31,7 @@ import edu.guc.mind_graf.nodes.AchieveNode;
 import edu.guc.mind_graf.mgip.matching.Match;
 import edu.guc.mind_graf.mgip.matching.Matcher;
 import edu.guc.mind_graf.nodes.ActNode;
+import edu.guc.mind_graf.nodes.AttitudeNode;
 import edu.guc.mind_graf.nodes.DoAllNode;
 import edu.guc.mind_graf.nodes.DoOneNode;
 import edu.guc.mind_graf.nodes.IndividualNode;
@@ -38,6 +39,9 @@ import edu.guc.mind_graf.nodes.MolecularType;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.nodes.RuleNode;
+import edu.guc.mind_graf.nodes.SNIFNode;
+import edu.guc.mind_graf.nodes.SNITERATENode;
+import edu.guc.mind_graf.nodes.SNSequenceNode;
 
 public class Network {
 	private static HashMap<Integer, Node> nodes;
@@ -45,7 +49,6 @@ public class Network {
 	private static HashMap<String, Node> baseNodes;
 	private static HashMap<String, Relation> relations;
 	private static HashMap<Integer, Node> propositionNodes;
-	private static HashMap<String, Context> Contexts;
 	public static HashMap<String, String> quantifiers = new HashMap<String, String>();
 	public static HashMap<String, CustomClass> userDefinedClasses = new HashMap<String, CustomClass>();
 	public static int MolecularCount;
@@ -147,6 +150,9 @@ public class Network {
 				case "whendonode":
 					node = new WhenDoNode(downCableSet);
 					break;
+				case "attitudenode":
+					node = new AttitudeNode(downCableSet);
+					break;
 				case "doonenode":
 					node = new DoOneNode(downCableSet);
 					break;
@@ -156,6 +162,16 @@ public class Network {
 				case "achievenode":
 					node = new AchieveNode(downCableSet);
 					break;
+				case "snifnode":
+					node = new SNIFNode(downCableSet);
+					break;
+				case "sniteratenode":
+					node = new SNITERATENode(downCableSet);
+					break;
+				case "snsequencenode":
+					node = new SNSequenceNode(downCableSet);
+					break;
+
 				default:
 					if (userDefinedClasses.containsKey(SemanticType)) {
 						CustomClass customClass = userDefinedClasses
@@ -485,10 +501,6 @@ public class Network {
 
 	public static HashMap<Integer, Node> getPropositionNodes() {
 		return propositionNodes;
-	}
-
-	public static HashMap<String, Context> getContexts() {
-		return Contexts;
 	}
 
 	public static void setQuantifiers(HashMap<String, String> quantifiers) {

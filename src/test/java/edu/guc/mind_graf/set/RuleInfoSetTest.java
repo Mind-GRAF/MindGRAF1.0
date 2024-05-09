@@ -1,6 +1,7 @@
 package edu.guc.mind_graf.set;
 
 import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.support.Support;
 import org.junit.jupiter.api.AfterEach;
@@ -31,7 +32,7 @@ class RuleInfoSetTest {
     }
 
     @Test
-    public void testCombine() {
+    public void testCombine() throws DirectCycleException {
         RuleInfo ruleInfo1 = new RuleInfo("", 0, 1, 2, new Substitutions(), new FlagNodeSet(), new Support(-1));
         RuleInfo ruleInfo2 = new RuleInfo("", 0, 2, 1, new Substitutions(), new FlagNodeSet(), new Support(-1));
         ruleInfoSet.addRuleInfo(ruleInfo1);
@@ -45,7 +46,7 @@ class RuleInfoSetTest {
     }
 
     @Test
-    public void testCombineAdd() {
+    public void testCombineAdd() throws DirectCycleException {
         RuleInfoSet ruleInfoSet1 = new RuleInfoSet(new RuleInfo("", 0, 1, 2, new Substitutions(), new FlagNodeSet(), new Support(-1)));
         RuleInfo ruleInfo = new RuleInfo("", 0, 2, 1, new Substitutions(), new FlagNodeSet(), new Support(-1));
         RuleInfoSet combined = ruleInfoSet1.combineAdd(ruleInfo);
@@ -70,7 +71,7 @@ class RuleInfoSetTest {
     }
 
     @Test
-    public void testCombineDisjointSets() {
+    public void testCombineDisjointSets() throws DirectCycleException {
         RuleInfoSet ruleInfoSet1 = new RuleInfoSet(new RuleInfo("", 0, 1, 2, new Substitutions(), new FlagNodeSet(), new Support(-1)));
         RuleInfoSet ruleInfoSet2 = new RuleInfoSet(new RuleInfo("", 0, 2, 1, new Substitutions(), new FlagNodeSet(), new Support(-1)));
         RuleInfoSet combined = ruleInfoSet1.combineDisjointSets(ruleInfoSet2);
@@ -91,7 +92,7 @@ class RuleInfoSetTest {
     }
 
     @Test
-    public void testAddRootRuleInfo() {
+    public void testAddRootRuleInfo() throws DirectCycleException {
         RuleInfoSet ruleInfoSet1 = new RuleInfoSet(new RuleInfo("", 0, 1, 2, new Substitutions(), new FlagNodeSet(), new Support(-1)));
         RuleInfoSet ruleInfoSet2 = new RuleInfoSet(new RuleInfo("", 0, 2, 1, new Substitutions(), new FlagNodeSet(), new Support(-1)));
         ruleInfoSet1.addRootRuleInfo(ruleInfoSet2);

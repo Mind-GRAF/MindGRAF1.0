@@ -96,7 +96,8 @@ public class ContextController {
     public static void addHypothesisToContext(String contextName, int attitudeNumber, PropositionNode node) {
         Context c = ContextController.getContext(contextName);
         c.addHypothesisToContext(attitudeNumber, node);
-        Revision.checkContradiction(c,attitudeNumber,node);
+        //TODO: wael uncomment this it's removed to test
+//        Revision.checkContradiction(c,attitudeNumber,node);
     }
 
     public static void removeFromContext(String contextName, int attitudeNumber, int nodeId) {

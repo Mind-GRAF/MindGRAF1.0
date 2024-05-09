@@ -10,24 +10,26 @@ import edu.guc.mind_graf.set.NodeSet;
 
 public class AchieveNode extends ActNode {
 
-    private ActAgenda controlAgenda;
+	private ActAgenda controlAgenda;
+	static int achieveCount;
 
-    public AchieveNode(DownCableSet downCables) {
-        super(downCables);
-    }
+	public AchieveNode(DownCableSet downCables) {
+		super(downCables);
+		this.setPrimitive(true);
+	}
 
-    public void runActuator(ActNode node) throws NoSuchTypeException {
-        switch(controlAgenda){
+	public void runActuator() throws NoSuchTypeException {
+		switch (controlAgenda) {
 			case START:
-				PropositionNode goal = (PropositionNode) node.getDownCableSet().get("obj").getNodeSet().getNode(0);
+				PropositionNode goal = (PropositionNode) this.getDownCableSet().get("obj").getNodeSet().getNode(0);
 				ContextSet cs = ContextController.getContextSet();
-				for(Context c : cs.getSet().values()) {
-					if(c.isHypothesis(1, goal))
-						return;	
+				for (Context c : cs.getSet().values()) {
+					if (c.isHypothesis(1, goal))
+						return;
 				}
 				try {
-					controlAgenda = Agenda.FIND_PLANS;
-					Scheduler.addToActQueue(node);
+					controlAgenda = ActAgenda.FIND_PLANS;
+					Scheduler.addToActQueue(this);
 					searchForPlansInAchieve(goal);
 				} catch (NoSuchTypeException e) {
 					e.printStackTrace();
@@ -35,13 +37,13 @@ public class AchieveNode extends ActNode {
 				break;
 			case FIND_PLANS:
 				NodeSet plans = this.processReportsInAct();
-				if(!plans.isEmpty()) {
-					controlAgenda = Agenda.DONE;
+				if (!plans.isEmpty()) {
+					controlAgenda = ActAgenda.DONE;
 					sendDoOneToActQueue(plans);
 				}
 			default:
 				break;
 		}
-    }
+	}
 
 }

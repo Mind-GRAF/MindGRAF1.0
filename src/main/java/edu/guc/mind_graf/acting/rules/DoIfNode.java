@@ -31,7 +31,7 @@ public class DoIfNode extends RuleNode {
     public void applyDoIfHandler(Substitutions substitutions, Request request, Support knownInstanceSupport)
             throws NoSuchTypeException {
         NodeSet acts = this.getDownDoNodeSet();
-
+        int currentAttitudeId=request.getChannel().getAttitudeID();
         HashMap<Integer, PropositionNodeSet> negativeSupport = new HashMap<Integer, PropositionNodeSet>();
         Node ifNode = request.getChannel().getRequesterNode();
 
@@ -55,6 +55,15 @@ public class DoIfNode extends RuleNode {
             support.add(pair);
         } else {
             if (knownInstanceSupport != null) {
+                for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> currSupport : knownInstanceSupport
+                        .getJustificationSupport().get(0).get(currentAttitudeId)) {
+                    HashMap<Integer, PropositionNodeSet> hash = new HashMap<>();
+                    for (Integer innerAttitude : currSupport.getFirst().keySet()) {
+                        PropositionNodeSet currNodeSet = currSupport.getFirst().get(currentAttitudeId).getFirst();
+                        hash.put(innerAttitude, currNodeSet);
+                    }
+                    support.add(new Pair(hash, negativeSupport));
+                }
                 //TODO: marwa I commented this as it was causing errors
 //                for (HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> entry : knownInstanceSupport
 //                        .getJustificationSupport().getFirst().get(request.getChannel().getAttitudeID())) {

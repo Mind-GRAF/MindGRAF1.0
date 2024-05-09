@@ -1,5 +1,6 @@
 package edu.guc.mind_graf.mgip.ruleHandlers;
 
+import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
 
@@ -19,7 +20,7 @@ public class Singleton extends SIndex {
     }
 
     @Override
-    public RuleInfoSet insertIntoMap(RuleInfo ri, int hash) {
+    public RuleInfoSet insertIntoMap(RuleInfo ri, int hash) throws DirectCycleException {
         RuleInfo combined = ri.combine(ruleInfoMap.getOrDefault(hash, new RuleInfo(ri.getContext(), ri.getAttitude())));
         if(combined == null)
             return null;
