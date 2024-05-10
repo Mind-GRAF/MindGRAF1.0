@@ -91,28 +91,28 @@ public class Context {
      * checks the validity of a node set as a support in a context and an attitude
      */
     public boolean isValidSupport(int level, int attitudeNumber, PropositionNodeSet nodes) {
-        for(PropositionNode node:nodes){
-            if(!node.supported(this.getName(),attitudeNumber,0)){
+        for (PropositionNode node : nodes) {
+            if (!node.supported(this.getName(), attitudeNumber, level)) {
                 return false;
             }
         }
-        return  true;
+        return true;
     }
 
-    public void completelyRemoveNodeFromContext(int level, int attitudeNumber, PropositionNode node,boolean manual) {
+    public void completelyRemoveNodeFromContext(int level, int attitudeNumber, PropositionNode node, boolean manual) {
         if (this.isHypothesis(level, attitudeNumber, node)) {
             this.removeHypothesisFromContext(level, attitudeNumber, node);
         }
-        if(manual){
+        if (manual) {
             this.manuallyRemoveInferredNodeFromContext(level, attitudeNumber, node);
-        }else{
+        } else {
             //TODO: wael
         }
     }
 
     public void manuallyRemoveInferredNodeFromContext(int level, int attitudeNumber, PropositionNode node) {
-		Revision.print("Starting removal of node: "+ node.printShortData()+" from attitude: "+ ContextController.getAttitudeName(attitudeNumber)+" from Context: "+ this.getName());
-        for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>,PropositionNodeSet> assumptionSupport : node.getSupport().getAssumptionSupport().get(level).get(attitudeNumber)) {
+        Revision.print("Starting removal of node: " + node.printShortData() + " from attitude: " + ContextController.getAttitudeName(attitudeNumber) + " from Context: " + this.getName());
+        for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> assumptionSupport : node.getSupport().getAssumptionSupport().get(level).get(attitudeNumber)) {
             for (Map.Entry<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> support : assumptionSupport.getFirst().entrySet()) {
                 if (!isValidSupport(level, attitudeNumber, support.getValue().getFirst())) {
                     continue;
@@ -124,7 +124,7 @@ public class Context {
                     Revision.print((i + 1) + ". Node: " + nodeInSupport.printShortData());
                 }
                 PropositionNode nodeToRemove = (PropositionNode) supportNodes.get(Revision.readInt() - 1);
-                completelyRemoveNodeFromContext(level,attitudeNumber,nodeToRemove,true);
+                completelyRemoveNodeFromContext(level, attitudeNumber, nodeToRemove, true);
             }
         }
         Revision.print("successfully removed Node: " + node + " from attitude: " + ContextController.getAttitudeName(attitudeNumber) + " from Context: " + this.getName());
