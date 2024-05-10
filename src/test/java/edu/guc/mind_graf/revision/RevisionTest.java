@@ -99,4 +99,13 @@ class RevisionTest {
 
         Assertions.assertEquals(0, Revision.checkContradiction(ContextController.getContext("guc"), 0, 0, p).size());
     }
+
+    @Test
+    void manualContradictionHandling1() {
+        System.out.println("manual contradiction handling test 1");
+        ContextController.addHypothesisToContext(0, p);
+        ContextController.addHypothesisToContext(1, notP);
+
+        Assertions.assertEquals(0, Revision.checkContradiction(ContextController.getContext("guc"), 0, 0, p).size());
+    }
 }

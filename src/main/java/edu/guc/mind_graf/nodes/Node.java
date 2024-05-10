@@ -367,6 +367,10 @@ public abstract class Node {
 		return "{" + this.name + ", " + this.syntacticType + "}";
 	}
 
+	public String printShortData(){
+		return "{ id: " + this.id + ", name: " + this.name + "}";
+	}
+
 	public MolecularType getMolecularType() {
 		if (this.getFreeVariables() == null
 				|| this.getFreeVariables().size() == 0)

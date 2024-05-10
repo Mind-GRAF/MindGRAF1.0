@@ -105,10 +105,6 @@ public class ContextController {
 //        c.removeHypothesisFromContext(attitudeNumber, n);
     }
 
-    public static int max(int x, int y){
-        return Math.max(x,y);
-    }
-
     public static IntBinaryOperator mergeGrades() {
         return switch (ContextController.mergeFunctionNumber) {
             case 2 -> Math::min;
