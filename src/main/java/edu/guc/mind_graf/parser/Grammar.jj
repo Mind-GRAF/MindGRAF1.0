@@ -14,6 +14,7 @@ import edu.guc.mind_graf.components.CustomMethod;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.io.StringReader;
+import edu.guc.mind_graf.nodes.ActNode;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.Set;
 import java.util.HashSet;
@@ -71,6 +72,9 @@ public class MindGRAF_Parser {
       // wffs
       private static HashMap<Integer, ArrayList<String>> wffs = new HashMap<Integer, ArrayList<String>>();
       private static Integer wffCount = 1;
+
+      //default attitude
+      private static Integer defaultAttitude = 0;
 
 
     public static <K, V> HashMap<V, ArrayList<K>> groupByValue(HashMap<K, V> originalMap) {
@@ -426,19 +430,27 @@ Node WhenIfDo() throws ParseException :
 
 Node Act() throws ParseException :
 {
-Node act = null;
+    Node act = null;
 }
 {
-  act = SNSequence() | act = Attitude() | act = Achieve() |
-  act = DoOne() | act = DoAll() | act = GuardedAct() | act = SNIF() | 
-  act = SNIterate()
-  {
-    return act;
-  }
-
-
-
+    (
+        act = SNSequence() |
+        act = Attitude() |
+        act = Achieve() |
+        act = DoOne() |
+        act = DoAll() |
+        act = GuardedAct() |
+        act = SNIF() |
+        act = SNIterate()
+    )
+    {
+        return act;
+    }
+    {
+        throw new ParseException("No valid action found.");
+    }
 }
+
 
 
 Node SNSequence() throws ParseException:
@@ -1284,7 +1296,7 @@ void Command() throws ParseException :
     {
     Token CName;
    }
-    ("add-bridge" "["CName = <STRING>"]"Bridge())
+    ("add-bridge" Bridge())
     {
        HashMap<String, HashMap<String, Node>> molecN = network.getMolecularNodes();
       for(HashMap<String, Node> x : molecN.values()){
@@ -1301,8 +1313,7 @@ void Command() throws ParseException :
     |
     forwardInference()
     |
-    backwardInference()
-    |
+ 
   
     AddToContext()
     |
@@ -1313,7 +1324,68 @@ void Command() throws ParseException :
     getAllSupported()
     |
     backInferSub()
+    |
+    performAct()
+    |
+    clearNetwork()
+    |
+    clearInfer()
     }
+
+
+void clearNetwork() throws ParseException :
+{}
+{
+  "clear-network"
+  {
+    network.setBaseNodes(new HashMap<String,Node>());
+    network.setNodes(new HashMap<Integer,Node>());
+    network.setMolecularNodes(new HashMap<String,HashMap<String,Node>>());
+    network.setRelations(new HashMap<String,Relation>());
+    network.getPropositionNodes().clear();
+
+    CLI.print("Network is Cleared.");
+  }
+}
+
+void clearInfer() throws ParseException :
+{}
+{
+  "clear-infer"
+  {
+        String x;
+  }
+
+}
+
+
+void performAct() throws ParseException :
+{
+  Node node = null;
+  ActNode actNode = null;
+}
+{
+  "perform-act" node = Act()
+  {
+    actNode = (ActNode)node;
+
+    try {
+      actNode.perform();
+    } catch (NoSuchTypeException e) {
+      // TODO Auto-generated catch block
+      CLI.print(e.getMessage());
+    } catch (NoPlansExistForTheActException e) {
+      // TODO Auto-generated catch block
+      CLI.print(e.getMessage());
+    } catch (DirectCycleException e) {
+      // TODO Auto-generated catch block
+      CLI.print(e.getMessage());
+    }
+  }
+
+}
+
+
 
 
 void backInferSub() throws ParseException :
@@ -1507,46 +1579,61 @@ void AddToContext() throws ParseException :
 
 
 
-void backwardInference() throws ParseException :
+void backwardInferenceV1() throws ParseException :
 {
   Node node;
   String CName = null;
 }
 {
-  "back-infer"  "["node = Expression()"]"("["CName = <STRING>.image"]")?
-  {
-    PropositionNode prop = (PropositionNode) node;
+   "c{"<STRING>"}" "a{"<STRING>"}" Expression()
+} 
 
-    if (CName == null) {
-      try {
-        CName = controller.getCurrContextName();
-        CName = CName.trim();
-      } catch (Exception e) {
-        CLI.print("Set Default Context First.");
-      }
 
-    } else {
-      CName = CName.trim();
-      if (!controller.getContextSet().getSet().containsKey(CName.trim())) 
-          throw new ParseException("Context Does Not Exist.");
-    }
-    try {
-      String oldCurrContext = controller.getCurrContextName();
-      controller.setCurrContext(CName);
-      prop.deduce();
-      controller.setCurrContext(oldCurrContext);
-    } catch (NoSuchTypeException e) {
-      // TODO Auto-generated catch block
-         CLI.print(e.getMessage());
-    } catch (NoPlansExistForTheActException e) {
-      // TODO Auto-generated catch block
-         CLI.print(e.getMessage());
-    } catch (DirectCycleException e) {
-      // TODO Auto-generated catch block
-         CLI.print(e.getMessage());
-    }
-  }
-}    
+void backwardInferenceV2() throws ParseException :
+{
+  Node node;
+  String CName = null;
+}
+{
+    "c{"<STRING>"}"  Expression()
+} 
+
+
+void backwardInferenceV3() throws ParseException :
+{
+  Node node;
+  String CName = null;
+}
+{
+    "a{"<STRING>"}" Expression()
+} 
+
+
+
+
+void backwardInferenceV4() throws ParseException :
+{
+  Node node;
+  String CName = null;
+}
+{
+    Expression()
+} 
+
+
+void backwardInference() throws ParseException :
+{}
+{
+  "back-infer"
+  (backwardInferenceV1()
+  |
+  backwardInferenceV2()
+  |
+  backwardInferenceV3()
+  |
+  backwardInferenceV4())
+}
+
 
 void forwardInference() throws ParseException :
 {
@@ -1625,7 +1712,29 @@ void setCurrentContext() throws ParseException :
   }
 }
 
+void setCurrentAttitude() throws ParseException :
+{
+  String attitude; 
+}
+{
+  "set-attitude" attitude = <STRING>.image
+  {
+    attitude = attitude.trim().toLowerCase();
+    
+    Integer num = controller.getAttitudeNumber(attitude);
+    if(num == null)
+    {
+      CLI.print("no such attitude. The current default attitude is " + controller.getAttitudeName(defaultAttitude)+".");
 
+    }
+    else{
+      defaultAttitude = num;
+      CLI.print("The default attitude has been set to "+attitude+".");
+    }
+
+
+  }
+}
 
 
 Node Bridge() throws ParseException :
