@@ -77,39 +77,67 @@ class RuleNodeTest {
         Node P0 = Network.createNode("andentailment", new DownCableSet(new DownCable(Network.getRelations().get("ant"), new NodeSet(M0, M1, M2, M3, M4)),
                 new DownCable(Network.getRelations().get("cq"), new NodeSet(M5))));
 
+        Substitutions govVSubs = new Substitutions();
+        Node voldemort = Network.createNode("voldemort", "individualnode");
+        govVSubs.add(G, voldemort);
+        Report report01 = new Report(govVSubs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M0);
+        report01.setContextName("Hierarchy");
+        ((RuleNode)P0).applyRuleHandler(report01);
+
+        Substitutions govDSubs = new Substitutions();
+        Node daenerys = Network.createNode("daenerys", "individualnode");
+        govDSubs.add(G, daenerys);
+        Report report00 = new Report(govDSubs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M0);
+        report00.setContextName("Hierarchy");
+        ((RuleNode)P0).applyRuleHandler(report00);
+
         Substitutions govSubs = new Substitutions();
         Node henry = Network.createNode("henry", "individualnode");
         govSubs.add(G, henry);
         Report report0 = new Report(govSubs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M0);
-        report0.setContextName("");
+        report0.setContextName("Hierarchy");
         ((RuleNode)P0).applyRuleHandler(report0);
+
+        Substitutions civPSubs = new Substitutions();
+        Node pam = Network.createNode("pam", "individualnode");
+        civPSubs.add(C, pam);
+        Report report10 = new Report(civPSubs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M1);
+        report10.setContextName("Hierarchy");
+        ((RuleNode)P0).applyRuleHandler(report10);
 
         Substitutions civSubs = new Substitutions();
         Node anne = Network.createNode("anne", "individualnode");
         civSubs.add(C, anne);
         Report report1 = new Report(civSubs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M1);
-        report1.setContextName("");
+        report1.setContextName("Hierarchy");
         ((RuleNode)P0).applyRuleHandler(report1);
 
         Substitutions coSubs = new Substitutions();
         Node england = Network.createNode("england", "individualnode");
         coSubs.add(Co, england);
         Report report2 = new Report(coSubs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M2);
-        report2.setContextName("");
+        report2.setContextName("Hierarchy");
         ((RuleNode)P0).applyRuleHandler(report2);
+
+        Substitutions coNSubs = new Substitutions();
+        Node neverland = Network.createNode("neverland", "individualnode");
+        coNSubs.add(Co, neverland);
+        Report report20 = new Report(coNSubs, new Support(-1), 0, false, InferenceType.BACKWARD, P0, M2);
+        report20.setContextName("Hierarchy");
+        ((RuleNode)P0).applyRuleHandler(report20);
 
         Substitutions rSubs = new Substitutions();
         rSubs.add(Co, england);
         rSubs.add(G, henry);
         Report report3 = new Report(rSubs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M3);
-        report3.setContextName("");
+        report3.setContextName("Hierarchy");
         ((RuleNode)P0).applyRuleHandler(report3);
 
         Substitutions lSubs = new Substitutions();
         lSubs.add(Co, england);
         lSubs.add(C, anne);
         Report report4 = new Report(lSubs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M4);
-        report4.setContextName("");
+        report4.setContextName("Hierarchy");
         ((RuleNode)P0).applyRuleHandler(report4);
 
         assertEquals(1, Scheduler.getHighQueue().size());
@@ -136,8 +164,15 @@ class RuleNodeTest {
         Node M2 = Network.createNode("propositionnode", new DownCableSet(aMember, aClass));
 
         Node P0 = Network.createNode("orentailment", new DownCableSet(new DownCable(Network.getRelations().get("ant"), new NodeSet(M0, M1)), new DownCable(Network.getRelations().get("cq"), new NodeSet(M2))));
-        ((RuleNode)P0).applyRuleHandler(new Report(new Substitutions(), new Support(-1), 0, true, InferenceType.BACKWARD, P0, M0));
+        Report report0 = new Report(new Substitutions(), new Support(-1), 0, true, InferenceType.BACKWARD, P0, M0);
+        report0.setContextName("Mythology");
+        ((RuleNode)P0).applyRuleHandler(report0);
         assertEquals(1, Scheduler.getHighQueue().size());
+
+        Report report1 = new Report(new Substitutions(), new Support(-1), 0, false, InferenceType.BACKWARD, P0, M1);
+        report1.setContextName("Mythology");
+        ((RuleNode)P0).applyRuleHandler(report1);
+
     }
 
     @Test

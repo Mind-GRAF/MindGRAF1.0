@@ -22,6 +22,7 @@ import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfoHandler;
 import edu.guc.mind_graf.mgip.requests.WhenToRuleChannel;
 import edu.guc.mind_graf.mgip.rules.AndOr;
+import edu.guc.mind_graf.mgip.rules.BridgeRule;
 import edu.guc.mind_graf.mgip.rules.Thresh;
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.set.NodeSet;
@@ -30,10 +31,9 @@ import edu.guc.mind_graf.acting.rules.WhenDoNode;
 import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.components.Substitutions;
-import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
+import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
-import edu.guc.mind_graf.support.Support;
 import edu.guc.mind_graf.support.Support;
 
 public abstract class RuleNode extends PropositionNode {
@@ -49,13 +49,18 @@ public abstract class RuleNode extends PropositionNode {
     }
 
     public void applyRuleHandler(Report report) throws NoSuchTypeException {
-
+        System.out.println();
+        System.out.println("applyRuleHandler called on the report: " + report.stringifyReport());
         try {
             RuleInfoSet inserted = ruleInfoHandler.insertRI(RuleInfo.createRuleInfo(report));
             if (inserted != null && !inserted.isEmpty()) {
+                System.out.println("The rule can fire");
                 rootRuleInfos.addRootRuleInfo(inserted);
                 RuleInfoSet[] mayInfer = mayInfer();
                 createInferenceReports(mayInfer);
+            }
+            else{
+                System.out.println("Nothing can be inferred yet");
             }
         } catch (InvalidRuleInfoException e) {
             System.out.println("Inserting RI failed");
@@ -73,10 +78,14 @@ public abstract class RuleNode extends PropositionNode {
             for (RuleInfo ri : inferrable[i]) {
                 rootRuleInfos.removeRuleInfo(ri);
                 ri.removeNullSubs();
+                PropositionNodeSet suppportPropSet = new PropositionNodeSet();
+
                 Support supports = new Support(-1); // probably wrong (maybe should make new support of the flag nodes
                                                     // and rule node
-                if(!this.isOpen())
-                    supports.addNode(ri.getAttitude(), this);
+                if(!this.isOpen()){
+                    if(!(this instanceof BridgeRule))
+                        supports.addNode(ri.getAttitude(), this);
+                }
                 else {
                     Collection<KnownInstance> theKnownInstanceSet = knownInstances.mergeKInstancesBasedOnAtt(
                             ri.getAttitude());
@@ -459,12 +468,10 @@ public abstract class RuleNode extends PropositionNode {
                         // i removed the apply rule handler here because i call it only when the
                         // antecedents report back replying to my request thus whenever its a backward
                         // inference
-
                     } else {
                         super.processSingleRequests(tempRequest);
                     }
                 } else {
-
                     Collection<KnownInstance> theKnownInstanceSet = knownInstances.mergeKInstancesBasedOnAtt(
                             currentReportAttitudeID);
                     knownInstances.printKnownInstanceSet(theKnownInstanceSet);
@@ -502,13 +509,11 @@ public abstract class RuleNode extends PropositionNode {
                     if (!this.isForwardReport()) {
                         this.setForwardReport(true);
                         super.processSingleRequests(tempRequest);
-
                     }
                 }
             } else {
                 /** Backward Inference */
                 applyRuleHandler(currentReport);
-
             }
         } else if (this instanceof WhenDoNode) {
 

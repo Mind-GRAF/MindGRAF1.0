@@ -17,27 +17,27 @@ import edu.guc.mind_graf.nodes.PropositionNode;
 public class Support {
 
 	private int nodeID;
-	private HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>>> justificationSupport;
-	private HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>>> assumptionSupport;
+	private HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>>>> justificationSupport;
+	private HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>>>> assumptionSupport;
 	private HashMap<Integer, HashMap<Integer, SupportTree>> supportsTree;
 	private HashSet<Integer> isHyp;
 	private HashMap<Integer, HashSet<Integer>> isTreeCalculatetd;
 
-	public Support(int nodeID){
+	public Support(int nodeID) {
 		// Constructor
 		this.nodeID = nodeID;
 		justificationSupport = new HashMap<>();
-		justificationSupport.put(0,new HashMap<>());
+		justificationSupport.put(0, new HashMap<>());
 
 		assumptionSupport = new HashMap<>();
-		assumptionSupport.put(0,new HashMap<>());
+		assumptionSupport.put(0, new HashMap<>());
 
 		isHyp = new HashSet<>();
 		isTreeCalculatetd = new HashMap<>();
 		supportsTree = new HashMap<>();
 	}
 
-	public Support(int nodeID, HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>>> justificationSupport) throws DirectCycleException{
+	public Support(int nodeID, HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>>>> justificationSupport) throws DirectCycleException {
 		// Constructor
 		setJustificationSupport(justificationSupport);
 		this.nodeID = nodeID;
@@ -46,21 +46,26 @@ public class Support {
 		supportsTree = new HashMap<>();
 	}
 
-	public Support(int nodeID, int currentAttitudeID, int level, Pair<PropositionNodeSet,PropositionNodeSet> justificationSupport) throws DirectCycleException{
+	public Support(int nodeID, int currentAttitudeID, int level, Pair<PropositionNodeSet, PropositionNodeSet> justificationSupport) throws DirectCycleException {
 		// Constructor
-		HashMap<Integer,Pair<PropositionNodeSet,PropositionNodeSet>> innerHashMap = new HashMap<>();
+		HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> innerHashMap = new HashMap<>();
 		innerHashMap.put(currentAttitudeID, justificationSupport);
-		ArrayList< Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>> array = new ArrayList<>();
-		array.add(new Pair<HashMap<Integer,Pair<PropositionNodeSet,PropositionNodeSet>>, PropositionNodeSet>(innerHashMap,new PropositionNodeSet()));
-		HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>> outerHashMap = new HashMap<>();
+		ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> array = new ArrayList<>();
+		array.add(new Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>(innerHashMap, new PropositionNodeSet()));
+		HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>>> outerHashMap = new HashMap<>();
 		outerHashMap.put(currentAttitudeID, array);
-		HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>>> levelHash = new HashMap<>();
+		HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>>>> levelHash = new HashMap<>();
 		levelHash.put(level, outerHashMap);
 		setJustificationSupport(levelHash);
 		this.nodeID = nodeID;
 		isHyp = new HashSet<>();
 		isTreeCalculatetd = new HashMap<>();
 		supportsTree = new HashMap<>();
+	}
+
+
+	public Support(int nodeID, int currentAttitudeID, HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> justificationSupport, PropositionNodeSet bridgeRule) throws DirectCycleException {
+		// Constructor
 	}
 
 

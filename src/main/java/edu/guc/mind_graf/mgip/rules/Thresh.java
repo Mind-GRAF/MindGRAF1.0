@@ -19,6 +19,7 @@ public class Thresh extends RuleNode {
 
     public Thresh(DownCableSet downcableSet) {
         super(downcableSet);
+        System.out.println("Creating a thresh rule node");
         thresh = downcableSet.get("thresh").getNodeSet().getIntValue();
         threshmax = downcableSet.get("threshmax").getNodeSet().getIntValue();
         arg = downcableSet.get("arg").getNodeSet();

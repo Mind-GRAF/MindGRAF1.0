@@ -5,7 +5,6 @@ import java.util.Map;
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.mgip.reports.Report;
-import edu.guc.mind_graf.nodes.FlagNode;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.set.FlagNodeSet;
 import edu.guc.mind_graf.set.FreeVariableSet;
@@ -51,7 +50,9 @@ public class RuleInfo {
         else
             ncount++;
         FlagNode reporter = new FlagNode(report.getReporterNode(), report.isSign(), report.getSupport());
-        return new RuleInfo(report.getContextName(), report.getAttitude(), pcount, ncount, report.getSubstitutions(), new FlagNodeSet(reporter), new Support(-1));
+        RuleInfo newRuleInfo =  new RuleInfo(report.getContextName(), report.getAttitude(), pcount, ncount, report.getSubstitutions(), new FlagNodeSet(reporter), new Support(-1));
+        System.out.println(newRuleInfo + " is created with context " + newRuleInfo.getContext() + " and attitude " + newRuleInfo.getAttitude());
+        return newRuleInfo;
     }
 
     public boolean isCompatible(RuleInfo r) {
@@ -176,10 +177,10 @@ public class RuleInfo {
 
     @Override
     public String toString() {
-        return "RuleInfo{" +
-                "context=" + context +
-                ", attitude=" + attitude +
-                ", pcount=" + pcount +
+        return "RI{" +
+                /*"context=" + context +
+                ", attitude=" + attitude + */
+                "pcount=" + pcount +
                 ", ncount=" + ncount +
                 ", subs=" + subs +
                 ", fns=" + fns +

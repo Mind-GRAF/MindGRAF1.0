@@ -63,12 +63,15 @@ public class PtreeNode {
             return result;
         for(RuleInfo newRuleInfo : newRuleInfoSet){
             if(newRuleInfo.getPcount() >= sIndex.getMin() && isPropagating){
+                System.out.println("Propagating up the RuleInfo: " + newRuleInfo);
                 if(parent != null) {
                     RuleInfoSet combinedWithSibling = combineWithSibling(newRuleInfo);
                     if(!combinedWithSibling.isEmpty()) {
+                        System.out.println("The RuleInfo found compatible RuleInfos in Sibling.");
                         result = result.union(parent.insertIntoNode(combinedWithSibling, true));
                     }
                     else {
+                        System.out.println("There were no compatible RuleInfos in Sibling.");
                         result = result.union(parent.insertIntoNode(newRuleInfo.addNullSubs(siblingIntersection), true));
                     }
                 } else{
@@ -103,14 +106,12 @@ public class PtreeNode {
     @Override
     public String toString() {
         return "PtreeNode{" +
-                "has parent=" + (parent != null) +
-                ",has sibling=" + (sibling != null) +
-//                ", leftChild=" + leftChild +
-//                ", rightChild=" + rightChild +
-                ", sIndex=" + (sIndex instanceof Singleton ? "Singleton" : "Linear") +
-                ", vars=" + vars +
-                ", siblingIntersection=" + siblingIntersection +
-                ", min=" + sIndex.getMin() +
+                " has " + (parent != null ? "a" : "no") + " parent, " +
+                " has " + (sibling != null ? "a" : "no") + " sibling, " +
+                " sIndex is " + (sIndex instanceof Singleton ? "Singleton" : "Linear") +
+                ", vars =" + vars +
+                (sibling != null ? ", siblingIntersection =" + siblingIntersection : "")+
+                ", min =" + sIndex.getMin() +
                 '}';
     }
 

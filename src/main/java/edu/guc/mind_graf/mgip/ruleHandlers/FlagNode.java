@@ -1,6 +1,6 @@
-package edu.guc.mind_graf.nodes;
+package edu.guc.mind_graf.mgip.ruleHandlers;
 
-import edu.guc.mind_graf.set.PropositionNodeSet;
+import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.support.Support;
 
 public class FlagNode {
@@ -57,10 +57,10 @@ public class FlagNode {
 
     @Override
     public String toString() {
-        return "FlagNode{" +
-                "node=" + node.getName() +
-                ", flag=" + flag +
-                ", support=" + support +
+        return "{" +
+                node.getName() +
+                "/" + flag +
+                /*", support=" + support +*/
                 '}';
     }
 }

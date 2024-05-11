@@ -31,6 +31,7 @@ import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
+import edu.guc.mind_graf.support.Pair;
 
 public class BridgeRule extends RuleNode {
 
@@ -66,17 +67,6 @@ public class BridgeRule extends RuleNode {
         this.ruleInfoHandler.setcMin(cAnt);
     }
 
-//    public boolean mayTryToInfer() {
-//        if(cAnt < this.ruleInfoHandler.getConstantAntecedents().getPcount())
-//            return false;
-//        for(PtreeNode root : ((Ptree)ruleInfoHandler).getRoots()) {
-//            if(root.getSIndex().getAllRuleInfos().isEmpty()) {  // maybe should also check pcount of roots?
-//                return false;
-//            }
-//        }
-//        return true;
-//    }
-
     public RuleInfoSet[] mayInfer() {
         RuleInfoSet[] inferrable = {new RuleInfoSet()};  // at index 0 the set of positively inferred, at index 1 the set of negatively inferred
         for(RuleInfo ri : this.getRootRuleInfos()){
@@ -98,12 +88,18 @@ public class BridgeRule extends RuleNode {
             for(int att : attitudeToCq.keySet()){
                 Report newReportInAttitude = report.clone();
                 newReportInAttitude.setAttitude(att);
+                Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> pair = new Pair<>(new HashMap<>(), new PropositionNodeSet(this));
+                ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>> justSupport = new ArrayList<>();
+                justSupport.add(pair);
+//                try {
+//                    newReportInAttitude.getSupport().addJustificatoinSupportForAttitude(att, 0, justSupport);
+//                } catch (DirectCycleException e) {
+//                    System.out.println("Adding justification based support failed");
+//                }
                 sendReportToConsequents(attitudeToCq.get(att), newReportInAttitude);
             }
         }
     }
-
-
 
     protected void requestAntecedentsNotAlreadyWorkingOn(Request currentRequest, KnownInstance knownInstance) {
         Channel currentChannel = currentRequest.getChannel();

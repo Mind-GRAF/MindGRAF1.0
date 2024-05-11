@@ -8,7 +8,6 @@ import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.exceptions.InvalidRuleInfoException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.network.Network;
-import edu.guc.mind_graf.nodes.FlagNode;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.relations.Relation;
 import edu.guc.mind_graf.set.FlagNodeSet;
@@ -16,7 +15,6 @@ import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
 import edu.guc.mind_graf.support.Support;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

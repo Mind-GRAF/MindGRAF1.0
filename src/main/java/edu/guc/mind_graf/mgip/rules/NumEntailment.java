@@ -24,6 +24,7 @@ public class NumEntailment extends RuleNode {
 
     public NumEntailment(DownCableSet downcableSet) {
         super(downcableSet);
+        System.out.println("Creating a numerical-entailment rule node");
         i = downcableSet.get("i").getNodeSet().getIntValue();
         ant = downcableSet.get("ant").getNodeSet();
         cq = downcableSet.get("cq").getNodeSet();
