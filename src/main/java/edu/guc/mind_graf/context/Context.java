@@ -11,13 +11,15 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 
 public class Context {
 
     private final HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>[]> hypotheses;
     private final String name;
-    private Set<Integer, BitSet> AttitudesBitset;
+    private Set<Integer, BitSet> AttitudesBitset; //TODO: wael init this
 
 
     public Context(String name, Set<String, Integer> attitudeNames) {
@@ -103,11 +105,44 @@ public class Context {
         if (this.isHypothesis(level, attitudeNumber, node)) {
             this.removeHypothesisFromContext(level, attitudeNumber, node);
         }
-        if (manual) {
-            this.manuallyRemoveInferredNodeFromContext(level, attitudeNumber, node);
-        } else {
-            //TODO: wael
+        if (node.supported(this.getName(), attitudeNumber, level)) {
+            if (manual) {
+                this.manuallyRemoveInferredNodeFromContext(level, attitudeNumber, node);
+            } else {
+                automaticallyRemoveInferredNodeFromContext(level,attitudeNumber,node);
+            }
         }
+    }
+
+    public void automaticallyRemoveInferredNodeFromContext(int level, int attitudeNumber, PropositionNode node) {
+        for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> assumptionSupport : node.getSupport().getAssumptionSupport().get(level).get(attitudeNumber)) {
+            for (Map.Entry<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> support : assumptionSupport.getFirst().entrySet()) {
+                PropositionNodeSet supportOriginSet = support.getValue().getFirst();
+                if (!isValidSupport(level, attitudeNumber, supportOriginSet)) {
+                    continue;
+                }
+                //TODO: wael add a method to get the level of a node in support
+                if (supportOriginSet.size() == 1) {
+                    this.completelyRemoveNodeFromContext(level, attitudeNumber, (PropositionNode) supportOriginSet.getNodes().iterator().next(), false);
+                } else {
+                    int indexOfNodeToRemove = getSmallestIndexFromStream(supportOriginSet.getNodes().stream().map(supportNode -> (PropositionNode) supportNode).mapToInt(PropositionNode::getGradeFromParent));
+                    this.completelyRemoveNodeFromContext(level,attitudeNumber, (PropositionNode) supportOriginSet.getNodes().stream().skip(indexOfNodeToRemove-1).findFirst().get(),false);
+                }
+            }
+        }
+    }
+
+    public static int getSmallestIndexFromStream(IntStream stream) {
+        int minIndex = Integer.MAX_VALUE;
+        int minValue = Integer.MAX_VALUE;
+        int[] arr = stream.toArray();
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i] < minValue) {
+                minIndex = i;
+                minValue = arr[i];
+            }
+        }
+        return minIndex;
     }
 
     public void manuallyRemoveInferredNodeFromContext(int level, int attitudeNumber, PropositionNode node) {
@@ -124,7 +159,7 @@ public class Context {
                     Revision.print((i + 1) + ". Node: " + nodeInSupport.printShortData());
                 }
                 PropositionNode nodeToRemove = (PropositionNode) supportNodes.get(Revision.readInt() - 1);
-                completelyRemoveNodeFromContext(level, attitudeNumber, nodeToRemove, true);
+                this.completelyRemoveNodeFromContext(level, attitudeNumber, nodeToRemove, true);
             }
         }
         Revision.print("successfully removed Node: " + node + " from attitude: " + ContextController.getAttitudeName(attitudeNumber) + " from Context: " + this.getName());

@@ -5,6 +5,7 @@ import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.network.Network;
+import edu.guc.mind_graf.network.NetworkController;
 import edu.guc.mind_graf.relations.Relation;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.Set;
@@ -23,7 +24,6 @@ class NodeTest {
 
     @BeforeEach
     void setUp() {
-        n = new Network();
         System.out.println("Testing Nodes");
         Set<String,Integer> attitudeNames = new Set<>();
         attitudeNames.add( "beliefs",0);
@@ -38,14 +38,14 @@ class NodeTest {
         consistentAttitudes.add(new ArrayList<>(List.of(0,2)));
         consistentAttitudes.add(new ArrayList<>(List.of(0,2,3)));
 
-        ContextController.setUp(attitudeNames,consistentAttitudes ,false);
+        n = NetworkController.setUp(attitudeNames, consistentAttitudes, false,false,false,1);
         ContextController.createNewContext("guc");
+        ContextController.setCurrContext("guc");
     }
 
     @Test
     void getNegation() throws NoSuchTypeException {
         System.out.println("negation test 1");
-        ContextController.setCurrContext("guc");
         Node p = Network.createNode("p", "propositionnode");
         HashMap<String, Relation> relations = Network.getRelations();
 

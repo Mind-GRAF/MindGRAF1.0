@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.guc.mind_graf.network.NetworkController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -38,7 +39,7 @@ public class MatcherTest {
         consistentAttitudes.add(new ArrayList<>(List.of(1)));
         consistentAttitudes.add(new ArrayList<>(List.of(0, 1)));
 
-        ContextController.setUp(attitudeNames, consistentAttitudes, false);
+        network = NetworkController.setUp(attitudeNames, consistentAttitudes, false,false,false,1);
         ContextController.createNewContext("guc");
     }
 

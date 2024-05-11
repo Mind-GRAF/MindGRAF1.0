@@ -13,22 +13,17 @@ public class ContextController {
     private static Context currContext;
     private static ContextSet contextSet;
     private static Set<String, Integer> attitudes;
-    private static Network network;
-    private static boolean uvbrEnabled;
     private static boolean automaticHandlingEnabled;
+    private static boolean cacheEnabled;
     private static int mergeFunctionNumber;
     private static ArrayList<ArrayList<Integer>> consistentAttitudes;
 
-    public static void setUp(Set<String, Integer> attitudeNames, ArrayList<ArrayList<Integer>> consistentAttitudes, boolean uvbrEnabled) {
-        ContextController.network = new Network();
+    public static void setUp(Set<String, Integer> attitudeNames, ArrayList<ArrayList<Integer>> consistentAttitudes, boolean automaticHandlingEnabled, boolean cacheEnabled, int mergeFunctionNumber) {
         ContextController.attitudes = attitudeNames;
-        ContextController.uvbrEnabled = uvbrEnabled;
         ContextController.consistentAttitudes = consistentAttitudes;
         ContextController.automaticHandlingEnabled = false;
         ContextController.mergeFunctionNumber = 0;
-        //TODO: wael update the setup method
         contextSet = new ContextSet();
-
     }
 
     public static void setCurrContext(String currContext) {

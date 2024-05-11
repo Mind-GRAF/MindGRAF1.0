@@ -73,14 +73,12 @@ public class Revision {
         if (nodeIsHyp && !contradictingIsHyp) {
             for (Contradiction cont : contradictions) {
                 for (Map.Entry<Integer, PropositionNode> entry : cont.getContradictions().getSet().entrySet()) {
-                    //TODO: wael
-//                    c.removeInferredNodeFromContext(entry.getKey(), entry.getValue());
+                    c.completelyRemoveNodeFromContext(level,entry.getKey(),entry.getValue(),false);
                 }
             }
         }
         if (!nodeIsHyp && contradictingIsHyp) {
-            //same as above
-//            c.removeHypothesisFromContext(attitudeNumber, contradictions.getFirst().getNode());
+            c.completelyRemoveNodeFromContext(level,attitudeNumber,contradictions.getFirst().getNode(),false);
         } else {
             //Actual Automatic handling
             int gradeOfNode = getGradeOfNode(c, level, attitudeNumber, contradictions.getFirst().getNode());
@@ -95,7 +93,8 @@ public class Revision {
             }
             //This merges between grades of consistent attitudes to get the final grade
             int gradeOfContradictions = gradesOfContradictions.stream().mapToInt(i -> i).reduce(ContextController.mergeGrades()).orElse(0);
-//            handleDecision(c, attitudeNumber, contradictions, gradeOfNode <= gradeOfContradictions);
+
+            handleDecision(c,level, attitudeNumber, contradictions, gradeOfNode <= gradeOfContradictions);
         }
     }
 
