@@ -82,7 +82,7 @@ public class Set<K, V> {
     public Set<K, V> intersection(Set<K, V> otherSet) {
         Set<K, V> result = new Set<>();
         for (Map.Entry<K, V> entry : set.entrySet()) {
-            if (otherSet.contains(entry)) {
+            if (entry.getValue().equals(otherSet.get(entry.getKey()))) {
                 result.add(entry);
             }
         }
@@ -98,5 +98,10 @@ public class Set<K, V> {
 
     public boolean isSubsetOf(Set<K, V> otherSet) {
         return otherSet.containsAll(this.set.keySet());
+    }
+
+    public boolean equals(Set<K,V> o) {
+        if (this == o) return true;
+        return this.intersection(o).size() == this.size();
     }
 }

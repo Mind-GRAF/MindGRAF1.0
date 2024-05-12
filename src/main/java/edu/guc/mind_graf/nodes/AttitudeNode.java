@@ -8,6 +8,7 @@ public class AttitudeNode extends ActNode {
 
     public AttitudeNode(DownCableSet downCables) {
         super(downCables);
+        this.setPrimitive(true);
     }
 
     @Override

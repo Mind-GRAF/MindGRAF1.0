@@ -15,6 +15,7 @@ public class AchieveNode extends ActNode {
 
     public AchieveNode(DownCableSet downCables) {
         super(downCables);
+		this.setPrimitive(true);
 		controlAgenda = ActAgenda.START;
     }
 

@@ -12,6 +12,7 @@ public class DoAllNode extends ActNode {
 
     public DoAllNode(DownCableSet downCables) {
         super(downCables);
+        this.setPrimitive(true);
     }
 
     @Override

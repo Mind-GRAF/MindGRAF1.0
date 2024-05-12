@@ -12,6 +12,7 @@ public class DoOneNode extends ActNode {
 
     public DoOneNode(DownCableSet downCables) {
         super(downCables);
+        this.setPrimitive(true);
     }
 
     @Override

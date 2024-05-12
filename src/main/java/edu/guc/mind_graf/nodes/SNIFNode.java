@@ -16,6 +16,7 @@ public class SNIFNode extends ActNode {
 
     public SNIFNode(DownCableSet downCables) {
         super(downCables);
+        this.setPrimitive(true);
         controlAgenda = ActAgenda.START;
     }
 

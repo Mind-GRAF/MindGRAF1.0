@@ -11,7 +11,6 @@ import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.cables.UpCable;
 import edu.guc.mind_graf.cables.UpCableSet;
-import edu.guc.mind_graf.caseFrames.Adjustability;
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
@@ -366,6 +365,10 @@ public abstract class Node {
 					+ this.downCableSet + "}";
 
 		return "{" + this.name + ", " + this.syntacticType + "}";
+	}
+
+	public String printShortData(){
+		return "{ id: " + this.id + ", name: " + this.name + "}";
 	}
 
 	public MolecularType getMolecularType() {

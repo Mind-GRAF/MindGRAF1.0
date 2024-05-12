@@ -10,6 +10,7 @@ public class SNSequenceNode extends ActNode {
 
     public SNSequenceNode(DownCableSet downCables) {
         super(downCables);
+        this.setPrimitive(true);
     }
 
     //howa eshm3na fl SNSequence byb2a el node 3obara 3n object1 w object2 wl ba2y object bas

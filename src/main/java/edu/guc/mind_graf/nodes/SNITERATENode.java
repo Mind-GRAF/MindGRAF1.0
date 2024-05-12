@@ -17,6 +17,7 @@ public class SNITERATENode extends ActNode {
 
     public SNITERATENode(DownCableSet downCables) {
         super(downCables);
+        this.setPrimitive(true);
         controlAgenda = ActAgenda.START;
     }
 
