@@ -1340,7 +1340,7 @@ public class PropositionNode extends Node {
         return knownInstances;
     }
 
-    public int getGradeFromParent() {
+    public int getGradeFromParent(Context c, int level, int attitudeId) {
         UpCable propCable = this.getUpCable("prop");
         if (propCable == null) {
             return 0;
@@ -1351,7 +1351,11 @@ public class PropositionNode extends Node {
             return 0;
         }
 
-        PropositionNode parentNode = (PropositionNode) propNodeSet.iterator().next();
+        PropositionNode parentNode = propNodeSet.getValues().stream().map(node -> (PropositionNode) node).filter(node -> c.isHypothesis(level + 1, attitudeId, node)).findFirst().orElse(null);
+        if (parentNode == null) {
+            return 0;
+        }
+
         DownCable gradeCable = parentNode.getDownCable("grade");
         if (gradeCable == null) {
             return 0;
@@ -1363,15 +1367,15 @@ public class PropositionNode extends Node {
         }
 
         Node gradeNode = gradeNodeSet.iterator().next();
-        if(parentNode.isGraded()){
+        if (parentNode.isGraded(c, level, attitudeId)) {
             //this merges grade on the level of a graded prop son g(g(p,2),4) will merge 2 and 4 using the mergeGrades() operator
-            return ContextController.mergeGrades().applyAsInt(Integer.parseInt(gradeNode.getName()),parentNode.getGradeFromParent());
-        }else{
+            return ContextController.mergeGrades().applyAsInt(Integer.parseInt(gradeNode.getName()), parentNode.getGradeFromParent(c, level, attitudeId));
+        } else {
             return Integer.parseInt(gradeNode.getName());
         }
     }
 
-    public boolean isGraded() {
+    public boolean isGraded(Context c, int level, int attitudeId) {
         UpCable propCable = this.getUpCable("prop");
         if (propCable == null) {
             return false;
@@ -1382,7 +1386,11 @@ public class PropositionNode extends Node {
             return false;
         }
 
-        PropositionNode parentNode = (PropositionNode) propNodeSet.iterator().next();
+        PropositionNode parentNode = propNodeSet.getValues().stream().map(node -> (PropositionNode) node).filter(node -> c.isHypothesis(level + 1, attitudeId, node)).findFirst().orElse(null);
+        if (parentNode == null) {
+            return false;
+        }
+
         DownCable gradeCable = parentNode.getDownCable("grade");
         if (gradeCable == null) {
             return false;
