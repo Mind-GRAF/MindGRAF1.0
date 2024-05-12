@@ -103,7 +103,7 @@ public abstract class RuleNode extends PropositionNode {
                 }
                 Report newReport = new Report(ri.getSubs() == null ? new Substitutions() : ri.getSubs(), supports,
                         ri.getAttitude(),
-                        (i == 0), InferenceType.FORWARD, null, this);
+                        (i == 0), (forwardReport ? InferenceType.FORWARD : InferenceType.BACKWARD), null, this);
                 newReport.setContextName(ri.getContext());
                 newReport.setReportType(ReportType.RuleCons);
                 reports.put(ri, newReport);

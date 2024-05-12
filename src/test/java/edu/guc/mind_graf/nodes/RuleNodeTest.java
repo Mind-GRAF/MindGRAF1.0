@@ -27,9 +27,9 @@ class RuleNodeTest {
 
     @Test
     void applyRuleHandler_AndEntail() throws NoSuchTypeException {
-        Node G = Network.createVariableNode("G", "propositionnode");
-        Node C = Network.createVariableNode("C", "propositionnode");
-        Node Co = Network.createVariableNode("Co", "propositionnode");
+        Node G = Network.createVariableNode("X", "propositionnode");
+        Node C = Network.createVariableNode("Y", "propositionnode");
+        Node Co = Network.createVariableNode("Z", "propositionnode");
 
         DownCable gMem = new DownCable(Network.getRelations().get("member"), new NodeSet(G));
         Node government = Network.createNode("government", "propositionnode");
@@ -77,63 +77,63 @@ class RuleNodeTest {
         Node voldemort = Network.createNode("voldemort", "individualnode");
         govVSubs.add(G, voldemort);
         Report report01 = new Report(govVSubs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M0);
-        report01.setContextName("Hierarchy");
+        report01.setContextName("Dystopia");
         ((RuleNode)P0).applyRuleHandler(report01);
 
         Substitutions govDSubs = new Substitutions();
         Node daenerys = Network.createNode("daenerys", "individualnode");
         govDSubs.add(G, daenerys);
         Report report00 = new Report(govDSubs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M0);
-        report00.setContextName("Hierarchy");
+        report00.setContextName("Dystopia");
         ((RuleNode)P0).applyRuleHandler(report00);
 
         Substitutions govSubs = new Substitutions();
         Node henry = Network.createNode("henry", "individualnode");
         govSubs.add(G, henry);
         Report report0 = new Report(govSubs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M0);
-        report0.setContextName("Hierarchy");
+        report0.setContextName("Dystopia");
         ((RuleNode)P0).applyRuleHandler(report0);
 
         Substitutions civPSubs = new Substitutions();
         Node pam = Network.createNode("pam", "individualnode");
         civPSubs.add(C, pam);
         Report report10 = new Report(civPSubs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M1);
-        report10.setContextName("Hierarchy");
+        report10.setContextName("Dystopia");
         ((RuleNode)P0).applyRuleHandler(report10);
 
         Substitutions civSubs = new Substitutions();
         Node anne = Network.createNode("anne", "individualnode");
         civSubs.add(C, anne);
         Report report1 = new Report(civSubs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M1);
-        report1.setContextName("Hierarchy");
+        report1.setContextName("Dystopia");
         ((RuleNode)P0).applyRuleHandler(report1);
 
         Substitutions coSubs = new Substitutions();
         Node england = Network.createNode("england", "individualnode");
         coSubs.add(Co, england);
         Report report2 = new Report(coSubs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M2);
-        report2.setContextName("Hierarchy");
+        report2.setContextName("Dystopia");
         ((RuleNode)P0).applyRuleHandler(report2);
 
         Substitutions coNSubs = new Substitutions();
         Node neverland = Network.createNode("neverland", "individualnode");
         coNSubs.add(Co, neverland);
         Report report20 = new Report(coNSubs, new Support(-1), 0, false, InferenceType.BACKWARD, P0, M2);
-        report20.setContextName("Hierarchy");
+        report20.setContextName("Dystopia");
         ((RuleNode)P0).applyRuleHandler(report20);
 
         Substitutions rSubs = new Substitutions();
         rSubs.add(Co, england);
         rSubs.add(G, henry);
         Report report3 = new Report(rSubs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M3);
-        report3.setContextName("Hierarchy");
+        report3.setContextName("Dystopia");
         ((RuleNode)P0).applyRuleHandler(report3);
 
         Substitutions lSubs = new Substitutions();
         lSubs.add(Co, england);
         lSubs.add(C, anne);
         Report report4 = new Report(lSubs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M4);
-        report4.setContextName("Hierarchy");
+        report4.setContextName("Dystopia");
         ((RuleNode)P0).applyRuleHandler(report4);
 
         assertEquals(1, Scheduler.getHighQueue().size());
