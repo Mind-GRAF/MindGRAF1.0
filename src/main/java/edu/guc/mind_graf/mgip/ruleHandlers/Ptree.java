@@ -77,7 +77,6 @@ public class Ptree extends RuleInfoHandler {
                 varSetLeafMap.get(hash).setMin(ptreeNodeMin);
             else
                 varSetLeafMap.get(hash).setMin(varSetLeafMap.get(hash).getMin() + 1);
-            System.out.println("The P-tree node is updated with a minimum of " + varSetLeafMap.get(hash).getMin() + " pcount in a RI for it to be inserted in this node.");
         }
         return vpList;
     }
@@ -126,7 +125,7 @@ public class Ptree extends RuleInfoHandler {
                 PtreeNode parent = matchSiblings(p1, p2, intersection, ptreeNodeMin);
                 pSequence.add(parent);
             }
-            System.out.println("The pattern sequence now has " + pSequence.size() + " P-tree nodes.");
+            System.out.println("The pattern sequence now has " + pSequence.size() + " P-tree " + (pSequence.size() == 1 ? "node." : "nodes."));
         }
         System.out.println("The tree is constructed with " + pSequence.size() + (pSequence.size() == 1 ? " root." : " roots."));
     }

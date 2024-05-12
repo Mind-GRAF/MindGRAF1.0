@@ -54,7 +54,7 @@ public abstract class RuleNode extends PropositionNode {
         try {
             RuleInfoSet inserted = ruleInfoHandler.insertRI(RuleInfo.createRuleInfo(report));
             if (inserted != null && !inserted.isEmpty()) {
-                System.out.println("The rule can fire");
+//                System.out.println("The rule can fire");
                 rootRuleInfos.addRootRuleInfo(inserted);
                 RuleInfoSet[] mayInfer = mayInfer();
                 createInferenceReports(mayInfer);

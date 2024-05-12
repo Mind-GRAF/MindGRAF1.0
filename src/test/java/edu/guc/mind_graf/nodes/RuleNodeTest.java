@@ -8,13 +8,9 @@ import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.reports.Report;
-import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.relations.Relation;
-import edu.guc.mind_graf.set.FlagNodeSet;
 import edu.guc.mind_graf.set.NodeSet;
-import edu.guc.mind_graf.set.PropositionNodeSet;
-import edu.guc.mind_graf.set.RuleInfoSet;
 import edu.guc.mind_graf.support.Support;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -203,6 +199,62 @@ class RuleNodeTest {
         testReport.setContextName("");
         ((RuleNode)P0).applyRuleHandler(testReport);
         assertEquals(1, Scheduler.getHighQueue().size());
+    }
+
+    @Test
+    void applyRuleHandler_NumEntailConVar() throws NoSuchTypeException {
+        Node three = Network.createNode("3", "propositionnode");
+        Node X = Network.createVariableNode("X", "propositionnode");
+        Node Merlin = Network.createNode("Merlin", "individualnode");
+
+        Node Magic = Network.createNode("Magic", "individualnode");
+        Node Around = Network.createNode("Around", "individualnode");
+        DownCable mMember = new DownCable(Network.getRelations().get("member"), new NodeSet(Magic));
+        DownCable mClass = new DownCable(Network.getRelations().get("class"), new NodeSet(Around));
+        Node M0 = Network.createNode("propositionnode", new DownCableSet(mMember, mClass));
+
+        Node Flying = Network.createNode("Flying", "individualnode");
+        DownCable fMember = new DownCable(Network.getRelations().get("member"), new NodeSet(X));
+        DownCable fClass = new DownCable(Network.getRelations().get("class"), new NodeSet(Flying));
+        Node M1 = Network.createNode("propositionnode", new DownCableSet(fMember, fClass));
+
+        Node spellcaster = Network.createNode("spellcaster", "individualnode");
+        DownCable hMember = new DownCable(Network.getRelations().get("member"), new NodeSet(X));
+        DownCable hClass = new DownCable(Network.getRelations().get("class"), new NodeSet(spellcaster));
+        Node M2 = Network.createNode("propositionnode", new DownCableSet(hMember, hClass));
+
+        Node fortuneTeller = Network.createNode("fortuneTeller", "individualnode");
+        DownCable gMember = new DownCable(Network.getRelations().get("member"), new NodeSet(X));
+        DownCable gClass = new DownCable(Network.getRelations().get("class"), new NodeSet(fortuneTeller));
+        Node M3 = Network.createNode("propositionnode", new DownCableSet(gMember, gClass));
+
+        Node magician = Network.createNode("magician", "individualnode");
+        DownCable magMember = new DownCable(Network.getRelations().get("member"), new NodeSet(X));
+        DownCable magClass = new DownCable(Network.getRelations().get("class"), new NodeSet(magician));
+        Node M4 = Network.createNode("propositionnode", new DownCableSet(magMember, magClass));
+
+        Node P0 = Network.createNode("numentailment", new DownCableSet(new DownCable(Network.getRelations().get("i"), new NodeSet(three)),
+                new DownCable(Network.getRelations().get("ant"), new NodeSet(M0, M1, M2, M3)),
+                new DownCable(Network.getRelations().get("cq"), new NodeSet(M4))));
+
+        Report report0 = new Report(new Substitutions(), new Support(-1), 0, true, InferenceType.BACKWARD, P0, M0);
+        report0.setContextName("Mythology");
+        ((RuleNode)P0).applyRuleHandler(report0);
+
+        Substitutions mSubs = new Substitutions();
+        mSubs.add(X, Merlin);
+        Report report1 = new Report(mSubs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M1);
+        report1.setContextName("Mythology");
+        ((RuleNode)P0).applyRuleHandler(report1);
+
+        Substitutions hSubs = new Substitutions();
+        hSubs.add(X, Merlin);
+        Report report2 = new Report(hSubs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M2);
+        report2.setContextName("Mythology");
+        ((RuleNode)P0).applyRuleHandler(report2);
+
+        assertEquals(1, Scheduler.getHighQueue().size());
+
     }
 
     @Test
