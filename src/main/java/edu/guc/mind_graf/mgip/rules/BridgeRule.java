@@ -42,6 +42,7 @@ public class BridgeRule extends RuleNode {
 
     public BridgeRule(DownCableSet downCableSet) {
         super(downCableSet);
+        System.out.println("Creating a bridge rule node");
         attitudeToAnt = new HashMap<>();
         attitudeToCq = new HashMap<>();
         for(DownCable downCable : downCableSet){
@@ -63,6 +64,7 @@ public class BridgeRule extends RuleNode {
             }
         }
         cAnt = allAntecedents - antecedents.size();
+        System.out.println("The rule has " + antecedents.size() + " open antecedents and " + cAnt + " closed antecedents.");
         this.ruleInfoHandler = Ptree.constructPtree(antecedents, antecedents.size(), Integer.MAX_VALUE, 2);
         this.ruleInfoHandler.setcMin(cAnt);
     }

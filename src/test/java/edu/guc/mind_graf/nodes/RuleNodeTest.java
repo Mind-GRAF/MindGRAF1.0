@@ -138,6 +138,28 @@ class RuleNodeTest {
 
         assertEquals(1, Scheduler.getHighQueue().size());
 
+        System.out.println(G);
+        System.out.println(C);
+        System.out.println(Co);
+        System.out.println(voldemort);
+        System.out.println(daenerys);
+        System.out.println(henry);
+        System.out.println(pam);
+        System.out.println(anne);
+        System.out.println(england);
+        System.out.println(neverland);
+        System.out.println(government);
+        System.out.println(civilian);
+        System.out.println(country);
+        System.out.println(M0);
+        System.out.println(M1);
+        System.out.println(M2);
+        System.out.println(M3);
+        System.out.println(M4);
+        System.out.println(M5);
+        System.out.println(P0);
+
+
     }
 
     @Test
@@ -168,6 +190,17 @@ class RuleNodeTest {
         Report report1 = new Report(new Substitutions(), new Support(-1), 0, false, InferenceType.BACKWARD, P0, M1);
         report1.setContextName("Mythology");
         ((RuleNode)P0).applyRuleHandler(report1);
+
+        System.out.println(Patroclus);
+        System.out.println(Hector);
+        System.out.println(Achilles);
+        System.out.println(Alive);
+        System.out.println(M0);
+        System.out.println(M1);
+        System.out.println(M2);
+        System.out.println(P0);
+
+
 
     }
 
@@ -255,11 +288,26 @@ class RuleNodeTest {
 
         assertEquals(1, Scheduler.getHighQueue().size());
 
+        System.out.println(X);
+        System.out.println(three);
+        System.out.println(Merlin);
+        System.out.println(Magic);
+        System.out.println(Around);
+        System.out.println(Flying);
+        System.out.println(spellcaster);
+        System.out.println(fortuneTeller);
+        System.out.println(M0);
+        System.out.println(M1);
+        System.out.println(M2);
+        System.out.println(M3);
+        System.out.println(M4);
+        System.out.println(P0);
+
     }
 
     @Test
     void applyRuleHandler_Andor() throws NoSuchTypeException {
-        Node A = Network.createVariableNode("A", "propositionnode");
+        Node A = Network.createVariableNode("X", "propositionnode");
         Node one = Network.createNode("1", "propositionnode");
         Node Fish = Network.createNode("Fish", "propositionnode");
         Node Cat = Network.createNode("Cat", "propositionnode");
@@ -280,9 +328,19 @@ class RuleNodeTest {
         Substitutions subs = new Substitutions();
         subs.add(A, Network.createNode("Nemo", "propositionnode"));
         Report testReport = new Report(subs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M0);
-        testReport.setContextName("");
+        testReport.setContextName("PetStore");
         ((RuleNode)P0).applyRuleHandler(testReport);
         assertEquals(2, Scheduler.getHighQueue().size());
+
+        System.out.println(A);
+        System.out.println(one);
+        System.out.println(Fish);
+        System.out.println(Cat);
+        System.out.println(Dog);
+        System.out.println(M0);
+        System.out.println(M1);
+        System.out.println(M2);
+        System.out.println(P0);
     }
 
     @Test
@@ -314,5 +372,16 @@ class RuleNodeTest {
         testReport.setContextName("");
         ((RuleNode)P0).applyRuleHandler(testReport);
         assertEquals(2, Scheduler.getHighQueue().size());
+
+        System.out.println(X);
+        System.out.println(one);
+        System.out.println(two);
+        System.out.println(idealistic);
+        System.out.println(moral);
+        System.out.println(brave);
+        System.out.println(M0);
+        System.out.println(M1);
+        System.out.println(M2);
+        System.out.println(P0);
     }
 }

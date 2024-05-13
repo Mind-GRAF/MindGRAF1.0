@@ -48,13 +48,20 @@ class BridgeRuleTest {
         Substitutions subs1 = new Substitutions();
         subs1.add(X, paris);
         Report bReport = new Report(subs1, new Support(-1), 1, true, InferenceType.BACKWARD, P0, M0);
-        bReport.setContextName("");
-        ((RuleNode)P0).applyRuleHandler(bReport);
+        bReport.setContextName("Mythology");
 
         Substitutions subs2 = new Substitutions();
         subs2.add(X, paris);
         Report cReport = new Report(subs2, new Support(-1), 2, true, InferenceType.BACKWARD, P0, M1);
-        cReport.setContextName("");
+        cReport.setContextName("Mythology");
+
+        /*System.out.println(X);
+        System.out.println(M0);
+        System.out.println(M1);
+        System.out.println(M2);
+        System.out.println(P0);*/
+
+        ((RuleNode)P0).applyRuleHandler(bReport);
         ((RuleNode)P0).applyRuleHandler(cReport);
         assertEquals(1, Scheduler.getHighQueue().size());
 

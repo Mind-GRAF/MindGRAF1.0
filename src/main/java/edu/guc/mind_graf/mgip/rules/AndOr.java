@@ -25,6 +25,7 @@ public class AndOr extends RuleNode {
         arg = downcableSet.get("arg").getNodeSet();
         PropositionNodeSet antecedents = RuleInfoHandler.getVariableAntecedents(arg);
         int cAnt = arg.size() - antecedents.size();
+        System.out.println("The rule has " + antecedents.size() + " open antecedents and " + cAnt + " closed antecedents.");
         this.ruleInfoHandler = Ptree.constructPtree(antecedents, Math.max(0, max - cAnt), Math.max(0, arg.size() - min - cAnt), 0);
     }
 
