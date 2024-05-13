@@ -4,12 +4,16 @@ import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.caseFrames.Adjustability;
 import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.reports.Report;
+import edu.guc.mind_graf.mgip.ruleHandlers.FlagNode;
+import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.relations.Relation;
+import edu.guc.mind_graf.set.FlagNodeSet;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.support.Support;
 import org.junit.jupiter.api.BeforeEach;
@@ -383,5 +387,37 @@ class RuleNodeTest {
         System.out.println(M1);
         System.out.println(M2);
         System.out.println(P0);
+    }
+
+    @Test
+    void createSupport() throws NoSuchTypeException, DirectCycleException {
+        Node X = Network.createVariableNode("X", "propositionnode");
+        Node one = Network.createNode("1", "individualnode");
+        Node two = Network.createNode("2", "individualnode");
+        Node idealistic = Network.createNode("Idealistic", "individualnode");
+        Node moral = Network.createNode("Moral", "individualnode");
+        Node brave = Network.createNode("Brave", "individualnode");
+
+        DownCable iMember = new DownCable(Network.getRelations().get("member"), new NodeSet(X));
+        DownCable mMember = new DownCable(Network.getRelations().get("member"), new NodeSet(X));
+        DownCable bMember = new DownCable(Network.getRelations().get("member"), new NodeSet(X));
+        DownCable iClass = new DownCable(Network.getRelations().get("class"), new NodeSet(idealistic));
+        DownCable mClass = new DownCable(Network.getRelations().get("class"), new NodeSet(moral));
+        DownCable bClass = new DownCable(Network.getRelations().get("class"), new NodeSet(brave));
+        Node M0 = Network.createNode("propositionnode", new DownCableSet(iMember, iClass));
+        Node M1 = Network.createNode("propositionnode", new DownCableSet(mMember, mClass));
+        Node M2 = Network.createNode("propositionnode", new DownCableSet(bMember, bClass));
+
+        Node P0 = Network.createNode("thresh", new DownCableSet(new DownCable(Network.getRelations().get("thresh"), new NodeSet(one)),
+                new DownCable(Network.getRelations().get("threshmax"), new NodeSet(two)),
+                new DownCable(Network.getRelations().get("arg"), new NodeSet(M0, M1, M2))));
+        Substitutions rSubs = new Substitutions();
+        rSubs.add(X, Network.createNode("Patroclus", "individualnode"));
+        FlagNodeSet fns = new FlagNodeSet();
+        fns.addFlagNode(new FlagNode(M0, true, new Support(M0.getId())));
+        RuleInfo ri = new RuleInfo("", 0, 1, 0, rSubs, fns, new Support(-1));
+        Support sup = ((RuleNode)P0).createSupport(ri);
+        System.out.println(sup);
+        assertNotNull(sup);
     }
 }
