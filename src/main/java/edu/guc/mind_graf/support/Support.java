@@ -43,11 +43,6 @@ public class Support implements Cloneable{
 	}
 
 
-	public Support(int nodeID, int currentAttitudeID, HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> justificationSupport, PropositionNodeSet bridgeRule) throws DirectCycleException {
-		// Constructor
-	}
-
-
 	/**
 	 * @return the nodeID
 	 */

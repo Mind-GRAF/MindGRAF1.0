@@ -1,5 +1,6 @@
 package edu.guc.mind_graf.mgip.rules;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -14,6 +15,7 @@ import edu.guc.mind_graf.mgip.requests.Channel;
 import edu.guc.mind_graf.mgip.requests.ChannelType;
 import edu.guc.mind_graf.mgip.requests.MatchChannel;
 import edu.guc.mind_graf.mgip.requests.Request;
+import edu.guc.mind_graf.mgip.ruleHandlers.FlagNode;
 import edu.guc.mind_graf.mgip.ruleHandlers.Ptree;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.context.Context;
@@ -28,6 +30,7 @@ import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
 import edu.guc.mind_graf.support.Pair;
+import edu.guc.mind_graf.support.Support;
 
 public class BridgeRule extends RuleNode {
 
@@ -81,19 +84,37 @@ public class BridgeRule extends RuleNode {
         }
     }
 
+    public Support createSupport(RuleInfo ri) throws NoSuchTypeException, DirectCycleException {
+        HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> justSupport = new HashMap<>();
+        for(Integer att : attitudeToAnt.keySet()){
+            PropositionNodeSet supportPropSet = new PropositionNodeSet();
+            for(Node antecedent : attitudeToAnt.get(att)){
+                if(antecedent.isOpen()){
+                    supportPropSet.add(antecedent.applySubstitution(antecedent.onlyRelevantSubs(ri.getSubs())));
+                } else {
+                    supportPropSet.add(antecedent);
+                }
+            }
+            justSupport.put(att, new Pair(supportPropSet, new PropositionNodeSet()));
+        }
+        PropositionNodeSet bridgeSet = new PropositionNodeSet();
+        if(this.isOpen()){
+            bridgeSet.add(this.applySubstitution(ri.getSubs()));
+        } else {
+            bridgeSet.add(this);
+        }
+        Support reportSup = new Support(-1, ri.getAttitude(), 0, justSupport, new PropositionNodeSet());
+        return reportSup;
+    }
+
     public void sendInferenceReports(HashMap<RuleInfo, Report> reports) {
         for(Report report : reports.values()) {
             for(int att : attitudeToCq.keySet()){
                 Report newReportInAttitude = report.clone();
                 newReportInAttitude.setAttitude(att);
-                Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> pair = new Pair<>(new HashMap<>(), new PropositionNodeSet(this));
-                ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>> justSupport = new ArrayList<>();
-                justSupport.add(pair);
-//                try {
-//                    newReportInAttitude.getSupport().addJustificatoinSupportForAttitude(att, 0, justSupport);
-//                } catch (DirectCycleException e) {
-//                    System.out.println("Adding justification based support failed");
-//                }
+//                Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> pair = new Pair<>(new HashMap<>(), new PropositionNodeSet(this));
+//                ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>> justSupport = new ArrayList<>();
+//                justSupport.add(pair);
                 sendReportToConsequents(attitudeToCq.get(att), newReportInAttitude);
             }
         }
