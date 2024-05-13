@@ -33,7 +33,7 @@ public class Contradiction {
     private String printContractionsSet() {
         StringBuilder sb = new StringBuilder();
         for(Map.Entry<Integer,PropositionNode> entry :this.contradictions.getSet().entrySet()){
-            sb.append("node: ").append(entry.getValue().getName()).append(", at attitude: ").append(entry.getKey());
+            sb.append("node: ").append(entry.getValue().printShortData()).append(", in attitude: ").append(entry.getKey());
         }
         return sb.toString();
     }

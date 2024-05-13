@@ -3,39 +3,18 @@ package edu.guc.mind_graf.view;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
-import edu.guc.mind_graf.paths.AndPath;
-import edu.guc.mind_graf.paths.BUnitPath;
-import edu.guc.mind_graf.paths.ComposePath;
-import edu.guc.mind_graf.paths.DomainRestrictPath;
-import edu.guc.mind_graf.paths.FUnitPath;
-import edu.guc.mind_graf.paths.IrreflexiveRestrictPath;
-import edu.guc.mind_graf.paths.KPlusPath;
-import edu.guc.mind_graf.paths.KStarPath;
-import edu.guc.mind_graf.paths.Path;
-import edu.guc.mind_graf.paths.PathTrace;
-import edu.guc.mind_graf.paths.RangeRestrictPath;
-
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-
 
 
 import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
-import edu.guc.mind_graf.cables.UpCable;
 import edu.guc.mind_graf.components.Substitutions;
-import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.caseFrames.Adjustability;
-import edu.guc.mind_graf.exceptions.CannotRemoveNodeException;
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.relations.Relation;

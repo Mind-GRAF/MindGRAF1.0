@@ -4,206 +4,158 @@ import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.set.PropositionNodeSet;
+import edu.guc.mind_graf.support.Pair;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.function.BinaryOperator;
 
 public class Revision {
-	public static ArrayList<Contradiction> checkContradiction(Context c, int attitudeNumberOfAddedNode, PropositionNode node) {
-		System.out.println("checking contradictions");
-		PropositionNode nodeCompliment = (PropositionNode) node.getNegation();
-		if(nodeCompliment == null){
-			//node complement is not in the network so a contradiction can never happen
-			return null;
-		}
-		System.out.println("found negation: "+ nodeCompliment.getName());
-		//TODO: wael cache
-		ArrayList<ArrayList<Integer>> filteredConsistentAttitudes = filterAttitudes(ContextController.getConsistentAttitudes(),attitudeNumberOfAddedNode);
-		ArrayList<Contradiction> contradictions = new ArrayList<>();
-		for(ArrayList<Integer> entry : filteredConsistentAttitudes){
-			Contradiction cont = new Contradiction(node);
-			for(int attitudeNumber : entry){
-				//TODO: wael check level
-				if(nodeCompliment.supported(c.getName(), attitudeNumber,0)){
-					cont.getContradictions().add(attitudeNumber,nodeCompliment);
-				}
-			}
-			if(!cont.getContradictions().isEmpty() && !contradictions.contains(cont)){
-				contradictions.add(cont);
-			}
-		}
-		System.out.println("Found Contradictions: "+ contradictions);
 
+    public static void ensureConsistency(Context c, int level, int attitudeNumberOfAddedNode, PropositionNode nodeToAdd) {
+        ArrayList<Contradiction> contradictions = checkContradiction(c, level, attitudeNumberOfAddedNode, nodeToAdd);
+        if (contradictions != null && !contradictions.isEmpty()) {
+            if (ContextController.automaticHandlingEnabled()) {
+                automaticContradictionHandling(c, level, attitudeNumberOfAddedNode, contradictions);
+            } else {
+                manualContradictionHandling(c, level, attitudeNumberOfAddedNode, contradictions);
+            }
+        }
+    }
 
-		//TODO: wael add a parent method
-		return contradictions;
-//		if(!contradictions.isEmpty()){
-//			if(ContextController.automaticHandlingEnabled()){
-//				automaticContradictionHandling(c,attitudeNumberOfAddedNode,contradictions);
-//			}else{
-//				manualContradictionHandling(c,attitudeNumberOfAddedNode,contradictions);
-//			}
-//		}
+    public static ArrayList<Contradiction> checkContradiction(Context c, int level, int attitudeNumberOfAddedNode, PropositionNode node) {
+        System.out.println("checking contradictions");
+        PropositionNode nodeCompliment = (PropositionNode) node.getNegation();
+        if (nodeCompliment == null) {
+            //node complement is not in the network so a contradiction can never happen
+            return null;
+        }
+        System.out.println("found negation" + nodeCompliment);
+        //TODO: wael cache
+        ArrayList<ArrayList<Integer>> filteredConsistentAttitudes = filterAttitudes(ContextController.getConsistentAttitudes(), attitudeNumberOfAddedNode);
+        ArrayList<Contradiction> contradictions = new ArrayList<>();
+        for (ArrayList<Integer> entry : filteredConsistentAttitudes) {
+            Contradiction cont = new Contradiction(node);
+            for (int attitudeNumber : entry) {
+                if (nodeCompliment.supported(c.getName(), attitudeNumber, level)) {
+                    cont.getContradictions().add(attitudeNumber, nodeCompliment);
+                }
+            }
+            if (!cont.getContradictions().isEmpty() && !contradictions.contains(cont)) {
+                contradictions.add(cont);
+            }
+        }
+        System.out.println("Found Contradictions: " + contradictions);
+        return contradictions;
+    }
 
-	}
+    public static void manualContradictionHandling(Context c, int level, int attitudeNumber, ArrayList<Contradiction> contradictions) {
+        print("Contradiction Detected");
+        print("Select How to handle this contradiction");
+        print("\t1. Remove node:" + contradictions.getFirst().toString());
+        print("\t2. Remove contradicting nodes");
+        System.out.println(contradictions);
+        int decision = readInt();
+        handleDecision(c, level, attitudeNumber, contradictions, decision == 1);
+        print("completed contradiction handling");
+    }
 
-	public static void manualContradictionHandling(Context c, int attitudeNumber, ArrayList<Contradiction> contradictions) {
-		print("Contradiction Detected");
-		print("Select How to handle this contradiction");
-		print("\t1. Remove node:" + contradictions.getFirst().toString());
-		print("\t2. Remove contradicting nodes");
-		int decision = readInt();
-        handleDecision(c,attitudeNumber,contradictions, decision == 1);
-		print("completed contradiction handling");
-	}
+    public static void automaticContradictionHandling(Context c, int level, int attitudeNumber, ArrayList<Contradiction> contradictions) {
+        boolean nodeIsHyp = c.isHypothesis(attitudeNumber, level, contradictions.getFirst().getNode());
+        boolean contradictingIsHyp = containsHyp(c, level, contradictions);
 
-	public static void automaticContradictionHandling(Context c, int attitudeNumber, ArrayList<Contradiction> contradictions) {
-		boolean nodeIsHyp = c.isHypothesis(attitudeNumber,contradictions.getFirst().getNode());
-		boolean contradictingIsHyp = containsHyp(c,contradictions);
+        if (nodeIsHyp && contradictingIsHyp) {
+            print("Found a contradiction that can't be automatically handled, reverting to manual handling");
+            manualContradictionHandling(c, level, attitudeNumber, contradictions);
+        }
+        if (nodeIsHyp && !contradictingIsHyp) {
+            for (Contradiction cont : contradictions) {
+                for (Map.Entry<Integer, PropositionNode> entry : cont.getContradictions().getSet().entrySet()) {
+                    c.completelyRemoveNodeFromContext(level,entry.getKey(),entry.getValue(),false);
+                }
+            }
+        }
+        if (!nodeIsHyp && contradictingIsHyp) {
+            c.completelyRemoveNodeFromContext(level,attitudeNumber,contradictions.getFirst().getNode(),false);
+        } else {
+            //Actual Automatic handling
+            int gradeOfNode = getGradeOfNode(c, level, attitudeNumber, contradictions.getFirst().getNode());
+            ArrayList<Integer> gradesOfContradictions = new ArrayList<>();
+            for (Contradiction cont : contradictions) {
+                ArrayList<Integer> gradesOfConsistentAttitudes = new ArrayList<>();
+                for (Map.Entry<Integer, PropositionNode> entry : cont.getContradictions().getSet().entrySet()) {
+                    gradesOfConsistentAttitudes.add(getGradeOfNode(c, level, entry.getKey(), entry.getValue()));
+                }
+                //This merges on the level of 2 contradicting nodes in the same consistent attitudes list
+                gradesOfContradictions.add(gradesOfConsistentAttitudes.stream().mapToInt(i -> i).reduce(ContextController.mergeGrades()).orElse(0));
+            }
+            //This merges between grades of consistent attitudes to get the final grade
+            int gradeOfContradictions = gradesOfContradictions.stream().mapToInt(i -> i).reduce(ContextController.mergeGrades()).orElse(0);
 
-		if(nodeIsHyp && contradictingIsHyp){
-			print("Found a contradiction that can't be automatically handled, reverting to manual handling");
-			manualContradictionHandling(c,attitudeNumber,contradictions);
-		}
-		if(nodeIsHyp && !contradictingIsHyp){
-			for (Contradiction cont : contradictions) {
-				for (Map.Entry<Integer, PropositionNode> entry : cont.getContradictions().getSet().entrySet()) {
-					removeInferredNodeFromContext(c, entry.getKey(), entry.getValue());
-				}
-			}
-		}
-		if(!nodeIsHyp && contradictingIsHyp){
-			c.removeHypothesisFromContext(attitudeNumber, contradictions.getFirst().getNode());
-		}else{
-			int gradeOfNode = getGradeOfNode(c,attitudeNumber,contradictions.getFirst().getNode());
-			int gradeOfContradictions = 0;
-			//TODO: wael the way we are merging will half the value if we average, change every thing to a stream and reduce
-			for(Contradiction cont: contradictions){
-				int gradeForConsistentAttitudes = 0;
-				for(Map.Entry<Integer,PropositionNode> entry : cont.getContradictions().getSet().entrySet()){
-					//This merges on the level of 2 contradicting nodes in the same consistent attitudes list
-					gradeForConsistentAttitudes = ContextController.max(gradeOfContradictions, getGradeOfNode(c,attitudeNumber,entry.getValue()));
-				}
-				//This merges between grades of consistent attitudes to get the final grade
-				gradeOfContradictions = ContextController.max(gradeOfContradictions,gradeForConsistentAttitudes);
-			}
-			handleDecision(c,attitudeNumber,contradictions, gradeOfNode <= gradeOfContradictions);
-			//TODO: wael
-		}
-	}
+            handleDecision(c,level, attitudeNumber, contradictions, gradeOfNode <= gradeOfContradictions);
+        }
+    }
 
-	public static void handleDecision(Context c, int attitudeNumber, ArrayList<Contradiction> contradictions, boolean removeNode){
-		if (removeNode) {
-			CompletelyRemoveNodeFromContext(c,attitudeNumber, contradictions.getFirst().getNode());
-		} else {
-			for (Contradiction cont : contradictions) {
-				for (Map.Entry<Integer, PropositionNode> entry : cont.getContradictions().getSet().entrySet()) {
-					CompletelyRemoveNodeFromContext(c,entry.getKey(), entry.getValue());
-				}
-			}
-		}
-	}
+    public static void handleDecision(Context c, int level, int attitudeNumber, ArrayList<Contradiction> contradictions, boolean removeNode) {
+        if (removeNode) {
+            c.completelyRemoveNodeFromContext(level, attitudeNumber, contradictions.getFirst().getNode(), true);
+        } else {
+            for (Contradiction cont : contradictions) {
+                for (Map.Entry<Integer, PropositionNode> entry : cont.getContradictions().getSet().entrySet()) {
+                    c.completelyRemoveNodeFromContext(level, entry.getKey(), entry.getValue(), true);
+                }
+            }
+        }
+    }
 
-	public static void CompletelyRemoveNodeFromContext(Context c, int attitudeNumber, PropositionNode node){
-		if(c.isHypothesis(attitudeNumber,node)){
-			c.removeHypothesisFromContext(attitudeNumber,node);
-		}
-		removeInferredNodeFromContext(c,attitudeNumber,node);
-	}
+    private static boolean containsHyp(Context c, int level, ArrayList<Contradiction> contradictions) {
+        for (Contradiction contradiction : contradictions) {
+            for (Map.Entry<Integer, PropositionNode> entry : contradiction.getContradictions().getSet().entrySet()) {
+                if (c.isHypothesis(entry.getKey(), level, entry.getValue())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
-	public static void removeInferredNodeFromContext(Context c, int attitudeNumber, PropositionNode node){
-//		print("Starting removal of node: "+ node.getId()+" from attitude: "+ ContextController.getAttitudeName(attitudeNumber)+" from Context: "+ c.getName());
+    public static int getGradeOfNode(Context c, int level, int attitudeId, PropositionNode node) {
+        ArrayList<Integer> grades = new ArrayList<>();
+        for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> assumptionSupport : node.getSupport().getAssumptionSupport().get(level).get(attitudeId)) {
+            for (Map.Entry<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> support : assumptionSupport.getFirst().entrySet()) {
+                if (!c.isValidSupport(level, attitudeId, support.getValue().getFirst())) {
+                    continue;
+                }
+                //maps the support to a stream of integers representing the grade of every node in the support then merges them using ContextController.mergeGrades()
+                grades.add(support.getValue().getFirst().getNodes().stream().mapToInt(suportNode -> ((PropositionNode) suportNode).getGradeFromParent(c, level, attitudeId)).reduce(ContextController.mergeGrades()).orElse(0));
+            }
+        }
+        //merges grades of every support to return the final grade of this node
+        return grades.stream().mapToInt(i -> i).reduce(ContextController.mergeGrades()).orElse(0);
+    }
 
-//		for(HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> assumptionSupport : node.getSupport().getAssumptionSupport().getFirst().get(attitudeNumber)){
-//			for(Map.Entry<Integer,Pair<PropositionNodeSet,PropositionNodeSet>> support: assumptionSupport.entrySet()){
-//				if(supportIsInvalid(c,attitudeNumber,support.getValue().getFirst())) {
-//					continue;
-//				}
-//				print("choose node to remove from this support in attitude: "+ support.getKey());
-//                ArrayList<Node> supportNodes = new ArrayList<>(support.getValue().getFirst().getNodes());
-//				for(int i =0;i<supportNodes.size();i++){
-//					PropositionNode nodeInSupport = (PropositionNode) supportNodes.get(i);
-//					print((i+1)+". Node: "+ nodeInSupport.toString());
-//				}
-//				PropositionNode nodeToRemove = (PropositionNode) supportNodes.get(readInt()-1);
-//
-//				if(c.isHypothesis(support.getKey(),nodeToRemove)){
-//
-//					//TODO: wael change these to remove node completely
-//					c.removeHypothesisFromContext(attitudeNumber,nodeToRemove);
-//				}else{
-//					print("this node is inferred, choose how to remove it:");
-//					removeInferredNodeFromContext(c,attitudeNumber,nodeToRemove);
-//				}
-//			}
-//		}
-//		print("successfully removed Node: "+ node+" from attitude: "+ ContextController.getAttitudeName(attitudeNumber)+" from Context: "+ c.getName());
-	}
+    public static ArrayList<ArrayList<Integer>> filterAttitudes(ArrayList<ArrayList<Integer>> consistentAttitudes, int attitudeNumber) {
+        ArrayList<ArrayList<Integer>> result = new ArrayList<>();
+        for (ArrayList<Integer> entry : consistentAttitudes) {
+            if (entry.contains(attitudeNumber)) {
+                result.add(entry);
+            }
+        }
+        return result;
+    }
 
-	/**
-	 * checks the validity of a node set as a support in a context and an attitude
-	 */
-	public static boolean supportIsInvalid(Context c, int attitudeNumber, PropositionNodeSet nodes) {
-		for(PropositionNode node:nodes){
-			//TODO: wael check level
-			if(!c.isHypothesis(attitudeNumber,node) && !node.supported(c.getName(),attitudeNumber,0)){
-					return true;
-			}
-		}
-	return  false;
-	}
+    ////////////////////////////////////////////////////
 
-	public static ArrayList<ArrayList<Integer>> filterAttitudes(ArrayList<ArrayList<Integer>> consistentAttitudes, int attitudeNumber) {
-		ArrayList<ArrayList<Integer>> result = new ArrayList<>();
-		for(ArrayList<Integer> entry : consistentAttitudes){
-			if(entry.contains(attitudeNumber)){
-				result.add(entry);
-			}
-		}
-		return result;
-	}
+    public static void print(String s) {
+        System.out.println(s);
+    }
 
-	private static boolean containsHyp(Context c, ArrayList<Contradiction> Contradictions){
-		for(Contradiction contradiction: Contradictions){
-			for(Map.Entry<Integer, PropositionNode> entry : contradiction.getContradictions().getSet().entrySet()){
-				if(c.isHypothesis(entry.getKey(), entry.getValue())){
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	public static int getGradeOfNode(Context c,int attitudeNumber, PropositionNode node){
-//		int grade = 0;
-//		for(HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> assumptionSupport : node.getSupport().getAssumptionSupport().getFirst().get(attitudeNumber)) {
-//			int gradeForThisSupport = 0;
-//			for(Map.Entry<Integer,Pair<PropositionNodeSet,PropositionNodeSet>> support: assumptionSupport.entrySet()) {
-//				if (supportIsInvalid(c, attitudeNumber, support.getValue().getFirst())) {
-//					continue;
-//				}
-//				gradeForThisSupport = 0;
-//				support.getValue().getSecond().getNodes().stream().mapToInt(((Node n)-> (PropositionNode) n).getGradeFromParent())
-//				for(PropositionNode supportNode :support.getValue().getSecond()){
-//					//This merges grades of nodes in a single support for example: g(g(p,2),3)
-//					gradeForThisSupport = ContextController.max(gradeForThisSupport, supportNode.getGradeFromParent());
-//				}
-//			}
-//			//This merges grades between multiple supports
-//			grade = ContextController.max(grade,gradeForThisSupport);
-//		}
-		return 0;
-	}
-
-	////////////////////////////////////////////////////
-
-	public static void print(String s){
-		System.out.println(s);
-	}
-
-	public static int readInt(){
-		Scanner sc = new Scanner(System.in);
-		int x = sc.nextInt();
-		sc.close();
-		return x;
-	}
+    public static int readInt() {
+        Scanner sc = new Scanner(System.in);
+        int x = sc.nextInt();
+        sc.close();
+        return x;
+    }
 }

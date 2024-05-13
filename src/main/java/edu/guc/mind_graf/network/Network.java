@@ -3,18 +3,9 @@ package edu.guc.mind_graf.network;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 
 import edu.guc.mind_graf.mgip.rules.*;
-import edu.guc.mind_graf.paths.AndPath;
-import edu.guc.mind_graf.paths.ComposePath;
-import edu.guc.mind_graf.paths.FUnitPath;
-import edu.guc.mind_graf.paths.KPlusPath;
-import edu.guc.mind_graf.paths.Path;
-import edu.guc.mind_graf.paths.PathTrace;
 import edu.guc.mind_graf.relations.Relation;
-import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.acting.rules.DoIfNode;
 import edu.guc.mind_graf.acting.rules.WhenDoNode;
 import edu.guc.mind_graf.cables.DownCable;
@@ -23,13 +14,10 @@ import edu.guc.mind_graf.caseFrames.Adjustability;
 import edu.guc.mind_graf.components.CustomClass;
 import edu.guc.mind_graf.components.CustomConstructor;
 import edu.guc.mind_graf.components.CustomMethod;
-import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.exceptions.CannotRemoveNodeException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.exceptions.NodeNotInNetworkException;
 import edu.guc.mind_graf.nodes.AchieveNode;
-import edu.guc.mind_graf.mgip.matching.Match;
-import edu.guc.mind_graf.mgip.matching.Matcher;
 import edu.guc.mind_graf.nodes.ActNode;
 import edu.guc.mind_graf.nodes.AttitudeNode;
 import edu.guc.mind_graf.nodes.DoAllNode;
@@ -38,7 +26,6 @@ import edu.guc.mind_graf.nodes.IndividualNode;
 import edu.guc.mind_graf.nodes.MolecularType;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.PropositionNode;
-import edu.guc.mind_graf.nodes.RuleNode;
 import edu.guc.mind_graf.nodes.SNIFNode;
 import edu.guc.mind_graf.nodes.SNITERATENode;
 import edu.guc.mind_graf.nodes.SNSequenceNode;
@@ -52,6 +39,7 @@ public class Network {
 	public static HashMap<String, String> quantifiers = new HashMap<String, String>();
 	public static HashMap<String, CustomClass> userDefinedClasses = new HashMap<String, CustomClass>();
 	public static int MolecularCount;
+	public static int currentLevel;
 
 	public Network() {
 		nodes = new HashMap<Integer, Node>();
