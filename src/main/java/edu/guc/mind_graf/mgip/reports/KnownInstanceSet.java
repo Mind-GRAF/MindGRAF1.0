@@ -4,8 +4,6 @@ import java.util.*;
 
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.exceptions.DirectCycleException;
-import edu.guc.mind_graf.set.PropositionNodeSet;
-import edu.guc.mind_graf.support.Support;
 import edu.guc.mind_graf.support.Support;
 
 public class KnownInstanceSet{

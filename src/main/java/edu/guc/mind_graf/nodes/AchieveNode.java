@@ -24,7 +24,7 @@ public class AchieveNode extends ActNode {
 				PropositionNode goal = (PropositionNode) this.getDownCableSet().get("obj").getNodeSet().getNode(0);
 				ContextSet cs = ContextController.getContextSet();
 				for (Context c : cs.getSet().values()) {
-					if (c.isHypothesis(1, goal))
+					if (c.isHypothesis(0,1, goal))
 						return;
 				}
 				try {

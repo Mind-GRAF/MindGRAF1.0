@@ -9,7 +9,6 @@ import edu.guc.mind_graf.set.FlagNodeSet;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
 import edu.guc.mind_graf.support.Support;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

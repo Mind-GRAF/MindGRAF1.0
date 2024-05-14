@@ -10,14 +10,33 @@ PARSER_BEGIN(MindGRAF_Parser)
 package edu.guc.mind_graf.parser;
 import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.components.CustomMethod;
+import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.paths.IrreflexiveRestrictPath;
+import edu.guc.mind_graf.paths.DomainRestrictPath;
+import edu.guc.mind_graf.paths.BUnitPath;
+import edu.guc.mind_graf.paths.BangPath;
+import edu.guc.mind_graf.paths.OrPath;
+import edu.guc.mind_graf.paths.EmptyPath;
+import edu.guc.mind_graf.paths.FUnitPath;
+import edu.guc.mind_graf.paths.AndPath;
+import java.util.LinkedList;
+
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.io.StringReader;
+import edu.guc.mind_graf.paths.KPlusPath;
+import edu.guc.mind_graf.paths.KStarPath;
 import edu.guc.mind_graf.nodes.ActNode;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.Set;
 import java.util.HashSet;
+import java.util.HashSet;
+import java.util.Hashtable;
+import edu.guc.mind_graf.paths.ConversePath;
+import edu.guc.mind_graf.paths.ComposePath;
+import edu.guc.mind_graf.paths.Path;
+import java.util.Map.Entry;
 import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.caseFrames.Adjustability;
@@ -25,10 +44,12 @@ import edu.guc.mind_graf.context.Context;
 import java.util.Collection;
 import java.util.Collections;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
+import edu.guc.mind_graf.mgip.reports.KnownInstance;
 import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.exceptions.NoPlansExistForTheActException;
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.nodes.Node;
+import edu.guc.mind_graf.paths.RangeRestrictPath;
 import edu.guc.mind_graf.relations.Relation;
 import edu.guc.mind_graf.nodes.PropositionNode;
 
@@ -36,7 +57,7 @@ public class MindGRAF_Parser {
       private ContextController controller = new ContextController();
       private static int  mode = 1;
       static boolean uvbrEnabled;
-      private Network network = controller.getNetwork();
+      private Network network =new Network();
     
       //setting the attitudes 
       private static int attitudeNumber = 1;
@@ -193,6 +214,8 @@ TOKEN :
 | < #LETTER: ["_","a"-"z","A"-"Z"] >
 | < #DIGIT: ["0"-"9"] >
 | <ANDOR_THRESH: (("andor"|"thresh")"(")>
+| <ADJUST: ("expand"| "reduce"|"none")>
+| <RELATION_TYPE: ("expand"| "reduce"|"none")>
 | <WHENDO_DOIF: (("whendo"|"doif")"{")>
 | <QUANTIFIER: "forall(">
 | <ENTAILMENT:("&=>"|"v=>"|(<NUMBER>"=>"))>
@@ -428,7 +451,7 @@ Node WhenIfDo() throws ParseException :
    }
 }
 
-Node Act() throws ParseException :
+ActNode Act() throws ParseException :
 {
     Node act = null;
 }
@@ -444,7 +467,7 @@ Node Act() throws ParseException :
         act = SNIterate()
     )
     {
-        return act;
+        return (ActNode) act;
     }
     {
         throw new ParseException("No valid action found.");
@@ -490,6 +513,308 @@ Node SNSequence() throws ParseException:
     return snsequenceNode;
 
   }
+}
+
+Relation Relation() throws ParseException:
+{
+String name = null;
+String type = null;
+String adjust = null;
+String limit ;
+}
+{
+  "rel{"name = <STRING>.image"," type = <STRING>.image","adjust = <ADJUST>.image","limit = <NUMBER>.image"}"
+  {
+
+    name = name.trim().toLowerCase();
+    type = type.trim().toLowerCase();
+    adjust = adjust.trim();
+    Relation relation = Network.createRelation(name, type, adjust.equals("expand") ? Adjustability.EXPAND
+        : adjust.equals("reduce") ? Adjustability.REDUCE : Adjustability.NONE, Integer.parseInt(limit));
+    return relation;
+  }
+}
+
+Path FUnit() throws ParseException :
+{
+  Relation relation = null;
+  String relationName = null;
+}
+{
+ "f-unit("(relation =Relation() | relationName = <STRING>.image)")"
+ {
+  if(relationName ==  null)
+{   
+  FUnitPath fUnit = new FUnitPath(relation);
+  return fUnit;
+}
+  relationName = relationName.trim().toLowerCase();
+  if(!Network.getRelations().containsKey(relationName))
+    throw new ParseException("No Such Relation.");
+  
+  relation = Network.getRelations().get(relationName);
+  FUnitPath fUnit = new FUnitPath(relation);
+  return fUnit;
+
+ }
+
+ }
+
+
+
+
+Path BUnit() throws ParseException :
+{
+  Relation relation = null;
+  String relationName = null;}
+{
+ "b-unit(" (relation =Relation() | relationName = <STRING>.image)")"
+ {
+  if(relationName ==  null)
+{   
+  BUnitPath bUnit = new BUnitPath(relation);
+  return bUnit;
+}
+  relationName = relationName.trim().toLowerCase();
+  if(!Network.getRelations().containsKey(relationName))
+    throw new ParseException("No Such Relation.");
+  
+  relation = Network.getRelations().get(relationName);
+  BUnitPath bUnit = new BUnitPath(relation);
+  return bUnit;
+
+ }
+}
+
+Path ComposePath() throws ParseException :
+{
+  Path onePath = null;
+  LinkedList<Path> allPaths = new LinkedList<Path>();
+
+}
+{
+ "compose-path("onePath = Path(){allPaths.add(onePath);}(","onePath = Path(){allPaths.add(onePath);})*")"
+ {
+    ComposePath composePath = new ComposePath(allPaths);
+    return composePath;
+ }
+}
+
+Path ConversePath() throws ParseException :
+{
+  Path path= null;
+}
+{
+ "converse-path("path = Path()")"
+ {
+  ConversePath conversePath = new ConversePath(path);
+  return conversePath; }
+}
+
+Path KStar() throws ParseException :
+{
+  Path path = null;
+}
+{
+ "k-start("path = Path()")"
+ {
+    KStarPath kstar = new KStarPath(path);
+    return kstar;
+ }
+}
+
+Path KPlus() throws ParseException :
+{
+  Path path = null;
+}
+{
+ "k-plus("path = Path()")"
+ {
+    KPlusPath kplus = new KPlusPath(path);
+    return kplus;
+ }
+}
+
+
+Path OrPath() throws ParseException :
+{
+ Path onePath = null;
+ LinkedList<Path> allPaths = new LinkedList<Path>(); 
+}
+{
+ "or-path("onePath = Path(){allPaths.add(onePath);}(","onePath = Path(){allPaths.add(onePath);})*")"
+ {
+    OrPath orPath = new OrPath(allPaths);
+    return orPath; }
+}
+
+
+
+Path AndPath() throws ParseException :
+{
+ Path onePath = null;
+ LinkedList<Path> allPaths = new LinkedList<Path>(); 
+}
+{
+ "and-path("onePath = Path(){allPaths.add(onePath);}(","onePath = Path(){allPaths.add(onePath);})*")"
+ {
+  AndPath andPath = new AndPath(allPaths);
+  return andPath;
+ }
+}
+
+Path IrreflexiveRestrictPath() throws ParseException :
+{
+  Path path = null;
+}
+{
+ "irreflexive-restrict("path = Path()")"
+ {
+    IrreflexiveRestrictPath irrefPath = new IrreflexiveRestrictPath(path);
+    return irrefPath;
+ }
+}
+
+Path DomainRestrictPath() throws ParseException :
+{
+  Path p1 = null;
+  Path p2 = null;
+  Node node = null;
+}
+{
+ "domain-restrict("Path()","Path()","Expression()")"
+ {
+    DomainRestrictPath domainPath = new DomainRestrictPath(p1, p2, node);
+    return domainPath; 
+ }
+
+}
+
+Path RangeRestrictPath() throws ParseException :
+{
+  Path p1 = null;
+  Path p2 = null;
+  Node node = null;
+}
+{
+ "range-restrict("Path()","Path()","Expression()")"
+ {
+    RangeRestrictPath rangePath = new RangeRestrictPath(p1, p2, node);
+    return rangePath; 
+ }
+
+}
+
+Path BangPath() throws ParseException : 
+{}
+{
+  "bang-path"
+  {
+    BangPath bangPath = new BangPath();
+    return bangPath;  
+  }
+}
+
+Path EmptyPath() throws ParseException : 
+{}
+{
+  "empty-path"
+  {
+    EmptyPath emptyPath = new EmptyPath();
+    return emptyPath;
+  }
+}
+
+Path Path() throws ParseException :
+{
+  Path path = null;
+ 
+}
+{
+  path = FUnit() 
+   {
+    return path;
+  }
+| path = BUnit()
+ {
+    return path;
+  }
+| path = OrPath()
+ {
+    return path;
+  }
+| path = AndPath()
+ {
+    return path;
+  }
+| path = BangPath()
+ {
+    return path;
+  }
+| path = EmptyPath()
+ {
+    return path;
+  }
+| path = KPlus()
+ {
+    return path;
+  }
+| path = KStar()
+ {
+    return path;
+  }
+| path = ComposePath()
+ {
+    return path;
+  }
+| path = RangeRestrictPath()
+ {
+    return path;
+  }
+| path = DomainRestrictPath()
+ {
+    return path;
+  }
+| path = IrreflexiveRestrictPath()
+ {
+    return path;
+  }
+| path = ConversePath()
+  
+  {
+    return path;
+  }
+
+}
+
+
+void definePath() throws ParseException:
+{
+  Path path = null;
+  Relation relation = null;
+  String relationName = null;
+}
+{
+  "define-path" (relation = Relation() | relationName = <STRING>.image) path = Path()
+{ 
+   if(relationName == null)
+{
+    relation.setPath(path);
+    CLI.print("Path '" + relation.getPath().toString()+"' is Defined for relation " + relation.getName()+"." );
+
+    return;
+}
+  relationName = relationName.trim().toLowerCase();
+  if(!Network.getRelations().containsKey(relationName))
+    throw new ParseException("No Such Relation.");
+  
+  relation = Network.getRelations().get(relationName);
+  relation.setPath(path);
+  CLI.print("Path '" + relation.getPath().toString()+"' is Defined for relation " + "'"+relation.getName()+"'"+"." );
+
+    
+
+}
 }
 
 Node Attitude() throws ParseException : 
@@ -1151,7 +1476,6 @@ void Arguments(String pName) :
 Node Argument() : 
 {Token Argument;
 Token var=null;
-Network network = controller.getNetwork();
 Node leafNode = null;
 }
 {
@@ -1309,21 +1633,29 @@ void Command() throws ParseException :
     |
     setCurrentContext()
     |
+    "back-infer"backwardInference(null, null, null, false, false)
+    |
     getAllContexts()
     |
     forwardInference()
     |
- 
+ setCurrentAttitude()
   
     AddToContext()
     |
     RemoveFromContext()
+    |
+    definePath()
     |
     DescribeContext()
     |
     getAllSupported()
     |
     backInferSub()
+    |
+    backInferSubNot()
+    |
+    "back-infer-not"backwardInferenceNeg(null, null, null, false, false)
     |
     performAct()
     |
@@ -1385,17 +1717,86 @@ void performAct() throws ParseException :
 
 }
 
+void defineNonPrimitive() throws ParseException :
+{
+  ActNode plan = null;
+  String actName  = null;
+  boolean p = false;
+}
+{
+  "define-nonprimitive-act" actName = <STRING>.image (plan = Act(){p= true;})?
+  {
+    if(p){
+      
+    }
+  }
+  
 
+}
 
+void definePrimitive() throws ParseException :
+{
+  String fileName = null;
+  String actName  = null;
+  boolean p = false;
+}
+{
+  "define-primitive-act" actName = <STRING>.image fileName = <STRING>.image
+  {
+  
+  }
+  
+
+}
 
 void backInferSub() throws ParseException :
-{}
 {
-  "back-infer-sub"
-  {
-    String x;
-  }
+  PropositionNode propNode;
 }
+{
+  "back-infer-sub"  propNode = backwardInference(null, null, null, false, false)
+{
+    propNode = backwardInference(null, null, null, false, false);
+    if (propNode != null) {
+      Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> subs = propNode
+          .getKnownInstances().positiveKInstances;
+      for (Hashtable<Substitutions, KnownInstance> sub : subs.values()) {
+        for (Substitutions s : sub.keySet()) {
+          for (Entry<Node, Node> entry : s.getMap().entrySet()) {
+            String var = entry.getKey().toString();
+            String n = entry.getValue().toString();
+            CLI.print("Key: " + var + ", Value: " + n);
+          }
+        }
+      }
+      }
+}
+}
+
+void backInferSubNot() throws ParseException :
+{
+  PropositionNode propNode;
+}
+{
+  "back-infer-subnot"  propNode = backwardInference(null, null, null, false, false)
+{
+    propNode = backwardInference(null, null, null, false, false);
+    if (propNode != null) {
+      Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> subs = propNode
+          .getKnownInstances().negativeKInstances;
+      for (Hashtable<Substitutions, KnownInstance> sub : subs.values()) {
+        for (Substitutions s : sub.keySet()) {
+          for (Entry<Node, Node> entry : s.getMap().entrySet()) {
+            String var = entry.getKey().toString();
+            String n = entry.getValue().toString();
+            CLI.print("Key: " + var + ", Value: " + n);
+          }
+        }
+      }
+      }
+}
+}
+
 
 void getAllSupported() throws ParseException :
 {}
@@ -1579,105 +1980,282 @@ void AddToContext() throws ParseException :
 
 
 
-void backwardInferenceV1() throws ParseException :
+PropositionNode backwardInference(Node node, String CName, String attitude, boolean c, boolean a) throws ParseException :
 {
-  Node node;
-  String CName = null;
+
 }
 {
-   "c{"<STRING>"}" "a{"<STRING>"}" Expression()
+   ("c{"CName = <STRING>.image"}"{ c = true;})?
+   ("a{"attitude = <STRING>.image"}"{ a = true ;})?
+   node = Expression()
+    {
+    PropositionNode propNode = (PropositionNode) node;
+    try {
+      if (c && a) {
+        if (!controller.getContextSet().getSet().containsKey(CName)) {
+          CLI.print("No such Context.");
+          {
+            if ("" != null) {
+              if ("" != null)
+                return null;
+            }
+          }
+        }
+        if (!controller.getAttitudes().getSet().containsKey(attitude)) {
+          CLI.print("No such Attitude.");
+          {
+            if ("" != null) {
+              if ("" != null)
+                return null;
+            }
+          }
+        }
+        propNode.deduce(CName, controller.getAttitudeNumber(attitude));
+
+        {
+          if ("" != null) {
+            if ("" != null)
+              return propNode;
+          }
+        }
+      }
+
+      if (c) {
+        if (!controller.getContextSet().getSet().containsKey(CName)) {
+          CLI.print("No such Context.");
+          {
+            if ("" != null) {
+              if ("" != null)
+                return null;
+            }
+          }
+        }
+        propNode.deduce(CName, defaultAttitude);
+        {
+          if ("" != null) {
+            if ("" != null)
+              return propNode;
+          }
+        }
+      }
+      if (a) {
+        if (!controller.getAttitudes().getSet().containsKey(attitude)) {
+          CLI.print("No such Attitude.");
+          {
+            if ("" != null) {
+              if ("" != null)
+                return null;
+            }
+          }
+        }
+        try {
+          propNode.deduce(controller.getCurrContextName(), controller.getAttitudeNumber(attitude));
+          return propNode;
+        } catch (NullPointerException e) {
+          CLI.print("Set Current Context First.");
+          {
+            if ("" != null)
+              return null;
+          }
+        }
+      }
+      try {
+        propNode.deduce(controller.getCurrContextName(), defaultAttitude);
+        return propNode;
+      } catch (NullPointerException e) {
+        CLI.print("Set Current Context First.");
+        {
+          if ("" != null)
+            return null;
+        }
+      }
+    } catch (NoSuchTypeException | NoPlansExistForTheActException | DirectCycleException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    return null;
+    }
 } 
 
 
-void backwardInferenceV2() throws ParseException :
+PropositionNode backwardInferenceNeg(Node node, String CName, String attitude, boolean c, boolean a) throws ParseException :
 {
-  Node node;
-  String CName = null;
+
 }
 {
-    "c{"<STRING>"}"  Expression()
+   ("c{"CName = <STRING>.image"}"{ c = true;})?
+   ("a{"attitude = <STRING>.image"}"{ a = true ;})?
+   node = Expression()
+    {
+    PropositionNode propNode = (PropositionNode) node.createNegation();
+
+    try {
+      if (c && a) {
+        if (!controller.getContextSet().getSet().containsKey(CName)) {
+          CLI.print("No such Context.");
+          {
+            if ("" != null) {
+              if ("" != null)
+                return null;
+            }
+          }
+        }
+        if (!controller.getAttitudes().getSet().containsKey(attitude)) {
+          CLI.print("No such Attitude.");
+          {
+            if ("" != null) {
+              if ("" != null)
+                return null;
+            }
+          }
+        }
+        propNode.deduce(CName, controller.getAttitudeNumber(attitude));
+
+        {
+          if ("" != null) {
+            if ("" != null)
+              return propNode;
+          }
+        }
+      }
+
+      if (c) {
+        if (!controller.getContextSet().getSet().containsKey(CName)) {
+          CLI.print("No such Context.");
+          {
+            if ("" != null) {
+              if ("" != null)
+                return null;
+            }
+          }
+        }
+        propNode.deduce(CName, defaultAttitude);
+        {
+          if ("" != null) {
+            if ("" != null)
+              return propNode;
+          }
+        }
+      }
+      if (a) {
+        if (!controller.getAttitudes().getSet().containsKey(attitude)) {
+          CLI.print("No such Attitude.");
+          {
+            if ("" != null) {
+              if ("" != null)
+                return null;
+            }
+          }
+        }
+        try {
+          propNode.deduce(controller.getCurrContextName(), controller.getAttitudeNumber(attitude));
+          return propNode;
+        } catch (NullPointerException e) {
+          CLI.print("Set Current Context First.");
+          {
+            if ("" != null)
+              return null;
+          }
+        }
+      }
+      try {
+        propNode.deduce(controller.getCurrContextName(), defaultAttitude);
+        return propNode;
+      } catch (NullPointerException e) {
+        CLI.print("Set Current Context First.");
+        {
+          if ("" != null)
+            return null;
+        }
+      }
+    } catch (NoSuchTypeException | NoPlansExistForTheActException | DirectCycleException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    return null;
+    }
 } 
-
-
-void backwardInferenceV3() throws ParseException :
-{
-  Node node;
-  String CName = null;
-}
-{
-    "a{"<STRING>"}" Expression()
-} 
-
-
-
-
-void backwardInferenceV4() throws ParseException :
-{
-  Node node;
-  String CName = null;
-}
-{
-    Expression()
-} 
-
-
-void backwardInference() throws ParseException :
-{}
-{
-  "back-infer"
-  (backwardInferenceV1()
-  |
-  backwardInferenceV2()
-  |
-  backwardInferenceV3()
-  |
-  backwardInferenceV4())
-}
-
 
 void forwardInference() throws ParseException :
 {
-  Node node;
-  String CName = null; 
+  Node node = null;
+  String CName = null;
+  String attitude = null;
+  boolean c = false;
+  boolean a = false;
 }
 {
-  "forward-infer"  "["node = Expression()"]" ("["CName = <STRING>.image"]")?
-  {
-    PropositionNode prop = (PropositionNode) node;
-
-    if (CName == null) {
-      try {
-        CName = controller.getCurrContextName();
-        CName = CName.trim();
-      } catch (Exception e) {
-        CLI.print("Set Default Context First.");
-      }
-
-    } else {
-      CName = CName.trim();
-      if (!controller.getContextSet().getSet().containsKey(CName.trim())) {
-        if (true)
-          throw new ParseException("Context Does Not Exist.");
-      }
-
-    }
+   "forward-infer"("c{"CName = <STRING>.image"}"{ c = true;})?
+   ("a{"attitude = <STRING>.image"}"{ a = true ;})?
+   node = Expression()
+    {
+    PropositionNode propNode = (PropositionNode) node;
     try {
-      String oldCurrContext = controller.getCurrContextName();
-      controller.setCurrContext(CName);
-      prop.add();
-      controller.setCurrContext(oldCurrContext);
-    } catch (NoSuchTypeException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (NoPlansExistForTheActException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (DirectCycleException e) {
+      if (c && a) {
+        if (!controller.getContextSet().getSet().containsKey(CName)) {
+          CLI.print("No such Context.");
+          {
+            if ("" != null)
+              return;
+          }
+        }
+        if (!controller.getAttitudes().getSet().containsKey(attitude)) {
+          CLI.print("No such Attitude.");
+          {
+            if ("" != null)
+              return;
+          }
+        }
+        propNode.add(CName, controller.getAttitudeNumber(attitude));
+
+        {
+          if ("" != null)
+            return;
+        }
+      }
+
+      if (c) {
+        if (!controller.getContextSet().getSet().containsKey(CName)) {
+          CLI.print("No such Context.");
+          {
+            if ("" != null)
+              return;
+          }
+        }
+        propNode.add(CName, defaultAttitude);
+        {
+          if ("" != null)
+            return;
+        }
+      }
+      if (a) {
+        if (!controller.getAttitudes().getSet().containsKey(attitude)) {
+          CLI.print("No such Attitude.");
+          {
+            if ("" != null)
+              return;
+          }
+        }
+        try {
+          propNode.add(controller.getCurrContextName(), controller.getAttitudeNumber(attitude));
+        } catch (NullPointerException e) {
+          CLI.print("Set Current Context First.");
+          return;
+        }
+      }
+      try {
+        propNode.add(controller.getCurrContextName(), defaultAttitude);
+      } catch (NullPointerException e) {
+        CLI.print("Set Current Context First.");
+        return;
+      }
+    } catch (NoSuchTypeException | NoPlansExistForTheActException | DirectCycleException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-  }
-}
+    return;
+    }
+} 
 
 void getAllContexts() throws ParseException :
 {}

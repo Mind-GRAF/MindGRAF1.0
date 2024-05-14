@@ -1,39 +1,29 @@
 package edu.guc.mind_graf.context;
 
+import edu.guc.mind_graf.network.Network;
+import edu.guc.mind_graf.nodes.PropositionNode;
+import edu.guc.mind_graf.set.ContextSet;
+import edu.guc.mind_graf.set.Set;
+
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.function.IntBinaryOperator;
 
-import edu.guc.mind_graf.network.Network;
-import edu.guc.mind_graf.nodes.PropositionNode;
-import edu.guc.mind_graf.revision.Revision;
-import edu.guc.mind_graf.set.ContextSet;
-import edu.guc.mind_graf.set.Set;
-
 public class ContextController {
     private static Context currContext;
-    private static ContextSet contextSet;
-    private static Set<String,Integer> attitudes;
-    private static Network network;
-    private static boolean uvbrEnabled;
+    private static ContextSet contextSet = new ContextSet();;
+    private static Set<String, Integer> attitudes = new Set<String, Integer>();
     private static boolean automaticHandlingEnabled;
-    private static int mergeFunctionNumber;    
+    private static boolean cacheEnabled;
+    private static int mergeFunctionNumber;
     private static ArrayList<ArrayList<Integer>> consistentAttitudes;
 
-    public static void setUp(Set<String,Integer> attitudeNames, ArrayList<ArrayList<Integer>> consistentAttitudes, boolean uvbrEnabled){
-        ContextController.network = new Network();
+    public static void setUp(Set<String, Integer> attitudeNames, ArrayList<ArrayList<Integer>> consistentAttitudes, boolean automaticHandlingEnabled, boolean cacheEnabled, int mergeFunctionNumber) {
         ContextController.attitudes = attitudeNames;
-        ContextController.uvbrEnabled = uvbrEnabled;
         ContextController.consistentAttitudes = consistentAttitudes;
         ContextController.automaticHandlingEnabled = false;
         ContextController.mergeFunctionNumber = 0;
-        //TODO: wael update the setup method
         contextSet = new ContextSet();
-
-    }
-
-    public static Network getNetwork() {
-        return network;
     }
 
     public static void setCurrContext(String currContext) {
@@ -43,14 +33,14 @@ public class ContextController {
         }
         ContextController.currContext = c;
     }
-    
+
     public static int getAttitudeNumber(String attitudeName) {
         return attitudes.get(attitudeName);
     }
 
     public static String getAttitudeName(int attitudeNumber) {
-        for(Map.Entry<String,Integer> entry: attitudes.getSet().entrySet()){
-            if(entry.getValue() == attitudeNumber){
+        for (Map.Entry<String, Integer> entry : attitudes.getSet().entrySet()) {
+            if (entry.getValue() == attitudeNumber) {
                 return entry.getKey();
             }
         }
@@ -77,8 +67,8 @@ public class ContextController {
         return consistentAttitudes;
     }
 
-    public static void createNewContext(String name){
-        if(contextSet.contains(name)){
+    public static void createNewContext(String name) {
+        if (contextSet.contains(name)) {
             throw new RuntimeException("context Already Exists");
         }
         Context c = new Context(name, ContextController.attitudes);
@@ -93,34 +83,35 @@ public class ContextController {
         return automaticHandlingEnabled;
     }
 
-    public static void addHypothesisToContext(String contextName, int attitudeNumber, PropositionNode node) {
+    public static void addHypothesisToContext(String contextName, int level, int attitudeId, PropositionNode node) {
         Context c = ContextController.getContext(contextName);
-        c.addHypothesisToContext(attitudeNumber, node);
+        c.addHypothesisToContext(level, attitudeId, node);
         //TODO: wael uncomment this it's removed to test
-//        Revision.checkContradiction(c,attitudeNumber,node);
+//        Revision.checkContradiction(c,attitudeId,node);
     }
 
-    public static void removeFromContext(String contextName, int attitudeNumber, int nodeId) {
+    public static void addHypothesisToContext(int attitudeNumber, PropositionNode node) {
+        ContextController.addHypothesisToContext(ContextController.currContext.getName(), 0, attitudeNumber, node);
+    }
+
+    public static void removeHypothesisFromContext(String contextName, int level, int attitudeId, int nodeId) {
         Context c = ContextController.getContext(contextName);
         PropositionNode n = (PropositionNode) Network.getNodeById(nodeId);
-        c.removeHypothesisFromContext(attitudeNumber, n);
+        c.removeHypothesisFromContext(level, attitudeId, n);
     }
 
-    public static int max(int x, int y){
-        return Math.max(x,y);
+    public static void removeHypothesisFromContext(int attitudeId, int nodeId) {
+        ContextController.removeHypothesisFromContext(ContextController.getCurrContextName(), 0, attitudeId, nodeId);
     }
 
     public static IntBinaryOperator mergeGrades() {
-        switch (ContextController.mergeFunctionNumber) {
-            case 1:
-                return Math::max;
-            case 2:
-                return Math::min;
-            case 3:
-                return (a, b) -> (a + b) / 2;
-            default:
-                throw new IllegalArgumentException("Invalid choice");
-        }
+        return switch (ContextController.mergeFunctionNumber) {
+            case 2 -> Math::min;
+            case 3 -> (a, b) -> (a + b) / 2;
+            default -> Math::max;
+        };
     }
+
+    
 
 }

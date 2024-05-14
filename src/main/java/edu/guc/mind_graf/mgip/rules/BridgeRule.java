@@ -1,12 +1,9 @@
 package edu.guc.mind_graf.mgip.rules;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Map;
 
 import edu.guc.mind_graf.cables.DownCable;
-import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.reports.KnownInstance;
@@ -18,7 +15,6 @@ import edu.guc.mind_graf.mgip.requests.ChannelType;
 import edu.guc.mind_graf.mgip.requests.MatchChannel;
 import edu.guc.mind_graf.mgip.requests.Request;
 import edu.guc.mind_graf.mgip.ruleHandlers.Ptree;
-import edu.guc.mind_graf.mgip.ruleHandlers.PtreeNode;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.context.ContextController;

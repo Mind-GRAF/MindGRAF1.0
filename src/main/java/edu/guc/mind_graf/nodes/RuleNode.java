@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashMap;
 
 import edu.guc.mind_graf.exceptions.InvalidRuleInfoException;
-import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.reports.KnownInstance;
@@ -20,7 +19,6 @@ import edu.guc.mind_graf.mgip.requests.MatchChannel;
 import edu.guc.mind_graf.mgip.requests.Request;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfoHandler;
-import edu.guc.mind_graf.mgip.requests.WhenToRuleChannel;
 import edu.guc.mind_graf.mgip.rules.AndOr;
 import edu.guc.mind_graf.mgip.rules.Thresh;
 import edu.guc.mind_graf.network.Network;
@@ -33,7 +31,6 @@ import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.set.RuleInfoSet;
-import edu.guc.mind_graf.support.Support;
 import edu.guc.mind_graf.support.Support;
 
 public abstract class RuleNode extends PropositionNode {

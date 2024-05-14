@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 class NetworkTest {
-
+	Network n;
 	@BeforeEach
 	void setUp() {
 		System.out.println("Testing Network");
@@ -31,16 +31,16 @@ class NetworkTest {
 		consistentAttitudes.add(new ArrayList<>(List.of(0,1)));
 		consistentAttitudes.add(new ArrayList<>(List.of(0,2)));
 		consistentAttitudes.add(new ArrayList<>(List.of(0,2,3)));
-		
-		ContextController.setUp(attitudeNames,consistentAttitudes ,false);
+
+		n = NetworkController.setUp(attitudeNames, consistentAttitudes, false,false,false,1);
 		ContextController.createNewContext("guc");
+		ContextController.setCurrContext("guc");
 	}
 	
 	@Test
 	void test1(){
 		try {
 			System.out.println("Testing example 1: Who is Aquatic");
-			ContextController.setCurrContext("guc");
 			Node nemo = Network.createNode("nemo", "propositionnode");
 			Node clownFish = Network.createNode("clown-fish", "propositionnode");
 			Node aquatic = Network.createNode("aquatic", "propositionnode");

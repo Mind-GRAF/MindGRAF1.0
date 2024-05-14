@@ -1,7 +1,6 @@
 package edu.guc.mind_graf.mgip.reports;
 
 import edu.guc.mind_graf.components.Substitutions;
-import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.support.Support;
 
 public class KnownInstance {

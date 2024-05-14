@@ -1,17 +1,15 @@
 package edu.guc.mind_graf.mgip.rules;
-import edu.guc.mind_graf.mgip.Scheduler;
+
 import edu.guc.mind_graf.mgip.reports.Report;
 import edu.guc.mind_graf.mgip.ruleHandlers.Ptree;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfoHandler;
-import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.RuleNode;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class AndOr extends RuleNode {

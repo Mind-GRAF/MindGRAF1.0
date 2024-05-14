@@ -33,19 +33,23 @@ public interface MindGRAF_ParserConstants {
   /** RegularExpression Id. */
   int ANDOR_THRESH = 15;
   /** RegularExpression Id. */
-  int WHENDO_DOIF = 16;
+  int ADJUST = 16;
   /** RegularExpression Id. */
-  int QUANTIFIER = 17;
+  int RELATION_TYPE = 17;
   /** RegularExpression Id. */
-  int ENTAILMENT = 18;
+  int WHENDO_DOIF = 18;
   /** RegularExpression Id. */
-  int VARIABLE = 19;
+  int QUANTIFIER = 19;
   /** RegularExpression Id. */
-  int WFF_NAME = 20;
+  int ENTAILMENT = 20;
   /** RegularExpression Id. */
-  int STRING = 21;
+  int VARIABLE = 21;
   /** RegularExpression Id. */
-  int PREDICATE_NAME_BRACKET = 22;
+  int WFF_NAME = 22;
+  /** RegularExpression Id. */
+  int STRING = 23;
+  /** RegularExpression Id. */
+  int PREDICATE_NAME_BRACKET = 24;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -68,6 +72,8 @@ public interface MindGRAF_ParserConstants {
     "<LETTER>",
     "<DIGIT>",
     "<ANDOR_THRESH>",
+    "<ADJUST>",
+    "<RELATION_TYPE>",
     "<WHENDO_DOIF>",
     "\"forall(\"",
     "<ENTAILMENT>",
@@ -84,6 +90,21 @@ public interface MindGRAF_ParserConstants {
     "\"=>\"",
     "\"{\"",
     "\"snsequence{\"",
+    "\"rel{\"",
+    "\"f-unit(\"",
+    "\"b-unit(\"",
+    "\"compose-path(\"",
+    "\"converse-path(\"",
+    "\"k-start(\"",
+    "\"k-plus(\"",
+    "\"or-path(\"",
+    "\"and-path(\"",
+    "\"irreflexive-restrict(\"",
+    "\"domain-restrict(\"",
+    "\"range-restrict(\"",
+    "\"bang-path\"",
+    "\"empty-path\"",
+    "\"define-path\"",
     "\"attitude{\"",
     "\"achieve{\"",
     "\"doone{\"",
@@ -94,10 +115,15 @@ public interface MindGRAF_ParserConstants {
     "\"define-frame\"",
     "\"define-semantic\"",
     "\"add-bridge\"",
+    "\"back-infer\"",
+    "\"back-infer-not\"",
     "\"clear-network\"",
     "\"clear-infer\"",
     "\"perform-act\"",
+    "\"define-nonprimitive-act\"",
+    "\"define-primitive-act\"",
     "\"back-infer-sub\"",
+    "\"back-infer-subnot\"",
     "\"get-supported\"",
     "\"describe-context\"",
     "\"remove-from-context\"",
@@ -106,7 +132,6 @@ public interface MindGRAF_ParserConstants {
     "\"add-to-context\"",
     "\"c{\"",
     "\"a{\"",
-    "\"back-infer\"",
     "\"forward-infer\"",
     "\"get-contexts\"",
     "\"set-curr-context\"",

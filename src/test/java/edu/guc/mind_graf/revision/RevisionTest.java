@@ -2,10 +2,11 @@ package edu.guc.mind_graf.revision;
 
 import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
+import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.network.Network;
-import edu.guc.mind_graf.nodes.Node;
+import edu.guc.mind_graf.network.NetworkController;
 import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.relations.Relation;
 import edu.guc.mind_graf.set.NodeSet;
@@ -18,50 +19,31 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 class RevisionTest {
     Network n;
+    PropositionNode p;
+    PropositionNode notP;
 
     @BeforeEach
-    void setUp(){
-        n = new Network();
+    void setUp() throws NoSuchTypeException {
         System.out.println("Testing Revision");
-        Set<String,Integer> attitudeNames = new Set<>();
-        attitudeNames.add( "beliefs",0);
-        attitudeNames.add("obligations",1);
-        attitudeNames.add("fears",2);
-        attitudeNames.add("hate",3);
+        Set<String, Integer> attitudeNames = new Set<>();
+        attitudeNames.add("beliefs", 0);
+        attitudeNames.add("obligations", 1);
+        attitudeNames.add("fears", 2);
+        attitudeNames.add("hate", 3);
 
         ArrayList<ArrayList<Integer>> consistentAttitudes = new ArrayList<>();
         consistentAttitudes.add(new ArrayList<>(List.of(0)));
         consistentAttitudes.add(new ArrayList<>(List.of(1)));
-        consistentAttitudes.add(new ArrayList<>(List.of(0,1)));
-        consistentAttitudes.add(new ArrayList<>(List.of(0,2)));
-        consistentAttitudes.add(new ArrayList<>(List.of(0,2,3)));
+        consistentAttitudes.add(new ArrayList<>(List.of(0, 2)));
+        consistentAttitudes.add(new ArrayList<>(List.of(0, 2, 3)));
 
-        ContextController.setUp(attitudeNames,consistentAttitudes ,false);
+        n = NetworkController.setUp(attitudeNames, consistentAttitudes, false,false,false,1);
         ContextController.createNewContext("guc");
-    }
-
-    @Test
-    void filterAttitudes() {
-
-        ArrayList<ArrayList<Integer>> output = Revision.filterAttitudes(ContextController.getConsistentAttitudes(),0);
-        ArrayList< ArrayList< Integer>> expected = new ArrayList<>();
-        expected.add(new ArrayList<>(List.of(0)));
-        expected.add(new ArrayList<>(List.of(0,1)));
-        expected.add(new ArrayList<>(List.of(0,2)));
-        expected.add(new ArrayList<>(List.of(0,2,3)));
-
-        Assertions.assertEquals(expected,output);
-    }
-
-    @Test
-    void testDetectingContradictions1() throws NoSuchTypeException {
-        System.out.println("contradiction detection test 1");
         ContextController.setCurrContext("guc");
-        PropositionNode p = (PropositionNode) Network.createNode("p", "propositionnode");
+
+        p = (PropositionNode) Network.createNode("p", "propositionnode");
         HashMap<String, Relation> relations = Network.getRelations();
 
         NodeSet ns1 = new NodeSet();
@@ -73,13 +55,53 @@ class RevisionTest {
         DownCable downCable2 = new DownCable(relations.get("min"), ns2);
         DownCable downCable3 = new DownCable(relations.get("max"), ns2);
 
-        DownCableSet downCableSet = new DownCableSet(downCable1,downCable2,downCable3);
+        DownCableSet downCableSet = new DownCableSet(downCable1, downCable2, downCable3);
 
-        PropositionNode notP = (PropositionNode) Network.createNode("propositionnode", downCableSet);
-
-        ContextController.addHypothesisToContext("guc",0, p);
-        ContextController.addHypothesisToContext("guc",0,  notP);
-
-        Assertions.assertEquals(1,Revision.checkContradiction(ContextController.getContext("guc"),0, p).size());
+        notP = (PropositionNode) Network.createNode("propositionnode", downCableSet);
     }
+
+    @Test
+    void filterAttitudes() {
+
+        ArrayList<ArrayList<Integer>> output = Revision.filterAttitudes(ContextController.getConsistentAttitudes(), 0);
+        ArrayList<ArrayList<Integer>> expected = new ArrayList<>();
+        expected.add(new ArrayList<>(List.of(0)));
+        expected.add(new ArrayList<>(List.of(0, 2)));
+        expected.add(new ArrayList<>(List.of(0, 2, 3)));
+
+        Assertions.assertEquals(expected, output);
+    }
+
+    @Test
+    void testDetectingContradictions1() {
+        System.out.println("contradiction detection test 1");
+        ContextController.addHypothesisToContext(0, p);
+        ContextController.addHypothesisToContext(0, notP);
+
+        Assertions.assertEquals(1, Revision.checkContradiction(ContextController.getContext("guc"), 0, 0, p).size());
+    }
+
+    @Test
+    void testDetectingContradictions2() {
+        System.out.println("contradiction detection test 2");
+        ContextController.addHypothesisToContext(0, p);
+        ContextController.addHypothesisToContext(2, notP);
+        ContextController.addHypothesisToContext(3, notP);
+
+        Assertions.assertEquals(2, Revision.checkContradiction(ContextController.getContext("guc"), 0, 0, p).size());
+    }
+
+    @Test
+    void testDetectingContradictions3() {
+        System.out.println("contradiction detection test 3");
+        ContextController.addHypothesisToContext(0, p);
+        ContextController.addHypothesisToContext(1, notP);
+
+        Assertions.assertEquals(0, Revision.checkContradiction(ContextController.getContext("guc"), 0, 0, p).size());
+    }
+
+    @Test
+    void manualContradictionHandling1() {
+        System.out.println("manual contradiction handling test 1");
+       }
 }

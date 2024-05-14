@@ -3,7 +3,6 @@ package edu.guc.mind_graf.mgip.requests;
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.mgip.reports.Report;
 import edu.guc.mind_graf.nodes.Node;
-import edu.guc.mind_graf.support.Support;
 
 public class MatchChannel extends Channel {
     private int matchType;
