@@ -1341,17 +1341,7 @@ public class PropositionNode extends Node {
     }
 
     public int getGradeFromParent(Context c, int level, int attitudeId) {
-        UpCable propCable = this.getUpCable("prop");
-        if (propCable == null) {
-            return 0;
-        }
-
-        NodeSet propNodeSet = propCable.getNodeSet();
-        if (propNodeSet.isEmpty()) {
-            return 0;
-        }
-
-        PropositionNode parentNode = propNodeSet.getValues().stream().map(node -> (PropositionNode) node).filter(node -> c.isHypothesis(level + 1, attitudeId, node)).findFirst().orElse(null);
+        PropositionNode parentNode = this.getGradedParent(c, level, attitudeId);
         if (parentNode == null) {
             return 0;
         }
@@ -1368,25 +1358,15 @@ public class PropositionNode extends Node {
 
         Node gradeNode = gradeNodeSet.iterator().next();
         if (parentNode.isGraded(c, level, attitudeId)) {
-            //this merges grade on the level of a graded prop son g(g(p,2),4) will merge 2 and 4 using the mergeGrades() operator
-            return ContextController.mergeGrades().applyAsInt(Integer.parseInt(gradeNode.getName()), parentNode.getGradeFromParent(c, level, attitudeId));
+            //this merges grade on the level of a graded prop so g(g(p,2),4) will merge 2 and 4 using the mergeGrades() operator
+            return ContextController.getMergeFunction().applyAsInt(Integer.parseInt(gradeNode.getName()), parentNode.getGradeFromParent(c, level + 1, attitudeId));
         } else {
             return Integer.parseInt(gradeNode.getName());
         }
     }
 
     public boolean isGraded(Context c, int level, int attitudeId) {
-        UpCable propCable = this.getUpCable("prop");
-        if (propCable == null) {
-            return false;
-        }
-
-        NodeSet propNodeSet = propCable.getNodeSet();
-        if (propNodeSet.isEmpty()) {
-            return false;
-        }
-
-        PropositionNode parentNode = propNodeSet.getValues().stream().map(node -> (PropositionNode) node).filter(node -> c.isHypothesis(level + 1, attitudeId, node)).findFirst().orElse(null);
+        PropositionNode parentNode = this.getGradedParent(c, level, attitudeId);
         if (parentNode == null) {
             return false;
         }
@@ -1398,5 +1378,41 @@ public class PropositionNode extends Node {
 
         NodeSet gradeNodeSet = gradeCable.getNodeSet();
         return !gradeNodeSet.isEmpty();
+    }
+
+//    public int getLevel(Context c, int level, int attitudeId) {
+//        DownCable propCable = this.getDownCable("prop");
+//        if (propCable == null) {
+//            return 0;
+//        }
+//
+//        NodeSet propNodeSet = propCable.getNodeSet();
+//        if (propNodeSet.isEmpty()) {
+//            return 0;
+//        }
+//
+//        PropositionNode child = (PropositionNode) propNodeSet.getValues().stream().map(node -> (PropositionNode) node).filter(node -> node.supported(c.getName(), attitudeId, level - 1)).findFirst().orElse(null);
+//        if (child == null) {
+//            return 0;
+//        }
+//
+//        return 1 + child.getLevel(c, level - 1, attitudeId);
+//    }
+
+    public PropositionNode getGradedParent(Context c, int level, int attitudeId) {
+        if (!this.isGraded(c, level, attitudeId)) {
+            return null;
+        }
+        UpCable propCable = this.getUpCable("prop");
+        if (propCable == null) {
+            return null;
+        }
+
+        NodeSet propNodeSet = propCable.getNodeSet();
+        if (propNodeSet.isEmpty()) {
+            return null;
+        }
+
+        return propNodeSet.getValues().stream().map(node -> (PropositionNode) node).filter(node -> c.isHypothesis(level + 1, attitudeId, node)).findFirst().orElse(null);
     }
 }
