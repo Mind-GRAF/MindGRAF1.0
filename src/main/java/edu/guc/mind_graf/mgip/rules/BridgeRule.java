@@ -79,8 +79,10 @@ public class BridgeRule extends RuleNode {
 
     public void applyRuleHandler(Report report) throws NoSuchTypeException {
         if(attitudeToAnt.containsKey(report.getAttitude()) && attitudeToAnt.get(report.getAttitude()).contains(report.getReporterNode())){
+            int originalAttitude = report.getAttitude();
             report.setAttitude(-1);
             super.applyRuleHandler(report);
+            report.setAttitude(originalAttitude);
         }
     }
 

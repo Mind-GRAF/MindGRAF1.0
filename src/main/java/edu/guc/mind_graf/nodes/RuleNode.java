@@ -38,6 +38,7 @@ import edu.guc.mind_graf.support.Pair;
 import edu.guc.mind_graf.support.Support;
 
 public abstract class RuleNode extends PropositionNode {
+
     private boolean forwardReport;
     protected RuleInfoHandler ruleInfoHandler;
     protected RuleInfoSet rootRuleInfos;
