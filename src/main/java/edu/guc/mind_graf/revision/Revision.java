@@ -121,15 +121,15 @@ public class Revision {
         return false;
     }
 
-    public static int getGradeOfNode(Context c, int level, int attitudeNumber, PropositionNode node) {
+    public static int getGradeOfNode(Context c, int level, int attitudeId, PropositionNode node) {
         ArrayList<Integer> grades = new ArrayList<>();
-        for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> assumptionSupport : node.getSupport().getAssumptionSupport().get(level).get(attitudeNumber)) {
+        for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> assumptionSupport : node.getSupport().getAssumptionSupport().get(level).get(attitudeId)) {
             for (Map.Entry<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> support : assumptionSupport.getFirst().entrySet()) {
-                if (!c.isValidSupport(level, attitudeNumber, support.getValue().getFirst())) {
+                if (!c.isValidSupport(level, attitudeId, support.getValue().getFirst())) {
                     continue;
                 }
                 //maps the support to a stream of integers representing the grade of every node in the support then merges them using ContextController.mergeGrades()
-                grades.add(support.getValue().getFirst().getNodes().stream().mapToInt(suportNode -> ((PropositionNode) suportNode).getGradeFromParent()).reduce(ContextController.mergeGrades()).orElse(0));
+                grades.add(support.getValue().getFirst().getNodes().stream().mapToInt(suportNode -> ((PropositionNode) suportNode).getGradeFromParent(c, level, attitudeId)).reduce(ContextController.mergeGrades()).orElse(0));
             }
         }
         //merges grades of every support to return the final grade of this node

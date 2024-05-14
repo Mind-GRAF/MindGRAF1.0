@@ -109,24 +109,24 @@ public class Context {
             if (manual) {
                 this.manuallyRemoveInferredNodeFromContext(level, attitudeNumber, node);
             } else {
-                automaticallyRemoveInferredNodeFromContext(level,attitudeNumber,node);
+                automaticallyRemoveInferredNodeFromContext(level, attitudeNumber, node);
             }
         }
     }
 
-    public void automaticallyRemoveInferredNodeFromContext(int level, int attitudeNumber, PropositionNode node) {
-        for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> assumptionSupport : node.getSupport().getAssumptionSupport().get(level).get(attitudeNumber)) {
+    public void automaticallyRemoveInferredNodeFromContext(int level, int attitudeId, PropositionNode node) {
+        for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> assumptionSupport : node.getSupport().getAssumptionSupport().get(level).get(attitudeId)) {
             for (Map.Entry<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> support : assumptionSupport.getFirst().entrySet()) {
                 PropositionNodeSet supportOriginSet = support.getValue().getFirst();
-                if (!isValidSupport(level, attitudeNumber, supportOriginSet)) {
+                if (!isValidSupport(level, attitudeId, supportOriginSet)) {
                     continue;
                 }
                 //TODO: wael add a method to get the level of a node in support
                 if (supportOriginSet.size() == 1) {
-                    this.completelyRemoveNodeFromContext(level, attitudeNumber, (PropositionNode) supportOriginSet.getNodes().iterator().next(), false);
+                    this.completelyRemoveNodeFromContext(level, attitudeId, (PropositionNode) supportOriginSet.getNodes().iterator().next(), false);
                 } else {
-                    int indexOfNodeToRemove = getSmallestIndexFromStream(supportOriginSet.getNodes().stream().map(supportNode -> (PropositionNode) supportNode).mapToInt(PropositionNode::getGradeFromParent));
-                    this.completelyRemoveNodeFromContext(level,attitudeNumber, (PropositionNode) supportOriginSet.getNodes().stream().skip(indexOfNodeToRemove-1).findFirst().get(),false);
+                    int indexOfNodeToRemove = getSmallestIndexFromStream(supportOriginSet.getNodes().stream().map(supportNode -> (PropositionNode) supportNode).mapToInt(supportNode -> supportNode.getGradeFromParent(this, level, attitudeId)));
+                    this.completelyRemoveNodeFromContext(level, attitudeId, (PropositionNode) supportOriginSet.getNodes().stream().skip(indexOfNodeToRemove - 1).findFirst().get(), false);
                 }
             }
         }

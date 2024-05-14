@@ -10,6 +10,7 @@ PARSER_BEGIN(MindGRAF_Parser)
 package edu.guc.mind_graf.parser;
 import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.components.CustomMethod;
+import edu.guc.mind_graf.network.NetworkController;
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.paths.IrreflexiveRestrictPath;
 import edu.guc.mind_graf.paths.DomainRestrictPath;
@@ -54,7 +55,7 @@ import edu.guc.mind_graf.relations.Relation;
 import edu.guc.mind_graf.nodes.PropositionNode;
 
 public class MindGRAF_Parser {
-      private ContextController controller = new ContextController();
+      private static ContextController controller = new ContextController();
       private static int  mode = 1;
       static boolean uvbrEnabled;
       private Network network =new Network();
@@ -75,7 +76,15 @@ public class MindGRAF_Parser {
 
        //setting telescopable Attitudes
         private  static ArrayList<Integer> finalTelList;
+
+      //automaticHandling
+      private static boolean automaticHandling;
       
+      //cacheEnabled
+      private static boolean cacheEnabled;
+
+      //mergeFN
+      private static int mergeFN;
       //creation of nodes
         //private static ArrayList<Node> molecNodes = new ArrayList<Node>();
         private static HashMap<String, DownCable> allDCB = new HashMap<String, DownCable>();
@@ -97,6 +106,10 @@ public class MindGRAF_Parser {
       //default attitude
       private static Integer defaultAttitude = 0;
 
+      //levels
+      private static boolean firstExpression = true;
+      private static boolean isGrading = true;
+      private static int levelsCount = 0;
 
     public static <K, V> HashMap<V, ArrayList<K>> groupByValue(HashMap<K, V> originalMap) {
     HashMap<V, ArrayList<K>> groupedMap = new HashMap<>();
@@ -180,6 +193,75 @@ public class MindGRAF_Parser {
     return returnNode;
 
   }
+    public static void fInference(PropositionNode propNode, boolean c, boolean a, String CName, String attitude) {
+    try {
+      if (c && a) {
+        if (!controller.getContextSet().getSet().containsKey(CName)) {
+          CLI.print("No such Context.");
+          {
+            if ("" != null)
+              return;
+          }
+        }
+        if (!controller.getAttitudes().getSet().containsKey(attitude)) {
+          CLI.print("No such Attitude.");
+          {
+            if ("" != null)
+              return;
+          }
+        }
+        propNode.add(CName, controller.getAttitudeNumber(attitude));
+        {
+          if ("" != null)
+            return;
+        }
+      }
+      if (c) {
+        if (!controller.getContextSet().getSet().containsKey(CName)) {
+          CLI.print("No such Context.");
+          {
+            if ("" != null)
+              return;
+          }
+        }
+        propNode.add(CName, defaultAttitude);
+        {
+          if ("" != null)
+            return;
+        }
+      }
+      if (a) {
+        if (!controller.getAttitudes().getSet().containsKey(attitude)) {
+          CLI.print("No such Attitude.");
+          {
+            if ("" != null)
+              return;
+          }
+        }
+        try {
+          propNode.add(controller.getCurrContextName(), controller.getAttitudeNumber(attitude));
+        } catch (NullPointerException e) {
+          CLI.print("Set Current Context First.");
+          {
+            if ("" != null)
+              return;
+          }
+        }
+      }
+      try {
+        propNode.add(controller.getCurrContextName(), defaultAttitude);
+      } catch (NullPointerException e) {
+        CLI.print("Set Current Context First.");
+        {
+          if ("" != null)
+            return;
+        }
+      }
+    } catch (NoSuchTypeException | NoPlansExistForTheActException | DirectCycleException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
 
   public static void main(String[] args) throws ParseException {
     // Instantiate the parser
@@ -237,11 +319,12 @@ TOKEN :
 
 // Define the grammar
 
+
 Node Expression() throws ParseException : {
   Node result = null;
 }
 {(
-     result = Predicate() | result = AndOrThreshExpression(false) | result = OrAndEntailment(false) | result = forall()
+     result = Predicate()| result = AndOrThreshExpression(false) | result = OrAndEntailment(false) | result = forall()
     | result = WhenIfDo() | result = gradedProp() | result = negatedProp()
 )
     {
@@ -332,8 +415,10 @@ Node ForallExpressionList() throws ParseException :
 
 Node forall() throws ParseException :
 {
+  firstExpression = false;
   Node arg = null;
   ArrayList<Node> varNodes = new ArrayList<Node>();
+  isGrading = false;
 }
 {
   <QUANTIFIER>varNodes  = variableNodes(){
@@ -390,6 +475,8 @@ Node WhenIfDo() throws ParseException :
   Node actNode = null;
   String attitude;
   String ruleType;
+  firstExpression = false;
+  isGrading = false;
 } 
 {
    ruleType = <WHENDO_DOIF>.image 
@@ -1077,6 +1164,8 @@ Node AndOrThreshExpression(boolean quantifier) throws ParseException : {
   Token j;
   Node node = null;
   ArrayList<Node> nodes = new ArrayList<Node>();
+  firstExpression = false;
+  isGrading = false;
   }
 {
     rule = <ANDOR_THRESH> i = <NUMBER> "," j = <NUMBER> ")" "{" nodes = ExpressionList() "}"
@@ -1176,8 +1265,10 @@ Node AndOrThreshExpression(boolean quantifier) throws ParseException : {
 
 Node OrAndEntailment(boolean quantifier) throws ParseException : 
 {
+firstExpression = false;
 ArrayList<Node> cq = new ArrayList<Node>();
 ArrayList<Node> ant = new ArrayList<Node>();
+isGrading = false;
 Token ent;
 } 
 { ("{" ant = ExpressionList()"}"ent=<ENTAILMENT>"{" cq = ExpressionList()"}")
@@ -1301,7 +1392,9 @@ else {
 
 Node negatedProp() : 
 {
+  firstExpression = false;
   Node node = null;
+  isGrading = false;
 }
 { 
   "~"node = Expression()
@@ -1322,6 +1415,11 @@ Node gradedProp() :
 {
   Node node = null;
   String gradeValue;
+  if(firstExpression || isGrading)
+   {
+    levelsCount++;
+    firstExpression = false;
+   }
 }
 { 
   "g{"node = Expression()","gradeValue = <NUMBER>.image"}"
@@ -1359,6 +1457,8 @@ Node gradedProp() :
 Node Predicate() : {
   Token num;
   Token predicateName;
+  firstExpression = false;
+  isGrading = false;
 }
 
 {
@@ -1884,7 +1984,9 @@ void RemoveFromContext() throws ParseException :
         throw new ParseException("Context Does Not Exist.");
     }
       if (attNum != null) {
-        controller.removeFromContext(CName, attNum, node.getId());
+        controller.removeHypothesisFromContext(CName,levelsCount, attNum, node.getId());
+        isGrading = true;
+        levelsCount = 0;
         if (wffs.containsKey(node.getId())) {
           ArrayList<String> contexts = wffs.get(node.getId());
           contexts.remove(CName + "_" + attNum);
@@ -1950,8 +2052,10 @@ void AddToContext() throws ParseException :
 
     try {
       CLI.print(node.toString()+" is supported in " + CName +" in attitude " + attitude+".");
-      controller.addHypothesisToContext(CName, attNum, node);
-      if (wffs.containsKey(node.getId())) {
+        controller.addHypothesisToContext(CName,levelsCount, attNum, node);
+        isGrading = true;
+        levelsCount = 0;
+        if (wffs.containsKey(node.getId())) {
         ArrayList<String> wffName = wffs.get(node.getId());
         wffName.addLast(CName + "_" + attNum);
         wffs.put(node.getId(), wffName);
@@ -2087,8 +2191,13 @@ PropositionNode backwardInferenceNeg(Node node, String CName, String attitude, b
    ("a{"attitude = <STRING>.image"}"{ a = true ;})?
    node = Expression()
     {
-    PropositionNode propNode = (PropositionNode) node.createNegation();
-
+PropositionNode propNode = null;
+try {
+  propNode = (PropositionNode) node.createNegation(node);
+} catch (NoSuchTypeException e) {
+  // TODO Auto-generated catch block
+  e.printStackTrace();
+}
     try {
       if (c && a) {
         if (!controller.getContextSet().getSet().containsKey(CName)) {
@@ -2190,72 +2299,30 @@ void forwardInference() throws ParseException :
    node = Expression()
     {
     PropositionNode propNode = (PropositionNode) node;
-    try {
-      if (c && a) {
-        if (!controller.getContextSet().getSet().containsKey(CName)) {
-          CLI.print("No such Context.");
-          {
-            if ("" != null)
-              return;
-          }
-        }
-        if (!controller.getAttitudes().getSet().containsKey(attitude)) {
-          CLI.print("No such Attitude.");
-          {
-            if ("" != null)
-              return;
-          }
-        }
-        propNode.add(CName, controller.getAttitudeNumber(attitude));
-
-        {
-          if ("" != null)
-            return;
-        }
-      }
-
-      if (c) {
-        if (!controller.getContextSet().getSet().containsKey(CName)) {
-          CLI.print("No such Context.");
-          {
-            if ("" != null)
-              return;
-          }
-        }
-        propNode.add(CName, defaultAttitude);
-        {
-          if ("" != null)
-            return;
-        }
-      }
-      if (a) {
-        if (!controller.getAttitudes().getSet().containsKey(attitude)) {
-          CLI.print("No such Attitude.");
-          {
-            if ("" != null)
-              return;
-          }
-        }
-        try {
-          propNode.add(controller.getCurrContextName(), controller.getAttitudeNumber(attitude));
-        } catch (NullPointerException e) {
-          CLI.print("Set Current Context First.");
-          return;
-        }
-      }
-      try {
-        propNode.add(controller.getCurrContextName(), defaultAttitude);
-      } catch (NullPointerException e) {
-        CLI.print("Set Current Context First.");
-        return;
-      }
-    } catch (NoSuchTypeException | NoPlansExistForTheActException | DirectCycleException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-    return;
+    fInference(propNode, c, a, CName, attitude);
     }
 } 
+
+void activate() throws ParseException:
+{
+  String CName = null;
+  boolean c = false;
+  boolean a = false;
+  Node node = null;
+  String attitude = null;
+}
+{
+  "activate-node"("c{"CName = <STRING>.image"}"{ c = true;})?
+   ("a{"attitude = <STRING>.image"}"{ a = true ;})?
+   node = Expression()
+   {
+    PropositionNode propNode = (PropositionNode) node;
+    Collection<Node> set = propNode.getDirectParents().getValues();
+    for (Node n : set) {
+      fInference(propNode, c, a, CName, attitude);
+    }
+   }
+}
 
 void getAllContexts() throws ParseException :
 {}
@@ -2541,6 +2608,74 @@ String methodParam() throws ParseException :
 }
 
 
+void automaticHandling() throws ParseException:
+{}
+{
+ ( "set-automatic-handling on"
+  {automaticHandling = true;}
+  |
+  "set-automatic-handling off"
+  {automaticHandling = false;})
+  {
+        CLI.print("Enable Cache?");
+    System.out.print(":");
+    while (true) {
+      String input = CLI.readInput();
+      MindGRAF_Parser parser = new MindGRAF_Parser(
+          new StringReader(input.trim()));
+      try {
+        parser.EnableCache();
+        break;
+      } catch (ParseException e) {
+        CLI.print("Wrong Command.");
+        System.out.print(":");
+      }
+    }
+  }
+}
+
+void EnableCache() throws ParseException:
+{}
+{
+ ( "set-cache on"
+  {cacheEnabled = true;}
+  |
+  "set-cache off"
+  {cacheEnabled = false;})
+  {
+      CLI.print("Enter Merge Function Number");
+      System.out.print(":");
+      while (true) {
+      String input = CLI.readInput();
+      MindGRAF_Parser parser = new MindGRAF_Parser(
+          new StringReader(input.trim()));
+      try {
+        parser.MergeFunctionNumber();
+        parser.MergeFunctionNumber();
+        Set attitudeNames = new Set();
+        attitudeNames.setSet(initialAttitudes);
+        NetworkController.setUp(attitudeNames, consisAttitudeLists, uvbrEnabled, automaticHandling, cacheEnabled, mergeFN);
+        break;
+      } catch (ParseException e) {
+        CLI.print("Wrong Command.");
+        System.out.print(":");
+      }
+    }
+  }
+}
+
+
+void MergeFunctionNumber() throws ParseException:
+{
+  String mfn;
+}
+{
+  "set-mfn" mfn = <NUMBER>.image
+  {
+    mergeFN = mergeFN = Integer.parseInt(mfn);
+  }
+}
+
 void UVBR() throws ParseException :
 { 
   Token value;
@@ -2552,44 +2687,39 @@ void UVBR() throws ParseException :
     {
       uvbrEnabled=true;
       System.out.println("UVBR is ON");
-      Set attitudeNames = new Set();
-      attitudeNames.setSet(initialAttitudes);
-      controller.setUp(attitudeNames,consisAttitudeLists,uvbrEnabled);
-
-      //System.out.print("uvbr: "+controller.isUvbrEnabled());
-      System.out.println("consis attitudes:" );
-      for(ArrayList<Integer> i : controller.getConsistentAttitudes())
-     { 
-      System.out.println("SET " + i+1);
-      for( Integer x : i)
-        System.out.print(x+" ");}
-         System.out.print("attitudeNumbers");
-      for(String key : controller.getAttitudes().getSet().keySet())
-        System.out.println(key+": " +controller.getAttitudeNumber(key));
+      
     }
     
-  )
   |
- (   "set-uvbr off"
+    "set-uvbr off"
     { 
       uvbrEnabled=false;
       System.out.println("UVBR is OFF");
-            Set attitudeNames = new Set();
-      attitudeNames.setSet(initialAttitudes);
-      controller.setUp(attitudeNames,consisAttitudeLists,uvbrEnabled);
 
-      //System.out.print("uvbr: "+controller.isUvbrEnabled());
-      System.out.println("consis attitudes:" );
-      for(ArrayList<Integer> i : controller.getConsistentAttitudes())
-     { 
-      System.out.println("SET " + i+1);
-      for( Integer x : i)
-        System.out.print(x+" ");}
-         System.out.print("attitudeNumbers");
-      for(String key : controller.getAttitudes().getSet().keySet())
-        System.out.println(key+": " +controller.getAttitudeNumber(key));
+
+
     }
   )
+  {
+    Set attitudeNames = new Set();
+    attitudeNames.setSet(initialAttitudes);
+    CLI.print("Set Automatic Handling:");
+    System.out.print(":");
+    while (true) {
+      String input = CLI.readInput();
+      MindGRAF_Parser parser = new MindGRAF_Parser(
+          new StringReader(input.trim()));
+      try {
+        parser.automaticHandling();
+        break;
+      } catch (ParseException e) {
+        CLI.print("Wrong Command.");
+        System.out.print(":");
+      }
+    }
+  }
+  
+
 }
 
 

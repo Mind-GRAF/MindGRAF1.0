@@ -39,8 +39,8 @@ public class Network {
 	public static HashMap<String, String> quantifiers = new HashMap<String, String>();
 	public static HashMap<String, CustomClass> userDefinedClasses = new HashMap<String, CustomClass>();
 	public static int MolecularCount;
-	
-	
+	public static int currentLevel;
+
 	public Network() {
 		nodes = new HashMap<Integer, Node>();
 		molecularNodes = new HashMap<String, HashMap<String, Node>>();

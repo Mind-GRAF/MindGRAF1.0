@@ -137,7 +137,7 @@ public class CLI {
                                 try {
                                     parser.TelescopableAttitudes();
                                     telescopable = false;
-                                    //uvbr = true;
+                                    uvbr = true;
                                 } catch (ParseException e) {
                                     // TODO Auto-generated catch block
                                     //e.printStackTrace();

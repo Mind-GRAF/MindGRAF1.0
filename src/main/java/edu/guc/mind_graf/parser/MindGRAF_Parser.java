@@ -3,6 +3,7 @@
 package edu.guc.mind_graf.parser;
 import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.components.CustomMethod;
+import edu.guc.mind_graf.network.NetworkController;
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.paths.IrreflexiveRestrictPath;
 import edu.guc.mind_graf.paths.DomainRestrictPath;
@@ -47,7 +48,7 @@ import edu.guc.mind_graf.relations.Relation;
 import edu.guc.mind_graf.nodes.PropositionNode;
 
 public class MindGRAF_Parser implements MindGRAF_ParserConstants {
-      private ContextController controller = new ContextController();
+      private static ContextController controller = new ContextController();
       private static int  mode = 1;
       static boolean uvbrEnabled;
       private Network network =new Network();
@@ -69,6 +70,14 @@ public class MindGRAF_Parser implements MindGRAF_ParserConstants {
        //setting telescopable Attitudes
         private  static ArrayList<Integer> finalTelList;
 
+      //automaticHandling
+      private static boolean automaticHandling;
+
+      //cacheEnabled
+      private static boolean cacheEnabled;
+
+      //mergeFN
+      private static int mergeFN;
       //creation of nodes
         //private static ArrayList<Node> molecNodes = new ArrayList<Node>();
         private static HashMap<String, DownCable> allDCB = new HashMap<String, DownCable>();
@@ -90,6 +99,10 @@ public class MindGRAF_Parser implements MindGRAF_ParserConstants {
       //default attitude
       private static Integer defaultAttitude = 0;
 
+      //levels
+      private static boolean firstExpression = true;
+      private static boolean isGrading = true;
+      private static int levelsCount = 0;
 
     public static <K, V> HashMap<V, ArrayList<K>> groupByValue(HashMap<K, V> originalMap) {
     HashMap<V, ArrayList<K>> groupedMap = new HashMap<>();
@@ -173,6 +186,75 @@ public class MindGRAF_Parser implements MindGRAF_ParserConstants {
     return returnNode;
 
   }
+    public static void fInference(PropositionNode propNode, boolean c, boolean a, String CName, String attitude) {
+    try {
+      if (c && a) {
+        if (!controller.getContextSet().getSet().containsKey(CName)) {
+          CLI.print("No such Context.");
+          {
+            if ("" != null)
+              return;
+          }
+        }
+        if (!controller.getAttitudes().getSet().containsKey(attitude)) {
+          CLI.print("No such Attitude.");
+          {
+            if ("" != null)
+              return;
+          }
+        }
+        propNode.add(CName, controller.getAttitudeNumber(attitude));
+        {
+          if ("" != null)
+            return;
+        }
+      }
+      if (c) {
+        if (!controller.getContextSet().getSet().containsKey(CName)) {
+          CLI.print("No such Context.");
+          {
+            if ("" != null)
+              return;
+          }
+        }
+        propNode.add(CName, defaultAttitude);
+        {
+          if ("" != null)
+            return;
+        }
+      }
+      if (a) {
+        if (!controller.getAttitudes().getSet().containsKey(attitude)) {
+          CLI.print("No such Attitude.");
+          {
+            if ("" != null)
+              return;
+          }
+        }
+        try {
+          propNode.add(controller.getCurrContextName(), controller.getAttitudeNumber(attitude));
+        } catch (NullPointerException e) {
+          CLI.print("Set Current Context First.");
+          {
+            if ("" != null)
+              return;
+          }
+        }
+      }
+      try {
+        propNode.add(controller.getCurrContextName(), defaultAttitude);
+      } catch (NullPointerException e) {
+        CLI.print("Set Current Context First.");
+        {
+          if ("" != null)
+            return;
+        }
+      }
+    } catch (NoSuchTypeException | NoPlansExistForTheActException | DirectCycleException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
 
   public static void main(String[] args) throws ParseException {
     // Instantiate the parser
@@ -190,6 +272,7 @@ public class MindGRAF_Parser implements MindGRAF_ParserConstants {
 
 // Define the grammar
   final public 
+
 Node Expression() throws ParseException, ParseException {Node result = null;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case PREDICATE_NAME_BRACKET:{
@@ -320,8 +403,10 @@ gradeValue = gradeValue.trim();
     throw new Error("Missing return statement in function");
 }
 
-  final public Node forall() throws ParseException, ParseException {Node arg = null;
+  final public Node forall() throws ParseException, ParseException {firstExpression = false;
+  Node arg = null;
   ArrayList<Node> varNodes = new ArrayList<Node>();
+  isGrading = false;
     jj_consume_token(QUANTIFIER);
     varNodes = variableNodes();
 HashMap<String, Node> nodeSet = new HashMap<String, Node>();
@@ -377,6 +462,8 @@ String ss = var.trim().toLowerCase();
   Node actNode = null;
   String attitude;
   String ruleType;
+  firstExpression = false;
+  isGrading = false;
     ruleType = jj_consume_token(WHENDO_DOIF).image;
     prop = Expression();
     jj_consume_token(27);
@@ -1170,6 +1257,8 @@ allGuardActs.put(oneGuardAct.getName(),oneGuardAct);
   Token j;
   Node node = null;
   ArrayList<Node> nodes = new ArrayList<Node>();
+  firstExpression = false;
+  isGrading = false;
     rule = jj_consume_token(ANDOR_THRESH);
     i = jj_consume_token(NUMBER);
     jj_consume_token(27);
@@ -1275,8 +1364,10 @@ nodes.add(arg);
     throw new Error("Missing return statement in function");
 }
 
-  final public Node OrAndEntailment(boolean quantifier) throws ParseException, ParseException {ArrayList<Node> cq = new ArrayList<Node>();
+  final public Node OrAndEntailment(boolean quantifier) throws ParseException, ParseException {firstExpression = false;
+ArrayList<Node> cq = new ArrayList<Node>();
 ArrayList<Node> ant = new ArrayList<Node>();
+isGrading = false;
 Token ent;
     jj_consume_token(32);
     ant = ExpressionList();
@@ -1401,7 +1492,9 @@ else {
     throw new Error("Missing return statement in function");
 }
 
-  final public Node negatedProp() throws ParseException {Node node = null;
+  final public Node negatedProp() throws ParseException {firstExpression = false;
+  Node node = null;
+  isGrading = false;
     jj_consume_token(25);
     node = Expression();
 Node negatedNode = null;
@@ -1417,6 +1510,11 @@ Node negatedNode = null;
 
   final public Node gradedProp() throws ParseException {Node node = null;
   String gradeValue;
+  if(firstExpression || isGrading)
+   {
+    levelsCount++;
+    firstExpression = false;
+   }
     jj_consume_token(26);
     node = Expression();
     jj_consume_token(27);
@@ -1452,6 +1550,8 @@ gradeValue = gradeValue.trim();
 
   final public Node Predicate() throws ParseException {Token num;
   Token predicateName;
+  firstExpression = false;
+  isGrading = false;
     predicateName = jj_consume_token(PREDICATE_NAME_BRACKET);
     Arguments(predicateName.image.toLowerCase());
     jj_consume_token(29);
@@ -1678,7 +1778,7 @@ String relationName = s.image.trim().toLowerCase();
     case MODE1:
     case MODE2:
     case MODE3:
-    case 105:{
+    case 111:{
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case currContext:{
         jj_consume_token(currContext);
@@ -1722,7 +1822,7 @@ mode = 3;
       System.out.println(mode);
         break;
         }
-      case 105:{
+      case 111:{
         defineContext();
         break;
         }
@@ -1756,7 +1856,7 @@ HashMap<String, HashMap<String, Node>> molecN = network.getMolecularNodes();
     }
       break;
       }
-    case 78:{
+    case 79:{
       setCurrentContext();
       break;
       }
@@ -1765,7 +1865,7 @@ HashMap<String, HashMap<String, Node>> molecN = network.getMolecularNodes();
       backwardInference(null, null, null, false, false);
       break;
       }
-    case 77:{
+    case 78:{
       getAllContexts();
       break;
       }
@@ -1773,7 +1873,7 @@ HashMap<String, HashMap<String, Node>> molecN = network.getMolecularNodes();
       forwardInference();
       break;
       }
-    case 79:{
+    case 80:{
       setCurrentAttitude();
       AddToContext();
       break;
@@ -2027,7 +2127,9 @@ try {
         {if (true) throw new ParseException("Context Does Not Exist.");}
     }
       if (attNum != null) {
-        controller.removeFromContext(CName, attNum, node.getId());
+        controller.removeHypothesisFromContext(CName,levelsCount, attNum, node.getId());
+        isGrading = true;
+        levelsCount = 0;
         if (wffs.containsKey(node.getId())) {
           ArrayList<String> contexts = wffs.get(node.getId());
           contexts.remove(CName + "_" + attNum);
@@ -2101,8 +2203,10 @@ if (CName == null) {
 
     try {
       CLI.print(node.toString()+" is supported in " + CName +" in attitude " + attitude+".");
-      controller.addHypothesisToContext(CName, attNum, node);
-      if (wffs.containsKey(node.getId())) {
+        controller.addHypothesisToContext(CName,levelsCount, attNum, node);
+        isGrading = true;
+        levelsCount = 0;
+        if (wffs.containsKey(node.getId())) {
         ArrayList<String> wffName = wffs.get(node.getId());
         wffName.addLast(CName + "_" + attNum);
         wffs.put(node.getId(), wffName);
@@ -2267,8 +2371,13 @@ a = true ;
       ;
     }
     node = Expression();
-PropositionNode propNode = (PropositionNode) node.createNegation();
-
+PropositionNode propNode = null;
+try {
+  propNode = (PropositionNode) node.createNegation(node);
+} catch (NoSuchTypeException e) {
+  // TODO Auto-generated catch block
+  e.printStackTrace();
+}
     try {
       if (c && a) {
         if (!controller.getContextSet().getSet().containsKey(CName)) {
@@ -2388,74 +2497,49 @@ a = true ;
     }
     node = Expression();
 PropositionNode propNode = (PropositionNode) node;
-    try {
-      if (c && a) {
-        if (!controller.getContextSet().getSet().containsKey(CName)) {
-          CLI.print("No such Context.");
-          {
-            if ("" != null)
-              {if ("" != null) return;}
-          }
-        }
-        if (!controller.getAttitudes().getSet().containsKey(attitude)) {
-          CLI.print("No such Attitude.");
-          {
-            if ("" != null)
-              {if ("" != null) return;}
-          }
-        }
-        propNode.add(CName, controller.getAttitudeNumber(attitude));
+    fInference(propNode, c, a, CName, attitude);
+}
 
-        {
-          if ("" != null)
-            {if ("" != null) return;}
-        }
+  final public void activate() throws ParseException, ParseException {String CName = null;
+  boolean c = false;
+  boolean a = false;
+  Node node = null;
+  String attitude = null;
+    jj_consume_token(77);
+    switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+    case 74:{
+      jj_consume_token(74);
+      CName = jj_consume_token(STRING).image;
+      jj_consume_token(28);
+c = true;
+      break;
       }
-
-      if (c) {
-        if (!controller.getContextSet().getSet().containsKey(CName)) {
-          CLI.print("No such Context.");
-          {
-            if ("" != null)
-              {if ("" != null) return;}
-          }
-        }
-        propNode.add(CName, defaultAttitude);
-        {
-          if ("" != null)
-            {if ("" != null) return;}
-        }
-      }
-      if (a) {
-        if (!controller.getAttitudes().getSet().containsKey(attitude)) {
-          CLI.print("No such Attitude.");
-          {
-            if ("" != null)
-              {if ("" != null) return;}
-          }
-        }
-        try {
-          propNode.add(controller.getCurrContextName(), controller.getAttitudeNumber(attitude));
-        } catch (NullPointerException e) {
-          CLI.print("Set Current Context First.");
-          {if ("" != null) return;}
-        }
-      }
-      try {
-        propNode.add(controller.getCurrContextName(), defaultAttitude);
-      } catch (NullPointerException e) {
-        CLI.print("Set Current Context First.");
-        {if ("" != null) return;}
-      }
-    } catch (NoSuchTypeException | NoPlansExistForTheActException | DirectCycleException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+    default:
+      jj_la1[33] = jj_gen;
+      ;
     }
-    {if ("" != null) return;}
+    switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+    case 75:{
+      jj_consume_token(75);
+      attitude = jj_consume_token(STRING).image;
+      jj_consume_token(28);
+a = true ;
+      break;
+      }
+    default:
+      jj_la1[34] = jj_gen;
+      ;
+    }
+    node = Expression();
+PropositionNode propNode = (PropositionNode) node;
+    Collection<Node> set = propNode.getDirectParents().getValues();
+    for (Node n : set) {
+      fInference(propNode, c, a, CName, attitude);
+    }
 }
 
   final public void getAllContexts() throws ParseException, ParseException {
-    jj_consume_token(77);
+    jj_consume_token(78);
 HashMap<String, Context> set = controller.getContextSet().getSet();
      System.out.println("All Contexts Defined:");
     for(String cName  : set.keySet()){
@@ -2464,7 +2548,7 @@ HashMap<String, Context> set = controller.getContextSet().getSet();
 }
 
   final public void setCurrentContext() throws ParseException, ParseException {String cName;
-    jj_consume_token(78);
+    jj_consume_token(79);
     cName = jj_consume_token(STRING).image;
 cName = cName.trim().toLowerCase();
     try {
@@ -2477,7 +2561,7 @@ cName = cName.trim().toLowerCase();
 }
 
   final public void setCurrentAttitude() throws ParseException, ParseException {String attitude;
-    jj_consume_token(79);
+    jj_consume_token(80);
     attitude = jj_consume_token(STRING).image;
 attitude = attitude.trim().toLowerCase();
 
@@ -2559,7 +2643,7 @@ nodes.add(arg); attitudes.add(attitude.trim().toLowerCase());
         break;
         }
       default:
-        jj_la1[33] = jj_gen;
+        jj_la1[35] = jj_gen;
         break label_12;
       }
       jj_consume_token(27);
@@ -2598,7 +2682,7 @@ ArrayList<Integer> attitudeNo = new ArrayList<Integer>();
       break;
       }
     default:
-      jj_la1[34] = jj_gen;
+      jj_la1[36] = jj_gen;
       ;
     }
 typeName = typeName.trim();
@@ -2641,7 +2725,7 @@ typeName = typeName.trim();
   ArrayList<String> params = new ArrayList<String>();
   ArrayList<String> args = new ArrayList<String>();
   String methodCode = null;
-    jj_consume_token(80);
+    jj_consume_token(81);
     jj_consume_token(71);
     methodName = jj_consume_token(STRING).image;
     jj_consume_token(72);
@@ -2681,20 +2765,20 @@ methodName = methodName.trim();
         jj_consume_token(STRING);
         break;
         }
-      case 81:{
-        jj_consume_token(81);
+      case 82:{
+        jj_consume_token(82);
         break;
         }
       case 27:{
         jj_consume_token(27);
         break;
         }
-      case 82:{
-        jj_consume_token(82);
-        break;
-        }
       case 83:{
         jj_consume_token(83);
+        break;
+        }
+      case 84:{
+        jj_consume_token(84);
         break;
         }
       case 30:{
@@ -2719,10 +2803,6 @@ methodName = methodName.trim();
         }
       case 28:{
         jj_consume_token(28);
-        break;
-        }
-      case 84:{
-        jj_consume_token(84);
         break;
         }
       case 85:{
@@ -2777,12 +2857,12 @@ methodName = methodName.trim();
         jj_consume_token(97);
         break;
         }
-      case VARIABLE:{
-        jj_consume_token(VARIABLE);
-        break;
-        }
       case 98:{
         jj_consume_token(98);
+        break;
+        }
+      case VARIABLE:{
+        jj_consume_token(VARIABLE);
         break;
         }
       case 99:{
@@ -2797,6 +2877,10 @@ methodName = methodName.trim();
         jj_consume_token(101);
         break;
         }
+      case 102:{
+        jj_consume_token(102);
+        break;
+        }
       case 25:{
         jj_consume_token(25);
         break;
@@ -2806,7 +2890,7 @@ methodName = methodName.trim();
         break;
         }
       default:
-        jj_la1[35] = jj_gen;
+        jj_la1[37] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -2822,7 +2906,6 @@ methodName = methodName.trim();
       case 32:
       case 71:
       case 72:
-      case 81:
       case 82:
       case 83:
       case 84:
@@ -2842,12 +2925,13 @@ methodName = methodName.trim();
       case 98:
       case 99:
       case 100:
-      case 101:{
+      case 101:
+      case 102:{
         ;
         break;
         }
       default:
-        jj_la1[36] = jj_gen;
+        jj_la1[38] = jj_gen;
         break label_13;
       }
     }
@@ -2868,7 +2952,7 @@ allArgs.add(arg);
         break;
         }
       default:
-        jj_la1[37] = jj_gen;
+        jj_la1[39] = jj_gen;
         break label_14;
       }
       jj_consume_token(27);
@@ -2890,7 +2974,7 @@ allArgs.add(arg);
       break;
       }
     default:
-      jj_la1[38] = jj_gen;
+      jj_la1[40] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -2912,7 +2996,7 @@ allParams.add(arg);
         break;
         }
       default:
-        jj_la1[39] = jj_gen;
+        jj_la1[41] = jj_gen;
         break label_15;
       }
       jj_consume_token(27);
@@ -2930,59 +3014,123 @@ String p = param.image.trim();
     throw new Error("Missing return statement in function");
 }
 
-  final public void UVBR() throws ParseException, ParseException {Token value;
+  final public void automaticHandling() throws ParseException, ParseException {
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-    case 102:{
-      jj_consume_token(102);
-uvbrEnabled=true;
-      System.out.println("UVBR is ON");
-      Set attitudeNames = new Set();
-      attitudeNames.setSet(initialAttitudes);
-      controller.setUp(attitudeNames,consisAttitudeLists,uvbrEnabled);
-
-      //System.out.print("uvbr: "+controller.isUvbrEnabled());
-      System.out.println("consis attitudes:" );
-      for(ArrayList<Integer> i : controller.getConsistentAttitudes())
-     {
-      System.out.println("SET " + i+1);
-      for( Integer x : i)
-        System.out.print(x+" ");}
-         System.out.print("attitudeNumbers");
-      for(String key : controller.getAttitudes().getSet().keySet())
-        System.out.println(key+": " +controller.getAttitudeNumber(key));
-      break;
-      }
     case 103:{
       jj_consume_token(103);
-uvbrEnabled=false;
-      System.out.println("UVBR is OFF");
-            Set attitudeNames = new Set();
-      attitudeNames.setSet(initialAttitudes);
-      controller.setUp(attitudeNames,consisAttitudeLists,uvbrEnabled);
-
-      //System.out.print("uvbr: "+controller.isUvbrEnabled());
-      System.out.println("consis attitudes:" );
-      for(ArrayList<Integer> i : controller.getConsistentAttitudes())
-     {
-      System.out.println("SET " + i+1);
-      for( Integer x : i)
-        System.out.print(x+" ");}
-         System.out.print("attitudeNumbers");
-      for(String key : controller.getAttitudes().getSet().keySet())
-        System.out.println(key+": " +controller.getAttitudeNumber(key));
+automaticHandling = true;
+      break;
+      }
+    case 104:{
+      jj_consume_token(104);
+automaticHandling = false;
       break;
       }
     default:
-      jj_la1[40] = jj_gen;
+      jj_la1[42] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
+    }
+CLI.print("Enable Cache?");
+    System.out.print(":");
+    while (true) {
+      String input = CLI.readInput();
+      MindGRAF_Parser parser = new MindGRAF_Parser(
+          new StringReader(input.trim()));
+      try {
+        parser.EnableCache();
+        break;
+      } catch (ParseException e) {
+        CLI.print("Wrong Command.");
+        System.out.print(":");
+      }
+    }
+}
+
+  final public void EnableCache() throws ParseException, ParseException {
+    switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+    case 105:{
+      jj_consume_token(105);
+cacheEnabled = true;
+      break;
+      }
+    case 106:{
+      jj_consume_token(106);
+cacheEnabled = false;
+      break;
+      }
+    default:
+      jj_la1[43] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+CLI.print("Enter Merge Function Number");
+      System.out.print(":");
+      while (true) {
+      String input = CLI.readInput();
+      MindGRAF_Parser parser = new MindGRAF_Parser(
+          new StringReader(input.trim()));
+      try {
+        parser.MergeFunctionNumber();
+        parser.MergeFunctionNumber();
+        Set attitudeNames = new Set();
+        attitudeNames.setSet(initialAttitudes);
+        NetworkController.setUp(attitudeNames, consisAttitudeLists, uvbrEnabled, automaticHandling, cacheEnabled, mergeFN);
+        break;
+      } catch (ParseException e) {
+        CLI.print("Wrong Command.");
+        System.out.print(":");
+      }
+    }
+}
+
+  final public void MergeFunctionNumber() throws ParseException, ParseException {String mfn;
+    jj_consume_token(107);
+    mfn = jj_consume_token(NUMBER).image;
+mergeFN = mergeFN = Integer.parseInt(mfn);
+}
+
+  final public void UVBR() throws ParseException, ParseException {Token value;
+    switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+    case 108:{
+      jj_consume_token(108);
+uvbrEnabled=true;
+      System.out.println("UVBR is ON");
+      break;
+      }
+    case 109:{
+      jj_consume_token(109);
+uvbrEnabled=false;
+      System.out.println("UVBR is OFF");
+      break;
+      }
+    default:
+      jj_la1[44] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+Set attitudeNames = new Set();
+    attitudeNames.setSet(initialAttitudes);
+    CLI.print("Set Automatic Handling:");
+    System.out.print(":");
+    while (true) {
+      String input = CLI.readInput();
+      MindGRAF_Parser parser = new MindGRAF_Parser(
+          new StringReader(input.trim()));
+      try {
+        parser.automaticHandling();
+        break;
+      } catch (ParseException e) {
+        CLI.print("Wrong Command.");
+        System.out.print(":");
+      }
     }
 }
 
   final public void setAttitudes() throws ParseException, ParseException {initialAttitudes.put("belief",0);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-    case 104:{
-      jj_consume_token(104);
+    case 110:{
+      jj_consume_token(110);
       jj_consume_token(32);
       attitude();
       label_16:
@@ -2993,7 +3141,7 @@ uvbrEnabled=false;
           break;
           }
         default:
-          jj_la1[41] = jj_gen;
+          jj_la1[45] = jj_gen;
           break label_16;
         }
         jj_consume_token(27);
@@ -3011,14 +3159,14 @@ System.out.println("Attitudes Defined:");
       break;
       }
     default:
-      jj_la1[42] = jj_gen;
+      jj_la1[46] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
 }
 
   final public void defineContext() throws ParseException, ParseException {String CName;
-    jj_consume_token(105);
+    jj_consume_token(111);
     jj_consume_token(71);
     CName = jj_consume_token(STRING).image;
     jj_consume_token(72);
@@ -3051,14 +3199,14 @@ attitudeNumber++;
 }
 
   final public void TelescopableAttitudes() throws ParseException, ParseException {ArrayList<Integer> list = new ArrayList<Integer>();
-    jj_consume_token(106);
+    jj_consume_token(112);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case 32:{
       list = telescopableAttitudeList();
       break;
       }
     default:
-      jj_la1[43] = jj_gen;
+      jj_la1[47] = jj_gen;
       ;
     }
 finalTelList = list;
@@ -3082,7 +3230,7 @@ telList.add(att);
         break;
         }
       default:
-        jj_la1[44] = jj_gen;
+        jj_la1[48] = jj_gen;
         break label_17;
       }
       jj_consume_token(27);
@@ -3105,14 +3253,14 @@ String s = attitude.image.trim().toLowerCase();
 }
 
   final public void underConsequenceAttitudes() throws ParseException, ParseException {ArrayList<Integer> list = new ArrayList<Integer>();
-    jj_consume_token(107);
+    jj_consume_token(113);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case 32:{
       list = consequenceAttitudeList();
       break;
       }
     default:
-      jj_la1[45] = jj_gen;
+      jj_la1[49] = jj_gen;
       ;
     }
 finalConseqList = list;
@@ -3136,7 +3284,7 @@ conseqList.add(att);
         break;
         }
       default:
-        jj_la1[46] = jj_gen;
+        jj_la1[50] = jj_gen;
         break label_18;
       }
       jj_consume_token(27);
@@ -3149,14 +3297,14 @@ conseqList.add(att);
 }
 
   final public void underConjunctionAttitudes() throws ParseException, ParseException {ArrayList<Integer> list = new ArrayList<Integer>();
-    jj_consume_token(108);
+    jj_consume_token(114);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case 32:{
       list = conjunctionAttitudeList();
       break;
       }
     default:
-      jj_la1[47] = jj_gen;
+      jj_la1[51] = jj_gen;
       ;
     }
 finalConjList = list;
@@ -3180,7 +3328,7 @@ conjList.add(att);
         break;
         }
       default:
-        jj_la1[48] = jj_gen;
+        jj_la1[52] = jj_gen;
         break label_19;
       }
       jj_consume_token(27);
@@ -3193,7 +3341,7 @@ conjList.add(att);
 }
 
   final public void consistentAttitudes() throws ParseException, ParseException {
-    jj_consume_token(109);
+    jj_consume_token(115);
     label_20:
     while (true) {
       consisAttitudeList();
@@ -3203,7 +3351,7 @@ conjList.add(att);
         break;
         }
       default:
-        jj_la1[49] = jj_gen;
+        jj_la1[53] = jj_gen;
         break label_20;
       }
     }
@@ -3226,7 +3374,7 @@ for (ArrayList<Integer> list : consisAttitudeLists) {
         break;
         }
       default:
-        jj_la1[50] = jj_gen;
+        jj_la1[54] = jj_gen;
         break label_21;
       }
       jj_consume_token(27);
@@ -3272,7 +3420,7 @@ String s = attitude.image.trim().toLowerCase();
   public Token jj_nt;
   private int jj_ntk;
   private int jj_gen;
-  final private int[] jj_la1 = new int[51];
+  final private int[] jj_la1 = new int[55];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static private int[] jj_la1_2;
@@ -3284,16 +3432,16 @@ String s = attitude.image.trim().toLowerCase();
 	   jj_la1_init_3();
 	}
 	private static void jj_la1_init_0() {
-	   jj_la1_0 = new int[] {0x70c8000,0x8000,0x6008000,0x8000000,0x0,0x800000,0x800000,0x8000000,0x8000000,0x8000000,0x0,0x800000,0x8000000,0x8000000,0x8000000,0x8000000,0x8000000,0x8000000,0x200000,0x78c8000,0x8000000,0x7c0,0x7c0,0x0,0x800000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x8000000,0x0,0x7aa00020,0x7aa00020,0x8000000,0x800020,0x8000000,0x0,0x8000000,0x800,0x0,0x8000000,0x0,0x8000000,0x0,0x8000000,0x0,0x8000000,};
+	   jj_la1_0 = new int[] {0x70c8000,0x8000,0x6008000,0x8000000,0x0,0x800000,0x800000,0x8000000,0x8000000,0x8000000,0x0,0x800000,0x8000000,0x8000000,0x8000000,0x8000000,0x8000000,0x8000000,0x200000,0x78c8000,0x8000000,0x7c0,0x7c0,0x0,0x800000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x8000000,0x0,0x7aa00020,0x7aa00020,0x8000000,0x800020,0x8000000,0x0,0x0,0x0,0x8000000,0x800,0x0,0x8000000,0x0,0x8000000,0x0,0x8000000,0x0,0x8000000,};
 	}
 	private static void jj_la1_init_1() {
-	   jj_la1_1 = new int[] {0x1,0x1,0x1,0x0,0xfe0002,0x4,0x4,0x0,0x0,0x0,0xfff8,0x4,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x0,0xff010000,0xfe0002,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x1,0x0,0x1,0x0,0x1,0x0,};
+	   jj_la1_1 = new int[] {0x1,0x1,0x1,0x0,0xfe0002,0x4,0x4,0x0,0x0,0x0,0xfff8,0x4,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x0,0xff010000,0xfe0002,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x1,0x0,0x1,0x0,0x1,0x0,};
 	}
 	private static void jj_la1_init_2() {
-	   jj_la1_2 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xf07c,0x0,0x0,0x80,0x80,0x400,0x800,0x400,0x800,0x400,0x800,0x0,0x80,0xfffe0180,0xfffe0180,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
+	   jj_la1_2 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1d07c,0x0,0x0,0x80,0x80,0x400,0x800,0x400,0x800,0x400,0x800,0x400,0x800,0x0,0x80,0xfffc0180,0xfffc0180,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
 	}
 	private static void jj_la1_init_3() {
-	   jj_la1_3 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x200,0x200,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x3f,0x3f,0x0,0x0,0x0,0xc0,0x0,0x100,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
+	   jj_la1_3 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x8000,0x8000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x7f,0x7f,0x0,0x0,0x0,0x180,0x600,0x3000,0x0,0x4000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
 	}
 
   /** Constructor with InputStream. */
@@ -3307,7 +3455,7 @@ String s = attitude.image.trim().toLowerCase();
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 51; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 55; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -3321,7 +3469,7 @@ String s = attitude.image.trim().toLowerCase();
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 51; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 55; i++) jj_la1[i] = -1;
   }
 
   /** Constructor. */
@@ -3331,7 +3479,7 @@ String s = attitude.image.trim().toLowerCase();
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 51; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 55; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -3349,7 +3497,7 @@ String s = attitude.image.trim().toLowerCase();
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 51; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 55; i++) jj_la1[i] = -1;
   }
 
   /** Constructor with generated Token Manager. */
@@ -3358,7 +3506,7 @@ String s = attitude.image.trim().toLowerCase();
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 51; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 55; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -3367,7 +3515,7 @@ String s = attitude.image.trim().toLowerCase();
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 51; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 55; i++) jj_la1[i] = -1;
   }
 
   private Token jj_consume_token(int kind) throws ParseException {
@@ -3418,12 +3566,12 @@ String s = attitude.image.trim().toLowerCase();
   /** Generate ParseException. */
   public ParseException generateParseException() {
 	 jj_expentries.clear();
-	 boolean[] la1tokens = new boolean[110];
+	 boolean[] la1tokens = new boolean[116];
 	 if (jj_kind >= 0) {
 	   la1tokens[jj_kind] = true;
 	   jj_kind = -1;
 	 }
-	 for (int i = 0; i < 51; i++) {
+	 for (int i = 0; i < 55; i++) {
 	   if (jj_la1[i] == jj_gen) {
 		 for (int j = 0; j < 32; j++) {
 		   if ((jj_la1_0[i] & (1<<j)) != 0) {
@@ -3441,7 +3589,7 @@ String s = attitude.image.trim().toLowerCase();
 		 }
 	   }
 	 }
-	 for (int i = 0; i < 110; i++) {
+	 for (int i = 0; i < 116; i++) {
 	   if (la1tokens[i]) {
 		 jj_expentry = new int[1];
 		 jj_expentry[0] = i;
