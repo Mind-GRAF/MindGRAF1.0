@@ -88,8 +88,12 @@ public class ActNode extends Node {
         return this.reports;
     }
 
-    protected void restartAgenda() {
+    public void restartAgenda() {
         agenda = ActAgenda.START;
+    }
+
+    protected void setAgenda(ActAgenda agenda){
+        this.agenda=agenda;
     }
 
     protected NodeSet processReportsInAct() {
@@ -182,6 +186,7 @@ public class ActNode extends Node {
         DownCable planCable = new DownCable(planRelation, new NodeSet(variable));
         DownCableSet molecularDownCableSet = new DownCableSet(goalCable, planCable);
         PropositionNode molecularNode = (PropositionNode) Network.createNode("propositionnode", molecularDownCableSet);
+        System.out.println(molecularNode.toString());
         sendRequestsToNodeSet(new NodeSet(molecularNode), null, null, ContextController.getCurrContextName(), 0,
                 ChannelType.Act, this);
         variableCount++;
@@ -210,6 +215,7 @@ public class ActNode extends Node {
         DownCable d2 = new DownCable(relation2, new NodeSet(variable));
         DownCableSet downCableSet = new DownCableSet(d1, d2);
         PropositionNode molecularNode = (PropositionNode) Network.createNode("propositionnode", downCableSet);
+        System.out.println("Node"+molecularNode.toString()+"created");
         sendRequestsToNodeSet(new NodeSet(molecularNode), null, null, ContextController.getCurrContextName(), 0,
                 ChannelType.Act, this);
         variableCount++;
@@ -354,7 +360,6 @@ public class ActNode extends Node {
 
             case EXECUTE:
                 System.out.println("In execute case");
-                System.out.println("reports size is" + reports.size());
                 if (!isPrimitive) {
                     this.agenda = ActAgenda.FIND_PLANS;
                     Scheduler.addToActQueue(this);
