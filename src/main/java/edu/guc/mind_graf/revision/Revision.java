@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.function.BinaryOperator;
 
 public class Revision {
 
@@ -89,10 +88,10 @@ public class Revision {
                     gradesOfConsistentAttitudes.add(getGradeOfNode(c, level, entry.getKey(), entry.getValue()));
                 }
                 //This merges on the level of 2 contradicting nodes in the same consistent attitudes list
-                gradesOfContradictions.add(gradesOfConsistentAttitudes.stream().mapToInt(i -> i).reduce(ContextController.mergeGrades()).orElse(0));
+                gradesOfContradictions.add(gradesOfConsistentAttitudes.stream().mapToInt(i -> i).reduce(ContextController.getMergeFunction()).orElse(0));
             }
             //This merges between grades of consistent attitudes to get the final grade
-            int gradeOfContradictions = gradesOfContradictions.stream().mapToInt(i -> i).reduce(ContextController.mergeGrades()).orElse(0);
+            int gradeOfContradictions = gradesOfContradictions.stream().mapToInt(i -> i).reduce(ContextController.getMergeFunction()).orElse(0);
 
             handleDecision(c,level, attitudeNumber, contradictions, gradeOfNode <= gradeOfContradictions);
         }
@@ -125,15 +124,15 @@ public class Revision {
         ArrayList<Integer> grades = new ArrayList<>();
         for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> assumptionSupport : node.getSupport().getAssumptionSupport().get(level).get(attitudeId)) {
             for (Map.Entry<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> support : assumptionSupport.getFirst().entrySet()) {
-                if (!c.isValidSupport(level, attitudeId, support.getValue().getFirst())) {
+                if (c.isInvalidSupport(level, attitudeId, support.getValue().getFirst())) {
                     continue;
                 }
                 //maps the support to a stream of integers representing the grade of every node in the support then merges them using ContextController.mergeGrades()
-                grades.add(support.getValue().getFirst().getNodes().stream().mapToInt(suportNode -> ((PropositionNode) suportNode).getGradeFromParent(c, level, attitudeId)).reduce(ContextController.mergeGrades()).orElse(0));
+                grades.add(support.getValue().getFirst().getNodes().stream().mapToInt(suportNode -> ((PropositionNode) suportNode).getGradeFromParent(c, level, attitudeId)).reduce(ContextController.getMergeFunction()).orElse(0));
             }
         }
         //merges grades of every support to return the final grade of this node
-        return grades.stream().mapToInt(i -> i).reduce(ContextController.mergeGrades()).orElse(0);
+        return grades.stream().mapToInt(i -> i).reduce(ContextController.getMergeFunction()).orElse(0);
     }
 
     public static ArrayList<ArrayList<Integer>> filterAttitudes(ArrayList<ArrayList<Integer>> consistentAttitudes, int attitudeNumber) {

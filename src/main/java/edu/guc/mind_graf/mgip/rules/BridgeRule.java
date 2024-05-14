@@ -137,7 +137,7 @@ public class BridgeRule extends RuleNode {
         for (Node currentNode : argAntNodesToConsiderClose) {
             int currentNodeAttitude = currContext.getPropositionAttitude(currentNode.getId());
             Request newRequest = establishChannel(ChannelType.AntRule, currentNode, switchSubs, unionSubs,
-                    currentContextName, currentNodeAttitude, -1, this);
+                    currentContextName, currentNodeAttitude, -1, this,null);
             Scheduler.addToLowQueue(newRequest);
         }
     }
@@ -155,7 +155,7 @@ public class BridgeRule extends RuleNode {
         for (Node currentNode : remainingAntArgNodeSet) {
             int currentNodeAttitude = currContext.getPropositionAttitude(currentNode.getId());
             Request newRequest = establishChannel(ChannelType.AntRule, currentNode, switchRuleSubs, filterRuleSubs,
-                    currentContext, currentNodeAttitude, -1, this);
+                    currentContext, currentNodeAttitude, -1, this,null);
             Scheduler.addToLowQueue(newRequest);
         }
 
@@ -190,7 +190,7 @@ public class BridgeRule extends RuleNode {
                         int currentNodeAttitude = currContext.getPropositionAttitude(currentNode.getId());
                         Request newRequest = establishChannel(ChannelType.AntRule, currentNode, switchRuleSubs,
                                 filterRuleSubs,
-                                currentContext, currentNodeAttitude, -1, this);
+                                currentContext, currentNodeAttitude, -1, this,null);
                         Scheduler.addToLowQueue(newRequest);
 
                     }
@@ -346,7 +346,7 @@ public class BridgeRule extends RuleNode {
                                 int currentNodeAttitude = currContext.getPropositionAttitude(currentNode.getId());
                                 Request newRequest = establishChannel(ChannelType.AntRule, currentNode, switchSubs,
                                         unionSubs,
-                                        currentReportContextName, currentNodeAttitude, -1, this);
+                                        currentReportContextName, currentNodeAttitude, -1, this,null);
                                 Scheduler.addToLowQueue(newRequest);
                             }
                         }
