@@ -3,7 +3,6 @@ package edu.guc.mind_graf.mgip.reports;
 import java.util.*;
 
 import edu.guc.mind_graf.components.Substitutions;
-import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.support.Support;
 
 public class KnownInstanceSet{
@@ -17,7 +16,7 @@ public class KnownInstanceSet{
 
     }
 
-    public boolean addKnownInstance(Report Report) throws DirectCycleException {
+    public boolean addKnownInstance(Report Report) {
         Boolean ReportSign = Report.isSign();
         Substitutions ReportSubs = Report.getSubstitutions();
         Support Supports = Report.getSupport();

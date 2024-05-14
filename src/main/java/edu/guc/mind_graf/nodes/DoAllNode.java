@@ -15,18 +15,21 @@ public class DoAllNode extends ActNode {
         this.setPrimitive(true);
     }
 
-    public void runActuator(ActNode node) {
+    @Override
+    public void runActuator() {
         Random rand = new Random();
-        NodeSet acts = node.getDownCableSet().get("obj").getNodeSet();
+        NodeSet acts = this.getDownCableSet().get("obj").getNodeSet();
         NodeSet actsCopy = new NodeSet();
-        actsCopy.addAllTo(acts);
-        while (!actsCopy.isEmpty()) {
+        acts.addAllTo(actsCopy);
+        while(!actsCopy.isEmpty()) {
+            System.out.println("tmam");
             int nextActIndex = rand.nextInt(actsCopy.size());
             ActNode nextAct = (ActNode) actsCopy.getNode(nextActIndex);
+            System.out.println(nextAct.getName());
             nextAct.restartAgenda();
             Scheduler.addToActQueue(nextAct);
             actsCopy.remove(nextAct);
         }
     }
-
+    
 }
