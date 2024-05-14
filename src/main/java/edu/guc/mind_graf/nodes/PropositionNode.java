@@ -14,6 +14,7 @@ import java.util.*;
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.matching.Match;
+import edu.guc.mind_graf.mgip.matching.Matcher;
 import edu.guc.mind_graf.mgip.reports.KnownInstance;
 import edu.guc.mind_graf.mgip.reports.KnownInstanceSet;
 import edu.guc.mind_graf.mgip.reports.Report;
@@ -295,7 +296,7 @@ public class PropositionNode extends Node {
                                        Substitutions switchSubs,
                                        Substitutions filterSubs, String contextName,
                                        int attitudeId,
-                                       int matchType, Node requesterNode) {
+                                       int matchType, Node requesterNode,Support support) {
         /* BEGIN - Helpful Prints */
         String reporterIdent = targetNode.getName();
         String requesterIdent = requesterNode.getName();
@@ -310,7 +311,7 @@ public class PropositionNode extends Node {
             case Matched:
                 newChannel = new MatchChannel(switchSubstitutions, filterSubstitutions,
                         contextName, attitudeId,
-                        matchType, requesterNode);
+                        matchType, requesterNode,support);
                 break;
             case AntRule:
                 newChannel = new AntecedentToRuleChannel(switchSubstitutions,
@@ -430,7 +431,7 @@ public class PropositionNode extends Node {
      */
     public boolean sendReport(Report report, Channel currentChannel) {
         if (currentChannel.getChannelType() == ChannelType.Matched) {
-            //union channel support with report support
+            report.getSupport().union(((MatchChannel)currentChannel).getSupport());
         }
         System.out.println("Sending Report (" + report.stringifyReport() + ") through the channel ("
                 + currentChannel.getChannelType() + " of id " + currentChannel.getIdCount() + ")");
@@ -630,7 +631,7 @@ public class PropositionNode extends Node {
             newReport.setReportType(toBeSent.getReportType());
             Channel newChannel = new MatchChannel(currentMatch.getSwitchSubs(), newReport.getSubstitutions(),
                     newReport.getContextName(), newReport.getAttitude(), currentMatch.getMatchType(),
-                    currentMatch.getNode());
+                    currentMatch.getNode(),(Support)currentMatch.getSupport());
             if (newReport.getInferenceType() == InferenceType.FORWARD) {
                 forwardChannels.addChannel(newChannel);
 
@@ -679,8 +680,9 @@ public class PropositionNode extends Node {
                                          ChannelType channelType, Node requesterNode) {
         for (Node sentTo : nodeSet) {
             Request newRequest = establishChannel(channelType, sentTo, switchSubs, filterSubs,
-                    contextName, attitudeId, -1, requesterNode);
+                    contextName, attitudeId, -1, requesterNode,null);
             Scheduler.addToLowQueue(newRequest);
+
         }
     }
 
@@ -710,7 +712,7 @@ public class PropositionNode extends Node {
 
             Request newRequest = establishChannel(channelType, matchedNode,
                     switchSubs, filterSubs, contextId,
-                    attitudeId, matchType, requesterNode);
+                    attitudeId, matchType, requesterNode,(Support)currentMatch.getSupport());
             Scheduler.addToLowQueue(newRequest);
         }
     }
@@ -741,7 +743,7 @@ public class PropositionNode extends Node {
             switch (channelType) {
                 case Matched:
                     List<Match> matchesReturned = new ArrayList<>();
-                    // Matcher.match(this, substitutions);
+                     matchesReturned=Matcher.match(this, ContextController.getContext(currentContextName),currentAttitudeID);
                     if (matchesReturned != null)
                         sendReportToMatches(matchesReturned, toBeSent);
                     break;
@@ -800,7 +802,7 @@ public class PropositionNode extends Node {
             switch (channelType) {
                 case Matched:
                     List<Match> matchesReturned = new ArrayList<>();
-                    // Matcher.match(this, substitutions);
+                    matchesReturned=Matcher.match(this, ContextController.getContext(currentContextName),currentAttitudeID);
                     if (matchesReturned != null)
                         sendRequestsToMatches(matchesReturned, substitutions, null, currentContextName,
                                 currentAttitudeID, channelType, this);
@@ -1201,23 +1203,11 @@ public class PropositionNode extends Node {
                             currentAttitude,
                             ChannelType.IfRule, this);
 
-
                 }
 
                 if (!(currentChannel instanceof MatchChannel)) {
                     List<Match> matchesList = new ArrayList<Match>();
-
-                    //testComplexActWithAssertedPreconditions()
-                    // if(this.getName().equals("M9")){
-
-                    //     Node n=Network.getMolecularNodes().get("act_precondition").get("act_17precondition11");
-                    //     matchesList.add(new Match(filterSubs, switchSubs, n, 0));
-                    // }
-                    // if(this.getName().equals("M10")){
-
-                    //     Node n=Network.getMolecularNodes().get("act_plan").get("act_17plan15");
-                    //     matchesList.add(new Match(filterSubs, switchSubs, n, 0));
-                    // }
+                    matchesList=Matcher.match(this, ContextController.getContext(currentContext),currentAttitude);
                     sendRequestsToMatches(matchesList, filterSubs, switchSubs,
                             currentContext, currentAttitude,
                             ChannelType.Matched, this);
@@ -1293,7 +1283,7 @@ public class PropositionNode extends Node {
             if (reportToBeBroadcasted.getReportType() != ReportType.Matched) {
                 List<Match> matchesReturned = new ArrayList<Match>();
                 // list of matches with a node
-                // Matcher.match(this);
+                matchesReturned=Matcher.match(this, ContextController.getContext(currentReport.getContextName()),currentReport.getAttitude());
                 sendReportToMatches(matchesReturned, reportToBeBroadcasted);
             }
             NodeSet dominatingRules = getUpAntDomRuleNodeSet();
