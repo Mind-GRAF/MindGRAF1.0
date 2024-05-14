@@ -52,7 +52,7 @@ public class Scheduler {
     // will be processed next
     public static String schedule() throws NoSuchTypeException, NoPlansExistForTheActException, DirectCycleException {
         String sequence = "The sequence of the scheduler is ";
-        main: while (!highQueue.isEmpty() || !lowQueue.isEmpty() || !actQueue.isEmpty()) {
+        main: while (!highQueue.isEmpty() || !lowQueue.isEmpty() || !actQueue.isEmpty() || !highActQueue.isEmpty()) {
             while (!highQueue.isEmpty()) {
                 System.out.println(
                         "------------------------------------------------------------------------------------------------------------------------------------");
@@ -106,7 +106,7 @@ public class Scheduler {
                 System.out.println("\n\n");
                 toRunNext.processIntends(false);
                 sequence += "A ";
-                if (!highQueue.isEmpty() || !lowQueue.isEmpty()|| !actQueue.isEmpty()) {
+                if (!highQueue.isEmpty() || !lowQueue.isEmpty()|| !highActQueue.isEmpty()) {
                     continue main;
                 }
             }
