@@ -891,7 +891,7 @@ public class PropositionNode extends Node {
         List<Match> nodesToConsider = new ArrayList<Match>();
         for (Match sourceMatch : matchingNodes) {
             Node sourceNode = sourceMatch.getNode();
-            boolean conditionMet = false;
+            boolean conditionMet = true;
             ChannelSet outgoingChannels = ((PropositionNode) sourceNode).getOutgoingChannels();
             for (Channel outgoingChannel : outgoingChannels) {
                 Substitutions processedRequestChannelFilterSubs = outgoingChannel.getFilterSubstitutions();
@@ -1208,8 +1208,10 @@ public class PropositionNode extends Node {
                 if (!(currentChannel instanceof MatchChannel)) {
                     List<Match> matchesList = new ArrayList<Match>();
                     matchesList=Matcher.match(this, ContextController.getContext(currentContext),currentAttitude);
-                    System.out.println("Matches size:"+ matchesList.size());
-                    sendRequestsToMatches(matchesList, filterSubs, switchSubs,
+                    List<Match> remainingMatches = removeAlreadyEstablishedChannels(matchesList,
+                    currentRequest, filterSubs);
+                    System.out.println("remaiining Matches size:"+ remainingMatches.size());
+                    sendRequestsToMatches(remainingMatches, filterSubs, switchSubs,
                             currentContext, currentAttitude,
                             ChannelType.Matched, this);
 
