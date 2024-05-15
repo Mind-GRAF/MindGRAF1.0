@@ -160,6 +160,11 @@ public class Matcher {
                 molecularMatchList = new ArrayList<>(removeDuplicates(tempMatchList));
             }
             if (!nullCables) {
+                if (!queryNode.isOpen() && !node.isOpen()){
+                    matchList.remove(match);
+                    return true;
+                }
+
                 matchList.addAll(molecularMatchList);
             }
             matchList.remove(match);
