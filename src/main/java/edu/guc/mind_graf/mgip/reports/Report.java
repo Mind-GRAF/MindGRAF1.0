@@ -66,37 +66,37 @@ public class Report {
 
         // }
 
-        // Context chnlContext = ContextController.getContext(chnlContextName);
-        // int level = Network.currentLevel;
+        Context chnlContext = ContextController.getContext(chnlContextName);
+        int level = Network.currentLevel;
 
-        // for(Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> currSupport: support.getJustificationSupport().get(level).get(chnlAttitudeID)){
-        //     for(int propID : currSupport.getSecond().getProps()){
-        //         if(Network.getPropositionNodes().containsKey(propID)){
-        //             PropositionNode prop = (PropositionNode)Network.getPropositionNodes().get(propID);
-        //             if(!prop.supported(chnlContextName,chnlAttitudeID,level)){
-        //                 return false;
-        //             }
-        //         }
-        //     }
-        //     for(Integer innerAttitude : currSupport.getFirst().keySet()){
-        //         for(int propID : currSupport.getFirst().get(innerAttitude).getFirst().getProps()){
-        //             if(Network.getPropositionNodes().containsKey(propID)){
-        //                 PropositionNode prop = (PropositionNode)Network.getPropositionNodes().get(propID);
-        //                 if(!prop.supported(chnlContextName,chnlAttitudeID,level)){
-        //                     return false;
-        //                 }
-        //             }
-        //         }
-        //         for (int propID : currSupport.getFirst().get(innerAttitude).getSecond().getProps()) {
-        //             if (Network.getPropositionNodes().containsKey(propID)) {
-        //                 PropositionNode prop = (PropositionNode) Network.getPropositionNodes().get(propID);
-        //                 if (!prop.supported(chnlContextName, chnlAttitudeID, level)) {
-        //                     return false;
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
+        for(Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> currSupport: support.getJustificationSupport().get(level).get(chnlAttitudeID)){
+            for(int propID : currSupport.getSecond().getProps()){
+                if(Network.getPropositionNodes().containsKey(propID)){
+                    PropositionNode prop = (PropositionNode)Network.getPropositionNodes().get(propID);
+                    if(!prop.supported(chnlContextName,chnlAttitudeID,level)){
+                        return false;
+                    }
+                }
+            }
+            for(Integer innerAttitude : currSupport.getFirst().keySet()){
+                for(int propID : currSupport.getFirst().get(innerAttitude).getFirst().getProps()){
+                    if(Network.getPropositionNodes().containsKey(propID)){
+                        PropositionNode prop = (PropositionNode)Network.getPropositionNodes().get(propID);
+                        if(!prop.supported(chnlContextName,chnlAttitudeID,level)){
+                            return false;
+                        }
+                    }
+                }
+                for (int propID : currSupport.getFirst().get(innerAttitude).getSecond().getProps()) {
+                    if (Network.getPropositionNodes().containsKey(propID)) {
+                        PropositionNode prop = (PropositionNode) Network.getPropositionNodes().get(propID);
+                        if (!prop.supported(chnlContextName, chnlAttitudeID, level)) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
 
         return true;
 
