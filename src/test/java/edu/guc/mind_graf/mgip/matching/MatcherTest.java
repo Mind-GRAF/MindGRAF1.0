@@ -550,41 +550,38 @@ public class MatcherTest {
     void BangPath() throws DirectCycleException {
         try {
             Context ctx = ContextController.getContext("guc");
-            int attitude = 0;
 
             Node cs = Network.createNode("cs", "propositionnode");
             Node phy = Network.createNode("phy", "propositionnode");
-            Node fun = Network.createNode("fun", "propositionnode");
-            Node var1 = Network.createVariableNode("var1", "propositionnode");
-            Node var2 = Network.createVariableNode("var2", "propositionnode");
+            Node theory = Network.createNode("theory", "propositionnode");
+            Node var = Network.createVariableNode("var", "propositionnode");
+            int attitude = 0;
 
-            Relation obj = Network.createRelation("obj", "", Adjustability.NONE, 0);
-            Relation prop = Network.createRelation("prop", "", Adjustability.NONE, 0);
+            Relation p = Network.createRelation("p", "", Adjustability.REDUCE, 0);
+            Relation q = Network.createRelation("q", "", Adjustability.REDUCE, 0);
+            Relation obj = Network.createRelation("obj", "", Adjustability.REDUCE, 0);
+            obj.setPath(new edu.guc.mind_graf.paths.ComposePath(new edu.guc.mind_graf.paths.BangPath(),
+                    new edu.guc.mind_graf.paths.FUnitPath(p)));
 
-            obj.setPath(new edu.guc.mind_graf.paths.BangPath()); // path can't be a bang path alone (this is for
-                                                                 // debugging purposes)
+            DownCable d1 = new DownCable(obj, new NodeSet(cs));
+            DownCable d2 = new DownCable(p, new NodeSet(phy));
 
-            DownCable d1 = new DownCable(obj, new NodeSet(cs, phy));
-            DownCable d2 = new DownCable(prop, new NodeSet(fun));
-
-            DownCable d3 = new DownCable(obj, new NodeSet(var1, var2));
+            DownCable d3 = new DownCable(obj, new NodeSet(var));
 
             Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2));
-            Node M1 = Network.createNode("propositionnode", new DownCableSet(d3, d2));
+            Node M1 = Network.createNode("propositionnode", new DownCableSet(d3));
 
             ctx.addHypothesisToContext(0, attitude, ((PropositionNode) M0));
 
-            List<Match> matchList = Matcher.match(M1, ctx, attitude);
+            List<Match> matchList = Matcher.match(M1, ctx, 0);
 
             assertEquals(2, matchList.size());
 
             Substitutions switch1 = new Substitutions();
-            switch1.add(var1, cs);
-            switch1.add(var2, phy);
+            switch1.add(var, cs);
 
             Substitutions switch2 = new Substitutions();
-            switch2.add(var1, phy);
-            switch2.add(var2, cs);
+            switch2.add(var, phy);
 
             List<Substitutions> switchSubs = new ArrayList<>();
             switchSubs.add(switch1);
@@ -597,9 +594,10 @@ public class MatcherTest {
                 assertTrue(Substitutions.testContains(switchSubs, m.getSwitchSubs()));
                 assertEquals(M0, m.getNode());
                 assertEquals(matchType, m.getMatchType());
-                assertTrue(
-                        ((Support) m.getSupport()).getJustificationSupport().get(0).get(attitude).getFirst().getFirst()
-                                .get(attitude).getFirst().get(M0.getId()) == M0); // first get(0) is the level
+                if (m.getSwitchSubs().get(var).equals(phy)) {
+                    assertEquals(1, ((NodeSet) m.getSupport()).size());
+                    assertTrue(((NodeSet) m.getSupport()).contains(M0));
+                }
             }
         } catch (NoSuchTypeException e) {
             // TODO Auto-generated catch block
