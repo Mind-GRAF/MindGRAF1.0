@@ -133,13 +133,28 @@ public class Matcher {
             for (Object downRelation : downRelationList) {
                 List<Match> tempMatchList = new ArrayList<>();
                 Cable cable = node.getDownCableSet().get((String) downRelation);
-                if (cable == null)
-                    continue;
+                if (cable == null) {
+                    if (checkCable(queryNode, node, Network.getRelations().get(downRelation), match, true)) {
+                        continue;
+                    } else {
+                        matchList.remove(match);
+                        return false;
+                    }
+                }
                 nullCables = false;
                 List<List<Node>> nodePermutations = getAllPermutations(cable.getNodeSet().getValues());
                 for (List<Node> nodePermutation : nodePermutations) {
+                    cable = queryNode.getDownCableSet().get((String) downRelation);
+                    if (cable == null) {
+                        if (checkCable(queryNode, node, Network.getRelations().get(downRelation), match, false)) {
+                            continue;
+                        } else {
+                            matchList.remove(match);
+                            return false;
+                        }
+                    }
                     List<List<Node>> queryNodePermutations = getAllPermutations(
-                            queryNode.getDownCableSet().get((String) downRelation).getNodeSet().getValues());
+                            cable.getNodeSet().getValues());
                     for (List<Node> queryNodePermutation : queryNodePermutations) {
                         for (Match molecularMatch : molecularMatchList) {
                             Match tempMatch = molecularMatch.clone();
@@ -160,7 +175,7 @@ public class Matcher {
                 molecularMatchList = new ArrayList<>(removeDuplicates(tempMatchList));
             }
             if (!nullCables) {
-                if (!queryNode.isOpen() && !node.isOpen()){
+                if (!queryNode.isOpen() && !node.isOpen()) {
                     matchList.remove(match);
                     return true;
                 }
@@ -569,5 +584,35 @@ public class Matcher {
             }
         }
         return false;
+    }
+
+    private static boolean checkCable(Node queryNode, Node node, Relation downRelation, Match match,
+            boolean isNullInNode) {
+        if (downRelation.getAdjust() == Adjustability.NONE)
+            return false;
+
+        if (downRelation.getAdjust() == Adjustability.EXPAND) {
+            if (isNullInNode) {
+                if (match.getMatchType() == 2)
+                    return false;
+                match.setMatchType(1);
+            } else {
+                if (match.getMatchType() == 1)
+                    return false;
+                match.setMatchType(2);
+            }
+        } else if (downRelation.getAdjust() == Adjustability.REDUCE) {
+            if (isNullInNode) {
+                if (match.getMatchType() == 1)
+                    return false;
+                match.setMatchType(2);
+            } else {
+                if (match.getMatchType() == 2)
+                    return false;
+                match.setMatchType(1);
+            }
+        }
+
+        return true;
     }
 }
