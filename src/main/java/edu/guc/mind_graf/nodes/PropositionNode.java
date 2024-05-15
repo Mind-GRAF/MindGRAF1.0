@@ -740,6 +740,7 @@ public class PropositionNode extends Node {
             Substitutions subs2 = new Substitutions();
             Report toBeSent = new Report(subs, reportSupport, currentAttitudeID, reportSign, inferenceType, null, this);
             toBeSent.setReportType(channelType);
+            toBeSent.setContextName(currentContextName);
             switch (channelType) {
                 case Matched:
                     List<Match> matchesReturned = new ArrayList<>();
@@ -983,11 +984,11 @@ public class PropositionNode extends Node {
         /* END - Helpful Prints */
         Scheduler.initiate();
         String currentContextName = ContextController.getCurrContextName();
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter your desired attitude: ");
-        String att = scanner.nextLine();
-        scanner.close();
-        int currentattitudeID = 1;
+        // Scanner scanner = new Scanner(System.in);
+        // System.out.print("Enter your desired attitude: ");
+        // String att = scanner.nextLine();
+        // scanner.close();
+        int currentattitudeID = 0;
         // given by the user
         System.out.println("Backward Inference initiated in Context: " + currentContextName + " & Attitude: "
                 + currentattitudeID);
@@ -1066,10 +1067,10 @@ public class PropositionNode extends Node {
         Scheduler.initiate();
         String currentContextName = ContextController.getCurrContextName();
 
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter your desired attitude: ");
-        String att = scanner.nextLine();
-        scanner.close();
+        // Scanner scanner = new Scanner(System.in);
+        // System.out.print("Enter your desired attitude: ");
+        // String att = scanner.nextLine();
+        // scanner.close();
         int currentAttitudeID = 0;
         // given by the user
         boolean reportSign = true;

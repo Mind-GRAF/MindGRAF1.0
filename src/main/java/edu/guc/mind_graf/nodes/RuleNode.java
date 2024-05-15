@@ -17,6 +17,7 @@ import edu.guc.mind_graf.mgip.requests.ChannelType;
 import edu.guc.mind_graf.mgip.requests.IfToRuleChannel;
 import edu.guc.mind_graf.mgip.requests.MatchChannel;
 import edu.guc.mind_graf.mgip.requests.Request;
+import edu.guc.mind_graf.mgip.requests.WhenToRuleChannel;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfoHandler;
 import edu.guc.mind_graf.mgip.rules.AndOr;
@@ -303,7 +304,8 @@ public abstract class RuleNode extends PropositionNode {
     protected void processSingleRequests(Request currentRequest) throws DirectCycleException, NoSuchTypeException {
         System.out.println(this.getName() + " Processing Requests as a Rule node");
         Channel currentChannel = currentRequest.getChannel();
-        if (currentChannel instanceof AntecedentToRuleChannel || currentChannel instanceof MatchChannel)
+        if (currentChannel instanceof AntecedentToRuleChannel || currentChannel instanceof MatchChannel
+         || currentChannel instanceof IfToRuleChannel || currentChannel instanceof Channel)
             super.processSingleRequests(currentRequest);
 
         else {
@@ -315,12 +317,7 @@ public abstract class RuleNode extends PropositionNode {
             if (!this.isOpen()) {
                 if (this.supported(currentContext, currentAttitude, 0)) {
                     System.out.println("I am supported");
-                    if (currentChannel instanceof IfToRuleChannel) {
-                        if (this instanceof DoIfNode) {
-                            ((DoIfNode) this).applyDoIfHandler(filterRuleSubs, currentRequest, null);
-
-                        }
-                    } else {
+                    
                         boolean ruleType = this instanceof Thresh || this instanceof AndOr;
                         NodeSet antArgCloseToMe = getDownAntArgNodeSet();
                         NodeSet antArgNodesToConsiderClose = removeAlreadyEstablishedChannels(antArgCloseToMe,
@@ -330,52 +327,13 @@ public abstract class RuleNode extends PropositionNode {
                                 currentContext,
                                 currentAttitude,
                                 ChannelType.AntRule, this);
-                    }
+                    
 
                 } else
                     super.processSingleRequests(currentRequest);
 
             } else {
-                if (currentChannel.getChannelType() == ChannelType.IfRule) {
-                    if (this instanceof DoIfNode) {
-                        Collection<KnownInstance> theKnownInstanceSet = new ArrayList<KnownInstance>();
-
-                        if (knownInstances.getPositiveKInstances().containsKey(currentAttitude)) {
-                            Collection<KnownInstance> collectionOfSetsPve = knownInstances.getPositiveKInstances()
-                                    .get(currentAttitude).values();
-                            for (KnownInstance currentKIPve : collectionOfSetsPve) {
-                                theKnownInstanceSet.add(currentKIPve);
-                            }
-
-                        }
-                        knownInstances.printKnownInstanceSet(theKnownInstanceSet);
-                        Boolean notBound = isOpenNodeNotBound(filterRuleSubs);
-                        boolean flag = false;
-                        for (KnownInstance currentKnownInstance : theKnownInstanceSet) {
-                            Substitutions currentKISubs = currentKnownInstance.getSubstitutions();
-                            Substitutions onlySubsBindFreeVar = onlyRelevantSubs(filterRuleSubs);
-                            boolean compatibilityCheck = onlySubsBindFreeVar
-                                    .compatible(currentKISubs);
-                            boolean supportCheck = currentKnownInstance.anySupportSupportedInAttitudeContext(
-                                    currentContext,
-                                    currentAttitude);
-                            if (compatibilityCheck && supportCheck) {
-                                flag = true;
-                                if (notBound) {
-                                    ((DoIfNode) this).applyDoIfHandler(
-                                            Substitutions.union(currentKISubs, filterRuleSubs),
-                                            currentRequest, currentKnownInstance.getSupports());
-                                } else {
-                                    ((DoIfNode) this).applyDoIfHandler(filterRuleSubs, currentRequest,
-                                            currentKnownInstance.getSupports());
-                                }
-                            }
-                        }
-                        if (!flag) {
-                            super.processSingleRequests(currentRequest);
-                        }
-                    }
-                } else {
+                 
                     boolean isNotBound = isOpenNodeNotBound(filterRuleSubs);
                     Collection<KnownInstance> theKnownInstanceSet = knownInstances.mergeKInstancesBasedOnAtt(
                             currentChannel.getAttitudeID());
@@ -399,7 +357,7 @@ public abstract class RuleNode extends PropositionNode {
                     }
                     super.processSingleRequests(currentRequest);
 
-                }
+                
             }
 
         }
@@ -506,151 +464,7 @@ public abstract class RuleNode extends PropositionNode {
                 applyRuleHandler(currentReport);
 
             }
-        } else if (this instanceof WhenDoNode) {
-
-            if (forwardReportType) {
-                if (!this.isOpen()) {
-                    if (!supported(currentReportContextName, 0, 0)
-                            && currentReport.getReportType() == ReportType.WhenRule) {
-                        // The rule is not asserted and the "when" part is asserted with forward
-                        // inference
-                        if (this.isForwardReport() == false) {
-                            this.setForwardReport(true);
-                        }
-                        Substitutions switchSubs = new Substitutions();
-
-                        Channel tempChannel = new Channel(switchSubs, currentReportSubs, currentReportContextName,
-                                0, this);
-                        Request tempRequest = new Request(tempChannel, null);
-                        super.processSingleRequests(tempRequest);
-                    } else {
-                        if (supported(currentReportContextName, 0, 0)) {
-
-                            if (currentReport.getReportType() == ReportType.WhenRule) {
-
-                                // The rule is already asserted and the "when" part is asserted with forward
-                                // inference.
-                                currentReport.getSupport().addNode(0, this);
-                                ((WhenDoNode) this).applyRuleHandler(currentReport);
-                            } else {
-                                // The "when" part is already asserted and the rule is asserted with forward
-                                // inference.
-                                // The "when" part is not asserted and the rule is asserted with forward
-                                // inference.
-
-                                NodeSet whenNodes = getDownWhenNodeSet(currentReportAttitudeID);
-                                if (this.isForwardReport() == false) {
-                                    this.setForwardReport(true);
-                                }
-                                sendRequestsToNodeSet(whenNodes, currentReportSubs, null, currentReportContextName,
-                                        currentReportAttitudeID,
-                                        ChannelType.WhenRule, this);
-
-                            }
-                        }
-                    }
-                } else {
-
-                    Collection<KnownInstance> theKnownInstanceSet = new ArrayList<KnownInstance>();
-
-                    if (knownInstances.getPositiveKInstances().containsKey(currentReportAttitudeID)) {
-                        Collection<KnownInstance> collectionOfSetsPve = knownInstances.getPositiveKInstances()
-                                .get(currentReportAttitudeID).values();
-                        for (KnownInstance currentKIPve : collectionOfSetsPve) {
-                            theKnownInstanceSet.add(currentKIPve);
-                        }
-
-                    }
-                    knownInstances.printKnownInstanceSet(theKnownInstanceSet);
-                    Boolean notBound = isOpenNodeNotBound(currentReportSubs);
-                    for (KnownInstance currentKnownInstance : theKnownInstanceSet) {
-                        Substitutions currentKISubs = currentKnownInstance.getSubstitutions();
-                        boolean compatibilityCheck = currentKISubs
-                                .compatible(onlySubsBindFreeVar);
-                        boolean supportCheck = currentKnownInstance.anySupportSupportedInAttitudeContext(
-                                currentReportContextName,
-                                currentReportAttitudeID);
-                        if (compatibilityCheck && supportCheck) {
-
-                            if (notBound) {
-                                currentReport.setSubstitutions(Substitutions.union(currentReportSubs,
-                                        currentKnownInstance.getSubstitutions()));
-                            }
-                            if (currentReport.getSupport() != null) {
-                                currentReport.getSupport().union(currentKnownInstance.getSupports());
-
-                            }
-
-                            if (currentReport.getReportType() == ReportType.WhenRule) {
-                                applyRuleHandler(currentReport);
-                            } else {
-                                NodeSet whenNodes = getDownWhenNodeSet(currentReportAttitudeID);
-                                if (this.isForwardReport() == false) {
-                                    this.setForwardReport(true);
-                                }
-                                sendRequestsToNodeSet(whenNodes, currentReportSubs, null, currentReportContextName,
-                                        currentReportAttitudeID,
-                                        ChannelType.WhenRule, this);
-                            }
-                        }
-                    }
-                }
-            } else if (isForwardReport()) {
-                System.out.println(currentReport.getReportType());
-                if (currentReport.getReportType() == ReportType.WhenRule) {
-                    System.out.println("Hey");
-                    if (!this.isOpen()) {
-                        if (currentReport.isSign()) {
-                            // backwardInference of when part
-                            currentReport.getSupport().addNode(0, this);
-                            ((WhenDoNode) this).applyRuleHandler(currentReport);
-                        }
-                    } else {
-                        Collection<KnownInstance> theKnownInstanceSet = new ArrayList<KnownInstance>();
-
-                        if (knownInstances.getPositiveKInstances().containsKey(currentReportAttitudeID)) {
-                            Collection<KnownInstance> collectionOfSetsPve = knownInstances.getPositiveKInstances()
-                                    .get(currentReportAttitudeID).values();
-                            for (KnownInstance currentKIPve : collectionOfSetsPve) {
-                                theKnownInstanceSet.add(currentKIPve);
-                            }
-
-                        }
-                        knownInstances.printKnownInstanceSet(theKnownInstanceSet);
-                        Boolean notBound = isOpenNodeNotBound(currentReportSubs);
-                        for (KnownInstance currentKnownInstance : theKnownInstanceSet) {
-                            Substitutions currentKISubs = currentKnownInstance.getSubstitutions();
-                            boolean compatibilityCheck = currentKISubs
-                                    .compatible(onlySubsBindFreeVar);
-                            boolean supportCheck = currentKnownInstance.anySupportSupportedInAttitudeContext(
-                                    currentReportContextName,
-                                    currentReportAttitudeID);
-
-                            if (compatibilityCheck && supportCheck) {
-                                if (notBound) {
-                                    currentReport.setSubstitutions(Substitutions.union(currentReportSubs,
-                                            currentKnownInstance.getSubstitutions()));
-                                }
-                                if (currentReport.getSupport() != null) {
-                                    currentReport.getSupport().union(currentKnownInstance.getSupports());
-                                }
-                                this.applyRuleHandler(currentReport);
-                            }
-                        }
-
-                    }
-                } else {
-                    // backwardInference of when part
-                    if (supported(currentReportContextName, 0,0)) {
-                        currentReport.getSupport().addNode( 0,this);
-                        ((WhenDoNode) this).applyRuleHandler(currentReport);
-                    }
-                }
-            } else {
-                super.processSingleReports(currentReport);
-            }
-
-        } else {
+        }   else {
             Substitutions switchSubs = new Substitutions();
 
             Channel tempChannel = new Channel(switchSubs, currentReportSubs, currentReportContextName,

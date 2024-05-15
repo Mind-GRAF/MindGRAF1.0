@@ -96,6 +96,10 @@ public class ActNode extends Node {
         this.agenda=agenda;
     }
 
+    public boolean getPrimitive(){
+        return isPrimitive;
+    }
+
     protected NodeSet processReportsInAct() {
         System.out.println(this.getName() + " Processing Reports as act node ");
         if (reports.isEmpty()) {
@@ -243,16 +247,24 @@ public class ActNode extends Node {
             for(Integer attitude:support.getFirst().keySet()){
                 for(PropositionNode node:support.getFirst().get(attitude)){
                     doAct&=node.supported(currentContextName, attitude,0);
+                    if(doAct){
+                        System.out.println(node.getName() + " is still supported in context "+currentContextName + " in attitude id "+ attitude);
+                    }
                 }
             }
             if(!doAct){
                 continue;
             }
             for(Integer attitude:support.getSecond().keySet()){
-                for(PropositionNode node:support.getFirst().get(attitude)){
+                for(PropositionNode node:support.getSecond().get(attitude)){
+                    System.out.println(node);
                     doAct&=!node.supported(currentContextName, attitude,0);
+                    if(doAct){
+                        System.out.println(node.getName() + " is still not supported in context "+currentContextName + " in attitude id "+ attitude);
+                    }
                 }
             }
+            System.out.println("doAct is:"+doAct);
             if(doAct){
                 break;
             }
@@ -260,6 +272,13 @@ public class ActNode extends Node {
         }
         if(!doAct){
             System.out.println("The act is no longer needed to be done");
+            if(isHighStack){
+                Scheduler.getHighActQueue().remove(this);
+            }
+            else{
+                Scheduler.getActQueue().remove(this);
+            }
+            this.restartAgenda();
             return;
         }
 
