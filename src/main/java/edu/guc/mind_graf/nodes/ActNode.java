@@ -229,13 +229,8 @@ public class ActNode extends Node {
         Scheduler.initiate();
         String currentContextName = ContextController.getCurrContextName();
 
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter your desired attitude: ");
-        String att = scanner.nextLine();
-        scanner.close();
-        int currentAttitudeID = 0;
-        System.out.println("Performing an act initiated in Context: " + currentContextName + " & Attitude: "
-                + currentAttitudeID);
+       
+        System.out.println("Performing an act initiated in Context: " + currentContextName );
         Scheduler.addToActQueue(this);
         System.out.println(Scheduler.schedule());
     }

@@ -129,9 +129,7 @@ public class ActNodeTest {
    @Test
    void testPrimitiveActWithoutPreconditions() throws NoSuchTypeException, NoPlansExistForTheActException, DirectCycleException {
        M5.setPrimitive(true);
-       Scheduler.initiate();
-       Scheduler.addToActQueue(M5);
-       Scheduler.schedule();
+       M5.perform();
 
    }
 
@@ -177,34 +175,31 @@ public class ActNodeTest {
 //
 //    }
 //
-//    @Test
-//    void testComplexActWithAssertedPreconditions() throws NoSuchTypeException, NoPlansExistForTheActException, DirectCycleException{
+   @Test
+   void testComplexActWithAssertedPreconditions() throws NoSuchTypeException, NoPlansExistForTheActException, DirectCycleException{
 
-//        Relation preconditionRelation=new Relation("precondition", "propositionnode", Adjustability.NONE, 0);
-//        Relation actRelation=new Relation("act", "actnode", Adjustability.NONE, 0);
-//        Relation planRelation=new Relation("plan", "actnode", Adjustability.NONE, 0);
+       Relation preconditionRelation=new Relation("precondition", "propositionnode", Adjustability.NONE, 0);
+       Relation actRelation=new Relation("act", "actnode", Adjustability.NONE, 0);
+       Relation planRelation=new Relation("plan", "actnode", Adjustability.NONE, 0);
 
-//        DownCable preconditionCable=new DownCable(preconditionRelation, new NodeSet(M2));
-//        DownCable actCable=new DownCable(actRelation, new NodeSet(M6));
-//        DownCableSet preconditionActCable1=new DownCableSet(preconditionCable,actCable);
-//        DownCable planCable1=new DownCable(planRelation, new NodeSet(M5));
-//        DownCable actCable2=new DownCable(actRelation, new NodeSet(M6));
-//        DownCableSet planActCable1=new DownCableSet(planCable1,actCable2);
-//        DownCable planCable2=new DownCable(planRelation, new NodeSet(M7));
-//        DownCable actCable3=new DownCable(actRelation, new NodeSet(M6));
-//        DownCableSet planActCable2=new DownCableSet(planCable2,actCable3);
+       DownCable preconditionCable=new DownCable(preconditionRelation, new NodeSet(M2));
+       DownCable actCable=new DownCable(actRelation, new NodeSet(M6));
+       DownCableSet preconditionActCable1=new DownCableSet(preconditionCable,actCable);
+       DownCable planCable1=new DownCable(planRelation, new NodeSet(M5));
+       DownCable actCable2=new DownCable(actRelation, new NodeSet(M6));
+       DownCableSet planActCable1=new DownCableSet(planCable1,actCable2);
+       DownCable planCable2=new DownCable(planRelation, new NodeSet(M7));
+       DownCable actCable3=new DownCable(actRelation, new NodeSet(M6));
+       DownCableSet planActCable2=new DownCableSet(planCable2,actCable3);
 
-//        PropositionNode planActNode1=(PropositionNode)Network.createNode("propositionnode", planActCable1);
-//        PropositionNode planActNode2=(PropositionNode)Network.createNode("propositionnode", planActCable2);
+       PropositionNode planActNode1=(PropositionNode)Network.createNode("propositionnode", planActCable1);
+       PropositionNode planActNode2=(PropositionNode)Network.createNode("propositionnode", planActCable2);
 
-//        PropositionNode preconditionActNode1=(PropositionNode)Network.createNode("propositionnode", preconditionActCable1);
+       PropositionNode preconditionActNode1=(PropositionNode)Network.createNode("propositionnode", preconditionActCable1);
+        n.printNodes();
+        M6.perform();
 
-//         n.printNodes();
-//        Scheduler.initiate();
-//        Scheduler.addToActQueue(M6);
-//        Scheduler.schedule();
-
-//    }
+   }
 }
 //
 //    @Test

@@ -1208,6 +1208,7 @@ public class PropositionNode extends Node {
                 if (!(currentChannel instanceof MatchChannel)) {
                     List<Match> matchesList = new ArrayList<Match>();
                     matchesList=Matcher.match(this, ContextController.getContext(currentContext),currentAttitude);
+                    System.out.println("Matches size:"+ matchesList.size());
                     sendRequestsToMatches(matchesList, filterSubs, switchSubs,
                             currentContext, currentAttitude,
                             ChannelType.Matched, this);
