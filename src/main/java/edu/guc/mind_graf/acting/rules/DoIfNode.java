@@ -27,11 +27,10 @@ public class DoIfNode extends RuleNode {
         // TODO Auto-generated constructor stub
     }
 
-
     public void applyDoIfHandler(Substitutions substitutions, Request request, Support knownInstanceSupport)
             throws NoSuchTypeException {
         NodeSet acts = this.getDownDoNodeSet();
-        int currentAttitudeId=request.getChannel().getAttitudeID();
+        int currentAttitudeId = request.getChannel().getAttitudeID();
         HashMap<Integer, PropositionNodeSet> negativeSupport = new HashMap<Integer, PropositionNodeSet>();
         Node ifNode = request.getChannel().getRequesterNode();
 
@@ -64,17 +63,22 @@ public class DoIfNode extends RuleNode {
                     }
                     support.add(new Pair(hash, negativeSupport));
                 }
-                //TODO: marwa I commented this as it was causing errors
-//                for (HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> entry : knownInstanceSupport
-//                        .getJustificationSupport().getFirst().get(request.getChannel().getAttitudeID())) {
-//                    HashMap<Integer, PropositionNodeSet> temp = new HashMap<Integer, PropositionNodeSet>();
-//                    for (Integer attitude : entry.keySet()) {
-//                        temp.put(attitude, entry.get(attitude).getFirst());
-//                    }
-//                    Pair<HashMap<Integer, PropositionNodeSet>, HashMap<Integer, PropositionNodeSet>> pair = new Pair<HashMap<Integer, PropositionNodeSet>, HashMap<Integer, PropositionNodeSet>>(
-//                            temp, negativeSupport);
-//                    support.add(pair);
-//                }
+                // TODO: marwa I commented this as it was causing errors
+                // for (HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> entry :
+                // knownInstanceSupport
+                // .getJustificationSupport().getFirst().get(request.getChannel().getAttitudeID()))
+                // {
+                // HashMap<Integer, PropositionNodeSet> temp = new HashMap<Integer,
+                // PropositionNodeSet>();
+                // for (Integer attitude : entry.keySet()) {
+                // temp.put(attitude, entry.get(attitude).getFirst());
+                // }
+                // Pair<HashMap<Integer, PropositionNodeSet>, HashMap<Integer,
+                // PropositionNodeSet>> pair = new Pair<HashMap<Integer, PropositionNodeSet>,
+                // HashMap<Integer, PropositionNodeSet>>(
+                // temp, negativeSupport);
+                // support.add(pair);
+                // }
             }
         }
         for (Node act : acts) {
@@ -82,12 +86,14 @@ public class DoIfNode extends RuleNode {
                 if (!act.isOpen()) {
                     ((ActNode) act).addToSupports(support);
                     if (!Scheduler.getActQueue().contains((ActNode) act)) {
+                        ((ActNode) act).restartAgenda();
                         Scheduler.addToActQueue((ActNode) act);
                     }
                 } else {
                     ActNode newAct = (ActNode) ((ActNode) act).applySubstitution(substitutions);
                     newAct.addToSupports(support);
                     if (!Scheduler.getActQueue().contains(newAct)) {
+                        newAct.restartAgenda();
                         Scheduler.addToActQueue(newAct);
                     }
                 }

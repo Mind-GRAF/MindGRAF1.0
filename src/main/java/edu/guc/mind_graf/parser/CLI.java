@@ -16,7 +16,8 @@ public class CLI {
     private static boolean conjunctionAttitudes;
     private static boolean consequentAttitudes;
     private static boolean telescopable;
-    //static boolean definingSemanticType = false;
+    public static boolean loop = true;
+    // static boolean definingSemanticType = false;
     private static Scanner sc = new Scanner(System.in);
 
     @SuppressWarnings("unchecked")
@@ -31,7 +32,7 @@ public class CLI {
 
     public static void main(String[] args) {
 
-        while (true) {
+        while (loop) {
 
             if (attitudesSet) {
                 System.out.println("Enter attitudes or 'N' to proceed:");
@@ -74,7 +75,7 @@ public class CLI {
                         // uvbr = true;
                     } catch (ParseException e) {
                         // TODO Auto-generated catch block
-                        //e.printStackTrace();
+                        // e.printStackTrace();
                         System.out.println(e.getMessage());
                         continue;
 
@@ -96,7 +97,7 @@ public class CLI {
                             // uvbr = true;
                         } catch (ParseException e) {
                             // TODO Auto-generated catch block
-                           // e.printStackTrace();
+                            // e.printStackTrace();
                             System.out.println(e.getMessage());
                             continue;
 
@@ -117,7 +118,7 @@ public class CLI {
                                 telescopable = true;
                             } catch (ParseException e) {
                                 // TODO Auto-generated catch block
-                                //e.printStackTrace();
+                                // e.printStackTrace();
                                 System.out.println(e.getMessage());
                                 continue;
 
@@ -140,7 +141,7 @@ public class CLI {
                                     uvbr = true;
                                 } catch (ParseException e) {
                                     // TODO Auto-generated catch block
-                                    //e.printStackTrace();
+                                    // e.printStackTrace();
                                     System.out.println(e.getMessage());
                                     continue;
 
@@ -151,6 +152,10 @@ public class CLI {
                                     String input = readInput();
                                     MindGRAF_Parser parser = new MindGRAF_Parser(
                                             new StringReader(input.trim()));
+                                    if (input.trim().toLowerCase().equals("exit")) {
+                                        System.out.println("Session ended.");
+                                        break;
+                                    }
                                     try {
                                         parser.UVBR();
                                         uvbr = false;

@@ -34,6 +34,7 @@ public class AchieveNode extends ActNode {
 				}
 				try {
 					controlAgenda = ActAgenda.FIND_PLANS;
+					this.setAgenda(ActAgenda.EXECUTE);
 					Scheduler.addToActQueue(this);
 					searchForPlansInAchieve(goal);
 				} catch (NoSuchTypeException e) {

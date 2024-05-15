@@ -4,16 +4,22 @@ import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.caseFrames.Adjustability;
 import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.reports.Report;
 import edu.guc.mind_graf.network.Network;
+import edu.guc.mind_graf.network.NetworkController;
 import edu.guc.mind_graf.relations.Relation;
 import edu.guc.mind_graf.set.NodeSet;
+import edu.guc.mind_graf.set.Set;
 import edu.guc.mind_graf.support.Support;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,7 +28,19 @@ class RuleNodeTest {
     @BeforeEach
     void setUp() {
         Scheduler.initiate();
-        Network network = new Network();
+
+        Set<String, Integer> attitudeNames = new Set<>();
+        attitudeNames.add("beliefs", 0);
+        attitudeNames.add("obligations", 1);
+
+        ArrayList<ArrayList<Integer>> consistentAttitudes = new ArrayList<>();
+        consistentAttitudes.add(new ArrayList<>(List.of(0)));
+        consistentAttitudes.add(new ArrayList<>(List.of(1)));
+        consistentAttitudes.add(new ArrayList<>(List.of(0, 1)));
+
+        Network network = NetworkController.setUp(attitudeNames, consistentAttitudes, false, false, false, 1);
+        ContextController.createNewContext("guc");
+        ContextController.setCurrContext("guc");
     }
 
     @Test
@@ -77,36 +95,36 @@ class RuleNodeTest {
         Node henry = Network.createNode("henry", "individualnode");
         govSubs.add(G, henry);
         Report report0 = new Report(govSubs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M0);
-        report0.setContextName("");
-        ((RuleNode)P0).applyRuleHandler(report0);
+        report0.setContextName("guc");
+        ((RuleNode) P0).applyRuleHandler(report0);
 
         Substitutions civSubs = new Substitutions();
         Node anne = Network.createNode("anne", "individualnode");
         civSubs.add(C, anne);
         Report report1 = new Report(civSubs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M1);
-        report1.setContextName("");
-        ((RuleNode)P0).applyRuleHandler(report1);
+        report1.setContextName("guc");
+        ((RuleNode) P0).applyRuleHandler(report1);
 
         Substitutions coSubs = new Substitutions();
         Node england = Network.createNode("england", "individualnode");
         coSubs.add(Co, england);
         Report report2 = new Report(coSubs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M2);
-        report2.setContextName("");
-        ((RuleNode)P0).applyRuleHandler(report2);
+        report2.setContextName("guc");
+        ((RuleNode) P0).applyRuleHandler(report2);
 
         Substitutions rSubs = new Substitutions();
         rSubs.add(Co, england);
         rSubs.add(G, henry);
         Report report3 = new Report(rSubs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M3);
-        report3.setContextName("");
-        ((RuleNode)P0).applyRuleHandler(report3);
+        report3.setContextName("guc");
+        ((RuleNode) P0).applyRuleHandler(report3);
 
         Substitutions lSubs = new Substitutions();
         lSubs.add(Co, england);
         lSubs.add(C, anne);
         Report report4 = new Report(lSubs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M4);
-        report4.setContextName("");
-        ((RuleNode)P0).applyRuleHandler(report4);
+        report4.setContextName("guc");
+        ((RuleNode) P0).applyRuleHandler(report4);
 
         assertEquals(1, Scheduler.getHighQueue().size());
 
@@ -132,7 +150,10 @@ class RuleNodeTest {
         Node M2 = Network.createNode("propositionnode", new DownCableSet(aMember, aClass));
 
         Node P0 = Network.createNode("orentailment", new DownCableSet(new DownCable(Network.getRelations().get("ant"), new NodeSet(M0, M1)), new DownCable(Network.getRelations().get("cq"), new NodeSet(M2))));
-        ((RuleNode)P0).applyRuleHandler(new Report(new Substitutions(), new Support(-1), 0, true, InferenceType.BACKWARD, P0, M0));
+        Report r = new Report(new Substitutions(), new Support(-1), 0, true, InferenceType.BACKWARD, P0, M0);
+        r.setContextName("guc");
+
+        ((RuleNode) P0).applyRuleHandler(r);
         assertEquals(1, Scheduler.getHighQueue().size());
     }
 
@@ -161,8 +182,8 @@ class RuleNodeTest {
                 new DownCable(Network.getRelations().get("ant"), new NodeSet(M0, M1)),
                 new DownCable(Network.getRelations().get("cq"), new NodeSet(M2))));
         Report testReport = new Report(new Substitutions(), new Support(-1), 0, true, InferenceType.BACKWARD, P0, M0);
-        testReport.setContextName("");
-        ((RuleNode)P0).applyRuleHandler(testReport);
+        testReport.setContextName("guc");
+        ((RuleNode) P0).applyRuleHandler(testReport);
         assertEquals(1, Scheduler.getHighQueue().size());
     }
 
@@ -189,8 +210,8 @@ class RuleNodeTest {
         Substitutions subs = new Substitutions();
         subs.add(A, Network.createNode("Nemo", "propositionnode"));
         Report testReport = new Report(subs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M0);
-        testReport.setContextName("");
-        ((RuleNode)P0).applyRuleHandler(testReport);
+        testReport.setContextName("guc");
+        ((RuleNode) P0).applyRuleHandler(testReport);
         assertEquals(2, Scheduler.getHighQueue().size());
     }
 
@@ -220,8 +241,8 @@ class RuleNodeTest {
         Substitutions subs = new Substitutions();
         subs.add(X, Network.createNode("Patroclus", "individualnode"));
         Report testReport = new Report(subs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M0);
-        testReport.setContextName("");
-        ((RuleNode)P0).applyRuleHandler(testReport);
+        testReport.setContextName("guc");
+        ((RuleNode) P0).applyRuleHandler(testReport);
         assertEquals(2, Scheduler.getHighQueue().size());
     }
 }

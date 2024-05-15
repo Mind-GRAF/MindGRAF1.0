@@ -2843,6 +2843,7 @@ typeName = typeName.trim();
       }
       MindGRAF_Parser parser = new MindGRAF_Parser(
           new StringReader(s));
+
       try {
         parser.customMethod();
       } catch (ParseException e) {
@@ -3171,6 +3172,10 @@ CLI.print("Enable Cache?");
     System.out.print(":");
     while (true) {
       String input = CLI.readInput();
+      if (input.trim().toLowerCase().equals("exit")) {
+      System.out.println("Session ended.");
+      CLI.loop = false;
+    }
       MindGRAF_Parser parser = new MindGRAF_Parser(
           new StringReader(input.trim()));
       try {
@@ -3204,6 +3209,10 @@ CLI.print("Enter Merge Function Number");
       System.out.print(":");
       while (true) {
       String input = CLI.readInput();
+      if (input.trim().toLowerCase().equals("exit")) {
+      System.out.println("Session ended.");
+      CLI.loop = false;
+    }
       MindGRAF_Parser parser = new MindGRAF_Parser(
           new StringReader(input.trim()));
       try {
@@ -3251,6 +3260,10 @@ Set attitudeNames = new Set();
     System.out.print(":");
     while (true) {
       String input = CLI.readInput();
+      if (input.trim().toLowerCase().equals("exit")) {
+      System.out.println("Session ended.");
+      CLI.loop = false;
+    }
       MindGRAF_Parser parser = new MindGRAF_Parser(
           new StringReader(input.trim()));
       try {

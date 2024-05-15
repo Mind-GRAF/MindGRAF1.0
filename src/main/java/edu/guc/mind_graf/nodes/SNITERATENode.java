@@ -26,6 +26,7 @@ public class SNITERATENode extends ActNode {
         switch(controlAgenda) {
 			case START:
                 controlAgenda = ActAgenda.TEST;
+                this.setAgenda(ActAgenda.EXECUTE);
                 Scheduler.addToActQueue(this);
                 NodeSet guards = new NodeSet();
 				System.out.println("Sending requests to guards");

@@ -109,4 +109,12 @@ public class DownCableSet implements Iterable<DownCable>{
 	public Iterator<DownCable> iterator() {
 		return downCables.values().iterator();
 	}
+
+	public DownCableSet clone() {
+		HashMap<String, DownCable> cables = new HashMap<String, DownCable>();
+		for (DownCable cable : this.getValues()) {
+			cables.put(cable.getRelation().getName(), cable);
+		}
+		return new DownCableSet(cables);
+	}
 }

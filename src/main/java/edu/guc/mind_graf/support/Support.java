@@ -665,6 +665,9 @@ public class Support implements Cloneable{
 			this.assumptionSupport.get(currLevel).get(attitudeID).add(pair);
 		}
 		else{
+			if(!assumptionSupport.containsKey(currLevel)){
+				assumptionSupport.put(currLevel,new HashMap<>());
+			}
 			if (assumptionSupport.get(currLevel).containsKey(attitudeID)) {
 				this.assumptionSupport.get(currLevel).get(attitudeID).add(pair);
 			}
