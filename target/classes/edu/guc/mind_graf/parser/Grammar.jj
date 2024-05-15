@@ -126,6 +126,62 @@ public class MindGRAF_Parser {
 }
 
 
+  public static void addToContext(String CName, String attitude, boolean a, boolean c, PropositionNode propNode){
+    try {
+      if (c && a) {
+        if (!controller.getContextSet().getSet().containsKey(CName)) {
+          CLI.print("No such Context.");
+          return;
+        }
+        if (!controller.getAttitudes().getSet().containsKey(attitude)) {
+          CLI.print("No such Attitude.");
+          return;
+        }
+        controller.addHypothesisToContext(CName, levelsCount, controller.getAttitudeNumber(attitude), propNode);
+        isGrading = true;
+        levelsCount = 0;
+        return;
+
+      }
+      if (c) {
+        if (!controller.getContextSet().getSet().containsKey(CName)) {
+          CLI.print("No such Context.");
+          return;
+        }
+        controller.addHypothesisToContext(CName, levelsCount, defaultAttitude, propNode);
+        isGrading = true;
+        levelsCount = 0;
+        return;
+      }
+      if (a) {
+        if (!controller.getAttitudes().getSet().containsKey(attitude)) {
+          CLI.print("No such Attitude.");
+          return;
+        }
+        try {
+          controller.addHypothesisToContext(controller.getCurrContextName(), levelsCount,
+              controller.getAttitudeNumber(attitude), propNode);
+          isGrading = true;
+          levelsCount = 0;
+        } catch (NullPointerException e) {
+          CLI.print("Set Current Context First.");
+          return;
+        }
+      }
+      try {
+        controller.addHypothesisToContext(controller.getCurrContextName(), levelsCount, defaultAttitude, propNode);
+        isGrading = true;
+        levelsCount = 0;
+      } catch (NullPointerException e) {
+        CLI.print("Set Current Context First.");
+        return;
+      }
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
+
 
         @SuppressWarnings("static-access")
         public static void removeDuplicates(ArrayList<String> list) {
@@ -138,6 +194,58 @@ public class MindGRAF_Parser {
             }
         }
     }
+      public static void bInference(PropositionNode propNode, boolean c, boolean a, String CName, String attitude) {
+    try {
+      if (c && a) {
+        if (!controller.getContextSet().getSet().containsKey(CName)) {
+          CLI.print("No such Context.");
+          {
+            if ("" != null)
+              return;
+          }
+        }
+        if (!controller.getAttitudes().getSet().containsKey(attitude)) {
+          CLI.print("No such Attitude.");
+          return;
+        }
+        propNode.deduce(CName, controller.getAttitudeNumber(attitude));
+        return;
+      }
+      if (c) {
+        if (!controller.getContextSet().getSet().containsKey(CName)) {
+          CLI.print("No such Context.");
+          return;
+        }
+        propNode.deduce(CName, defaultAttitude);
+
+        return;
+
+      }
+      if (a) {
+        if (!controller.getAttitudes().getSet().containsKey(attitude)) {
+          CLI.print("No such Attitude.");
+
+          return;
+
+        }
+        try {
+          propNode.deduce(controller.getCurrContextName(), controller.getAttitudeNumber(attitude));
+        } catch (NullPointerException e) {
+          CLI.print("Set Current Context First.");
+          return;
+        }
+      }
+      try {
+        propNode.deduce(controller.getCurrContextName(), defaultAttitude);
+      } catch (NullPointerException e) {
+        CLI.print("Set Current Context First.");
+        return;
+      }
+    } catch (NoSuchTypeException | NoPlansExistForTheActException | DirectCycleException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
 
   public static int indexOfList(ArrayList<ArrayList<String>> listOfLists, ArrayList<String> listToAdd) {
     // Iterate over the listOfLists and compare each inner list with listToAdd
@@ -205,61 +313,95 @@ public class MindGRAF_Parser {
         }
         if (!controller.getAttitudes().getSet().containsKey(attitude)) {
           CLI.print("No such Attitude.");
-          {
-            if ("" != null)
               return;
-          }
         }
         propNode.add(CName, controller.getAttitudeNumber(attitude));
-        {
-          if ("" != null)
             return;
-        }
       }
       if (c) {
         if (!controller.getContextSet().getSet().containsKey(CName)) {
           CLI.print("No such Context.");
-          {
-            if ("" != null)
               return;
-          }
         }
         propNode.add(CName, defaultAttitude);
-        {
-          if ("" != null)
+
             return;
-        }
+        
       }
       if (a) {
         if (!controller.getAttitudes().getSet().containsKey(attitude)) {
           CLI.print("No such Attitude.");
-          {
-            if ("" != null)
+
               return;
-          }
+          
         }
         try {
           propNode.add(controller.getCurrContextName(), controller.getAttitudeNumber(attitude));
         } catch (NullPointerException e) {
           CLI.print("Set Current Context First.");
-          {
-            if ("" != null)
               return;
-          }
         }
       }
       try {
         propNode.add(controller.getCurrContextName(), defaultAttitude);
       } catch (NullPointerException e) {
         CLI.print("Set Current Context First.");
-        {
-          if ("" != null)
             return;
-        }
       }
     } catch (NoSuchTypeException | NoPlansExistForTheActException | DirectCycleException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
+    }
+  }
+    public static Integer isSupported(PropositionNode propNode, boolean c, boolean a, String CName, String attitude) {
+    try {
+      if (c && a) {
+        if (!controller.getContextSet().getSet().containsKey(CName)) {
+          CLI.print("No such Context.");
+          return null;
+
+        }
+        if (!controller.getAttitudes().getSet().containsKey(attitude)) {
+          CLI.print("No such Attitude.");
+          return null;
+        }
+
+        return propNode.supported(CName, controller.getAttitudeNumber(attitude), levelsCount) ? 1 : 0;
+      }
+      if (c) {
+        if (!controller.getContextSet().getSet().containsKey(CName)) {
+          CLI.print("No such Context.");
+          return null;
+        }
+        return propNode.supported(CName, defaultAttitude, levelsCount) ? 1 : 0;
+
+      }
+      if (a) {
+        if (!controller.getAttitudes().getSet().containsKey(attitude)) {
+          CLI.print("No such Attitude.");
+
+          return null;
+
+        }
+        try {
+          return propNode.supported(controller.getCurrContextName(), controller.getAttitudeNumber(attitude),
+              levelsCount) ? 1 : 0;
+        } catch (NullPointerException e) {
+          CLI.print("Set Current Context First.");
+          return null;
+        }
+      }
+      try {
+        return propNode.supported(controller.getCurrContextName(), defaultAttitude,
+            levelsCount) ? 1 : 0;
+      } catch (NullPointerException e) {
+        CLI.print("Set Current Context First.");
+        return null;
+      }
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+      return null;
     }
   }
 
@@ -1732,15 +1874,18 @@ void Command() throws ParseException :
     }
     |
     setCurrentContext()
-    |
-    "back-infer"backwardInference(null, null, null, false, false)
+
     |
     getAllContexts()
     |
     forwardInference()
     |
+    activate()
+    |
+    AssertActivate()
+    |
  setCurrentAttitude()
-  
+  |
     AddToContext()
     |
     RemoveFromContext()
@@ -1750,18 +1895,23 @@ void Command() throws ParseException :
     DescribeContext()
     |
     getAllSupported()
-    |
-    backInferSub()
-    |
-    backInferSubNot()
-    |
-    "back-infer-not"backwardInferenceNeg(null, null, null, false, false)
+   
     |
     performAct()
     |
     clearNetwork()
     |
     clearInfer()
+    |
+    "back-infer"backwardInference()
+    |
+    "ask-if-true"Ask()
+    |
+    "ask-if-not"AskifNot()
+    |
+    "ask-why"AskWh()
+    |
+    "ask-whynot"AskWhNot()
     }
 
 
@@ -1849,53 +1999,7 @@ void definePrimitive() throws ParseException :
 
 }
 
-void backInferSub() throws ParseException :
-{
-  PropositionNode propNode;
-}
-{
-  "back-infer-sub"  propNode = backwardInference(null, null, null, false, false)
-{
-    propNode = backwardInference(null, null, null, false, false);
-    if (propNode != null) {
-      Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> subs = propNode
-          .getKnownInstances().positiveKInstances;
-      for (Hashtable<Substitutions, KnownInstance> sub : subs.values()) {
-        for (Substitutions s : sub.keySet()) {
-          for (Entry<Node, Node> entry : s.getMap().entrySet()) {
-            String var = entry.getKey().toString();
-            String n = entry.getValue().toString();
-            CLI.print("Key: " + var + ", Value: " + n);
-          }
-        }
-      }
-      }
-}
-}
 
-void backInferSubNot() throws ParseException :
-{
-  PropositionNode propNode;
-}
-{
-  "back-infer-subnot"  propNode = backwardInference(null, null, null, false, false)
-{
-    propNode = backwardInference(null, null, null, false, false);
-    if (propNode != null) {
-      Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> subs = propNode
-          .getKnownInstances().negativeKInstances;
-      for (Hashtable<Substitutions, KnownInstance> sub : subs.values()) {
-        for (Substitutions s : sub.keySet()) {
-          for (Entry<Node, Node> entry : s.getMap().entrySet()) {
-            String var = entry.getKey().toString();
-            String n = entry.getValue().toString();
-            CLI.print("Key: " + var + ", Value: " + n);
-          }
-        }
-      }
-      }
-}
-}
 
 
 void getAllSupported() throws ParseException :
@@ -2011,67 +2115,22 @@ void RemoveFromContext() throws ParseException :
 
 void AddToContext() throws ParseException :
 {
-    String attitude;
+    String attitude = null;
     String CName = null;
     Node nn;
+    boolean c = false;
+    boolean a = false;
 }
  {  (
-      "add-to-context" "["nn = Expression()"]" "[" attitude = <STRING>.image"]"  ("["CName = <STRING>.image"]")?
+      "add-to-context"  ("c{"CName = <STRING>.image"}"{ c = true;})?
+   ("a{"attitude = <STRING>.image"}"{ a = true ;})?
+   nn = Expression()
     ){
       
-      if (CName == null) {
-        try{
-        CName = controller.getCurrContextName();
-        CName = CName.trim();
-        }catch(Exception e){
-          CLI.print("Set Default Context First.");
-        }
-    }
-    else{
-      CName = CName.trim();
-      if(!controller.getContextSet().getSet().containsKey(CName.trim()))
-        throw new ParseException("Context Does Not Exist.");
-    }
-    PropositionNode node = (PropositionNode) nn;
-    Integer attNum = controller.getAttitudeNumber(attitude);
-    CName = CName.trim().toLowerCase();
-    if (attNum == null) 
-        throw new ParseException("No Such Attitude.");
-  
-    if (wffs.containsKey(node.getId())) {
-      ArrayList<String> wffName = wffs.get(node.getId());
-      for (int i = 1; i < wffName.size(); i++) {
-        if (wffName.get(i).equals(CName + "_" + attNum)) {
-          if (true) {
-            if (true)
-              throw new ParseException("Already Supported in Context " + CName + " in attitude " + attitude);
-          }
-        }
-      }
-    }
+    PropositionNode propNode = (PropositionNode) nn;
+    addToContext(CName, attitude, a, c, propNode);
 
-    try {
-      CLI.print(node.toString()+" is supported in " + CName +" in attitude " + attitude+".");
-        controller.addHypothesisToContext(CName,levelsCount, attNum, node);
-        isGrading = true;
-        levelsCount = 0;
-        if (wffs.containsKey(node.getId())) {
-        ArrayList<String> wffName = wffs.get(node.getId());
-        wffName.addLast(CName + "_" + attNum);
-        wffs.put(node.getId(), wffName);
-    } else {
-        ArrayList<String> list = new ArrayList<String>();
-        list.add("wff_" + wffCount);
-        wffCount++;
-        list.add(CName + "_" + attNum);
-        wffs.put(node.getId(), list);
-    }
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
-      CLI.print(e.getMessage());
-
-    }
-
+    // printing
     HashMap<String, HashMap<String, Node>> molecN = network.getMolecularNodes();
     for (HashMap<String, Node> x : molecN.values()) {
       for (Node n : x.values()) {
@@ -2084,206 +2143,168 @@ void AddToContext() throws ParseException :
 
 
 
-PropositionNode backwardInference(Node node, String CName, String attitude, boolean c, boolean a) throws ParseException :
+void backwardInference() throws ParseException :
 {
-
+    String attitude = null;
+    String CName = null;
+    Node node;
+    boolean c = false;
+    boolean a = false;
 }
 {
    ("c{"CName = <STRING>.image"}"{ c = true;})?
    ("a{"attitude = <STRING>.image"}"{ a = true ;})?
    node = Expression()
-    {
+ {
     PropositionNode propNode = (PropositionNode) node;
-    try {
-      if (c && a) {
-        if (!controller.getContextSet().getSet().containsKey(CName)) {
-          CLI.print("No such Context.");
-          {
-            if ("" != null) {
-              if ("" != null)
-                return null;
-            }
-          }
-        }
-        if (!controller.getAttitudes().getSet().containsKey(attitude)) {
-          CLI.print("No such Attitude.");
-          {
-            if ("" != null) {
-              if ("" != null)
-                return null;
-            }
-          }
-        }
-        propNode.deduce(CName, controller.getAttitudeNumber(attitude));
-
-        {
-          if ("" != null) {
-            if ("" != null)
-              return propNode;
-          }
-        }
-      }
-
-      if (c) {
-        if (!controller.getContextSet().getSet().containsKey(CName)) {
-          CLI.print("No such Context.");
-          {
-            if ("" != null) {
-              if ("" != null)
-                return null;
-            }
-          }
-        }
-        propNode.deduce(CName, defaultAttitude);
-        {
-          if ("" != null) {
-            if ("" != null)
-              return propNode;
-          }
-        }
-      }
-      if (a) {
-        if (!controller.getAttitudes().getSet().containsKey(attitude)) {
-          CLI.print("No such Attitude.");
-          {
-            if ("" != null) {
-              if ("" != null)
-                return null;
-            }
-          }
-        }
-        try {
-          propNode.deduce(controller.getCurrContextName(), controller.getAttitudeNumber(attitude));
-          return propNode;
-        } catch (NullPointerException e) {
-          CLI.print("Set Current Context First.");
-          {
-            if ("" != null)
-              return null;
-          }
-        }
-      }
-      try {
-        propNode.deduce(controller.getCurrContextName(), defaultAttitude);
-        return propNode;
-      } catch (NullPointerException e) {
-        CLI.print("Set Current Context First.");
-        {
-          if ("" != null)
-            return null;
-        }
-      }
-    } catch (NoSuchTypeException | NoPlansExistForTheActException | DirectCycleException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-    return null;
-    }
+    levelsCount = 0;
+    isGrading = true;
+    bInference(propNode, c, a, CName, attitude);
+ }
 } 
 
 
-PropositionNode backwardInferenceNeg(Node node, String CName, String attitude, boolean c, boolean a) throws ParseException :
+void AskWh() throws ParseException :
 {
-
+    String attitude = null;
+    String CName = null;
+    Node node;
+    boolean c = false;
+    boolean a = false;
 }
 {
    ("c{"CName = <STRING>.image"}"{ c = true;})?
    ("a{"attitude = <STRING>.image"}"{ a = true ;})?
    node = Expression()
-    {
-PropositionNode propNode = null;
-try {
-  propNode = (PropositionNode) node.createNegation(node);
-} catch (NoSuchTypeException e) {
-  // TODO Auto-generated catch block
-  e.printStackTrace();
-}
-    try {
-      if (c && a) {
-        if (!controller.getContextSet().getSet().containsKey(CName)) {
-          CLI.print("No such Context.");
-          {
-            if ("" != null) {
-              if ("" != null)
-                return null;
-            }
-          }
-        }
-        if (!controller.getAttitudes().getSet().containsKey(attitude)) {
-          CLI.print("No such Attitude.");
-          {
-            if ("" != null) {
-              if ("" != null)
-                return null;
-            }
-          }
-        }
-        propNode.deduce(CName, controller.getAttitudeNumber(attitude));
+ {
+    PropositionNode propNode = (PropositionNode) node;
+    levelsCount = 0;
+    isGrading = true;
+    bInference(propNode, c, a, CName, attitude);
+    Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> positiveInstances = propNode
+        .getKnownInstances().positiveKInstances;
 
-        {
-          if ("" != null) {
-            if ("" != null)
-              return propNode;
-          }
+    Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> negativeInstances = propNode
+        .getKnownInstances().negativeKInstances;
+    for (Hashtable<Substitutions, KnownInstance> value : positiveInstances.values()) {
+      for (Substitutions sub : value.keySet()) {
+        for (HashMap.Entry<Node, Node> entry : sub.getMap().entrySet()) {
+          CLI.print("Variable: " + entry.getKey().toString() + ", Value: " + entry.getValue().toString());
         }
       }
-
-      if (c) {
-        if (!controller.getContextSet().getSet().containsKey(CName)) {
-          CLI.print("No such Context.");
-          {
-            if ("" != null) {
-              if ("" != null)
-                return null;
-            }
-          }
-        }
-        propNode.deduce(CName, defaultAttitude);
-        {
-          if ("" != null) {
-            if ("" != null)
-              return propNode;
-          }
-        }
-      }
-      if (a) {
-        if (!controller.getAttitudes().getSet().containsKey(attitude)) {
-          CLI.print("No such Attitude.");
-          {
-            if ("" != null) {
-              if ("" != null)
-                return null;
-            }
-          }
-        }
-        try {
-          propNode.deduce(controller.getCurrContextName(), controller.getAttitudeNumber(attitude));
-          return propNode;
-        } catch (NullPointerException e) {
-          CLI.print("Set Current Context First.");
-          {
-            if ("" != null)
-              return null;
-          }
-        }
-      }
-      try {
-        propNode.deduce(controller.getCurrContextName(), defaultAttitude);
-        return propNode;
-      } catch (NullPointerException e) {
-        CLI.print("Set Current Context First.");
-        {
-          if ("" != null)
-            return null;
-        }
-      }
-    } catch (NoSuchTypeException | NoPlansExistForTheActException | DirectCycleException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
     }
-    return null;
+    for (Hashtable<Substitutions, KnownInstance> value : negativeInstances.values()) {
+      for (Substitutions sub : value.keySet()) {
+        for (HashMap.Entry<Node, Node> entry : sub.getMap().entrySet()) {
+          CLI.print("Variable: " + entry.getKey().toString() + ", Value: " + entry.getValue().toString());
+        }
+      }
     }
+ }
 } 
+
+void AskWhNot() throws ParseException :
+{
+    String attitude = null;
+    String CName = null;
+    Node node;
+    boolean c = false;
+    boolean a = false;
+}
+{
+   ("c{"CName = <STRING>.image"}"{ c = true;})?
+   ("a{"attitude = <STRING>.image"}"{ a = true ;})?
+   node = Expression()
+ {
+    PropositionNode propNode = (PropositionNode) node;
+    levelsCount = 0;
+    isGrading = true;
+    bInference(propNode, c, a, CName, attitude);
+    PropositionNode negatedProp = null;
+    try {
+      negatedProp = (PropositionNode) propNode.createNegation(propNode);
+    } catch (NoSuchTypeException e) {
+      // TODO Auto-generated catch block
+      CLI.print(e.getMessage());
+    }
+    Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> positiveInstances = negatedProp
+        .getKnownInstances().positiveKInstances;
+
+    Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> negativeInstances = negatedProp
+        .getKnownInstances().negativeKInstances;
+    for (Hashtable<Substitutions, KnownInstance> value : positiveInstances.values()) {
+      for (Substitutions sub : value.keySet()) {
+        for (HashMap.Entry<Node, Node> entry : sub.getMap().entrySet()) {
+          CLI.print("Variable: " + entry.getKey().toString() + ", Value: " + entry.getValue().toString());
+        }
+      }
+    }
+    for (Hashtable<Substitutions, KnownInstance> value : negativeInstances.values()) {
+      for (Substitutions sub : value.keySet()) {
+        for (HashMap.Entry<Node, Node> entry : sub.getMap().entrySet()) {
+          CLI.print("Variable: " + entry.getKey().toString() + ", Value: " + entry.getValue().toString());
+        }
+      }
+    }
+ }
+} 
+
+
+void AskifNot() throws ParseException :
+{
+    String attitude = null;
+    String CName = null;
+    Node node;
+    boolean c = false;
+    boolean a = false;
+}
+{
+   ("c{"CName = <STRING>.image"}"{ c = true;})?
+   ("a{"attitude = <STRING>.image"}"{ a = true ;})?
+   node = Expression()
+ {
+    PropositionNode propNode = (PropositionNode) node;
+    levelsCount = 0;
+    isGrading = true;
+    bInference(propNode, c, a, CName, attitude);
+    Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> negativeInstances = propNode
+        .getKnownInstances().negativeKInstances;
+    for (Hashtable<Substitutions, KnownInstance> value : negativeInstances.values()) {
+      for (KnownInstance KI : value.values()) {
+        CLI.print(KI.toString());
+      }
+    }
+ }
+}
+
+void Ask() throws ParseException :
+{
+    String attitude = null;
+    String CName = null;
+    Node node;
+    boolean c = false;
+    boolean a = false;
+}
+{
+   ("c{"CName = <STRING>.image"}"{ c = true;})?
+   ("a{"attitude = <STRING>.image"}"{ a = true ;})?
+   node = Expression()
+ {
+    PropositionNode propNode = (PropositionNode) node;
+    levelsCount = 0;
+    isGrading = true;
+    bInference(propNode, c, a, CName, attitude);
+    Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> positiveInstances = propNode
+        .getKnownInstances().positiveKInstances;
+    for (Hashtable<Substitutions, KnownInstance> value : positiveInstances.values()) {
+      for (KnownInstance KI : value.values()) {
+        CLI.print(KI.toString());
+      }
+    }
+ }
+} 
+
+
 
 void forwardInference() throws ParseException :
 {
@@ -2298,6 +2319,8 @@ void forwardInference() throws ParseException :
    ("a{"attitude = <STRING>.image"}"{ a = true ;})?
    node = Expression()
     {
+      levelsCount = 0;
+      isGrading = true;
     PropositionNode propNode = (PropositionNode) node;
     fInference(propNode, c, a, CName, attitude);
     }
@@ -2317,9 +2340,38 @@ void activate() throws ParseException:
    node = Expression()
    {
     PropositionNode propNode = (PropositionNode) node;
+    levelsCount = 0;
+    isGrading = true;
     Collection<Node> set = propNode.getDirectParents().getValues();
     for (Node n : set) {
-      fInference(propNode, c, a, CName, attitude);
+      if (isSupported(propNode, c, a, CName, attitude) == 1)
+        fInference(propNode, c, a, CName, attitude);
+    }
+   }
+}
+
+void AssertActivate() throws ParseException:
+{
+  String CName = null;
+  boolean c = false;
+  boolean a = false;
+  Node node = null;
+  String attitude = null;
+}
+{
+  "activate-node!"("c{"CName = <STRING>.image"}"{ c = true;})?
+   ("a{"attitude = <STRING>.image"}"{ a = true ;})?
+   node = Expression()
+   {
+    PropositionNode propNode = (PropositionNode) node;
+
+    levelsCount = 0;
+    isGrading = true;
+    addToContext(CName, attitude, a, c, propNode);
+    Collection<Node> set = propNode.getDirectParents().getValues();
+    for (Node n : set) {
+      if (isSupported(propNode, c, a, CName, attitude) == 1)
+        fInference(propNode, c, a, CName, attitude);
     }
    }
 }
