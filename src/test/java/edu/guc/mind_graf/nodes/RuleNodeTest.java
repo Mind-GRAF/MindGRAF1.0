@@ -5,6 +5,7 @@ import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.caseFrames.Adjustability;
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.exceptions.DirectCycleException;
+import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.Scheduler;
@@ -12,12 +13,17 @@ import edu.guc.mind_graf.mgip.reports.Report;
 import edu.guc.mind_graf.mgip.ruleHandlers.FlagNode;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.network.Network;
+import edu.guc.mind_graf.network.NetworkController;
 import edu.guc.mind_graf.relations.Relation;
 import edu.guc.mind_graf.set.FlagNodeSet;
 import edu.guc.mind_graf.set.NodeSet;
+import edu.guc.mind_graf.set.Set;
 import edu.guc.mind_graf.support.Support;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -26,7 +32,21 @@ class RuleNodeTest {
     @BeforeEach
     void setUp() {
         Scheduler.initiate();
-        Network network = new Network();
+
+        Set<String, Integer> attitudeNames = new Set<>();
+        attitudeNames.add("beliefs", 0);
+        attitudeNames.add("obligations", 1);
+
+        ArrayList<ArrayList<Integer>> consistentAttitudes = new ArrayList<>();
+        consistentAttitudes.add(new ArrayList<>(List.of(0)));
+        consistentAttitudes.add(new ArrayList<>(List.of(1)));
+        consistentAttitudes.add(new ArrayList<>(List.of(0, 1)));
+
+        Network network = NetworkController.setUp(attitudeNames, consistentAttitudes, false, false, false, 1);
+        ContextController.createNewContext("Dystopia");
+        ContextController.createNewContext("Mythology");
+        ContextController.createNewContext("PetStore");
+        ContextController.setCurrContext("Dystopia");
     }
 
     @Test
@@ -168,6 +188,7 @@ class RuleNodeTest {
 
     @Test
     void applyRuleHandler_OrEntail() throws NoSuchTypeException {
+        ContextController.setCurrContext("Mythology");
         Node Patroclus = Network.createNode("Patroclus", "propositionnode");
         Node Achilles = Network.createNode("Achilles", "propositionnode");
         Node Hector = Network.createNode("Hector", "propositionnode");
@@ -210,6 +231,7 @@ class RuleNodeTest {
 
     @Test
     void applyRuleHandler_NumEntail() throws NoSuchTypeException {
+        ContextController.setCurrContext("Mythology");
         Node one = Network.createNode("1", "propositionnode");
 
         Node Patroclus = Network.createNode("Patroclus", "propositionnode");
@@ -233,13 +255,14 @@ class RuleNodeTest {
                 new DownCable(Network.getRelations().get("ant"), new NodeSet(M0, M1)),
                 new DownCable(Network.getRelations().get("cq"), new NodeSet(M2))));
         Report testReport = new Report(new Substitutions(), new Support(-1), 0, true, InferenceType.BACKWARD, P0, M0);
-        testReport.setContextName("");
-        ((RuleNode)P0).applyRuleHandler(testReport);
+        testReport.setContextName("Mythology");
+        ((RuleNode) P0).applyRuleHandler(testReport);
         assertEquals(1, Scheduler.getHighQueue().size());
     }
 
     @Test
     void applyRuleHandler_NumEntailConVar() throws NoSuchTypeException {
+        ContextController.setCurrContext("Mythology");
         Node three = Network.createNode("3", "propositionnode");
         Node X = Network.createVariableNode("X", "propositionnode");
         Node Merlin = Network.createNode("Merlin", "individualnode");
@@ -311,6 +334,8 @@ class RuleNodeTest {
 
     @Test
     void applyRuleHandler_Andor() throws NoSuchTypeException {
+        ContextController.setCurrContext("PetStore");
+
         Node A = Network.createVariableNode("X", "propositionnode");
         Node one = Network.createNode("1", "propositionnode");
         Node Fish = Network.createNode("Fish", "propositionnode");
@@ -349,6 +374,7 @@ class RuleNodeTest {
 
     @Test
     void applyRuleHandler_Thresh() throws NoSuchTypeException {
+        ContextController.setCurrContext("Mythology");
         Node X = Network.createVariableNode("X", "propositionnode");
         Node one = Network.createNode("1", "individualnode");
         Node two = Network.createNode("2", "individualnode");
@@ -373,8 +399,8 @@ class RuleNodeTest {
         Substitutions subs = new Substitutions();
         subs.add(X, Network.createNode("Patroclus", "individualnode"));
         Report testReport = new Report(subs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M0);
-        testReport.setContextName("");
-        ((RuleNode)P0).applyRuleHandler(testReport);
+        testReport.setContextName("Mythology");
+        ((RuleNode) P0).applyRuleHandler(testReport);
         assertEquals(2, Scheduler.getHighQueue().size());
 
         System.out.println(X);
@@ -415,7 +441,7 @@ class RuleNodeTest {
         rSubs.add(X, Network.createNode("Patroclus", "individualnode"));
         FlagNodeSet fns = new FlagNodeSet();
         fns.addFlagNode(new FlagNode(M0, true, new Support(M0.getId())));
-        RuleInfo ri = new RuleInfo("", 0, 1, 0, rSubs, fns, new Support(-1));
+        RuleInfo ri = new RuleInfo("Mythology", 0, 1, 0, rSubs, fns, new Support(-1));
         Support sup = ((RuleNode)P0).createSupport(ri);
         System.out.println(sup);
         assertNotNull(sup);

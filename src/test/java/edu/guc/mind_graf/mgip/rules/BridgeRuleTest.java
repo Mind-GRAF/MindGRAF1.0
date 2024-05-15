@@ -4,25 +4,47 @@ import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.caseFrames.Adjustability;
 import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.reports.Report;
 import edu.guc.mind_graf.network.Network;
+import edu.guc.mind_graf.network.NetworkController;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.RuleNode;
 import edu.guc.mind_graf.relations.Relation;
 import edu.guc.mind_graf.set.NodeSet;
+import edu.guc.mind_graf.set.Set;
 import edu.guc.mind_graf.support.Support;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class BridgeRuleTest {
 
+    @BeforeEach
+    void setup(){
+        Set<String, Integer> attitudeNames = new Set<>();
+        attitudeNames.add("beliefs", 0);
+        attitudeNames.add("obligations", 1);
+
+        ArrayList<ArrayList<Integer>> consistentAttitudes = new ArrayList<>();
+        consistentAttitudes.add(new ArrayList<>(List.of(0)));
+        consistentAttitudes.add(new ArrayList<>(List.of(1)));
+        consistentAttitudes.add(new ArrayList<>(List.of(0, 1)));
+
+        Network network = NetworkController.setUp(attitudeNames,consistentAttitudes,false,false,false,1);
+        ContextController.createNewContext("Mythology");
+        ContextController.setCurrContext("Mythology");
+    }
+
     @Test
     void applyRuleHandler() throws NoSuchTypeException {
-        Network network = new Network();
         Scheduler.initiate();
 
         // belief

@@ -60,6 +60,7 @@ public class WhenDoNode extends RuleNode {
                             if (Scheduler.getActQueue().contains((ActNode) act)) {
                                 Scheduler.getActQueue().remove((ActNode) act);
                             }
+                            ((ActNode) act).restartAgenda();
                             Scheduler.addToHighActQueue((ActNode) act);
                             System.out
                                     .println("Act" + act + " scheduled successfully");
@@ -71,6 +72,7 @@ public class WhenDoNode extends RuleNode {
                             if (Scheduler.getActQueue().contains((ActNode) newAct)) {
                                 Scheduler.getActQueue().remove((ActNode) newAct);
                             }
+                             newAct.restartAgenda();
                             Scheduler.addToHighActQueue((ActNode) newAct);
                             System.out
                                     .println("Act after applying substitutions" + newAct + " scheduled successfully");
