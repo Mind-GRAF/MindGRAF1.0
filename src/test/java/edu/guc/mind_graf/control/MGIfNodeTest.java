@@ -13,9 +13,9 @@ import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.network.NetworkController;
-import edu.guc.mind_graf.nodes.ActNode;
 import edu.guc.mind_graf.nodes.MGIfNode;
 import edu.guc.mind_graf.nodes.Node;
+import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.relations.Relation;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.Set;
@@ -47,37 +47,24 @@ public class MGIfNodeTest {
         try {
             System.out.println("Testing example 1");
             ContextController.setCurrContext("guc");
-            Node maro = Network.createNode("doit", "actnode");
-            Node snif = Network.createNode("snif", "actnode");
-            Node guard1 = Network.createNode("guard", "propositionnode");
-            Relation obj = Network.createRelation("obj", "", Adjustability.NONE,2);
-            Relation guard = Network.createRelation("guard", "", Adjustability.NONE,2);
-            Relation act = Network.createRelation("act", "", Adjustability.NONE,2);
-            Relation action = Network.createRelation("action", "", Adjustability.NONE,2);
 
-            NodeSet ns1 = new NodeSet();
-            ns1.add(maro);
-            NodeSet ns2 = new NodeSet();
-            ns2.add(guard1);
-            NodeSet ns4 = new NodeSet();
-            ns4.add(snif);
+			Node act = Network.createNode("act", "actnode");
+            Node guard = Network.createNode("guard", "propositionnode");
 
-            DownCable downCableMemM0 = new DownCable(act, ns1);
-            DownCable downCableMemM1 = new DownCable(guard, ns2);
-            DownCable downCableClassM0 = new DownCable(action, ns4);
+            Relation actR = Network.createRelation("act", "", Adjustability.NONE, 0);
+            Relation guardR = Network.createRelation("guard", "", Adjustability.NONE, 0);
+            Relation obj = Network.createRelation("obj", "", Adjustability.NONE, 0);
 
-            DownCableSet downCableSetM0 = new DownCableSet(downCableMemM0,downCableMemM1);
+            ContextController.getContext(ContextController.getCurrContextName()).addHypothesisToContext(0, 0, (PropositionNode)guard);
 
-            ActNode guardedAct = new ActNode(downCableSetM0);
+            DownCable d1 = new DownCable(actR, new NodeSet(act));
+            DownCable d2 = new DownCable(guardR, new NodeSet(guard));
 
-            NodeSet ns3 = new NodeSet();
-            ns3.add(guardedAct);
+            Node guardedAct = Network.createNode("actnode", new DownCableSet(d1, d2));
 
-            DownCable downCableMemM2 = new DownCable(obj, ns3);
+            DownCable d3 = new DownCable(obj, new NodeSet(guardedAct));
 
-            DownCableSet downCableSetM1 = new DownCableSet(downCableMemM2,downCableClassM0);
-
-            MGIfNode M0 = new MGIfNode(downCableSetM1);
+            MGIfNode M0 = new MGIfNode(new DownCableSet(d3));
 
             Scheduler.initiate();
 

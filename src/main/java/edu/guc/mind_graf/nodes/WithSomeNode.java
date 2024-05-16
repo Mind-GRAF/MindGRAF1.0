@@ -6,6 +6,7 @@ import java.util.List;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.context.ContextController;
+import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.matching.Match;
@@ -31,15 +32,22 @@ public class WithSomeNode extends ActNode {
         switch(controlAgenda) {
 			case START:
                 controlAgenda = ActAgenda.TEST;
-                List<Match> matches = Matcher.match(qualifiers, ContextController.getContext(ContextController.getCurrContextName()), 0);
-                ((PropositionNode)qualifiers).sendRequestsToMatches(matches, new Substitutions(), new Substitutions(),
-                ContextController.getCurrContextName(), 0, ChannelType.Matched, act);
+                List<Match> matches;
+                try {
+                    matches = Matcher.match(act, ContextController.getContext(ContextController.getCurrContextName()), 0);
+                    ((PropositionNode)qualifiers).sendRequestsToMatches(matches, new Substitutions(), new Substitutions(),
+                    ContextController.getCurrContextName(), 0, ChannelType.Matched, act);
+                } catch (DirectCycleException ex) {
+                    System.out.println("Direct cycle found");
+                }
                 System.out.println("Sending requests to matches");
                 this.setAgenda(ActAgenda.EXECUTE);
                 Scheduler.addToActQueue(this);
                 break;
             case TEST:
                 controlAgenda = ActAgenda.DONE;
+                this.setAgenda(ActAgenda.EXECUTE);
+                Scheduler.addToActQueue(this);
                 ArrayList<Report> reports = ((ActNode)act).getReports();
                 NodeSet newActs = new NodeSet();
                 System.out.println("Checking for substitutions");
@@ -47,15 +55,13 @@ public class WithSomeNode extends ActNode {
                     Report report = reports.remove(0);
                     ActNode newAct = (ActNode) ((ActNode) act).applySubstitution(report.getSubstitutions());
                     newActs.add(newAct);
+                    System.out.println(newAct.getDownCableSet().get("obj").getNodeSet().getNode(0).getName() + " added to newActs");
                 }
                 System.out.println("Substitutions are applied successfully");
                 sendDoOneToActQueue(newActs);
-                this.setAgenda(ActAgenda.EXECUTE);
-                Scheduler.addToActQueue(this);
                 break;
             case DONE:
                 System.out.println("WithSome done");
-                Scheduler.addToActQueue(this);
                 break;
             default:
                 System.out.print("UNIDENTIFIED AGENDA FOR WITHSOME!!");

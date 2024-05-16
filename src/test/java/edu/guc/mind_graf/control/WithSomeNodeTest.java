@@ -12,7 +12,9 @@ import edu.guc.mind_graf.caseFrames.Adjustability;
 import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.network.Network;
+import edu.guc.mind_graf.network.NetworkController;
 import edu.guc.mind_graf.nodes.Node;
+import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.nodes.WithSomeNode;
 import edu.guc.mind_graf.relations.Relation;
 import edu.guc.mind_graf.set.NodeSet;
@@ -36,7 +38,7 @@ public class WithSomeNodeTest {
         consistentAttitudes.add(new ArrayList<>(List.of(0,2)));
         consistentAttitudes.add(new ArrayList<>(List.of(0,2,3)));
 
-        ContextController.setUp(attitudeNames, consistentAttitudes , false, false, 0);
+        NetworkController.setUp(attitudeNames,consistentAttitudes ,false,false,false,1);
         ContextController.createNewContext("guc");
     }
 
@@ -46,7 +48,7 @@ public class WithSomeNodeTest {
             System.out.println("Testing example 1");
             ContextController.setCurrContext("guc");
 
-            Node cs = Network.createNode("cs", "propositionnode");
+			Node cs = Network.createNode("cs", "propositionnode");
             Node fun = Network.createNode("fun", "propositionnode");
             Node var1 = Network.createVariableNode("var1", "propositionnode");
             Node actionN = Network.createNode("pickup", "individualnode");
@@ -63,20 +65,23 @@ public class WithSomeNodeTest {
 
             Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2));
             Node M1 = Network.createNode("propositionnode", new DownCableSet(d3, d2));
+
+            ContextController.getContext(ContextController.getCurrContextName()).addHypothesisToContext(0, 0, (PropositionNode)M0);
+            ContextController.getContext(ContextController.getCurrContextName()).addHypothesisToContext(0, 0, (PropositionNode)M1);
             
             DownCable d4 = new DownCable(action, new NodeSet(actionN));
             
-            Node actNode = Network.createNode("actnode", new DownCableSet(d4, d1));
+            Node actNode = Network.createNode("actnode", new DownCableSet(d4, d3));
 
             DownCable d5 = new DownCable(qualifiers, new NodeSet(M1));
             DownCable d6 = new DownCable(qualifiers, new NodeSet(M0));
             DownCable d7 = new DownCable(obj, new NodeSet(actNode));
 
-            WithSomeNode M2 = new WithSomeNode(new DownCableSet(d5,d6,d7));
+            WithSomeNode M3 = new WithSomeNode(new DownCableSet(d5,d7));
 
             Scheduler.initiate();
 
-            Scheduler.addToActQueue(M2);
+            Scheduler.addToActQueue(M3);
 
             Scheduler.schedule();
 

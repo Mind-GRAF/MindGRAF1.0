@@ -182,6 +182,20 @@ public class ActNode extends Node {
 
     }
 
+    protected void sendDoAllToActQueue(NodeSet nodes) throws NoSuchTypeException {
+        Relation doAllAction = Network.createRelation("action", "individualNode", Adjustability.NONE, 0);
+        Relation doAllobj = Network.createRelation("obj", "actNode", Adjustability.NONE, 0);
+        Node doAllBaseNode = Network.createNode("DoAll" + DoAllNode.doAllCount++, "individualnode");
+        DownCable actionCable = new DownCable(doAllAction, new NodeSet(doAllBaseNode));
+        DownCable objCable = new DownCable(doAllobj, nodes);
+        DownCableSet doAllDownCableSet = new DownCableSet(actionCable, objCable);
+        DoAllNode doAllMolecularNode = (DoAllNode) Network.createNode("doallnode", doAllDownCableSet);
+        Scheduler.addToActQueue(doAllMolecularNode);
+        System.out.println("A DoAll control act of doing the plans of " + this.getName()
+                + " act is scheduled successfully on the act stack.");
+
+    }
+
     protected void searchForPlansInAchieve(PropositionNode goal) throws NoSuchTypeException {
         Relation planRelation = Network.createRelation("plan", "actNode", Adjustability.NONE, 0);
         Relation goalRelation = Network.createRelation("goal", "propositionNode", Adjustability.NONE, 0);

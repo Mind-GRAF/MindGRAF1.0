@@ -6,6 +6,7 @@ import java.util.List;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.context.ContextController;
+import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.matching.Match;
@@ -21,19 +22,24 @@ public class WithAllNode extends ActNode {
     public WithAllNode(DownCableSet downCables) {
         super(downCables);
         this.setPrimitive(true);
-        ActAgenda controlAgenda = ActAgenda.START;
+        controlAgenda = ActAgenda.START;
     }
 
     @Override
     public void runActuator() throws NoSuchTypeException {
-        Node qualifier = this.getDownCableSet().get("qualifier").getNodeSet().getNode(0);
+        Node qualifiers = this.getDownCableSet().get("qualifiers").getNodeSet().getNode(0);
         Node act = this.getDownCableSet().get("obj").getNodeSet().getNode(0);
         switch(controlAgenda) {
 			case START:
                 controlAgenda = ActAgenda.TEST;
-                List<Match> matches = Matcher.match(qualifier, ContextController.getContext(ContextController.getCurrContextName()), 0);
-                ((PropositionNode)qualifier).sendRequestsToMatches(matches, new Substitutions(), new Substitutions(),
-                ContextController.getCurrContextName(), 0, ChannelType.Matched, act);
+                List<Match> matches;
+                try {
+                    matches = Matcher.match(qualifiers, ContextController.getContext(ContextController.getCurrContextName()), 0);
+                    ((PropositionNode)qualifiers).sendRequestsToMatches(matches, new Substitutions(), new Substitutions(),
+                    ContextController.getCurrContextName(), 0, ChannelType.Matched, act);
+                } catch (DirectCycleException ex) {
+                    System.out.println("Direct cycle found");
+                }
                 System.out.println("Sending requests to matches");
                 this.setAgenda(ActAgenda.EXECUTE);
                 Scheduler.addToActQueue(this);
@@ -54,11 +60,11 @@ public class WithAllNode extends ActNode {
                 Scheduler.addToActQueue(this);
                 break;
             case DONE:
-                System.out.println("WithAll done");
+                System.out.println("WithSome done");
                 Scheduler.addToActQueue(this);
                 break;
             default:
-                System.out.print("UNIDENTIFIED AGENDA FOR WITHALL!!");
+                System.out.print("UNIDENTIFIED AGENDA FOR WITHSOME!!");
         }
     }
 }
