@@ -18,6 +18,7 @@ public class OrEntailment  extends RuleNode {
 
     public OrEntailment(DownCableSet downcableSet) {
         super(downcableSet);
+        System.out.println("Creating an or-entailment rule node");
         ant = downcableSet.get("ant").getNodeSet();
         cq = downcableSet.get("cq").getNodeSet();
         this.ruleInfoHandler = new OrEntailhandler();
@@ -38,6 +39,10 @@ public class OrEntailment  extends RuleNode {
     public void applyRuleHandler(Report report) throws NoSuchTypeException {
         if(report.isSign()){
             super.applyRuleHandler(report);
+        } else {
+            System.out.println();
+            System.out.println("applyRuleHandler called on the report: " + report.stringifyReport());
+            System.out.println("The report is negative, so the rule handler will not be applied");
         }
     }
 }

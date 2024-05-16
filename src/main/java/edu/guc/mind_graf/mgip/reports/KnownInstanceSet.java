@@ -45,7 +45,6 @@ public class KnownInstanceSet{
                             targetSet.put(ReportSubs, targetKnownInstance);
                             positiveKInstances.put(attitude, targetSet);
                             return true;
-
                         }
 
                     }
@@ -80,7 +79,6 @@ public class KnownInstanceSet{
                             positiveKInstances.put(attitude, targetSet);
                             return true;
                         }
-
                     }
                 }
             }
