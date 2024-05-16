@@ -218,8 +218,16 @@ public class PropositionNodeSet implements Iterable<PropositionNode>,Cloneable {
         return this.nodes.contains(n.getId());
     }
 
-    public boolean equals(PropositionNodeSet n) {
-        return this.getValues().equals(n.getValues());
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        PropositionNodeSet other = (PropositionNodeSet) obj;
+        return this.getValues().equals(other.getValues());
     }
 
     @Override

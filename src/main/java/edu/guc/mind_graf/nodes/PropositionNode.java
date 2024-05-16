@@ -484,6 +484,10 @@ public class PropositionNode extends Node {
             return true;
         }
 
+        if(!desiredContext.getLevels().contains(level)){
+            return false;
+        }
+
         if(!this.support.getAssumptionSupport().containsKey(level)){
             return false;
         }
@@ -520,7 +524,11 @@ public class PropositionNode extends Node {
      */
     public void setHyp(String desiredContextName, int attitude) {
         Context desiredContext = ContextController.getContext(desiredContextName);
-        desiredContext.getAttitudeProps(Network.currentLevel, attitude).getFirst().add(this.getId());
+        desiredContext.addHypothesisToContext(Network.currentLevel, attitude, this);
+        this.support.setHyp(attitude);
+    }
+
+    public void setHyp(int attitude) {
         this.support.setHyp(attitude);
     }
 
@@ -534,14 +542,14 @@ public class PropositionNode extends Node {
         for(int i = 0; i < assumptionDependents.length ; i++) {
             if(networkPropositions.containsKey(assumptionDependents[i])) {
                 PropositionNode dependent = (PropositionNode) networkPropositions.get(assumptionDependents[i]);
-                dependent.getSupport().removeNodeFromAssumptions(this.getId());
+                dependent.support.removeNodeFromAssumptions(this.getId());
             }
         }
         int[] justificationDependents = this.getJustificationSupportDependents().getProps();
         for(int i = 0; i < justificationDependents.length ; i++) {
             if(networkPropositions.containsKey(assumptionDependents[i])) {
                 PropositionNode dependent = (PropositionNode) networkPropositions.get(justificationDependents[i]);
-                dependent.getSupport().removeNodeFromJustifications(this.getId());
+                dependent.support.removeNodeFromJustifications(this.getId());
             }
         }
     }
@@ -1328,6 +1336,26 @@ public class PropositionNode extends Node {
         ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>, PropositionNodeSet>> list= new ArrayList<>();
         list.add(pair);
         this.support.addJustificationSupportForAttitude(attitude, level, list);
+    }
+
+    public void addJustificationBasedSupports(int attitude, int level, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>, PropositionNodeSet>> support) {
+        this.support.addJustificationSupportForAttitude(attitude, level, support);
+    }
+
+    public void addNodeToSupport(int attitude, PropositionNode PropositionNode){
+        support.addNode(attitude, PropositionNode);
+    }
+
+    public void CombineNodeToSupport(int attitude, PropositionNode PropositionNode){
+        support.combineNode(attitude, PropositionNode);
+    }
+
+    public void unionSupport(Support support){
+        this.support.union(support);
+    }
+
+    public void combineSupport(int attitude, Support support){
+        this.support.combine(attitude, support);
     }
 
     public ChannelSet getOutgoingChannels() {
