@@ -87,12 +87,16 @@ public class BridgeRule extends RuleNode {
     }
 
     public Support createSupport(RuleInfo ri) throws NoSuchTypeException, DirectCycleException {
+        return null;
+    }
+
+    private Support createReportSup(Report report) throws NoSuchTypeException, DirectCycleException {
         HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> justSupport = new HashMap<>();
         for(Integer att : attitudeToAnt.keySet()){
             PropositionNodeSet supportPropSet = new PropositionNodeSet();
             for(Node antecedent : attitudeToAnt.get(att)){
                 if(antecedent.isOpen()){
-                    supportPropSet.add(antecedent.applySubstitution(antecedent.onlyRelevantSubs(ri.getSubs())));
+                    supportPropSet.add(antecedent.applySubstitution(antecedent.onlyRelevantSubs(report.getSubstitutions())));
                 } else {
                     supportPropSet.add(antecedent);
                 }
@@ -101,19 +105,22 @@ public class BridgeRule extends RuleNode {
         }
         PropositionNodeSet bridgeSet = new PropositionNodeSet();
         if(this.isOpen()){
-            bridgeSet.add(this.applySubstitution(ri.getSubs()));
+            bridgeSet.add(this.applySubstitution(report.getSubstitutions()));
         } else {
             bridgeSet.add(this);
         }
-        Support reportSup = new Support(-1, ri.getAttitude(), 0, justSupport, new PropositionNodeSet());
+        System.out.println(report.getAttitude());
+        Support reportSup = new Support(-1, report.getAttitude(), 0, justSupport, bridgeSet);
+        System.out.println(reportSup);
         return reportSup;
     }
 
-    public void sendInferenceReports(HashMap<RuleInfo, Report> reports) {
+    public void sendInferenceReports(HashMap<RuleInfo, Report> reports) throws DirectCycleException, NoSuchTypeException {
         for(Report report : reports.values()) {
             for(int att : attitudeToCq.keySet()){
                 Report newReportInAttitude = report.clone();
                 newReportInAttitude.setAttitude(att);
+                newReportInAttitude.setSupport(createReportSup(newReportInAttitude));
 //                Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> pair = new Pair<>(new HashMap<>(), new PropositionNodeSet(this));
 //                ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>> justSupport = new ArrayList<>();
 //                justSupport.add(pair);

@@ -50,7 +50,7 @@ public class RuleInfo {
         else
             ncount++;
         FlagNode reporter = new FlagNode(report.getReporterNode(), report.isSign(), report.getSupport());
-        RuleInfo newRuleInfo =  new RuleInfo(report.getContextName(), report.getAttitude(), pcount, ncount, report.getSubstitutions(), new FlagNodeSet(reporter), new Support(-1));
+        RuleInfo newRuleInfo =  new RuleInfo(report.getContextName(), report.getAttitude(), pcount, ncount, report.getSubstitutions(), new FlagNodeSet(reporter), report.getSupport());
         System.out.println(newRuleInfo + " is created with context " + newRuleInfo.getContext() + " and attitude " + newRuleInfo.getAttitude());
         return newRuleInfo;
     }
@@ -61,7 +61,7 @@ public class RuleInfo {
         for (Map.Entry<Node, Node> entry : this.subs.getMap().entrySet()) {
             Node var = entry.getKey();
             Node value = entry.getValue();
-            if (r.getSubs().contains(var) && !r.getSubs().get(var).equals(value)) {
+            if (r.getSubs().contains(var) && !(r.getSubs().get(var) == null) && !r.getSubs().get(var).equals(value)) {
                 return false;
             }
         }
@@ -87,12 +87,8 @@ public class RuleInfo {
             else
                 resNcount--;
         }
-
         Substitutions resSubs = new Substitutions();
         resSubs.addSubs(this.subs);
-        resSubs.addSubs(r.getSubs()); // counting on that if the subs are not compatible, the method will not be
-        // called and that adding overwrites repeated nodes ==> a variable wouldn't
-        // exist twice in two different nodes
         FlagNodeSet resFns = this.fns.combine(r.getFns());
         res.pcount = resPcount;
         res.ncount = resNcount;
@@ -101,6 +97,10 @@ public class RuleInfo {
         res.support = new Support(-1);
         res.support.union(this.support);
         res.support.union(r.support);
+        res.removeNullSubs();
+        resSubs.addSubs(r.getSubs()); // counting on that if the subs are not compatible, the method will not be
+        // called and that adding overwrites repeated nodes ==> a variable wouldn't
+        // exist twice in two different nodes
         return res;
     }
 

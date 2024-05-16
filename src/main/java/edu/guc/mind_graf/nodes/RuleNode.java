@@ -56,7 +56,6 @@ public abstract class RuleNode extends PropositionNode {
         try {
             RuleInfoSet inserted = ruleInfoHandler.insertRI(RuleInfo.createRuleInfo(report));
             if (inserted != null && !inserted.isEmpty()) {
-//                System.out.println("The rule can fire");
                 rootRuleInfos.addRootRuleInfo(inserted);
                 RuleInfoSet[] mayInfer = mayInfer();
                 createInferenceReports(mayInfer);
@@ -131,7 +130,7 @@ public abstract class RuleNode extends PropositionNode {
         }
     }
 
-    public abstract void sendInferenceReports(HashMap<RuleInfo, Report> reports);
+    public abstract void sendInferenceReports(HashMap<RuleInfo, Report> reports) throws DirectCycleException, NoSuchTypeException;
 
     /***
      * this method gets all the consequents and arguments that this node is a rule

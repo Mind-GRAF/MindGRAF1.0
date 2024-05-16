@@ -65,41 +65,39 @@ public class Report {
         // return false;
 
         // }
-
-        Context chnlContext = ContextController.getContext(chnlContextName);
-        int level = Network.currentLevel;
-
-        for(Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> currSupport: support.getJustificationSupport().get(level).get(chnlAttitudeID)){
-            for(int propID : currSupport.getSecond().getProps()){
-                if(Network.getPropositionNodes().containsKey(propID)){
-                    PropositionNode prop = (PropositionNode)Network.getPropositionNodes().get(propID);
-                    if(!prop.supported(chnlContextName,chnlAttitudeID,level)){
-                        return false;
-                    }
-                }
-            }
-            for(Integer innerAttitude : currSupport.getFirst().keySet()){
-                for(int propID : currSupport.getFirst().get(innerAttitude).getFirst().getProps()){
-                    if(Network.getPropositionNodes().containsKey(propID)){
-                        PropositionNode prop = (PropositionNode)Network.getPropositionNodes().get(propID);
-                        if(!prop.supported(chnlContextName,chnlAttitudeID,level)){
-                            return false;
-                        }
-                    }
-                }
-                for (int propID : currSupport.getFirst().get(innerAttitude).getSecond().getProps()) {
-                    if (Network.getPropositionNodes().containsKey(propID)) {
-                        PropositionNode prop = (PropositionNode) Network.getPropositionNodes().get(propID);
-                        if (!prop.supported(chnlContextName, chnlAttitudeID, level)) {
-                            return false;
-                        }
-                    }
-                }
-            }
-        }
+//        System.out.println("Checking if the report " + this.stringifyReport() + " is supported in the attitude " + chnlAttitudeID + " in the context " + chnlContextName);
+//        System.out.println(support);
+//
+//        Context chnlContext = ContextController.getContext(chnlContextName);
+//        int level = Network.currentLevel;
+//
+//        boolean supported = false;
+//
+//        if(!this.support.getAssumptionSupport().containsKey(level)){
+//            return false;
+//        }
+//
+//        if(!this.support.getAssumptionSupport().get(level).containsKey(chnlAttitudeID)){
+//            return false;
+//        }
+//
+//        for(Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> currSupport : this.support.getAssumptionSupport().get(level).get(chnlAttitudeID)) {
+//            for(Integer key : currSupport.getFirst().keySet()) {
+//                if(currSupport.getFirst().get(key).getFirst().isSubset(chnlContext.getAttitudeProps(level, key).getFirst()) && currSupport.getFirst().get(key).getSecond().isSubset(chnlContext.getAttitudeProps(level, key).getSecond()) && currSupport.getSecond().isSubset(chnlContext.getAttitudeProps(level, key).getFirst())) {
+//                    supported = true;
+//                } else {
+//                    supported = false;
+//                    break;
+//                }
+//            }
+//            if (supported) {
+//                return true;
+//            }
+//        }
+//
+//        return false;
 
         return true;
-
     }
 
     public Substitutions getSubstitutions() {
@@ -204,7 +202,9 @@ public class Report {
     }
 
     public Report clone() {
-        return new Report(this.substitutions, this.support, this.attitude, this.sign, this.inferenceType, this.requesterNode, this.reporterNode);
+        Report res =  new Report(this.substitutions, this.support, this.attitude, this.sign, this.inferenceType, this.requesterNode, this.reporterNode);
+        res.setContextName(this.contextName);
+        return res;
     }
 
 }
