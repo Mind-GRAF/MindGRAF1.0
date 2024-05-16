@@ -100,20 +100,19 @@ public class Revision {
         } else {
             //Actual Automatic handling
             int gradeOfNode = contradictions.getFirst().getNode().getGradeOfNode(c, level, attitudeNumber);
-            ArrayList<Integer> gradesOfContradictions = new ArrayList<>();
-            for (Contradiction cont : contradictions) {
-                ArrayList<Integer> gradesOfConsistentAttitudes = new ArrayList<>();
-                for (Map.Entry<Integer, PropositionNode> entry : cont.getContradictions().getSet().entrySet()) {
-                    gradesOfConsistentAttitudes.add(entry.getValue().getGradeOfNode(c, level, entry.getKey()));
-                }
-                //This merges on the level of 2 contradicting nodes in the same consistent attitudes list
-                gradesOfContradictions.add(gradesOfConsistentAttitudes.stream().mapToInt(i -> i).reduce(ContextController.getMergeFunction()).orElse(0));
-            }
-            //This merges between grades of consistent attitudes to get the final grade
-            int gradeOfContradictions = gradesOfContradictions.stream().mapToInt(i -> i).reduce(ContextController.getMergeFunction()).orElse(0);
+            int gradeOfContradictions = contradictions.stream().mapToInt(cont -> getGradeOfNodes(cont,c,level)).reduce(ContextController.getMergeFunction()).orElse(0);
 
             handleDecision(c, level, attitudeNumber, contradictions, gradeOfNode <= gradeOfContradictions, false);
         }
+    }
+
+    public static int getGradeOfNodes(Contradiction contradiction, Context c, int level){
+        ArrayList<Integer> gradesOfNodesInContradiction = new ArrayList<>();
+        for (Map.Entry<Integer, PropositionNode> entry : contradiction.getContradictions().getSet().entrySet()) {
+            gradesOfNodesInContradiction.add(entry.getValue().getGradeOfNode(c, level, entry.getKey()));
+        }
+        //This merges on the level of contradicting nodes in the same consistent attitudes list to get one integer representing the grade of the consistent attitude
+        return gradesOfNodesInContradiction.stream().mapToInt(i -> i).reduce(ContextController.getMergeFunction()).orElse(0);
     }
 
     public static void handleDecision(Context c, int level, int attitudeNumber, ArrayList<Contradiction> contradictions, boolean removeNode, boolean manual) {
