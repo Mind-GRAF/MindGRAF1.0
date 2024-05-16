@@ -3,7 +3,6 @@ package edu.guc.mind_graf.network;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
-
 import edu.guc.mind_graf.mgip.rules.*;
 import edu.guc.mind_graf.relations.Relation;
 import edu.guc.mind_graf.acting.rules.DoIfNode;

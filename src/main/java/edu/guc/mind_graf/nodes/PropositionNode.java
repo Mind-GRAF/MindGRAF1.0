@@ -740,6 +740,7 @@ public class PropositionNode extends Node {
             Substitutions subs2 = new Substitutions();
             Report toBeSent = new Report(subs, reportSupport, currentAttitudeID, reportSign, inferenceType, null, this);
             toBeSent.setReportType(channelType);
+            toBeSent.setContextName(currentContextName);
             switch (channelType) {
                 case Matched:
                     List<Match> matchesReturned = new ArrayList<>();

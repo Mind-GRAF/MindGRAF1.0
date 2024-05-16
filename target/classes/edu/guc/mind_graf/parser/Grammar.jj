@@ -90,7 +90,7 @@ public class MindGRAF_Parser {
         private static HashMap<String, DownCable> allDCB = new HashMap<String, DownCable>();
 
       //case frames
-      private static ArrayList<ArrayList<String>> caseFrames = new ArrayList<ArrayList<String>>();
+       private static HashMap<String, ArrayList<String>> caseFrames = new HashMap<String, ArrayList<String>>();
 
       // semantic type
       private static ArrayList<CustomMethod> customMethods = new ArrayList<CustomMethod>();
@@ -125,7 +125,62 @@ public class MindGRAF_Parser {
     return groupedMap;
 }
 
+  public static void removeFromContext(String CName, String attitude, boolean a, boolean c, PropositionNode propNode) {
+    try {
+      if (c && a) {
+        if (!controller.getContextSet().getSet().containsKey(CName)) {
+          CLI.print("No such Context.");
+          return;
+        }
+        if (!controller.getAttitudes().getSet().containsKey(attitude)) {
+          CLI.print("No such Attitude.");
+          return;
+        }
+        controller.removeHypothesisFromContext(CName, levelsCount, controller.getAttitudeNumber(attitude),
+            propNode.getId());
+        CLI.print("Hypothesis Removed.");
 
+        return;
+      }
+      if (c) {
+        if (!controller.getContextSet().getSet().containsKey(CName)) {
+          CLI.print("No such Context.");
+          return;
+        }
+        controller.removeHypothesisFromContext(CName, levelsCount, defaultAttitude, propNode.getId());
+        CLI.print("Hypothesis Removed.");
+
+        return;
+      }
+      if (a) {
+        if (!controller.getAttitudes().getSet().containsKey(attitude)) {
+          CLI.print("No such Attitude.");
+          return;
+        }
+        try {
+          controller.removeHypothesisFromContext(controller.getCurrContextName(), levelsCount,
+              controller.getAttitudeNumber(attitude), propNode.getId());
+          CLI.print("Hypothesis Removed.");
+
+        } catch (NullPointerException e) {
+          CLI.print("Set Current Context First.");
+          return;
+        }
+      }
+      try {
+        controller.removeHypothesisFromContext(controller.getCurrContextName(), levelsCount, defaultAttitude,
+            propNode.getId());
+        CLI.print("Hypothesis Removed.");
+
+      } catch (NullPointerException e) {
+        CLI.print("Set Current Context First.");
+        return;
+      }
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
   public static void addToContext(String CName, String attitude, boolean a, boolean c, PropositionNode propNode){
     try {
       if (c && a) {
@@ -138,8 +193,7 @@ public class MindGRAF_Parser {
           return;
         }
         controller.addHypothesisToContext(CName, levelsCount, controller.getAttitudeNumber(attitude), propNode);
-        isGrading = true;
-        levelsCount = 0;
+
         return;
 
       }
@@ -149,8 +203,7 @@ public class MindGRAF_Parser {
           return;
         }
         controller.addHypothesisToContext(CName, levelsCount, defaultAttitude, propNode);
-        isGrading = true;
-        levelsCount = 0;
+
         return;
       }
       if (a) {
@@ -161,8 +214,7 @@ public class MindGRAF_Parser {
         try {
           controller.addHypothesisToContext(controller.getCurrContextName(), levelsCount,
               controller.getAttitudeNumber(attitude), propNode);
-          isGrading = true;
-          levelsCount = 0;
+ 
         } catch (NullPointerException e) {
           CLI.print("Set Current Context First.");
           return;
@@ -170,8 +222,7 @@ public class MindGRAF_Parser {
       }
       try {
         controller.addHypothesisToContext(controller.getCurrContextName(), levelsCount, defaultAttitude, propNode);
-        isGrading = true;
-        levelsCount = 0;
+
       } catch (NullPointerException e) {
         CLI.print("Set Current Context First.");
         return;
@@ -763,6 +814,8 @@ String limit ;
     return relation;
   }
 }
+
+
 
 Path FUnit() throws ParseException :
 {
@@ -1659,26 +1712,11 @@ void Arguments(String pName) :
   )*
     {
     if (mode == 3) {
-      ArrayList<String> frame = null;
-      for (ArrayList<String> s : caseFrames) {
-        System.out.println(s.size() - 2);
-        System.out.println(leafNodes.size());
-        System.out.println(s.get(0).trim().toLowerCase());
-        System.out.println(pName.trim().toLowerCase());
-        for (String ss : s)
-          System.out.println(ss);
-
-        if ((s.size() - 2 == leafNodes.size()) && (pName.equals(s.get(0)))) {
-          System.out.print(true);
-          frame = s;
-          break;
-        }
-      }
-      if (frame == null) 
-          throw new ParseException("No Such Case Frame");
-      
+      if (!caseFrames.containsKey(pName))
+        throw new ParseException("No Such Case Frame.");
+      ArrayList<String> frame = caseFrames.get(pName);
       Relation firstRel = null;
-      if (frame.get(1) != "null") {
+      if (frame.get(0) != "null") {
         firstRel = network.createRelation(frame.get(1), "propositionnode", Adjustability.EXPAND, 2);
         DownCable dcb = null;
         try {
@@ -1691,7 +1729,7 @@ void Arguments(String pName) :
         }
       }
       for (int i = 0; i < leafNodes.size(); i++) {
-        Relation r = network.createRelation(frame.get(i + 2), "propositionnode", Adjustability.EXPAND, 2);
+        Relation r = network.createRelation(frame.get(i + 1), "propositionnode", Adjustability.EXPAND, 2);
         DownCable dcb = new DownCable(r, new NodeSet(leafNodes.get(i)));
         allDCB.put(dcb.getRelation().getName(), dcb);
       }
@@ -1747,38 +1785,33 @@ Node leafNode = null;
 
 void defineFrame() throws ParseException : 
 {
-  ArrayList<String> allRelationNames = new ArrayList<String>();
-  String relName;
-  Token predicateName;
+    ArrayList<String> allRelationNames = new ArrayList<String>();
+    String relName;
+    Token predicateName;
 }
 {
-predicateName = <PREDICATE_NAME_BRACKET> relName = relationName() {allRelationNames.add(relName);}
+predicateName = <PREDICATE_NAME_BRACKET> relName = relationName() {if (!allRelationNames.contains(relName))
+      allRelationNames.add(relName);}
 (
-  "," relName = relationName() { allRelationNames.add(relName);} 
+  "," relName = relationName() { if (!allRelationNames.contains(relName))
+      allRelationNames.add(relName);} 
 )* ")"<EOF>
 {
- String predName = predicateName.image.trim().toLowerCase();
+    String predName = predicateName.image.trim().toLowerCase();
     predName = predName.substring(0, predName.length() - 1);
-    removeDuplicates(allRelationNames);
-    allRelationNames.add(0, predName);
-    int index = indexOfList(caseFrames, allRelationNames);
-    if (index != -1) {
-      // If listToAdd already exists, remove it
-      caseFrames.remove(index);
-      System.out.println("Removed duplicate list from the list of lists.");
-    }
 
     // Add listToAdd to listOfLists
-    caseFrames.add(allRelationNames);
-    ArrayList<String> s = caseFrames.getLast();
-    System.out.print("Case frame " + s.get(0) + "(" + s.get(1));
-    if (s.size() > 2) {
-      for (int i = 2; i < s.size(); i++) {
-        System.out.print(", " + s.get(i));
-      }
+    boolean isFirst = true;
+    caseFrames.put(predName, allRelationNames);
+    String output = "Case Frame " + predName + "(";
+    for (String s : allRelationNames) {
+      if (!isFirst)
+        output += ", " + s;
+      else
+        output += s;
     }
-    System.out.println(")" + " has been created.");
-
+    output += ") is Defined.";
+    CLI.print(output);
 }
 
 
@@ -1891,6 +1924,8 @@ void Command() throws ParseException :
     RemoveFromContext()
     |
     definePath()
+    |
+    "define-relation" Relation()
     |
     DescribeContext()
     |
@@ -2065,49 +2100,21 @@ void getAllSupported() throws ParseException :
 void RemoveFromContext() throws ParseException :
 {
   String CName = null;
-  String attitude;
+  boolean c = false;
+  boolean a = false;
   Node node = null;
+  String attitude = null;
 }
 {
-  "remove-from-context"  "["node = Expression()"]" "["attitude = <STRING>.image"]" ("["CName = <STRING>.image"]")?
+  "remove-from-context"  ("c{"CName = <STRING>.image"}"{ c = true;})?
+   ("a{"attitude = <STRING>.image"}"{ a = true ;})?
+   node = Expression()
   {
-    try {
-
-      Integer attNum = controller.getAttitudeNumber(attitude.trim());
-    if (CName == null) {
-      try{
-      CName = controller.getCurrContextName();
-      CName = CName.trim();
-      }catch(Exception e){
-        CLI.print("Set Default Context First.");
-      }
-    }
-    else{
-      CName = CName.trim();
-      if(!controller.getContextSet().getSet().containsKey(CName.trim()))
-        throw new ParseException("Context Does Not Exist.");
-    }
-      if (attNum != null) {
-        controller.removeHypothesisFromContext(CName,levelsCount, attNum, node.getId());
-        isGrading = true;
-        levelsCount = 0;
-        if (wffs.containsKey(node.getId())) {
-          ArrayList<String> contexts = wffs.get(node.getId());
-          contexts.remove(CName + "_" + attNum);
-          if (contexts.size() == 1)
-            wffs.remove(node.getId());
-          else
-            wffs.put(node.getId(), contexts);
-          CLI.print("Hypothesis Removed from Context " + CName + " in Attitude " + attitude.trim());
-        } else
-          CLI.print("Hypothesis Does Not Exist in " + CName + " in Attitude " + attitude.trim());
-      } else
-        CLI.print("No Such Attitude.");
-
-    } catch (Exception e) {
-      CLI.print(e.getMessage());
-      // TODO: handle exception
-    }
+    PropositionNode propNode = (PropositionNode) node;
+    removeFromContext(CName, attitude, a, c, propNode);
+    firstExpression = true;
+    isGrading = true;
+    levelsCount = 0;
   }
 }
 
@@ -2129,7 +2136,9 @@ void AddToContext() throws ParseException :
       
     PropositionNode propNode = (PropositionNode) nn;
     addToContext(CName, attitude, a, c, propNode);
-
+        firstExpression = true;
+        isGrading = true;
+        levelsCount = 0;
     // printing
     HashMap<String, HashMap<String, Node>> molecN = network.getMolecularNodes();
     for (HashMap<String, Node> x : molecN.values()) {
@@ -2157,9 +2166,10 @@ void backwardInference() throws ParseException :
    node = Expression()
  {
     PropositionNode propNode = (PropositionNode) node;
-    levelsCount = 0;
-    isGrading = true;
     bInference(propNode, c, a, CName, attitude);
+        firstExpression = true;
+        isGrading = true;
+        levelsCount = 0;
  }
 } 
 
@@ -2178,8 +2188,6 @@ void AskWh() throws ParseException :
    node = Expression()
  {
     PropositionNode propNode = (PropositionNode) node;
-    levelsCount = 0;
-    isGrading = true;
     bInference(propNode, c, a, CName, attitude);
     Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> positiveInstances = propNode
         .getKnownInstances().positiveKInstances;
@@ -2200,6 +2208,9 @@ void AskWh() throws ParseException :
         }
       }
     }
+        firstExpression = true;
+        isGrading = true;
+        levelsCount = 0;
  }
 } 
 
@@ -2217,8 +2228,6 @@ void AskWhNot() throws ParseException :
    node = Expression()
  {
     PropositionNode propNode = (PropositionNode) node;
-    levelsCount = 0;
-    isGrading = true;
     bInference(propNode, c, a, CName, attitude);
     PropositionNode negatedProp = null;
     try {
@@ -2246,6 +2255,9 @@ void AskWhNot() throws ParseException :
         }
       }
     }
+        firstExpression = true;
+        isGrading = true;
+        levelsCount = 0;
  }
 } 
 
@@ -2264,8 +2276,6 @@ void AskifNot() throws ParseException :
    node = Expression()
  {
     PropositionNode propNode = (PropositionNode) node;
-    levelsCount = 0;
-    isGrading = true;
     bInference(propNode, c, a, CName, attitude);
     Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> negativeInstances = propNode
         .getKnownInstances().negativeKInstances;
@@ -2274,6 +2284,9 @@ void AskifNot() throws ParseException :
         CLI.print(KI.toString());
       }
     }
+        firstExpression = true;
+        isGrading = true;
+        levelsCount = 0;
  }
 }
 
@@ -2291,8 +2304,6 @@ void Ask() throws ParseException :
    node = Expression()
  {
     PropositionNode propNode = (PropositionNode) node;
-    levelsCount = 0;
-    isGrading = true;
     bInference(propNode, c, a, CName, attitude);
     Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> positiveInstances = propNode
         .getKnownInstances().positiveKInstances;
@@ -2301,6 +2312,9 @@ void Ask() throws ParseException :
         CLI.print(KI.toString());
       }
     }
+        firstExpression = true;
+        isGrading = true;
+        levelsCount = 0;
  }
 } 
 
@@ -2319,10 +2333,12 @@ void forwardInference() throws ParseException :
    ("a{"attitude = <STRING>.image"}"{ a = true ;})?
    node = Expression()
     {
-      levelsCount = 0;
-      isGrading = true;
+
     PropositionNode propNode = (PropositionNode) node;
     fInference(propNode, c, a, CName, attitude);
+        firstExpression = true;
+        isGrading = true;
+        levelsCount = 0;
     }
 } 
 
@@ -2340,13 +2356,15 @@ void activate() throws ParseException:
    node = Expression()
    {
     PropositionNode propNode = (PropositionNode) node;
-    levelsCount = 0;
-    isGrading = true;
+
     Collection<Node> set = propNode.getDirectParents().getValues();
     for (Node n : set) {
       if (isSupported(propNode, c, a, CName, attitude) == 1)
         fInference(propNode, c, a, CName, attitude);
     }
+        firstExpression = true;
+        isGrading = true;
+        levelsCount = 0;
    }
 }
 
@@ -2364,15 +2382,15 @@ void AssertActivate() throws ParseException:
    node = Expression()
    {
     PropositionNode propNode = (PropositionNode) node;
-
-    levelsCount = 0;
-    isGrading = true;
     addToContext(CName, attitude, a, c, propNode);
     Collection<Node> set = propNode.getDirectParents().getValues();
     for (Node n : set) {
       if (isSupported(propNode, c, a, CName, attitude) == 1)
         fInference(propNode, c, a, CName, attitude);
     }
+        firstExpression = true;
+        isGrading = true;
+        levelsCount = 0;
    }
 }
 

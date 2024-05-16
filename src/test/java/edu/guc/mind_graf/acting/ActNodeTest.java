@@ -200,116 +200,9 @@ public class ActNodeTest {
 //         M6.perform();
 
 //    }
-}
-//
-//    @Test
-//    void testDoIf() throws NoSuchTypeException, NoPlansExistForTheActException, DirectCycleException{
-//        IndividualNode chair=(IndividualNode)Network.createNode("chair", "individualnode");
-//        IndividualNode heavy=(IndividualNode)Network.createNode("heavy", "individualnode");
-//        IndividualNode variableNode=(IndividualNode)Network.createVariableNode("x", "individualnode");
-//        IndividualNode carry=(IndividualNode)Network.createNode("carry", "individualnode");
-//
-//
-//        Relation ifRelation=new Relation("0-if", "propositionnode", Adjustability.NONE, 0);
-//        Relation doRelation=new Relation("do", "actnode", Adjustability.NONE, 0);
-//
-//        DownCable objectCable5=new DownCable(objectRelation, new NodeSet(chair));
-//        DownCable objectCable6=new DownCable(objectRelation, new NodeSet(variableNode));
-//        DownCable actionCable5=new DownCable(actionRelation, new NodeSet(carry));
-//
-//        DownCable propertyCable4=new DownCable(properetyRelation, new NodeSet(heavy));
-//        //DownCable propertyCable5=new DownCable(properetyRelation, new NodeSet(heavy));
-//        DownCableSet objprop4=new DownCableSet(objectCable5,propertyCable4);
-//        //DownCableSet objprop5=new DownCableSet(objectCable6,propertyCable5);
-//        DownCableSet actionobj5=new DownCableSet(objectCable5,actionCable5);
-//        PropositionNode M7=(PropositionNode)Network.createNode("propositionnode", objprop4);
-//        //PropositionNode M8=(PropositionNode)Network.createNode("propositionnode", objprop5);
-//        ActNode M8=(ActNode)Network.createNode("actnode", actionobj5);
-//        DownCable ifCable=new DownCable(ifRelation, new NodeSet(M7));
-//        DownCable doCable=new DownCable(doRelation, new NodeSet(M8));
-//        DownCableSet doifCableSet=new DownCableSet(ifCable,doCable);
-//        DoIfNode P9=(DoIfNode)Network.createNode("doifnode", doifCableSet);
-//        for(Node n:P9.getFreeVariables()){
-//            System.out.println("Free variables are"+n);
-//        }
-//        n.printNodes();
-//        M7.deduce();
-//
-//    }
-//
-//
-//    @Test
-//    void testWhenDoRuleReceiveForwardReportFromWhen() throws NoSuchTypeException, NoPlansExistForTheActException, DirectCycleException{
-//        IndividualNode chair=(IndividualNode)Network.createNode("chair", "individualnode");
-//        IndividualNode heavy=(IndividualNode)Network.createNode("heavy", "individualnode");
-//        IndividualNode variableNode=(IndividualNode)Network.createVariableNode("x", "individualnode");
-//        IndividualNode move=(IndividualNode)Network.createNode("move", "individualnode");
-//
-//
-//        Relation whenRelation=new Relation("0-when", "propositionnode", Adjustability.NONE, 0);
-//        Relation doRelation=new Relation("do", "actnode", Adjustability.NONE, 0);
-//
-//        DownCable objectCable5=new DownCable(objectRelation, new NodeSet(chair));
-//        DownCable objectCable6=new DownCable(objectRelation, new NodeSet(variableNode));
-//        DownCable actionCable5=new DownCable(actionRelation, new NodeSet(move));
-//
-//        DownCable propertyCable4=new DownCable(properetyRelation, new NodeSet(heavy));
-//        DownCableSet objprop4=new DownCableSet(objectCable5,propertyCable4);
-//        DownCableSet objprop5=new DownCableSet(objectCable6,propertyCable4);
-//        DownCableSet actionobj5=new DownCableSet(objectCable5,actionCable5);
-//        PropositionNode M7=(PropositionNode)Network.createNode("propositionnode", objprop4);
-//        PropositionNode M8=(PropositionNode)Network.createNode("propositionnode", objprop5);
-//        ActNode M9=(ActNode)Network.createNode("actnode", actionobj5);
-//        DownCable whenCable=new DownCable(whenRelation, new NodeSet(M7));
-//        DownCable doCable=new DownCable(doRelation, new NodeSet(M9));
-//        DownCableSet whendoCableSet=new DownCableSet(whenCable,doCable);
-//        WhenDoNode P9=(WhenDoNode)Network.createNode("whendonode", whendoCableSet);
-//        for(Node n:P9.getFreeVariables()){
-//            System.out.println("Free variables are"+n);
-//        }
-//        n.printNodes();
-//        M7.add();
-//
-//    }
-//
-//
-//    @Test
-//    void testWhenDoRuleReceiveForwardReportNotFromWhen() throws NoSuchTypeException, NoPlansExistForTheActException, DirectCycleException{
-//        IndividualNode chair=(IndividualNode)Network.createNode("chair", "individualnode");
-//        IndividualNode heavy=(IndividualNode)Network.createNode("heavy", "individualnode");
-//        IndividualNode variableNode=(IndividualNode)Network.createVariableNode("x", "individualnode");
-//        IndividualNode move=(IndividualNode)Network.createNode("move", "individualnode");
-//
-//
-//        Relation whenRelation=new Relation("0-when", "propositionnode", Adjustability.NONE, 0);
-//        Relation doRelation=new Relation("do", "actnode", Adjustability.NONE, 0);
-//
-//        DownCable objectCable5=new DownCable(objectRelation, new NodeSet(chair));
-//        DownCable objectCable6=new DownCable(objectRelation, new NodeSet(variableNode));
-//        DownCable actionCable5=new DownCable(actionRelation, new NodeSet(move));
-//
-//        DownCable propertyCable4=new DownCable(properetyRelation, new NodeSet(heavy));
-//        DownCableSet objprop4=new DownCableSet(objectCable5,propertyCable4);
-//        DownCableSet objprop5=new DownCableSet(objectCable6,propertyCable4);
-//        DownCableSet actionobj5=new DownCableSet(objectCable5,actionCable5);
-//        PropositionNode M7=(PropositionNode)Network.createNode("propositionnode", objprop4);
-//        PropositionNode M8=(PropositionNode)Network.createNode("propositionnode", objprop5);
-//        ActNode M9=(ActNode)Network.createNode("actnode", actionobj5);
-//        DownCable whenCable=new DownCable(whenRelation, new NodeSet(M7));
-//        DownCable doCable=new DownCable(doRelation, new NodeSet(M9));
-//        DownCableSet whendoCableSet=new DownCableSet(whenCable,doCable);
-//        WhenDoNode P10=(WhenDoNode)Network.createNode("whendonode", whendoCableSet);
-//        for(Node n:P10.getFreeVariables()){
-//            System.out.println("Free variables are"+n);
-//        }
-//        //Report report=new Report(new Substitutions(),null, 0, true,InferenceType.FORWARD, P10);
-//        Scheduler.initiate();
-//        //Scheduler.addToHighQueue(report);
-//        Scheduler.schedule();
-//        n.printNodes();
-//
-//
-//    }
+
+
+   
 //    @Test
 //    void testWhenDoRuleWithSubstitutions() throws NoSuchTypeException, NoPlansExistForTheActException, DirectCycleException{
 //        IndividualNode chair=(IndividualNode)Network.createNode("chair", "individualnode");
@@ -402,4 +295,4 @@ public class ActNodeTest {
 //
 //
 //
-//}
+}

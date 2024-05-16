@@ -115,6 +115,9 @@ public class ContextController {
         };
     }
 
-    
+
+    public static boolean isCacheEnabled() {
+        return cacheEnabled;
+    }
 
 }
