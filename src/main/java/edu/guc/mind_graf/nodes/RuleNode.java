@@ -108,7 +108,7 @@ public abstract class RuleNode extends PropositionNode {
         }
         HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> justSupport = new HashMap<>();
         justSupport.put(ri.getAttitude(), new Pair(supportPropSet, new PropositionNodeSet()));
-        Support reportSup = new Support(-1, ri.getAttitude(), 0, justSupport, new PropositionNodeSet());
+        Support reportSup = new Support(-1, ri.getAttitude(), Network.currentLevel, justSupport, new PropositionNodeSet());
         return reportSup;
     }
 

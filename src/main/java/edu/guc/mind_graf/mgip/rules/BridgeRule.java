@@ -22,6 +22,7 @@ import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
+import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.nodes.RuleNode;
@@ -110,7 +111,7 @@ public class BridgeRule extends RuleNode {
             bridgeSet.add(this);
         }
         System.out.println(report.getAttitude());
-        Support reportSup = new Support(-1, report.getAttitude(), 0, justSupport, bridgeSet);
+        Support reportSup = new Support(-1, report.getAttitude(), Network.currentLevel, justSupport, bridgeSet);
         System.out.println(reportSup);
         return reportSup;
     }

@@ -1057,7 +1057,7 @@ public class Support implements Cloneable{
 //			sb.append("Level").append(level).append(": ").append("\n");
 			sb.append(mapToString("  Level" + level + ": ", justificationSupport.get(level)));
 		}
-		for(Integer level : justificationSupport.keySet()) {
+		for(Integer level : assumptionSupport.keySet()) {
 			sb.append("Level").append(level).append(": ").append("\n");
 			sb.append(mapToString(" AssumptionSupport", assumptionSupport.get(level)));
 		}
