@@ -4,6 +4,7 @@ import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.revision.Revision;
+import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.Set;
 import edu.guc.mind_graf.support.Pair;
@@ -161,25 +162,34 @@ public class Context {
         Revision.print("successfully removed Node: " + node + " from attitude: " + ContextController.getAttitudeName(attitudeId) + " from Context: " + this.getName());
     }
 
-    public Context cloneContext() {
-        Context clone = new Context(this.getName() + " " + clonedContextsCount, ContextController.getAttitudes());
-        assumedContexts.add(clone);
+    public Context cloneContext(int attitudeId, NodeSet assumptionNodes) {
+
+        boolean contextHasContradictingNodes = assumptionNodes.getValues().stream().allMatch(node -> this.isHypothesis(0, attitudeId, (PropositionNode) node.getNegation()));
+        if(contextHasContradictingNodes){
+            return  null;
+        }
+
+        Context clonedContext = new Context(this.getName() + " " + clonedContextsCount, ContextController.getAttitudes());
+        assumedContexts.add(clonedContext);
         clonedContextsCount++;
-        ContextController.getContextSet().add(name, clone);
+        ContextController.getContextSet().add(name, clonedContext);
 
         for (int level : this.getLevels()) {
             for (int i = 0; i < this.hypotheses.get(0).length; i++) {
+                if(i == 0){
+                    assumptionNodes.getValues().forEach(node -> clonedContext.addHypothesisToContext(0,attitudeId,(PropositionNode)node));
+                }
                 Pair<PropositionNodeSet, PropositionNodeSet> pair = this.hypotheses.get(level)[i];
                 for (PropositionNode node : pair.getFirst()) {
-                    clone.addHypothesisToContext(level, i, node);
+                    clonedContext.addHypothesisToContext(level, i, node);
                 }
                 for (PropositionNode node : pair.getSecond()) {
-                    clone.addHypothesisToContext(level, i, node);
+                    clonedContext.addHypothesisToContext(level, i, node);
                 }
             }
         }
 
-        return clone;
+        return clonedContext;
     }
 
     public static void deleteAssumedContexts() {
