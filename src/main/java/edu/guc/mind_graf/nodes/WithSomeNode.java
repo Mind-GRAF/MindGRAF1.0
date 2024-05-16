@@ -26,7 +26,7 @@ public class WithSomeNode extends ActNode {
     }
 
     @Override
-    public void runActuator() throws NoSuchTypeException {
+    public void runActuator() throws NoSuchTypeException, DirectCycleException {
         Node qualifiers = this.getDownCableSet().get("qualifiers").getNodeSet().getNode(0);
         Node act = this.getDownCableSet().get("obj").getNodeSet().getNode(0);
         switch(controlAgenda) {

@@ -49,6 +49,7 @@ public class Network {
 		relations = new HashMap<String, Relation>();
 		quantifiers.put("forall", "forall");
 		addBasicRelations();
+		currentLevel = 0;
 		try {
 			addBasicNodes();
 		} catch (Exception e) {

@@ -55,7 +55,8 @@ public class WithAllNode extends ActNode {
                     newActs.add(newAct);
                 }
                 System.out.println("Substitutions are applied successfully");
-                sendDoAllToActQueue(newActs);
+//                sendDoAllToActQueue(newActs);
+                //TODO: marwan
                 this.setAgenda(ActAgenda.EXECUTE);
                 Scheduler.addToActQueue(this);
                 break;
