@@ -556,6 +556,7 @@ public class MatcherTest {
             Node theory = Network.createNode("theory", "propositionnode");
             Node var = Network.createVariableNode("var", "propositionnode");
             int attitude = 0;
+            int level = Network.currentLevel;
 
             Relation p = Network.createRelation("p", "", Adjustability.REDUCE, 0);
             Relation q = Network.createRelation("q", "", Adjustability.REDUCE, 0);
@@ -571,9 +572,9 @@ public class MatcherTest {
             Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2));
             Node M1 = Network.createNode("propositionnode", new DownCableSet(d3));
 
-            ctx.addHypothesisToContext(0, attitude, ((PropositionNode) M0));
+            ctx.addHypothesisToContext(level, attitude, ((PropositionNode) M0));
 
-            List<Match> matchList = Matcher.match(M1, ctx, 0);
+            List<Match> matchList = Matcher.match(M1, ctx, attitude);
 
             assertEquals(2, matchList.size());
 
@@ -595,8 +596,8 @@ public class MatcherTest {
                 assertEquals(M0, m.getNode());
                 assertEquals(matchType, m.getMatchType());
                 if (m.getSwitchSubs().get(var).equals(phy)) {
-                    assertEquals(1, ((NodeSet) m.getSupport()).size());
-                    assertTrue(((NodeSet) m.getSupport()).contains(M0));
+                    assertTrue(((Support) m.getSupport()).getJustificationSupport().get(level).get(attitude).getFirst()
+                            .getFirst().get(attitude).getFirst().contains(M0));
                 }
             }
         } catch (NoSuchTypeException e) {
