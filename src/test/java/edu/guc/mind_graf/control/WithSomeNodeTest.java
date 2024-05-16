@@ -3,6 +3,7 @@ package edu.guc.mind_graf.control;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.guc.mind_graf.network.NetworkController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -36,7 +37,7 @@ public class WithSomeNodeTest {
         consistentAttitudes.add(new ArrayList<>(List.of(0,2)));
         consistentAttitudes.add(new ArrayList<>(List.of(0,2,3)));
 
-        ContextController.setUp(attitudeNames, consistentAttitudes , false, false, 0);
+        NetworkController.setUp(attitudeNames, consistentAttitudes , false, false, false,1);
         ContextController.createNewContext("guc");
     }
 

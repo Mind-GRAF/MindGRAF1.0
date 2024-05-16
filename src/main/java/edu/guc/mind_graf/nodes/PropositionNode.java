@@ -1406,7 +1406,7 @@ public class PropositionNode extends Node {
         return knownInstances;
     }
 
-    public int getGradeFromParent(Context c, int level, int attitudeId) {
+    private int getGradeFromParent(Context c, int level, int attitudeId) {
         PropositionNode parentNode = this.getGradedParent(c, level, attitudeId);
         if (parentNode == null) {
             return 0;
@@ -1431,6 +1431,22 @@ public class PropositionNode extends Node {
         }
     }
 
+    public int getGradeOfNode(Context c, int level, int attitudeId) {
+        ArrayList<Integer> grades = new ArrayList<>();
+        for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> assumptionSupport : this.getSupport().getAssumptionSupport().get(level).get(attitudeId)) {
+            for (Map.Entry<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> support : assumptionSupport.getFirst().entrySet()) {
+                if (c.isInvalidSupport(level, attitudeId, support.getValue().getFirst())) {
+                    //TODO: wael see if we can make this is hyp
+                    continue;
+                }
+                //maps the support to a stream of integers representing the grade of every node in the support then merges them using ContextController.mergeGrades()
+                grades.add(support.getValue().getFirst().getNodes().stream().mapToInt(suportNode -> ((PropositionNode) suportNode).getGradeFromParent(c, level, attitudeId)).reduce(ContextController.getMergeFunction()).orElse(0));
+            }
+        }
+        //merges grades of every support to return the final grade of this node
+        return grades.stream().mapToInt(i -> i).reduce(ContextController.getMergeFunction()).orElse(0);
+    }
+
     public boolean isGraded(Context c, int level, int attitudeId) {
         PropositionNode parentNode = this.getGradedParent(c, level, attitudeId);
         if (parentNode == null) {
@@ -1445,25 +1461,6 @@ public class PropositionNode extends Node {
         NodeSet gradeNodeSet = gradeCable.getNodeSet();
         return !gradeNodeSet.isEmpty();
     }
-
-//    public int getLevel(Context c, int level, int attitudeId) {
-//        DownCable propCable = this.getDownCable("prop");
-//        if (propCable == null) {
-//            return 0;
-//        }
-//
-//        NodeSet propNodeSet = propCable.getNodeSet();
-//        if (propNodeSet.isEmpty()) {
-//            return 0;
-//        }
-//
-//        PropositionNode child = (PropositionNode) propNodeSet.getValues().stream().map(node -> (PropositionNode) node).filter(node -> node.supported(c.getName(), attitudeId, level - 1)).findFirst().orElse(null);
-//        if (child == null) {
-//            return 0;
-//        }
-//
-//        return 1 + child.getLevel(c, level - 1, attitudeId);
-//    }
 
     public PropositionNode getGradedParent(Context c, int level, int attitudeId) {
         if (!this.isGraded(c, level, attitudeId)) {

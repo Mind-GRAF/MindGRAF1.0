@@ -134,7 +134,7 @@ public class Context {
                 }
                 //TODO: wael what about when the support of p is G(p,2) doesn't this mean we handle different grades?
                 ArrayList<Node> supportNodesList = new ArrayList<>(supportOriginSet.getNodes());
-                int indexOfNodeToRemove = supportNodesList.stream().map(supportNode -> (PropositionNode) supportNode).mapToInt(supportNode -> supportNode.getGradeFromParent(this, level, attitudeId)).min().orElse(0);
+                int indexOfNodeToRemove = supportNodesList.stream().map(supportNode -> (PropositionNode) supportNode).mapToInt(supportNode -> supportNode.getGradeOfNode(this, level, attitudeId)).min().orElse(0);
                 PropositionNode supportingNodeToRemove = (PropositionNode) supportNodesList.get(indexOfNodeToRemove);
                 this.completelyRemoveNodeFromContext(level, attitudeId, supportingNodeToRemove, false);
             }

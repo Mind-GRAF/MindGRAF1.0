@@ -6,6 +6,7 @@ import java.util.List;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.context.ContextController;
+import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.matching.Match;
@@ -25,7 +26,7 @@ public class WithSomeNode extends ActNode {
     }
 
     @Override
-    public void runActuator() throws NoSuchTypeException {
+    public void runActuator() throws NoSuchTypeException, DirectCycleException {
         Node qualifiers = this.getDownCableSet().get("qualifiers").getNodeSet().getNode(0);
         Node act = this.getDownCableSet().get("obj").getNodeSet().getNode(0);
         switch(controlAgenda) {

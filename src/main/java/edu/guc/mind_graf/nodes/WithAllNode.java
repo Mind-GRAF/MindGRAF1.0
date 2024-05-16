@@ -6,6 +6,7 @@ import java.util.List;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.context.ContextController;
+import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.matching.Match;
@@ -25,7 +26,7 @@ public class WithAllNode extends ActNode {
     }
 
     @Override
-    public void runActuator() throws NoSuchTypeException {
+    public void runActuator() throws NoSuchTypeException, DirectCycleException {
         Node qualifier = this.getDownCableSet().get("qualifier").getNodeSet().getNode(0);
         Node act = this.getDownCableSet().get("obj").getNodeSet().getNode(0);
         switch(controlAgenda) {
@@ -49,7 +50,8 @@ public class WithAllNode extends ActNode {
                     newActs.add(newAct);
                 }
                 System.out.println("Substitutions are applied successfully");
-                sendDoAllToActQueue(newActs);
+//                sendDoAllToActQueue(newActs);
+                //TODO: marwan
                 this.setAgenda(ActAgenda.EXECUTE);
                 Scheduler.addToActQueue(this);
                 break;

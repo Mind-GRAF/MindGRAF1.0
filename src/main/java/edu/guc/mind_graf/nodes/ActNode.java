@@ -62,7 +62,7 @@ public class ActNode extends Node {
 
     }
 
-    public void runActuator() throws NoSuchTypeException {
+    public void runActuator() throws NoSuchTypeException, DirectCycleException {
         System.out.println("running " + this.getName() + " act's actuator");
 
     }
@@ -239,7 +239,7 @@ public class ActNode extends Node {
         System.out.println(Scheduler.schedule());
     }
 
-    public void processIntends(boolean isHighStack) throws NoSuchTypeException, NoPlansExistForTheActException {
+    public void processIntends(boolean isHighStack) throws NoSuchTypeException, NoPlansExistForTheActException, DirectCycleException {
         String currentContextName=ContextController.getCurrContextName();
         boolean doAct=true;
         for (Pair<HashMap<Integer, PropositionNodeSet>, HashMap<Integer, PropositionNodeSet>> support : supports) {
