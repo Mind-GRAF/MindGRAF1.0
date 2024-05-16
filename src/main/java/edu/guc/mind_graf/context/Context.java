@@ -1,5 +1,6 @@
 package edu.guc.mind_graf.context;
 
+import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.revision.Revision;
@@ -7,19 +8,17 @@ import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.Set;
 import edu.guc.mind_graf.support.Pair;
 
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 
 public class Context {
 
     private final HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>[]> hypotheses;
     private final String name;
-    private Set<Integer, BitSet> AttitudesBitset; //TODO: wael init this
+
+    private static int clonedContextsCount;
+    private static ArrayList<Context> assumedContexts = new ArrayList<>();
 
 
     public Context(String name, Set<String, Integer> attitudeNames) {
@@ -32,29 +31,32 @@ public class Context {
         this.hypotheses.put(0, hyps);
     }
 
-    public Integer getPropositionAttitude(Integer prop) {
-
-        // loop through all the Integer keys of attitudesBitset
-        for (Integer key : this.AttitudesBitset.getSet().keySet()) {
-            // If the propositionNode is in the attitude then return the name of the
-            // attitude
-            if (this.AttitudesBitset.get(key).get(prop)) {
-                return key;
+    public Integer getPropositionAttitude(Integer nodeId) {
+        PropositionNode p = (PropositionNode) Network.getNodeById(nodeId);
+        for (int i = 0; i < this.hypotheses.get(0).length; i++) {
+            if (this.hypotheses.get(0)[i].getFirst().contains(p)) {
+                return i;
             }
         }
         throw new RuntimeException("PropositionNode is not in any attitude");
+
+//        DEPRECATED CODE:
+//        // loop through all the Integer keys of attitudesBitset
+//        for (Integer key : this.AttitudesBitset.getSet().keySet()) {
+//            // If the propositionNode is in the attitude then return the name of the
+//            // attitude
+//            if (this.AttitudesBitset.get(key).get(nodeId)) {
+//                return key;
+//            }
+//        }
+//        throw new RuntimeException("PropositionNode is not in any attitude");
     }
 
     public String getName() {
         return name;
     }
 
-    public void addHypothesisToContext(int attitudeNumber, PropositionNode node) {
-        this.hypotheses.get(0)[attitudeNumber].getFirst().add(node);
-        node.getSupport().setHyp(attitudeNumber);
-    }
-
-    public void addHypothesisToContext(int level, int attitudeNumber, PropositionNode node) {
+    public void addHypothesisToContext(int level, int attitudeId, PropositionNode node) {
         if (this.hypotheses.get(level) == null) {
             Pair<PropositionNodeSet, PropositionNodeSet>[] hyps = new Pair[this.hypotheses.get(0).length];
             for (int i = 0; i < this.hypotheses.get(0).length; i++) {
@@ -62,8 +64,8 @@ public class Context {
             }
             this.hypotheses.put(level, hyps);
         }
-        this.hypotheses.get(level)[attitudeNumber].getFirst().add(node);
-        node.getSupport().setHyp(attitudeNumber);
+        this.hypotheses.get(level)[attitudeId].getFirst().add(node);
+        node.getSupport().setHyp(attitudeId);
     }
 
     public ArrayList<Integer> getLevels() {
@@ -80,7 +82,7 @@ public class Context {
     public boolean isHypothesis(int level, int attitudeId, PropositionNode node) {
         Pair<PropositionNodeSet, PropositionNodeSet>[] pairArr = this.hypotheses.get(level);
         if (pairArr != null) {
-            return pairArr[attitudeId].getFirst().contains(node);
+            return pairArr[attitudeId].getFirst().contains(node) || pairArr[attitudeId].getSecond().contains(node);
         }
         return false;
     }
@@ -90,15 +92,15 @@ public class Context {
     }
 
     /**
-     * checks the validity of a node set as a support in a context and an attitude
+     * checks the validity of a node set as a support in a level and an attitude
      */
-    public boolean isValidSupport(int level, int attitudeNumber, PropositionNodeSet nodes) {
+    public boolean isInvalidSupport(int level, int attitudeNumber, PropositionNodeSet nodes) {
         for (PropositionNode node : nodes) {
             if (!node.supported(this.getName(), attitudeNumber, level)) {
-                return false;
+                return true;
             }
         }
-        return true;
+        return false;
     }
 
     public void completelyRemoveNodeFromContext(int level, int attitudeNumber, PropositionNode node, boolean manual) {
@@ -118,38 +120,23 @@ public class Context {
         for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> assumptionSupport : node.getSupport().getAssumptionSupport().get(level).get(attitudeId)) {
             for (Map.Entry<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> support : assumptionSupport.getFirst().entrySet()) {
                 PropositionNodeSet supportOriginSet = support.getValue().getFirst();
-                if (!isValidSupport(level, attitudeId, supportOriginSet)) {
+                if (isInvalidSupport(level, attitudeId, supportOriginSet)) {
                     continue;
                 }
-                //TODO: wael add a method to get the level of a node in support
-                if (supportOriginSet.size() == 1) {
-                    this.completelyRemoveNodeFromContext(level, attitudeId, (PropositionNode) supportOriginSet.getNodes().iterator().next(), false);
-                } else {
-                    int indexOfNodeToRemove = getSmallestIndexFromStream(supportOriginSet.getNodes().stream().map(supportNode -> (PropositionNode) supportNode).mapToInt(supportNode -> supportNode.getGradeFromParent(this, level, attitudeId)));
-                    this.completelyRemoveNodeFromContext(level, attitudeId, (PropositionNode) supportOriginSet.getNodes().stream().skip(indexOfNodeToRemove - 1).findFirst().get(), false);
-                }
+                //TODO: wael what about when the support of p is G(p,2) doesn't this mean we handle different grades?
+                ArrayList<Node> supportNodesList = new ArrayList<>(supportOriginSet.getNodes());
+                int indexOfNodeToRemove = supportNodesList.stream().map(supportNode -> (PropositionNode) supportNode).mapToInt(supportNode -> supportNode.getGradeFromParent(this, level, attitudeId)).min().orElse(0);
+                PropositionNode supportingNodeToRemove = (PropositionNode) supportNodesList.get(indexOfNodeToRemove);
+                this.completelyRemoveNodeFromContext(level, attitudeId, supportingNodeToRemove, false);
             }
         }
-    }
-
-    public static int getSmallestIndexFromStream(IntStream stream) {
-        int minIndex = Integer.MAX_VALUE;
-        int minValue = Integer.MAX_VALUE;
-        int[] arr = stream.toArray();
-        for (int i = 0; i < arr.length; i++) {
-            if (arr[i] < minValue) {
-                minIndex = i;
-                minValue = arr[i];
-            }
-        }
-        return minIndex;
     }
 
     public void manuallyRemoveInferredNodeFromContext(int level, int attitudeNumber, PropositionNode node) {
         Revision.print("Starting removal of node: " + node.printShortData() + " from attitude: " + ContextController.getAttitudeName(attitudeNumber) + " from Context: " + this.getName());
         for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> assumptionSupport : node.getSupport().getAssumptionSupport().get(level).get(attitudeNumber)) {
             for (Map.Entry<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> support : assumptionSupport.getFirst().entrySet()) {
-                if (!isValidSupport(level, attitudeNumber, support.getValue().getFirst())) {
+                if (isInvalidSupport(level, attitudeNumber, support.getValue().getFirst())) {
                     continue;
                 }
                 Revision.print("choose node to remove from this support in attitude: " + support.getKey());
@@ -163,5 +150,33 @@ public class Context {
             }
         }
         Revision.print("successfully removed Node: " + node + " from attitude: " + ContextController.getAttitudeName(attitudeNumber) + " from Context: " + this.getName());
+    }
+
+    public Context cloneContext() {
+        Context clone = new Context(this.getName() + " " + clonedContextsCount, ContextController.getAttitudes());
+        assumedContexts.add(clone);
+        clonedContextsCount++;
+        ContextController.getContextSet().add(name, clone);
+
+        for (int level : this.getLevels()) {
+            for (int i = 0; i < this.hypotheses.get(0).length; i++) {
+                Pair<PropositionNodeSet, PropositionNodeSet> pair = this.hypotheses.get(level)[i];
+                for (PropositionNode node : pair.getFirst()) {
+                    clone.addHypothesisToContext(level, i, node);
+                }
+                for (PropositionNode node : pair.getSecond()) {
+                    clone.addHypothesisToContext(level, i, node);
+                }
+            }
+        }
+
+        return clone;
+    }
+
+    public static void deleteAssumedContexts() {
+        for (Context c : assumedContexts) {
+            ContextController.getContextSet().remove(c.getName());
+        }
+        clonedContextsCount = 0;
     }
 }

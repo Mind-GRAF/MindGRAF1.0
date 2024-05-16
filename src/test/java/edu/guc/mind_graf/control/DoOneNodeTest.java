@@ -12,6 +12,7 @@ import edu.guc.mind_graf.caseFrames.Adjustability;
 import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.network.Network;
+import edu.guc.mind_graf.network.NetworkController;
 import edu.guc.mind_graf.nodes.DoOneNode;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.relations.Relation;
@@ -37,7 +38,7 @@ public class DoOneNodeTest {
         consistentAttitudes.add(new ArrayList<>(List.of(0,2)));
         consistentAttitudes.add(new ArrayList<>(List.of(0,2,3)));
 
-        ContextController.setUp(attitudeNames, consistentAttitudes , false, false, 0);
+        NetworkController.setUp(attitudeNames,consistentAttitudes ,false,false,false,1);
         ContextController.createNewContext("guc");
     }
 

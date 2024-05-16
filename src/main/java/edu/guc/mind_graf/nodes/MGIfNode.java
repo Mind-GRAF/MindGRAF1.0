@@ -30,7 +30,9 @@ public class MGIfNode extends ActNode {
         NodeSet allActs = getDownCableSet().get("obj").getNodeSet();
         switch(controlAgenda) {
 			case START:
-                this.controlAgenda = ActAgenda.TEST;
+                controlAgenda = ActAgenda.TEST;
+                this.setAgenda(ActAgenda.EXECUTE);
+                Scheduler.addToActQueue(this);
                 NodeSet guards = new NodeSet();
                 for(Node n: allActs) {
                     guards.addAllTo(n.getDownCableSet().get("guard").getNodeSet());
@@ -38,8 +40,6 @@ public class MGIfNode extends ActNode {
                 		ContextController.getCurrContextName(), 0, ChannelType.Act, n);
                 }
 				System.out.println("Sending requests to guards");
-                this.setAgenda(ActAgenda.EXECUTE);
-                Scheduler.addToActQueue(this);
                 break;
 			case TEST:
                 try{

@@ -8,7 +8,7 @@ class ContextControllerTest {
 	Network n;
 	
 	@BeforeEach
-	void setUp() {
+	void setup() {
 	}
 	
 	@Test

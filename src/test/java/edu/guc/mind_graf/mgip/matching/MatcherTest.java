@@ -1,27 +1,32 @@
 package edu.guc.mind_graf.mgip.matching;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.guc.mind_graf.network.NetworkController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import edu.guc.mind_graf.cables.DownCable;
+import edu.guc.mind_graf.cables.UpCable;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.caseFrames.Adjustability;
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.context.ContextController;
+import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.network.Network;
+import edu.guc.mind_graf.network.NetworkController;
 import edu.guc.mind_graf.nodes.Node;
+import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.relations.Relation;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.Set;
+import edu.guc.mind_graf.support.Support;
 
 public class MatcherTest {
     Network network;
@@ -33,18 +38,16 @@ public class MatcherTest {
         Set<String, Integer> attitudeNames = new Set<>();
         attitudeNames.add("beliefs", 0);
         attitudeNames.add("obligations", 1);
-
         ArrayList<ArrayList<Integer>> consistentAttitudes = new ArrayList<>();
         consistentAttitudes.add(new ArrayList<>(List.of(0)));
         consistentAttitudes.add(new ArrayList<>(List.of(1)));
         consistentAttitudes.add(new ArrayList<>(List.of(0, 1)));
-
-        network = NetworkController.setUp(attitudeNames, consistentAttitudes, false,false,false,1);
+        network = NetworkController.setUp(attitudeNames, consistentAttitudes, true, false, false, 1);
         ContextController.createNewContext("guc");
     }
 
     @Test
-    void nodeBasedNone() {
+    void nodeBasedNone() throws DirectCycleException {
         try {
             Context ctx = ContextController.getContext("guc");
 
@@ -96,7 +99,7 @@ public class MatcherTest {
     }
 
     @Test
-    void nodeBasedNoneEmpty() {
+    void nodeBasedNoneEmpty() throws DirectCycleException {
         try {
             Context ctx = ContextController.getContext("guc");
 
@@ -127,7 +130,7 @@ public class MatcherTest {
     }
 
     @Test
-    void wireBasedReduceType1() {
+    void wireBasedReduceType1() throws DirectCycleException {
         try {
             Context ctx = ContextController.getContext("guc");
 
@@ -176,7 +179,7 @@ public class MatcherTest {
     }
 
     @Test
-    void wireBasedReduceType2() {
+    void wireBasedReduceType2() throws DirectCycleException {
         try {
             Context ctx = ContextController.getContext("guc");
 
@@ -255,7 +258,7 @@ public class MatcherTest {
     }
 
     @Test
-    void wireBasedExpandType1() {
+    void wireBasedExpandType1() throws DirectCycleException {
         try {
             Context ctx = ContextController.getContext("guc");
 
@@ -334,7 +337,7 @@ public class MatcherTest {
     }
 
     @Test
-    void wireBasedExpandType2() {
+    void wireBasedExpandType2() throws DirectCycleException {
         try {
             Context ctx = ContextController.getContext("guc");
 
@@ -383,7 +386,7 @@ public class MatcherTest {
     }
 
     @Test
-    void uvbrCheckVarTerm() {
+    void uvbrCheckVarTerm() throws DirectCycleException {
         try {
             Context ctx = ContextController.getContext("guc");
 
@@ -426,7 +429,7 @@ public class MatcherTest {
     }
 
     @Test
-    void uvbrCheckVarVar() {
+    void uvbrCheckVarVar() throws DirectCycleException {
         try {
             Context ctx = ContextController.getContext("guc");
 
@@ -457,7 +460,7 @@ public class MatcherTest {
     }
 
     @Test
-    void occursCheck() {
+    void occursCheck() throws DirectCycleException {
         try {
             Context ctx = ContextController.getContext("guc");
 
@@ -490,7 +493,7 @@ public class MatcherTest {
     }
 
     @Test
-    void EmptyPath() {
+    void EmptyPath() throws DirectCycleException {
         try {
             Context ctx = ContextController.getContext("guc");
 
@@ -544,40 +547,41 @@ public class MatcherTest {
     }
 
     @Test
-    void BangPath() {
+    void BangPath() throws DirectCycleException {
         try {
             Context ctx = ContextController.getContext("guc");
 
             Node cs = Network.createNode("cs", "propositionnode");
             Node phy = Network.createNode("phy", "propositionnode");
-            Node fun = Network.createNode("fun", "propositionnode");
-            Node var1 = Network.createVariableNode("var1", "propositionnode");
-            Node var2 = Network.createVariableNode("var2", "propositionnode");
+            Node theory = Network.createNode("theory", "propositionnode");
+            Node var = Network.createVariableNode("var", "propositionnode");
+            int attitude = 0;
 
-            Relation obj = Network.createRelation("obj", "", Adjustability.NONE, 0);
-            Relation prop = Network.createRelation("prop", "", Adjustability.NONE, 0);
+            Relation p = Network.createRelation("p", "", Adjustability.REDUCE, 0);
+            Relation q = Network.createRelation("q", "", Adjustability.REDUCE, 0);
+            Relation obj = Network.createRelation("obj", "", Adjustability.REDUCE, 0);
+            obj.setPath(new edu.guc.mind_graf.paths.ComposePath(new edu.guc.mind_graf.paths.BangPath(),
+                    new edu.guc.mind_graf.paths.FUnitPath(p)));
 
-            obj.setPath(new edu.guc.mind_graf.paths.BangPath());
+            DownCable d1 = new DownCable(obj, new NodeSet(cs));
+            DownCable d2 = new DownCable(p, new NodeSet(phy));
 
-            DownCable d1 = new DownCable(obj, new NodeSet(cs, phy));
-            DownCable d2 = new DownCable(prop, new NodeSet(fun));
-
-            DownCable d3 = new DownCable(obj, new NodeSet(var1, var2));
+            DownCable d3 = new DownCable(obj, new NodeSet(var));
 
             Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2));
-            Node M1 = Network.createNode("propositionnode", new DownCableSet(d3, d2));
+            Node M1 = Network.createNode("propositionnode", new DownCableSet(d3));
+
+            ctx.addHypothesisToContext(0, attitude, ((PropositionNode) M0));
 
             List<Match> matchList = Matcher.match(M1, ctx, 0);
 
             assertEquals(2, matchList.size());
 
             Substitutions switch1 = new Substitutions();
-            switch1.add(var1, cs);
-            switch1.add(var2, phy);
+            switch1.add(var, cs);
 
             Substitutions switch2 = new Substitutions();
-            switch2.add(var1, phy);
-            switch2.add(var2, cs);
+            switch2.add(var, phy);
 
             List<Substitutions> switchSubs = new ArrayList<>();
             switchSubs.add(switch1);
@@ -590,7 +594,10 @@ public class MatcherTest {
                 assertTrue(Substitutions.testContains(switchSubs, m.getSwitchSubs()));
                 assertEquals(M0, m.getNode());
                 assertEquals(matchType, m.getMatchType());
-                assertTrue(((NodeSet) m.getSupport()).contains(M0));
+                if (m.getSwitchSubs().get(var).equals(phy)) {
+                    assertEquals(1, ((NodeSet) m.getSupport()).size());
+                    assertTrue(((NodeSet) m.getSupport()).contains(M0));
+                }
             }
         } catch (NoSuchTypeException e) {
             // TODO Auto-generated catch block
@@ -599,7 +606,7 @@ public class MatcherTest {
     }
 
     @Test
-    void KStarPath() {
+    void KStarPath() throws DirectCycleException {
         try {
             Context ctx = ContextController.getContext("guc");
 
@@ -648,7 +655,7 @@ public class MatcherTest {
     }
 
     @Test
-    void KPlusPath() {
+    void KPlusPath() throws DirectCycleException {
         try {
             Context ctx = ContextController.getContext("guc");
 
@@ -697,7 +704,7 @@ public class MatcherTest {
     }
 
     @Test
-    void FUnitPath() {
+    void FUnitPath() throws DirectCycleException {
         try {
             Context ctx = ContextController.getContext("guc");
 
@@ -746,7 +753,7 @@ public class MatcherTest {
     }
 
     @Test
-    void BUnitPath() {
+    void BUnitPath() throws DirectCycleException {
         try {
             Context ctx = ContextController.getContext("guc");
 
@@ -795,7 +802,7 @@ public class MatcherTest {
     }
 
     @Test
-    void AndPath() {
+    void AndPath() throws DirectCycleException {
         try {
             Context ctx = ContextController.getContext("guc");
 
@@ -858,7 +865,7 @@ public class MatcherTest {
     }
 
     @Test
-    void OrPath() {
+    void OrPath() throws DirectCycleException {
         try {
             Context ctx = ContextController.getContext("guc");
 
@@ -931,7 +938,7 @@ public class MatcherTest {
     }
 
     @Test
-    void ComposePath() {
+    void ComposePath() throws DirectCycleException {
         try {
             Context ctx = ContextController.getContext("guc");
 
@@ -984,7 +991,7 @@ public class MatcherTest {
     }
 
     @Test
-    void ConversePath() {
+    void ConversePath() throws DirectCycleException {
         try {
             Context ctx = ContextController.getContext("guc");
 
@@ -1033,7 +1040,7 @@ public class MatcherTest {
     }
 
     @Test
-    void IrreflexiveRestrictPath() {
+    void IrreflexiveRestrictPath() throws DirectCycleException {
         try {
             Context ctx = ContextController.getContext("guc");
 
@@ -1082,7 +1089,7 @@ public class MatcherTest {
     }
 
     @Test
-    void DomainRestrictPath() {
+    void DomainRestrictPath() throws DirectCycleException {
         try {
             Context ctx = ContextController.getContext("guc");
 
@@ -1135,7 +1142,7 @@ public class MatcherTest {
     }
 
     @Test
-    void RangeRestrictPath() {
+    void RangeRestrictPath() throws DirectCycleException {
         try {
             Context ctx = ContextController.getContext("guc");
 

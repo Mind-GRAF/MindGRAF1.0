@@ -39,6 +39,8 @@ public class AchieveNode extends ActNode {
 				}
 				try {
 					controlAgenda = ActAgenda.FIND_PLANS;
+					this.setAgenda(ActAgenda.EXECUTE);
+					Scheduler.addToActQueue(this);
 					searchForPlansInAchieve(goal);
 					Scheduler.addToActQueue(this);
 				} catch (NoSuchTypeException e) {
@@ -57,8 +59,6 @@ public class AchieveNode extends ActNode {
 				catch(NullPointerException e){
 					System.out.println("No plans found");
 				}
-				this.setAgenda(ActAgenda.EXECUTE);
-				Scheduler.addToActQueue(this);
 				break;
 			case DONE:
 				System.out.println("Achieve is done");

@@ -30,6 +30,8 @@ public class MGIterateNode extends ActNode {
         switch(controlAgenda) {
 			case START:
                 controlAgenda = ActAgenda.TEST;
+                this.setAgenda(ActAgenda.EXECUTE);
+                Scheduler.addToActQueue(this);
                 NodeSet guards = new NodeSet();
                 for(Node n: this.getDownCableSet().get("obj").getNodeSet()) {
                     guards.addAllTo(n.getDownCableSet().get("guard").getNodeSet());
@@ -37,8 +39,6 @@ public class MGIterateNode extends ActNode {
                 		ContextController.getCurrContextName(), 0, ChannelType.Act, n);
                 }
 				System.out.println("Sending requests to guards");
-                this.setAgenda(ActAgenda.EXECUTE);
-                Scheduler.addToActQueue(this);
                 break;
 			case TEST:
                 try{

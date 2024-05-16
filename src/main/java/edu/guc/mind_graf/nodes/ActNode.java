@@ -88,8 +88,16 @@ public class ActNode extends Node {
         return this.reports;
     }
 
-    protected void restartAgenda() {
+    public void restartAgenda() {
         agenda = ActAgenda.START;
+    }
+
+    protected void setAgenda(ActAgenda agenda){
+        this.agenda=agenda;
+    }
+
+    public boolean getPrimitive(){
+        return isPrimitive;
     }
 
     protected NodeSet processReportsInAct() {
@@ -182,6 +190,7 @@ public class ActNode extends Node {
         DownCable planCable = new DownCable(planRelation, new NodeSet(variable));
         DownCableSet molecularDownCableSet = new DownCableSet(goalCable, planCable);
         PropositionNode molecularNode = (PropositionNode) Network.createNode("propositionnode", molecularDownCableSet);
+        System.out.println(molecularNode.toString());
         sendRequestsToNodeSet(new NodeSet(molecularNode), null, null, ContextController.getCurrContextName(), 0,
                 ChannelType.Act, this);
         variableCount++;
@@ -210,6 +219,7 @@ public class ActNode extends Node {
         DownCable d2 = new DownCable(relation2, new NodeSet(variable));
         DownCableSet downCableSet = new DownCableSet(d1, d2);
         PropositionNode molecularNode = (PropositionNode) Network.createNode("propositionnode", downCableSet);
+        System.out.println("Node"+molecularNode.toString()+"created");
         sendRequestsToNodeSet(new NodeSet(molecularNode), null, null, ContextController.getCurrContextName(), 0,
                 ChannelType.Act, this);
         variableCount++;
@@ -223,13 +233,8 @@ public class ActNode extends Node {
         Scheduler.initiate();
         String currentContextName = ContextController.getCurrContextName();
 
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter your desired attitude: ");
-        String att = scanner.nextLine();
-        scanner.close();
-        int currentAttitudeID = 0;
-        System.out.println("Performing an act initiated in Context: " + currentContextName + " & Attitude: "
-                + currentAttitudeID);
+       
+        System.out.println("Performing an act initiated in Context: " + currentContextName );
         Scheduler.addToActQueue(this);
         System.out.println(Scheduler.schedule());
     }
@@ -242,16 +247,24 @@ public class ActNode extends Node {
             for(Integer attitude:support.getFirst().keySet()){
                 for(PropositionNode node:support.getFirst().get(attitude)){
                     doAct&=node.supported(currentContextName, attitude,0);
+                    if(doAct){
+                        System.out.println(node.getName() + " is still supported in context "+currentContextName + " in attitude id "+ attitude);
+                    }
                 }
             }
             if(!doAct){
                 continue;
             }
             for(Integer attitude:support.getSecond().keySet()){
-                for(PropositionNode node:support.getFirst().get(attitude)){
+                for(PropositionNode node:support.getSecond().get(attitude)){
+                    System.out.println(node);
                     doAct&=!node.supported(currentContextName, attitude,0);
+                    if(doAct){
+                        System.out.println(node.getName() + " is still not supported in context "+currentContextName + " in attitude id "+ attitude);
+                    }
                 }
             }
+            System.out.println("doAct is:"+doAct);
             if(doAct){
                 break;
             }
@@ -259,6 +272,13 @@ public class ActNode extends Node {
         }
         if(!doAct){
             System.out.println("The act is no longer needed to be done");
+            if(isHighStack){
+                Scheduler.getHighActQueue().remove(this);
+            }
+            else{
+                Scheduler.getActQueue().remove(this);
+            }
+            this.restartAgenda();
             return;
         }
 
@@ -354,7 +374,6 @@ public class ActNode extends Node {
 
             case EXECUTE:
                 System.out.println("In execute case");
-                System.out.println("reports size is" + reports.size());
                 if (!isPrimitive) {
                     this.agenda = ActAgenda.FIND_PLANS;
                     Scheduler.addToActQueue(this);
