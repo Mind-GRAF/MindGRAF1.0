@@ -7,7 +7,6 @@ import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.support.Pair;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Revision {
     public static ArrayList<PropositionNodeSet> minimalNoGoods = new ArrayList<>();
@@ -82,8 +81,8 @@ public class Revision {
     }
 
     public static void automaticContradictionHandling(Context c, int level, int attitudeNumber, ArrayList<Contradiction> contradictions) {
-        boolean nodeIsHyp = c.isHypothesis(attitudeNumber, level, contradictions.getFirst().getNode());
-        boolean contradictingIsHyp = containsHyp(c, level, contradictions);
+        boolean nodeIsHyp = c.isOriginHypothesis(attitudeNumber, level, contradictions.getFirst().getNode());
+        boolean contradictingIsHyp = containsOriginHyp(c, level, contradictions);
 
         if (nodeIsHyp && contradictingIsHyp) {
             print("Found a contradiction that can't be automatically handled, reverting to manual handling");
@@ -129,10 +128,10 @@ public class Revision {
         }
     }
 
-    private static boolean containsHyp(Context c, int level, ArrayList<Contradiction> contradictions) {
+    private static boolean containsOriginHyp(Context c, int level, ArrayList<Contradiction> contradictions) {
         for (Contradiction contradiction : contradictions) {
             for (Map.Entry<Integer, PropositionNode> entry : contradiction.getContradictions().getSet().entrySet()) {
-                if (c.isHypothesis(entry.getKey(), level, entry.getValue())) {
+                if (c.isOriginHypothesis(entry.getKey(), level, entry.getValue())) {
                     return true;
                 }
             }
