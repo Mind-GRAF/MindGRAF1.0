@@ -106,7 +106,7 @@ public class Scheduler {
                 System.out.println("\n\n");
                 toRunNext.processIntends(false);
                 sequence += "A ";
-                if (!highQueue.isEmpty() || !lowQueue.isEmpty()|| !actQueue.isEmpty()) {
+                if (!highQueue.isEmpty() || !lowQueue.isEmpty()|| !highActQueue.isEmpty()) {
                     continue main;
                 }
             }
@@ -149,7 +149,7 @@ public class Scheduler {
      * 
      * @param actNode
      */
-    public static void addToActQueue(ActNode actNode) {
+    public static void addToActQueue(ActNode actNode) throws NoSuchTypeException {
         actQueue.add(actNode);
     }
 

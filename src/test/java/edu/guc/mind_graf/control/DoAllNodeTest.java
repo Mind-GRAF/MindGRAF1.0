@@ -38,7 +38,7 @@ public class DoAllNodeTest {
         consistentAttitudes.add(new ArrayList<>(List.of(0,2)));
         consistentAttitudes.add(new ArrayList<>(List.of(0,2,3)));
 
-        ContextController.setUp(attitudeNames,consistentAttitudes ,false);
+        ContextController.setUp(attitudeNames, consistentAttitudes , false, false, 0);
         ContextController.createNewContext("guc");
     }
 
@@ -70,7 +70,9 @@ public class DoAllNodeTest {
 
             Scheduler.initiate();
 
-            M0.runActuator();
+            Scheduler.addToActQueue(M0);
+
+            Scheduler.schedule();
 
 //			Node ruleNode1 = Network.createNode("ruleNode1", "rulenode");
         }catch (Exception e){

@@ -26,9 +26,9 @@ import edu.guc.mind_graf.nodes.IndividualNode;
 import edu.guc.mind_graf.nodes.MolecularType;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.PropositionNode;
-import edu.guc.mind_graf.nodes.SNIFNode;
-import edu.guc.mind_graf.nodes.SNITERATENode;
-import edu.guc.mind_graf.nodes.SNSequenceNode;
+import edu.guc.mind_graf.nodes.MGIfNode;
+import edu.guc.mind_graf.nodes.MGIterateNode;
+import edu.guc.mind_graf.nodes.MGSequenceNode;
 
 public class Network {
 	private static HashMap<Integer, Node> nodes;
@@ -147,14 +147,14 @@ public class Network {
 				case "achievenode":
 					node = new AchieveNode(downCableSet);
 					break;
-				case "snifnode":
-					node = new SNIFNode(downCableSet);
+				case "mgifnode":
+					node = new MGIfNode(downCableSet);
 					break;
-				case "sniteratenode":
-					node = new SNITERATENode(downCableSet);
+				case "mgiteratenode":
+					node = new MGIterateNode(downCableSet);
 					break;
-				case "snsequencenode":
-					node = new SNSequenceNode(downCableSet);
+				case "mgsequencenode":
+					node = new MGSequenceNode(downCableSet);
 					break;
 
 				default:
