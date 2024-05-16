@@ -780,7 +780,8 @@ public class Support implements Cloneable{
 		ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>> newJustificationSupport = this.getJustificationSupport().get(level).get(attitude);
 
 		for(Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> currSupp : newJustificationSupport){
-			currSupp.getFirst().get(attitude).getFirst().add(nodeID);
+			currSupp.getFirst().get(attitude).getFirst().add(propositionNode.getId());
+
 		}
 
 		this.justificationSupport.remove(level);
