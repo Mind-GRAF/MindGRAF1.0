@@ -484,6 +484,10 @@ public class PropositionNode extends Node {
             return true;
         }
 
+        if(!desiredContext.getLevels().contains(level)){
+            return false;
+        }
+
         if(!this.support.getAssumptionSupport().containsKey(level)){
             return false;
         }
@@ -520,7 +524,11 @@ public class PropositionNode extends Node {
      */
     public void setHyp(String desiredContextName, int attitude) {
         Context desiredContext = ContextController.getContext(desiredContextName);
-        desiredContext.getAttitudeProps(Network.currentLevel, attitude).getFirst().add(this.getId());
+        desiredContext.addHypothesisToContext(Network.currentLevel, attitude, this);
+        this.support.setHyp(attitude);
+    }
+
+    public void setHyp(int attitude) {
         this.support.setHyp(attitude);
     }
 
@@ -534,14 +542,14 @@ public class PropositionNode extends Node {
         for(int i = 0; i < assumptionDependents.length ; i++) {
             if(networkPropositions.containsKey(assumptionDependents[i])) {
                 PropositionNode dependent = (PropositionNode) networkPropositions.get(assumptionDependents[i]);
-                dependent.getSupport().removeNodeFromAssumptions(this.getId());
+                dependent.support.removeNodeFromAssumptions(this.getId());
             }
         }
         int[] justificationDependents = this.getJustificationSupportDependents().getProps();
         for(int i = 0; i < justificationDependents.length ; i++) {
             if(networkPropositions.containsKey(assumptionDependents[i])) {
                 PropositionNode dependent = (PropositionNode) networkPropositions.get(justificationDependents[i]);
-                dependent.getSupport().removeNodeFromJustifications(this.getId());
+                dependent.support.removeNodeFromJustifications(this.getId());
             }
         }
     }
@@ -740,6 +748,7 @@ public class PropositionNode extends Node {
             Substitutions subs2 = new Substitutions();
             Report toBeSent = new Report(subs, reportSupport, currentAttitudeID, reportSign, inferenceType, null, this);
             toBeSent.setReportType(channelType);
+            toBeSent.setContextName(currentContextName);
             switch (channelType) {
                 case Matched:
                     List<Match> matchesReturned = new ArrayList<>();
@@ -891,7 +900,7 @@ public class PropositionNode extends Node {
         List<Match> nodesToConsider = new ArrayList<Match>();
         for (Match sourceMatch : matchingNodes) {
             Node sourceNode = sourceMatch.getNode();
-            boolean conditionMet = false;
+            boolean conditionMet = true;
             ChannelSet outgoingChannels = ((PropositionNode) sourceNode).getOutgoingChannels();
             for (Channel outgoingChannel : outgoingChannels) {
                 Substitutions processedRequestChannelFilterSubs = outgoingChannel.getFilterSubstitutions();
@@ -983,11 +992,11 @@ public class PropositionNode extends Node {
         /* END - Helpful Prints */
         Scheduler.initiate();
         String currentContextName = ContextController.getCurrContextName();
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter your desired attitude: ");
-        String att = scanner.nextLine();
-        scanner.close();
-        int currentattitudeID = 1;
+        // Scanner scanner = new Scanner(System.in);
+        // System.out.print("Enter your desired attitude: ");
+        // String att = scanner.nextLine();
+        // scanner.close();
+        int currentattitudeID = 0;
         // given by the user
         System.out.println("Backward Inference initiated in Context: " + currentContextName + " & Attitude: "
                 + currentattitudeID);
@@ -1066,10 +1075,10 @@ public class PropositionNode extends Node {
         Scheduler.initiate();
         String currentContextName = ContextController.getCurrContextName();
 
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter your desired attitude: ");
-        String att = scanner.nextLine();
-        scanner.close();
+        // Scanner scanner = new Scanner(System.in);
+        // System.out.print("Enter your desired attitude: ");
+        // String att = scanner.nextLine();
+        // scanner.close();
         int currentAttitudeID = 0;
         // given by the user
         boolean reportSign = true;
@@ -1208,7 +1217,10 @@ public class PropositionNode extends Node {
                 if (!(currentChannel instanceof MatchChannel)) {
                     List<Match> matchesList = new ArrayList<Match>();
                     matchesList=Matcher.match(this, ContextController.getContext(currentContext),currentAttitude);
-                    sendRequestsToMatches(matchesList, filterSubs, switchSubs,
+                    List<Match> remainingMatches = removeAlreadyEstablishedChannels(matchesList,
+                    currentRequest, filterSubs);
+                    System.out.println("remaiining Matches size:"+ remainingMatches.size());
+                    sendRequestsToMatches(remainingMatches, filterSubs, switchSubs,
                             currentContext, currentAttitude,
                             ChannelType.Matched, this);
 
@@ -1326,6 +1338,26 @@ public class PropositionNode extends Node {
         this.support.addJustificationSupportForAttitude(attitude, level, list);
     }
 
+    public void addJustificationBasedSupports(int attitude, int level, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>, PropositionNodeSet>> support) {
+        this.support.addJustificationSupportForAttitude(attitude, level, support);
+    }
+
+    public void addNodeToSupport(int attitude, PropositionNode PropositionNode){
+        support.addNode(attitude, PropositionNode);
+    }
+
+    public void CombineNodeToSupport(int attitude, PropositionNode PropositionNode){
+        support.combineNode(attitude, PropositionNode);
+    }
+
+    public void unionSupport(Support support){
+        this.support.union(support);
+    }
+
+    public void combineSupport(int attitude, Support support){
+        this.support.combine(attitude, support);
+    }
+
     public ChannelSet getOutgoingChannels() {
         return outgoingChannels;
     }
@@ -1374,7 +1406,7 @@ public class PropositionNode extends Node {
         return knownInstances;
     }
 
-    public int getGradeFromParent(Context c, int level, int attitudeId) {
+    private int getGradeFromParent(Context c, int level, int attitudeId) {
         PropositionNode parentNode = this.getGradedParent(c, level, attitudeId);
         if (parentNode == null) {
             return 0;
@@ -1399,6 +1431,22 @@ public class PropositionNode extends Node {
         }
     }
 
+    public int getGradeOfNode(Context c, int level, int attitudeId) {
+        ArrayList<Integer> grades = new ArrayList<>();
+        for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> assumptionSupport : this.getSupport().getAssumptionSupport().get(level).get(attitudeId)) {
+            for (Map.Entry<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> support : assumptionSupport.getFirst().entrySet()) {
+                if (c.isInvalidSupport(level, attitudeId, support.getValue().getFirst())) {
+                    //TODO: wael see if we can make this is hyp
+                    continue;
+                }
+                //maps the support to a stream of integers representing the grade of every node in the support then merges them using ContextController.mergeGrades()
+                grades.add(support.getValue().getFirst().getNodes().stream().mapToInt(suportNode -> ((PropositionNode) suportNode).getGradeFromParent(c, level, attitudeId)).reduce(ContextController.getMergeFunction()).orElse(0));
+            }
+        }
+        //merges grades of every support to return the final grade of this node
+        return grades.stream().mapToInt(i -> i).reduce(ContextController.getMergeFunction()).orElse(0);
+    }
+
     public boolean isGraded(Context c, int level, int attitudeId) {
         PropositionNode parentNode = this.getGradedParent(c, level, attitudeId);
         if (parentNode == null) {
@@ -1413,25 +1461,6 @@ public class PropositionNode extends Node {
         NodeSet gradeNodeSet = gradeCable.getNodeSet();
         return !gradeNodeSet.isEmpty();
     }
-
-//    public int getLevel(Context c, int level, int attitudeId) {
-//        DownCable propCable = this.getDownCable("prop");
-//        if (propCable == null) {
-//            return 0;
-//        }
-//
-//        NodeSet propNodeSet = propCable.getNodeSet();
-//        if (propNodeSet.isEmpty()) {
-//            return 0;
-//        }
-//
-//        PropositionNode child = (PropositionNode) propNodeSet.getValues().stream().map(node -> (PropositionNode) node).filter(node -> node.supported(c.getName(), attitudeId, level - 1)).findFirst().orElse(null);
-//        if (child == null) {
-//            return 0;
-//        }
-//
-//        return 1 + child.getLevel(c, level - 1, attitudeId);
-//    }
 
     public PropositionNode getGradedParent(Context c, int level, int attitudeId) {
         if (!this.isGraded(c, level, attitudeId)) {

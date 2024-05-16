@@ -43,7 +43,7 @@ public class Report {
         Node requesterNode = this.getRequesterNode();
         String report = "Context " + reportContextName + " and Attitude " + reportAttitudeId + " and substitutions "
                 + subs.toString() +
-                " to " + requesterNode.getName();
+                " to " + ((requesterNode!=null)?requesterNode.getName():"null");
         return report;
     }
 

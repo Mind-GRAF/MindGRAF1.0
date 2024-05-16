@@ -3,7 +3,6 @@ package edu.guc.mind_graf.control;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.guc.mind_graf.network.NetworkController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -13,6 +12,7 @@ import edu.guc.mind_graf.caseFrames.Adjustability;
 import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.network.Network;
+import edu.guc.mind_graf.network.NetworkController;
 import edu.guc.mind_graf.nodes.DoAllNode;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.relations.Relation;
@@ -71,7 +71,9 @@ public class DoAllNodeTest {
 
             Scheduler.initiate();
 
-            M0.runActuator();
+            Scheduler.addToActQueue(M0);
+
+            Scheduler.schedule();
 
 //			Node ruleNode1 = Network.createNode("ruleNode1", "rulenode");
         }catch (Exception e){

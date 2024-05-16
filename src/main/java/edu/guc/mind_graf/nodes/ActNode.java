@@ -62,7 +62,7 @@ public class ActNode extends Node {
 
     }
 
-    public void runActuator() throws NoSuchTypeException {
+    public void runActuator() throws NoSuchTypeException, DirectCycleException {
         System.out.println("running " + this.getName() + " act's actuator");
 
     }
@@ -94,6 +94,10 @@ public class ActNode extends Node {
 
     protected void setAgenda(ActAgenda agenda){
         this.agenda=agenda;
+    }
+
+    public boolean getPrimitive(){
+        return isPrimitive;
     }
 
     protected NodeSet processReportsInAct() {
@@ -178,6 +182,20 @@ public class ActNode extends Node {
 
     }
 
+    protected void sendDoAllToActQueue(NodeSet nodes) throws NoSuchTypeException {
+        Relation doAllAction = Network.createRelation("action", "individualNode", Adjustability.NONE, 0);
+        Relation doAllobj = Network.createRelation("obj", "actNode", Adjustability.NONE, 0);
+        Node doAllBaseNode = Network.createNode("DoAll" + DoAllNode.doAllCount++, "individualnode");
+        DownCable actionCable = new DownCable(doAllAction, new NodeSet(doAllBaseNode));
+        DownCable objCable = new DownCable(doAllobj, nodes);
+        DownCableSet doAllDownCableSet = new DownCableSet(actionCable, objCable);
+        DoAllNode doAllMolecularNode = (DoAllNode) Network.createNode("doallnode", doAllDownCableSet);
+        Scheduler.addToActQueue(doAllMolecularNode);
+        System.out.println("A DoAll control act of doing the plans of " + this.getName()
+                + " act is scheduled successfully on the act stack.");
+
+    }
+
     protected void searchForPlansInAchieve(PropositionNode goal) throws NoSuchTypeException {
         Relation planRelation = Network.createRelation("plan", "actNode", Adjustability.NONE, 0);
         Relation goalRelation = Network.createRelation("goal", "propositionNode", Adjustability.NONE, 0);
@@ -229,18 +247,13 @@ public class ActNode extends Node {
         Scheduler.initiate();
         String currentContextName = ContextController.getCurrContextName();
 
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter your desired attitude: ");
-        String att = scanner.nextLine();
-        scanner.close();
-        int currentAttitudeID = 0;
-        System.out.println("Performing an act initiated in Context: " + currentContextName + " & Attitude: "
-                + currentAttitudeID);
+       
+        System.out.println("Performing an act initiated in Context: " + currentContextName );
         Scheduler.addToActQueue(this);
         System.out.println(Scheduler.schedule());
     }
 
-    public void processIntends(boolean isHighStack) throws NoSuchTypeException, NoPlansExistForTheActException {
+    public void processIntends(boolean isHighStack) throws NoSuchTypeException, NoPlansExistForTheActException, DirectCycleException {
         String currentContextName=ContextController.getCurrContextName();
         boolean doAct=true;
         for (Pair<HashMap<Integer, PropositionNodeSet>, HashMap<Integer, PropositionNodeSet>> support : supports) {
@@ -248,16 +261,24 @@ public class ActNode extends Node {
             for(Integer attitude:support.getFirst().keySet()){
                 for(PropositionNode node:support.getFirst().get(attitude)){
                     doAct&=node.supported(currentContextName, attitude,0);
+                    if(doAct){
+                        System.out.println(node.getName() + " is still supported in context "+currentContextName + " in attitude id "+ attitude);
+                    }
                 }
             }
             if(!doAct){
                 continue;
             }
             for(Integer attitude:support.getSecond().keySet()){
-                for(PropositionNode node:support.getFirst().get(attitude)){
+                for(PropositionNode node:support.getSecond().get(attitude)){
+                    System.out.println(node);
                     doAct&=!node.supported(currentContextName, attitude,0);
+                    if(doAct){
+                        System.out.println(node.getName() + " is still not supported in context "+currentContextName + " in attitude id "+ attitude);
+                    }
                 }
             }
+            System.out.println("doAct is:"+doAct);
             if(doAct){
                 break;
             }
@@ -265,6 +286,13 @@ public class ActNode extends Node {
         }
         if(!doAct){
             System.out.println("The act is no longer needed to be done");
+            if(isHighStack){
+                Scheduler.getHighActQueue().remove(this);
+            }
+            else{
+                Scheduler.getActQueue().remove(this);
+            }
+            this.restartAgenda();
             return;
         }
 

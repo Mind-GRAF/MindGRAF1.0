@@ -81,7 +81,6 @@ public class ChannelSet implements Iterable<Channel> {
 
     public Channel getChannel(Channel newChannel) {
         ChannelType channelType = newChannel.getChannelType();
-        System.out.println("Hello");
         String channelId = newChannel.stringifyChannelID();
         Hashtable<String, Channel> set = channels.get(channelType);
         return set.get(channelId);

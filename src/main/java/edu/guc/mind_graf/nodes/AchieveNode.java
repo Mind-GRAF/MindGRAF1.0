@@ -8,6 +8,7 @@ import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.set.ContextSet;
 import edu.guc.mind_graf.set.NodeSet;
 
+
 public class AchieveNode extends ActNode {
 
     private ActAgenda controlAgenda;
@@ -19,15 +20,19 @@ public class AchieveNode extends ActNode {
 		controlAgenda = ActAgenda.START;
     }
 
+	public ActAgenda getControlAgenda() {
+        return controlAgenda;
+    }
+
     @Override
-    public void runActuator() throws NoSuchTypeException {
+    public void runActuator() throws NoSuchTypeException{
         switch(controlAgenda){
 			case START:
 				PropositionNode goal = (PropositionNode) this.getDownCableSet().get("obj").getNodeSet().getNode(0);
 				ContextSet cs = ContextController.getContextSet();
 				for(Context c : cs.getSet().values()) {
 					if(goal.supported(c.getName(), 0, 0)){
-						System.out.println("tmam ya brens");
+						System.out.println("Goal is already supported");
 						controlAgenda = ActAgenda.DONE;
 						return;
 					}
@@ -37,6 +42,7 @@ public class AchieveNode extends ActNode {
 					this.setAgenda(ActAgenda.EXECUTE);
 					Scheduler.addToActQueue(this);
 					searchForPlansInAchieve(goal);
+					Scheduler.addToActQueue(this);
 				} catch (NoSuchTypeException e) {
 					e.printStackTrace();
 				}
@@ -53,6 +59,10 @@ public class AchieveNode extends ActNode {
 				catch(NullPointerException e){
 					System.out.println("No plans found");
 				}
+				break;
+			case DONE:
+				System.out.println("Achieve is done");
+				Scheduler.addToActQueue(this);
 				break;
 			default:
 				System.out.print("UNIDENTIFIED AGENDA FOR ACHIEVE!!");

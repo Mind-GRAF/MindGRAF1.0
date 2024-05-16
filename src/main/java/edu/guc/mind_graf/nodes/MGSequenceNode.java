@@ -4,19 +4,18 @@ import java.util.Stack;
 
 import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
+import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.mgip.Scheduler;
 
-public class SNSequenceNode extends ActNode {
+public class MGSequenceNode extends ActNode {
 
-    public SNSequenceNode(DownCableSet downCables) {
+    public MGSequenceNode(DownCableSet downCables) {
         super(downCables);
         this.setPrimitive(true);
     }
 
-    //howa eshm3na fl SNSequence byb2a el node 3obara 3n object1 w object2 wl ba2y object bas
-
     @Override
-    public void runActuator() {
+    public void runActuator() throws NoSuchTypeException {
         Stack<ActNode> acts = new Stack<>();
         DownCable next = this.getDownCableSet().get("obj" + 1);
         ActNode act;

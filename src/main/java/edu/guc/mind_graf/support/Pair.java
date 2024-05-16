@@ -1,5 +1,7 @@
 package edu.guc.mind_graf.support;
 
+import java.util.Objects;
+
 public class Pair<T, U> {
     private T first;
     private U second;
@@ -37,5 +39,22 @@ public class Pair<T, U> {
                "first=" + first +
                ", second=" + second +
                '}';
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        Pair<?, ?> other = (Pair<?, ?>) obj;
+        return Objects.equals(first, other.first) && Objects.equals(second, other.second);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(first, second);
     }
 }

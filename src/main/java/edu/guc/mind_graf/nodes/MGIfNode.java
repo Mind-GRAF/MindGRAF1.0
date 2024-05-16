@@ -11,26 +11,30 @@ import edu.guc.mind_graf.mgip.reports.Report;
 import edu.guc.mind_graf.mgip.requests.ChannelType;
 import edu.guc.mind_graf.set.NodeSet;
 
-public class SNITERATENode extends ActNode {
+public class MGIfNode extends ActNode {
 
     private ActAgenda controlAgenda;
 
-    public SNITERATENode(DownCableSet downCables) {
+    public MGIfNode(DownCableSet downCables) {
         super(downCables);
         this.setPrimitive(true);
         controlAgenda = ActAgenda.START;
     }
 
+    public ActAgenda getControlAgenda() {
+        return controlAgenda;
+    }  
+
     @Override
-    public void runActuator() {
+    public void runActuator() throws NoSuchTypeException {
+        NodeSet allActs = getDownCableSet().get("obj").getNodeSet();
         switch(controlAgenda) {
 			case START:
                 controlAgenda = ActAgenda.TEST;
                 this.setAgenda(ActAgenda.EXECUTE);
                 Scheduler.addToActQueue(this);
                 NodeSet guards = new NodeSet();
-				System.out.println("Sending requests to guards");
-                for(Node n: this.getDownCableSet().get("obj").getNodeSet()) {
+                for(Node n: allActs) {
                     guards.addAllTo(n.getDownCableSet().get("guard").getNodeSet());
 					n.sendRequestsToNodeSet(guards, new Substitutions(), new Substitutions(),
                 		ContextController.getCurrContextName(), 0, ChannelType.Act, n);
@@ -40,7 +44,6 @@ public class SNITERATENode extends ActNode {
 			case TEST:
                 try{
                     controlAgenda = ActAgenda.DONE;
-                    NodeSet allActs = getDownCableSet().get("obj").getNodeSet();
                     NodeSet possibleActs = new NodeSet();
                     ArrayList<PropositionNode> satisfiedGaurds = new ArrayList<>();
 					System.out.println("Checking if guards are satisfied");
@@ -53,7 +56,6 @@ public class SNITERATENode extends ActNode {
                         }
                         boolean containsAll = true;
                         for(Node n: act.getDownCableSet().get("guard").getNodeSet()) {
-							System.out.println("Checking if satisfied guards contain: " + n.getName());
                             if(!satisfiedGaurds.contains(n)) {
                                 containsAll = false;
                                 break;
@@ -64,15 +66,23 @@ public class SNITERATENode extends ActNode {
                             possibleActs.add((ActNode) act.getDownCableSet().get("act").getNodeSet().getNode(0));
                         }
                     }
-                    sendDoOneToActQueue(possibleActs);
-                    this.restartAgenda();
+                    System.out.println("Possible acts:" + possibleActs.size());
+                    if(possibleActs.size() > 0)
+                        sendDoOneToActQueue(possibleActs);
+                    else System.out.println("No possible acts found");
+                    this.setAgenda(ActAgenda.EXECUTE);
                     Scheduler.addToActQueue(this);
                 } catch(NoSuchTypeException e) {
                     System.out.println("SOMETHING WENT WRONG!! EXCEPTION THROWN FROM ACTNODE.JAVA 10");
                 }
+                break;
+            case DONE:
+                System.out.println("MGIf DONE");
+                Scheduler.addToActQueue(this);
+                break;
 			default:
-                System.out.print("UNIDENTIFIED AGENDA FOR ACHIEVE!!");
-                return;
+                System.out.print("UNIDENTIFIED AGENDA FOR MGIf!!");
 		}
     }
+
 }
