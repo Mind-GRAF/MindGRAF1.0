@@ -32,9 +32,9 @@ import edu.guc.mind_graf.nodes.DoAllNode;
 import edu.guc.mind_graf.nodes.AchieveNode;
 import edu.guc.mind_graf.nodes.AttitudeNode;
 import edu.guc.mind_graf.nodes.DoOneNode;
-import edu.guc.mind_graf.nodes.SNIFNode;
-import edu.guc.mind_graf.nodes.SNITERATENode;
-import edu.guc.mind_graf.nodes.SNSequenceNode;
+import edu.guc.mind_graf.nodes.MGIfNode;
+import edu.guc.mind_graf.nodes.MGIterateNode;
+import edu.guc.mind_graf.nodes.MGSequenceNode;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.Set;
 import java.util.HashSet;
@@ -843,7 +843,7 @@ ActNode Act() throws ParseException :
 
 
 
-SNSequenceNode mgSequence() throws ParseException:
+MGSequenceNode mgSequence() throws ParseException:
 {
   Node oneActNode = null;
   ArrayList<Node> allNodes = new ArrayList<Node>();
@@ -856,7 +856,7 @@ SNSequenceNode mgSequence() throws ParseException:
     // relations
     
     IndividualNode snSeqIndividual = null;
-    SNSequenceNode snsequenceNode = null;
+    MGSequenceNode snsequenceNode = null;
     // relations and Dcs
     HashMap<String, DownCable> allDCs = new HashMap<String, DownCable>();
     for (int i = 0; i < allNodes.size(); i++) {
@@ -882,9 +882,9 @@ SNSequenceNode mgSequence() throws ParseException:
       // snsequence act node creation
       Node shouldCreate = compareMolecularNode(dcSet);
       if (shouldCreate == null)
-        snsequenceNode =(SNSequenceNode) network.createNode("actnode", dcSet);
+        snsequenceNode =(MGSequenceNode) network.createNode("mgsequencenode", dcSet);
       else
-        snsequenceNode =(SNSequenceNode) shouldCreate;
+        snsequenceNode =(MGSequenceNode) shouldCreate;
       CLI.print("MGSequence Act Node Created.");
       return snsequenceNode;
 
@@ -1398,7 +1398,7 @@ ActNode GuardedAct() throws ParseException :
   }
 }
 
-SNIFNode MGIF() throws ParseException : 
+MGIfNode MGIF() throws ParseException : 
 {
   Node oneGuardAct = null;
   HashMap<String,Node> allGuardActs = new HashMap<String, Node>();
@@ -1412,7 +1412,7 @@ SNIFNode MGIF() throws ParseException :
 
     // snif indiv node
     IndividualNode snifIndividual = null;
-    SNIFNode snifActNode = null;
+    MGIfNode snifActNode = null;
     try {
       if (network.getBaseNodes().containsKey("mgif"))
         snifIndividual =(IndividualNode) network.getBaseNodes().get("mgif");
@@ -1425,9 +1425,9 @@ SNIFNode MGIF() throws ParseException :
       // creating snif act node
       Node shouldCreate = compareMolecularNode(allCables);
       if (shouldCreate == null)
-        snifActNode = (SNIFNode) network.createNode("actnode", allCables);
+        snifActNode = (MGIfNode) network.createNode("mgifnode", allCables);
       else
-        snifActNode =(SNIFNode) shouldCreate;
+        snifActNode =(MGIfNode) shouldCreate;
       CLI.print("MGIF Act Node Created.");
       return snifActNode;
     } catch (NoSuchTypeException e) {
@@ -1438,7 +1438,7 @@ SNIFNode MGIF() throws ParseException :
     }
 }
 
-SNITERATENode SNIterate() throws ParseException : 
+MGIterateNode SNIterate() throws ParseException : 
 {
   Node oneGuardAct = null;
   HashMap<String,Node> allGuardActs = new HashMap<String, Node>();
@@ -1452,7 +1452,7 @@ SNITERATENode SNIterate() throws ParseException :
 
     // sniterate indiv node
     IndividualNode sniterateIndividual = null;
-    SNITERATENode sniterateActNode = null;
+    MGIterateNode sniterateActNode = null;
     try {
       if (network.getBaseNodes().containsKey("mgiterate"))
         sniterateIndividual =(IndividualNode) network.getBaseNodes().get("mgiterate");
@@ -1466,9 +1466,9 @@ SNITERATENode SNIterate() throws ParseException :
        //creating sniterate act node
        Node shouldCreate = compareMolecularNode(allCables);
        if(shouldCreate == null)
-        sniterateActNode = (SNITERATENode)network.createNode("actnode", allCables);
+        sniterateActNode = (MGIterateNode)network.createNode("mgiteratenode", allCables);
        else
-        sniterateActNode = (SNITERATENode) shouldCreate;
+        sniterateActNode = (MGIterateNode) shouldCreate;
         CLI.print("MGITERATE Act Node Created.");
         return sniterateActNode;
     } catch (NoSuchTypeException e) {

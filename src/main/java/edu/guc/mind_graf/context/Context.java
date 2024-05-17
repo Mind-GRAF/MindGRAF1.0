@@ -57,9 +57,7 @@ public class Context {
         return name;
     }
 
-    public HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>[]> getHypotheses() {
-        return hypotheses;
-    }
+
 
     public void addHypothesisToContext(int level, int attitudeId, PropositionNode node) {
         if (this.hypotheses.get(level) == null) {
