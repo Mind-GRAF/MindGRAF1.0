@@ -70,6 +70,9 @@ public class Network {
 		Network.createRelation("threshmax", "propositionnode", Adjustability.NONE, 1);
 		Network.createRelation("action", "propositionnode", Adjustability.NONE, 1);
 		Network.createRelation("do", "actnode", Adjustability.NONE, 1);
+		Network.createRelation("act", "actnode", Adjustability.NONE, 1);
+		Network.createRelation("plan", "actnode", Adjustability.NONE, 1);
+		Network.createRelation("guard", "proposition", Adjustability.NONE, 1);
 		Network.createRelation("grade", "individualNode", Adjustability.NONE, 0);
 		Network.createRelation("prop", "propositionnode", Adjustability.NONE, 0);
 

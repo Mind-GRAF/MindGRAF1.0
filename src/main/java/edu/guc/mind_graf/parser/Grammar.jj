@@ -10,6 +10,7 @@ PARSER_BEGIN(MindGRAF_Parser)
 package edu.guc.mind_graf.parser;
 import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.components.CustomMethod;
+import edu.guc.mind_graf.nodes.IndividualNode;
 import edu.guc.mind_graf.network.NetworkController;
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.paths.IrreflexiveRestrictPath;
@@ -21,29 +22,31 @@ import edu.guc.mind_graf.paths.EmptyPath;
 import edu.guc.mind_graf.paths.FUnitPath;
 import edu.guc.mind_graf.paths.AndPath;
 import java.util.LinkedList;
-
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.io.StringReader;
 import edu.guc.mind_graf.paths.KPlusPath;
 import edu.guc.mind_graf.paths.KStarPath;
 import edu.guc.mind_graf.nodes.ActNode;
+import edu.guc.mind_graf.nodes.DoAllNode;
+import edu.guc.mind_graf.nodes.AchieveNode;
+import edu.guc.mind_graf.nodes.AttitudeNode;
+import edu.guc.mind_graf.nodes.DoOneNode;
+import edu.guc.mind_graf.nodes.SNIFNode;
+import edu.guc.mind_graf.nodes.SNITERATENode;
+import edu.guc.mind_graf.nodes.SNSequenceNode;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.Set;
-import java.util.HashSet;
 import java.util.HashSet;
 import java.util.Hashtable;
 import edu.guc.mind_graf.paths.ConversePath;
 import edu.guc.mind_graf.paths.ComposePath;
 import edu.guc.mind_graf.paths.Path;
-import java.util.Map.Entry;
 import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.caseFrames.Adjustability;
 import edu.guc.mind_graf.context.Context;
 import java.util.Collection;
-import java.util.Collections;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.mgip.reports.KnownInstance;
 import edu.guc.mind_graf.exceptions.DirectCycleException;
@@ -53,6 +56,8 @@ import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.paths.RangeRestrictPath;
 import edu.guc.mind_graf.relations.Relation;
 import edu.guc.mind_graf.nodes.PropositionNode;
+import edu.guc.mind_graf.set.PropositionNodeSet;
+import edu.guc.mind_graf.support.Pair;
 
 public class MindGRAF_Parser {
       private static ContextController controller = new ContextController();
@@ -124,6 +129,88 @@ public class MindGRAF_Parser {
     }
     return groupedMap;
 }
+
+public static void ResetGrading(){
+    isGrading = true;
+    firstExpression = true;
+    levelsCount= 0;
+}
+
+  public static void printHyps(Pair<PropositionNodeSet, PropositionNodeSet>[] hyps) {
+    for (Pair<PropositionNodeSet, PropositionNodeSet> pair : hyps) {
+      Collection<Node> firstSet = pair.getFirst().getNodes();
+      Collection<Node> secondSet = pair.getSecond().getNodes();
+      CLI.print("Ungraded Nodes:");
+      for (Node n : firstSet)
+        CLI.print(n.toString());
+
+      CLI.print("Graded Nodes:");
+      for (Node n : secondSet)
+        CLI.print(n.toString());
+
+    }
+  }
+
+  public static void GetAllHypsInContextAttitude(String CName, String attitude, boolean c, boolean a) {
+    Pair<PropositionNodeSet, PropositionNodeSet>[] hyps;
+    try {
+      if (c && a) {
+        if (!controller.getContextSet().getSet().containsKey(CName)) {
+          CLI.print("No such Context.");
+          return;
+        }
+        if (!controller.getAttitudes().getSet().containsKey(attitude)) {
+          CLI.print("No such Attitude.");
+          return;
+        }
+        Integer attNum = controller.getAttitudeNumber(attitude);
+        hyps = controller.getContext(CName).getHypotheses().get(attNum);
+        CLI.print("Hypotheses in Context " + CName + " Attitude " + attitude + ":");
+        printHyps(hyps);
+        return;
+      }
+      if (c) {
+        if (!controller.getContextSet().getSet().containsKey(CName)) {
+          CLI.print("No such Context.");
+          return;
+        }
+        hyps = controller.getContext(CName).getHypotheses()
+            .get(defaultAttitude);
+        printHyps(hyps);
+        CLI.print("Hypotheses in Context " + CName + " Attitude " + controller.getAttitudeName(defaultAttitude) + ":");
+        return;
+      }
+      if (a) {
+        if (!controller.getAttitudes().getSet().containsKey(attitude)) {
+          CLI.print("No such Attitude.");
+          return;
+        }
+        try {
+          hyps = controller.getContext(controller.getCurrContextName()).getHypotheses()
+              .get(controller.getAttitudeNumber(attitude));
+          CLI.print("Hypotheses in Context " + controller.getCurrContextName() + " Attitude " + attitude + ":");
+          printHyps(hyps);
+
+        } catch (NullPointerException e) {
+          CLI.print("Set Current Context First.");
+          return;
+        }
+      }
+      try {
+        hyps = controller.getContext(controller.getCurrContextName()).getHypotheses().get(defaultAttitude);
+        CLI.print("Hypotheses in Context " + controller.getCurrContextName() + " Attitude "
+            + controller.getAttitudeName(defaultAttitude) + ":");
+        printHyps(hyps);
+
+      } catch (NullPointerException e) {
+        CLI.print("Set Current Context First.");
+        return;
+      }
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
 
   public static void removeFromContext(String CName, String attitude, boolean a, boolean c, PropositionNode propNode) {
     try {
@@ -737,13 +824,13 @@ ActNode Act() throws ParseException :
 }
 {
     (
-        act = SNSequence() |
+        act = mgSequence() |
         act = Attitude() |
         act = Achieve() |
         act = DoOne() |
         act = DoAll() |
         act = GuardedAct() |
-        act = SNIF() |
+        act = MGIF() |
         act = SNIterate()
     )
     {
@@ -756,41 +843,55 @@ ActNode Act() throws ParseException :
 
 
 
-Node SNSequence() throws ParseException:
+SNSequenceNode mgSequence() throws ParseException:
 {
-  Node actNodeOne = null;
-  Node actNodeTwo = null;
+  Node oneActNode = null;
+  ArrayList<Node> allNodes = new ArrayList<Node>();
 
 }
 {
-  "snsequence{"actNodeOne = Act()","actNodeTwo = Act()"}"
+  "mgsequence{"oneActNode = Act(){allNodes.add(oneActNode);}(","oneActNode = Act(){allNodes.add(oneActNode);})*"}"
   {
 
     // relations
-    Relation obj1 = network.createRelation("obj1", "actnode", Adjustability.NONE, 1);
-    Relation obj2 = network.createRelation("obj2", "actnode", Adjustability.NONE, 1);
+    
+    IndividualNode snSeqIndividual = null;
+    SNSequenceNode snsequenceNode = null;
+    // relations and Dcs
+    HashMap<String, DownCable> allDCs = new HashMap<String, DownCable>();
+    for (int i = 0; i < allNodes.size(); i++) {
+      Relation rel = null;
+      if (network.getRelations().containsKey("obj" + (i + 1)))
+        rel = network.getRelations().get("obj" + (i + 1));
+      else
+        rel = network.createRelation("obj" + i, "actnode", Adjustability.NONE, i);
+      DownCable dc = new DownCable(rel, new NodeSet(allNodes.get(i)));
+      allDCs.put(rel.getName(), dc);
+    }
     Relation action = network.getRelations().get("action");
-    Node snSeqIndividual = null;
-    Node snsequenceNode = null;
+    DownCable actionDC = new DownCable(action, new NodeSet(snSeqIndividual));
+    allDCs.put(action.getName(), actionDC);
+    DownCableSet dcSet = new DownCableSet(allDCs);
     try {
       // individual node
-      snSeqIndividual = network.createNode("snsequence", "individualnode");
-      // Cables
-      DownCable actionDC = new DownCable(action, new NodeSet(snSeqIndividual));
-      DownCable obj1DC = new DownCable(obj1, new NodeSet(actNodeOne));
-      DownCable obj2DC = new DownCable(obj2, new NodeSet(actNodeTwo));
-      DownCableSet alldcs = new DownCableSet(actionDC, obj1DC, obj2DC);
-      // snsequence act node creation
-      Node shouldCreate = compareMolecularNode(alldcs);
-      if(shouldCreate == null)
-        snsequenceNode = network.createNode("actnode", new DownCableSet(actionDC, obj1DC, obj2DC));
+      if (network.getBaseNodes().containsKey("mgsequence"))
+        snSeqIndividual = (IndividualNode) network.getBaseNodes().get("mgsequence");
       else
-        snsequenceNode = shouldCreate;
+        snSeqIndividual = (IndividualNode) network.createNode("mgsequence", "individualnode");
+
+      // snsequence act node creation
+      Node shouldCreate = compareMolecularNode(dcSet);
+      if (shouldCreate == null)
+        snsequenceNode =(SNSequenceNode) network.createNode("actnode", dcSet);
+      else
+        snsequenceNode =(SNSequenceNode) shouldCreate;
+      CLI.print("MGSequence Act Node Created.");
+      return snsequenceNode;
+
     } catch (NoSuchTypeException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-    return snsequenceNode;
 
   }
 }
@@ -1099,24 +1200,26 @@ void definePath() throws ParseException:
 }
 }
 
-Node Attitude() throws ParseException : 
+AttitudeNode Attitude() throws ParseException : 
 {
   Node prop = null;
 }
 {
   "attitude{"prop = Expression()"}"
   {
-
+    ResetGrading();
     // relations
     Relation action = network.getRelations().get("action");
     Relation obj = network.getRelations().get("obj");
 
     // attitude indiv node
-    Node attitudeIndividual = null;
-    Node attitudeActNode = null;
+    IndividualNode attitudeIndividual = null;
+    AttitudeNode attitudeActNode = null;
     try {
-      attitudeIndividual = network.createNode("attitude", "individualnode");
-
+      if (network.getBaseNodes().containsKey("attitude"))
+        attitudeIndividual =(IndividualNode) network.getBaseNodes().get("attitude");
+      else
+        attitudeIndividual =(IndividualNode) network.createNode("attitude", "individualnode"); 
       // cables
       DownCable objDC = new DownCable(obj, new NodeSet(prop));
       DownCable actionDC = new DownCable(action, new NodeSet(attitudeIndividual));
@@ -1124,37 +1227,40 @@ Node Attitude() throws ParseException :
       // attitude act node
       Node shouldCreate = compareMolecularNode(alldcs);
       if(shouldCreate == null)
-        attitudeActNode = network.createNode("actnode", new DownCableSet(objDC, actionDC));
+        attitudeActNode =(AttitudeNode) network.createNode("actnode", new DownCableSet(objDC, actionDC));
       else 
-        attitudeActNode = shouldCreate;
+        attitudeActNode = (AttitudeNode)shouldCreate;
+      CLI.print("Attitude Act Node Created.");
+      return attitudeActNode;
 
     } catch (NoSuchTypeException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-    return attitudeActNode;
  
   }
 }
 
-Node Achieve() throws ParseException : 
+AchieveNode Achieve() throws ParseException : 
 {
   Node prop = null;
 }
 {
   "achieve{"prop = Expression()"}"
   {
-
+    ResetGrading();
     // relations
     Relation action = network.getRelations().get("action");
     Relation obj = network.getRelations().get("obj");
 
     // believe indiv node
-    Node achieveIndividual = null;
-    Node achieveActNode = null;
+    IndividualNode achieveIndividual = null;
+    AchieveNode achieveActNode = null;
     try {
-      achieveIndividual = network.createNode("achieve", "individualnode");
-
+      if (network.getBaseNodes().containsKey("achieve"))
+        achieveIndividual =(IndividualNode) network.getBaseNodes().get("achieve");
+      else
+        achieveIndividual =(IndividualNode) network.createNode("achieve", "individualnode"); 
       // cables
       DownCable objDC = new DownCable(obj, new NodeSet(prop));
       DownCable actionDC = new DownCable(action, new NodeSet(achieveIndividual));
@@ -1162,57 +1268,21 @@ Node Achieve() throws ParseException :
       // achieve act node
       Node shouldCreate = compareMolecularNode(alldcs);
       if(shouldCreate == null)
-        achieveActNode = network.createNode("actnode", new DownCableSet(objDC, actionDC));
+        achieveActNode =(AchieveNode) network.createNode("actnode", new DownCableSet(objDC, actionDC));
       else 
-        achieveActNode = shouldCreate;
+        achieveActNode =(AchieveNode) shouldCreate;
+      CLI.print("Achieve Act Node Created.");
 
+      return achieveActNode;
     } catch (NoSuchTypeException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-    return achieveActNode;
  
   }
 }
 
-Node DoOne() throws ParseException :
-{
-  HashMap<String, Node> hashedNodes = new HashMap<String, Node>();
-  Node oneAct;
-}
-{
-  "doone{"oneAct = Act(){hashedNodes.put(oneAct.getName(),oneAct);}
-  (","oneAct = Act() {hashedNodes.put(oneAct.getName(),oneAct);})*"}"
-  {
-    
-    // relations
-    Relation action = network.getRelations().get("action");
-    Relation obj = network.getRelations().get("obj");
-
-    // dooneIndividual
-    Node doOneIndiv = null;
-    Node doOneActNode = null;
-    try {
-      doOneIndiv = network.createNode("doone", "individualnode");
-      //cables
-      DownCable actionDC = new DownCable(action, new NodeSet(doOneIndiv));
-      DownCable objDC = new DownCable(obj, new NodeSet(hashedNodes));
-      DownCableSet allCables = new DownCableSet(actionDC, objDC);
-      Node shouldCreate = compareMolecularNode(allCables);
-      if(shouldCreate == null)
-        doOneActNode = network.createNode("actnode", allCables);
-      else
-        doOneActNode = shouldCreate;
-    } catch (NoSuchTypeException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-    return doOneActNode;
-  }
-}
-
-
-Node DoAll() throws ParseException :
+DoOneNode DoOne() throws ParseException :
 {
   HashMap<String, Node> hashedNodes = new HashMap<String, Node>();
   Node oneAct;
@@ -1226,39 +1296,85 @@ Node DoAll() throws ParseException :
     Relation action = network.getRelations().get("action");
     Relation obj = network.getRelations().get("obj");
 
-    // doAllIndividual
-    Node doAllIndiv = null;
-    Node doAllActNode = null;
+    // dooneIndividual
+    IndividualNode doOneIndiv = null;
+    DoOneNode doOneActNode = null;
     try {
-      doAllIndiv = network.createNode("doall", "individualnode");
-      //cables
-      DownCable actionDC = new DownCable(action, new NodeSet(doAllIndiv));
+      if (network.getBaseNodes().containsKey("doone"))
+        doOneIndiv =(IndividualNode) network.getBaseNodes().get("doone");
+      else
+        doOneIndiv =(IndividualNode) network.createNode("doone", "individualnode"); // cables
+      DownCable actionDC = new DownCable(action, new NodeSet(doOneIndiv));
       DownCable objDC = new DownCable(obj, new NodeSet(hashedNodes));
       DownCableSet allCables = new DownCableSet(actionDC, objDC);
       Node shouldCreate = compareMolecularNode(allCables);
-      if(shouldCreate == null)
-        doAllActNode = network.createNode("actnode", allCables);
+      if (shouldCreate == null)
+        doOneActNode =(DoOneNode) network.createNode("actnode", allCables);
       else
-        doAllActNode = shouldCreate;
+        doOneActNode =(DoOneNode) shouldCreate;
+      CLI.print("DoOne Act Node Created.");
+        return doOneActNode;
+
     } catch (NoSuchTypeException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-    return doAllActNode;
   }
 }
 
-Node GuardedAct() throws ParseException :
+
+DoAllNode DoAll() throws ParseException :
+{
+  HashMap<String, Node> hashedNodes = new HashMap<String, Node>();
+  ActNode oneAct;
+}
+{
+  "do-all{"oneAct = Act(){hashedNodes.put(oneAct.getName(),oneAct);}
+  (","oneAct = Act() {hashedNodes.put(oneAct.getName(),oneAct);})*"}"
+  {
+    
+    // relations
+    Relation action = network.getRelations().get("action");
+    Relation obj = network.getRelations().get("obj");
+
+    // doAllIndividual
+    IndividualNode doAllIndiv = null;
+    DoAllNode doAllActNode = null;
+    try {
+      if (network.getBaseNodes().containsKey("doall"))
+        doAllIndiv = (IndividualNode) network.getBaseNodes().get("doall");
+      else
+        doAllIndiv = (IndividualNode) network.createNode("doall", "individualnode");
+      // cables
+      DownCable actionDC = new DownCable(action, new NodeSet(doAllIndiv));
+      DownCable objDC = new DownCable(obj, new NodeSet(hashedNodes));
+      DownCableSet allCables = new DownCableSet(actionDC, objDC);
+      Node shouldCreate = compareMolecularNode(allCables);
+      if (shouldCreate == null)
+        doAllActNode = (DoAllNode) network.createNode("doallnode", allCables);
+      else
+        doAllActNode = (DoAllNode) shouldCreate;
+      CLI.print("Do All Act Node Created.");
+      return doAllActNode;
+    } catch (NoSuchTypeException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
+}
+
+ActNode GuardedAct() throws ParseException :
 {
   Node actNode = null;
   Node prop = null;
 }
 {
-  "guard{"actNode = Act()","prop = Expression()"}"
+  "guarded{"actNode = Act()","prop = Expression()"}"
   {
-        // Relations
-    Relation actRel = network.createRelation("act", "actnode", Adjustability.NONE, 1);
-    Relation guardRel = network.createRelation("guard", "propositionnode", Adjustability.NONE, 1);
+    ResetGrading();
+    // Relations
+    Relation actRel = network.getRelations().get("act");
+    Relation guardRel = network.getRelations().get("guard");
 
     // cables
     DownCable actDC = new DownCable(actRel, new NodeSet(actNode));
@@ -1266,74 +1382,83 @@ Node GuardedAct() throws ParseException :
 
     DownCableSet allcables = new DownCableSet(actDC, guardDC);
     // creating guarded actnode
-    Node guardedActNode = null;
+    ActNode guardedActNode = null;
     Node shouldCreate = compareMolecularNode(allcables);
     try {
       if (shouldCreate == null)
-        guardedActNode = network.createNode("actnode", allcables);
+        guardedActNode =(ActNode) network.createNode("actnode", allcables);
       else
-        guardedActNode = shouldCreate;
+        guardedActNode =(ActNode) shouldCreate;
+        CLI.print("Guarded Act Node Created.");
+        return guardedActNode;
     } catch (NoSuchTypeException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-    return guardedActNode;
   }
 }
 
-Node SNIF() throws ParseException : 
+SNIFNode MGIF() throws ParseException : 
 {
   Node oneGuardAct = null;
   HashMap<String,Node> allGuardActs = new HashMap<String, Node>();
 }
 {
-  "snif{"oneGuardAct = GuardedAct(){allGuardActs.put(oneGuardAct.getName(),oneGuardAct);}(","oneGuardAct = GuardedAct(){allGuardActs.put(oneGuardAct.getName(),oneGuardAct);})*"}"
+  "mgif{"oneGuardAct = GuardedAct(){allGuardActs.put(oneGuardAct.getName(),oneGuardAct);}(","oneGuardAct = GuardedAct(){allGuardActs.put(oneGuardAct.getName(),oneGuardAct);})*"}"
   {
     // relations
     Relation action = network.getRelations().get("action");
     Relation obj = network.getRelations().get("obj");
 
     // snif indiv node
-    Node snifIndividual = null;
-    Node snifActNode = null;
+    IndividualNode snifIndividual = null;
+    SNIFNode snifActNode = null;
     try {
-      snifIndividual = network.createNode("snif", "individualnode");
-      //cables
-       DownCable actionDC = new DownCable(action, new NodeSet(snifIndividual));
-       DownCable objDC = new DownCable(obj, new NodeSet(allGuardActs));
-       DownCableSet allCables = new DownCableSet(actionDC, objDC);
+      if (network.getBaseNodes().containsKey("mgif"))
+        snifIndividual =(IndividualNode) network.getBaseNodes().get("mgif");
+      else
+        snifIndividual =(IndividualNode) network.createNode("mgif", "individualnode"); // cables
+      DownCable actionDC = new DownCable(action, new NodeSet(snifIndividual));
+      DownCable objDC = new DownCable(obj, new NodeSet(allGuardActs));
+      DownCableSet allCables = new DownCableSet(actionDC, objDC);
 
-       //creating snif act node
-       Node shouldCreate = compareMolecularNode(allCables);
-       if(shouldCreate == null)
-        snifActNode = network.createNode("actnode", allCables);
-       else
-        snifActNode = shouldCreate;
+      // creating snif act node
+      Node shouldCreate = compareMolecularNode(allCables);
+      if (shouldCreate == null)
+        snifActNode = (SNIFNode) network.createNode("actnode", allCables);
+      else
+        snifActNode =(SNIFNode) shouldCreate;
+      CLI.print("MGIF Act Node Created.");
+      return snifActNode;
     } catch (NoSuchTypeException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-    return snifActNode;  }
+
+    }
 }
 
-Node SNIterate() throws ParseException : 
+SNITERATENode SNIterate() throws ParseException : 
 {
   Node oneGuardAct = null;
   HashMap<String,Node> allGuardActs = new HashMap<String, Node>();
 }
 {
-  "sniterate{"oneGuardAct = GuardedAct(){allGuardActs.put(oneGuardAct.getName(),oneGuardAct);}(","oneGuardAct = GuardedAct(){allGuardActs.put(oneGuardAct.getName(),oneGuardAct);})*"}"
+  "mgiterate{"oneGuardAct = GuardedAct(){allGuardActs.put(oneGuardAct.getName(),oneGuardAct);}(","oneGuardAct = GuardedAct(){allGuardActs.put(oneGuardAct.getName(),oneGuardAct);})*"}"
   {
     // relations
     Relation action = network.getRelations().get("action");
     Relation obj = network.getRelations().get("obj");
 
     // sniterate indiv node
-    Node sniterateIndividual = null;
-    Node sniterateActNode = null;
+    IndividualNode sniterateIndividual = null;
+    SNITERATENode sniterateActNode = null;
     try {
-      sniterateIndividual = network.createNode("sniterate", "individualnode");
-      //cables
+      if (network.getBaseNodes().containsKey("mgiterate"))
+        sniterateIndividual =(IndividualNode) network.getBaseNodes().get("mgiterate");
+      else
+        sniterateIndividual =(IndividualNode) network.createNode("mgiterate", "individualnode"); 
+        //cables
        DownCable actionDC = new DownCable(action, new NodeSet(sniterateIndividual));
        DownCable objDC = new DownCable(obj, new NodeSet(allGuardActs));
        DownCableSet allCables = new DownCableSet(actionDC, objDC);
@@ -1341,14 +1466,16 @@ Node SNIterate() throws ParseException :
        //creating sniterate act node
        Node shouldCreate = compareMolecularNode(allCables);
        if(shouldCreate == null)
-        sniterateActNode = network.createNode("actnode", allCables);
+        sniterateActNode = (SNITERATENode)network.createNode("actnode", allCables);
        else
-        sniterateActNode = shouldCreate;
+        sniterateActNode = (SNITERATENode) shouldCreate;
+        CLI.print("MGITERATE Act Node Created.");
+        return sniterateActNode;
     } catch (NoSuchTypeException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-    return sniterateActNode;  }
+  }
 }
 
 
@@ -2002,17 +2129,70 @@ void performAct() throws ParseException :
 
 }
 
-void defineNonPrimitive() throws ParseException :
+ActNode defineNonPrimitive() throws ParseException :
 {
   ActNode plan = null;
   String actName  = null;
   boolean p = false;
+  String obj = null;
 }
 {
-  "define-nonprimitive-act" actName = <STRING>.image (plan = Act(){p= true;})?
+  "define-nonprimitive-act" actName = <STRING>.image obj = <STRING>.image  (plan = Act(){p= true;})?
   {
-    if(p){
-      
+    try {
+
+      actName = actName.trim().toLowerCase();
+      obj = obj.trim().toLowerCase();
+      IndividualNode actionNode = null;
+      IndividualNode objNode = null;
+      // relations
+      Relation action = network.getRelations().get("action");
+      Relation object = network.getRelations().get("object");
+      Relation act = network.getRelations().get("act");
+      Relation planRel = network.getRelations().get("plan");
+      // nodes
+      if (network.getBaseNodes().containsKey(actName))
+        actionNode = (IndividualNode) network.getBaseNodes().get(actName);
+      else
+        actionNode = (IndividualNode) network.createNode(actName, "individualnode");
+      if (network.getBaseNodes().containsKey(obj))
+        actionNode = (IndividualNode) network.getBaseNodes().get(obj);
+      else
+        actionNode = (IndividualNode) network.createNode(obj, "individualnode");
+
+      // downcables
+      DownCable actionDC = new DownCable(action, new NodeSet(actionNode));
+      DownCable objDC = new DownCable(object, new NodeSet(objNode));
+
+      DownCableSet actNodeset = new DownCableSet(actionDC, objDC);
+
+      Node shouldCreate = compareMolecularNode(actNodeset);
+      ActNode actNode = null;
+      if (shouldCreate == null)
+        actNode = (ActNode) network.createNode("actnode", actNodeset);
+      else
+        actNode = (ActNode) shouldCreate;
+      DownCable actDC = new DownCable(act, new NodeSet(actNode));
+      if (p) {
+        DownCable planDC = new DownCable(planRel, new NodeSet(plan)); // p
+        DownCableSet planACtDC = new DownCableSet(planDC, actDC);// p
+
+        ActNode planActNode = null; // p
+        Node shouldCreate2 = compareMolecularNode(planACtDC); // p
+        if (shouldCreate2 == null) // p
+          planActNode = (ActNode) network.createNode("actnode", planACtDC);
+        else
+          planActNode = (ActNode) shouldCreate2;
+        CLI.print("Non-Primitive Act '" + actName + "' with Plan is Defined.");
+        return planActNode; // p
+      }
+      CLI.print("Non-Primitive Act '" + actName + "' is Defined.");
+
+      return actNode;
+    } catch (NoSuchTypeException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+      return null;
     }
   }
   
@@ -2028,33 +2208,58 @@ void definePrimitive() throws ParseException :
 {
   "define-primitive-act" actName = <STRING>.image fileName = <STRING>.image
   {
-  
+    String xxxxxxxxxxxxxxxxxx;
   }
   
 
 }
 
+void getAllSupportedInContext() throws ParseException :
+{
+  String CName = null;
+  boolean c = false;
+  boolean a = false;
+  String attitude = null;
+}
+{
+  "get-context-hyps" ("c{"CName = <STRING>.image"}"{ c = true;})?
+   ("a{"attitude = <STRING>.image"}"{ a = true ;})?
+ {
 
+  //GetAllHypsInContextAttitude(CName, attitude, c, a);
+}
+}
 
 
 void getAllSupported() throws ParseException :
 {}
 {
   "get-supported"
-  {
-    HashMap<Integer, ArrayList<String>> allWffs = wffs;
-    if (allWffs != null) {
-      for (ArrayList<String> list : allWffs.values()) {
-        for (int i = 0; i < list.size(); i++) {
-          if (i == 0)
-            CLI.print(list.getFirst() + " is Supported in :");
-          else
-            CLI.print(list.get(i));
+ {
+
+      CLI.print("Printing All Hypotheses Supported in All Contexts...");
+      HashMap<String, Context> contextSet = controller.getContextSet().getSet();
+    for (Context c : contextSet.values()) {
+      CLI.print("Context " + c + ":");
+      Collection<Pair<PropositionNodeSet, PropositionNodeSet>[]> hyps = c.getHypotheses().values();
+      for (Pair<PropositionNodeSet, PropositionNodeSet>[] pairArray : hyps) {
+        for (Pair<PropositionNodeSet, PropositionNodeSet> pair : pairArray) {
+          Collection<Node> firstSet = pair.getFirst().getNodes();
+          Collection<Node> secondSet = pair.getSecond().getNodes();
+          CLI.print("Ungraded Nodes:");
+          for (Node n : firstSet)
+            CLI.print(n.toString());
+
+          CLI.print("Graded Nodes:");
+          for (Node n : secondSet)
+            CLI.print(n.toString());
+
         }
       }
-    } else 
-      CLI.print("No Hypothesis Supported in Any Context.");
-  }
+      CLI.print("");
+
+ }
+}
 }
 
 
