@@ -110,9 +110,7 @@ public class BridgeRule extends RuleNode {
         } else {
             bridgeSet.add(this);
         }
-        System.out.println(report.getAttitude());
         Support reportSup = new Support(-1, report.getAttitude(), Network.currentLevel, justSupport, bridgeSet);
-        System.out.println(reportSup);
         return reportSup;
     }
 
@@ -122,9 +120,9 @@ public class BridgeRule extends RuleNode {
                 Report newReportInAttitude = report.clone();
                 newReportInAttitude.setAttitude(att);
                 newReportInAttitude.setSupport(createReportSup(newReportInAttitude));
-//                Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> pair = new Pair<>(new HashMap<>(), new PropositionNodeSet(this));
-//                ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>> justSupport = new ArrayList<>();
-//                justSupport.add(pair);
+                for(Node node : attitudeToCq.get(att)){
+                    System.out.println("Inferred " + node.applySubstitution(newReportInAttitude.getSubstitutions()));
+                }
                 sendReportToConsequents(attitudeToCq.get(att), newReportInAttitude);
             }
         }

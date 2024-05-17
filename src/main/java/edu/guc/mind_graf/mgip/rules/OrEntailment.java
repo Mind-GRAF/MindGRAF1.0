@@ -32,7 +32,7 @@ public class OrEntailment  extends RuleNode {
         return inferrable;
     }
 
-    public void sendInferenceReports(HashMap<RuleInfo, Report> reports) {
+    public void sendInferenceReports(HashMap<RuleInfo, Report> reports) throws NoSuchTypeException {
         sendInferenceToCq(reports, cq);
     }
 

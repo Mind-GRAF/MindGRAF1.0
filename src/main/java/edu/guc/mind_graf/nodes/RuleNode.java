@@ -52,7 +52,6 @@ public abstract class RuleNode extends PropositionNode {
     }
 
     public void applyRuleHandler(Report report) throws NoSuchTypeException {
-        System.out.println();
         System.out.println("applyRuleHandler called on the report: " + report.stringifyReport());
         try {
             RuleInfoSet inserted = ruleInfoHandler.insertRI(RuleInfo.createRuleInfo(report));
@@ -92,6 +91,7 @@ public abstract class RuleNode extends PropositionNode {
     }
 
     public Support createSupport(RuleInfo ri) throws NoSuchTypeException, DirectCycleException {
+        System.out.println("Creating the inference support");
         PropositionNodeSet supportPropSet = new PropositionNodeSet();
         for(FlagNode fn : ri.getFns()){
             Node n = fn.getNode();
@@ -112,21 +112,25 @@ public abstract class RuleNode extends PropositionNode {
         return reportSup;
     }
 
-    public void sendResponseToArgs(HashMap<RuleInfo, Report> reports, NodeSet arg) {
+    public void sendResponseToArgs(HashMap<RuleInfo, Report> reports, NodeSet arg) throws NoSuchTypeException {
         for (RuleInfo ri : reports.keySet()) {
             Report report = reports.get(ri);
             NodeSet filteredArgs = new NodeSet();
             for (Node node : arg) {
                 if (!ri.getFns().containsNode(node)) {
                     filteredArgs.add(node);
+                    System.out.println("Inferred " + node.applySubstitution(report.getSubstitutions()));
                 }
             }
             this.sendReportToConsequents(filteredArgs, report);
         }
     }
 
-    public void sendInferenceToCq(HashMap<RuleInfo, Report> reports, NodeSet cq) {
+    public void sendInferenceToCq(HashMap<RuleInfo, Report> reports, NodeSet cq) throws NoSuchTypeException {
         for (Report report : reports.values()) {
+            for(Node node : cq){
+                System.out.println("Inferred " + node.applySubstitution(report.getSubstitutions()));
+            }
             this.sendReportToConsequents(cq, report);
         }
     }

@@ -104,9 +104,9 @@ public class RuleInfo {
         return res;
     }
 
-    public RuleInfo addNullSubs(FreeVariableSet ns){
+    public RuleInfo addNullSubs(FreeVariableSet vars){
         RuleInfo ruleInfoWithNulls = clone();
-        for(Node n : ns.getFreeVariables()){
+        for(Node n : vars.getFreeVariables()){
             if(!ruleInfoWithNulls.getSubs().contains(n)){
                 ruleInfoWithNulls.getSubs().add(n, null);
             }
