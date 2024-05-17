@@ -98,7 +98,9 @@ public class Matcher {
             } else {
                 PropositionNodeSet propSet = new PropositionNodeSet(((NodeSet) match.getSupport()));
                 Pair<PropositionNodeSet, PropositionNodeSet> pair = new Pair<>(propSet, new PropositionNodeSet());
-                // match.setSupport(new Support(-2, attitude, 0, pair));
+                HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> map = new HashMap<>();
+                map.put(attitude, pair);
+                match.setSupport(new Support(-2, attitude, Network.currentLevel, map, new PropositionNodeSet()));
             }
             if (match.getMatchType() == -1) {
                 match.setMatchType(0);

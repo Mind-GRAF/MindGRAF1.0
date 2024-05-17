@@ -3,7 +3,7 @@ package edu.guc.mind_graf.set;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import edu.guc.mind_graf.nodes.FlagNode;
+import edu.guc.mind_graf.mgip.ruleHandlers.FlagNode;
 import edu.guc.mind_graf.nodes.Node;
 
 public class FlagNodeSet implements Iterable<FlagNode>{
@@ -96,9 +96,9 @@ public class FlagNodeSet implements Iterable<FlagNode>{
 
     @Override
     public String toString() {
-        String s = "FlagNodeSet{ ";
+        String s = "{";
         for(FlagNode fn : flagNodes){
-            s += fn + " ";
+            s += fn;
         }
         s += "}";
         return s;

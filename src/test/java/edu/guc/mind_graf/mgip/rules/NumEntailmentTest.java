@@ -8,7 +8,7 @@ import edu.guc.mind_graf.exceptions.InvalidRuleInfoException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.network.Network;
-import edu.guc.mind_graf.nodes.FlagNode;
+import edu.guc.mind_graf.mgip.ruleHandlers.FlagNode;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.RuleNode;
 import edu.guc.mind_graf.set.FlagNodeSet;

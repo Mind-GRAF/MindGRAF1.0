@@ -19,11 +19,13 @@ public class Thresh extends RuleNode {
 
     public Thresh(DownCableSet downcableSet) {
         super(downcableSet);
+        System.out.println("Creating a thresh rule node");
         thresh = downcableSet.get("thresh").getNodeSet().getIntValue();
         threshmax = downcableSet.get("threshmax").getNodeSet().getIntValue();
         arg = downcableSet.get("arg").getNodeSet();
         PropositionNodeSet antecedents = RuleInfoHandler.getVariableAntecedents(arg);
         int cAnt = arg.size() - antecedents.size(); // number of constants in the antecedents (total args - variable args)
+        System.out.println("The rule has " + antecedents.size() + " open antecedents and " + cAnt + " closed antecedents.");
         this.ruleInfoHandler = Ptree.constructPtree(antecedents, Math.max(0, thresh - 1 - cAnt), Math.max(0, arg.size() - threshmax - 1 - cAnt), 0);
     }
 
@@ -33,7 +35,7 @@ public class Thresh extends RuleNode {
         for(RuleInfo ri : this.getRootRuleInfos()){
             if(ri.getPcount() == thresh - 1 && ri.getNcount() == arg.size() - threshmax)
                 inferrable[1].addRuleInfo(ri);
-            else if(ri.getPcount() >= thresh && ri.getNcount() == (arg.size() - threshmax - 1))
+            else if(ri.getPcount() == thresh && ri.getNcount() == (arg.size() - threshmax - 1))
                 inferrable[0].addRuleInfo(ri);
         }
         return inferrable;

@@ -149,7 +149,7 @@ public class Scheduler {
      * 
      * @param actNode
      */
-    public static void addToActQueue(ActNode actNode) {
+    public static void addToActQueue(ActNode actNode) throws NoSuchTypeException {
         actQueue.add(actNode);
     }
 

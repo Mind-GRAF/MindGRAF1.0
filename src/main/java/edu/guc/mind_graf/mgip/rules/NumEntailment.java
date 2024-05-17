@@ -21,11 +21,13 @@ public class NumEntailment extends RuleNode {
 
     public NumEntailment(DownCableSet downcableSet) {
         super(downcableSet);
+        System.out.println("Creating a numerical-entailment rule node");
         i = downcableSet.get("i").getNodeSet().getIntValue();
         ant = downcableSet.get("ant").getNodeSet();
         cq = downcableSet.get("cq").getNodeSet();
         PropositionNodeSet antecedents = RuleInfoHandler.getVariableAntecedents(ant);
         int cAnt = ant.size() - antecedents.size();
+        System.out.println("The rule has " + antecedents.size() + " open antecedents and " + cAnt + " closed antecedents.");
         this.ruleInfoHandler = Ptree.constructPtree(antecedents, Math.max(0, i - cAnt), Integer.MAX_VALUE, 1);
         this.ruleInfoHandler.setcMin(1);
     }

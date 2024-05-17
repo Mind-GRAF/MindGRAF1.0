@@ -121,7 +121,7 @@ public class RuleInfoSet implements Iterable<RuleInfo>{
     public String toString() {
         String res = "";
         for(RuleInfo ri : ris) {
-            res += ri.toString() + " ";
+            res += ri.toString() + "\n";
         }
         return res;
     }

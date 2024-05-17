@@ -5,30 +5,34 @@ import java.util.ArrayList;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.context.ContextController;
+import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.reports.Report;
 import edu.guc.mind_graf.mgip.requests.ChannelType;
 import edu.guc.mind_graf.set.NodeSet;
 
-public class SNIFNode extends ActNode {
+public class MGIterateNode extends ActNode {
 
     private ActAgenda controlAgenda;
 
-    public SNIFNode(DownCableSet downCables) {
+    public MGIterateNode(DownCableSet downCables) {
         super(downCables);
         this.setPrimitive(true);
         controlAgenda = ActAgenda.START;
     }
 
+    public ActAgenda getControlAgenda() {
+        return controlAgenda;
+    }
+
     @Override
-    public void runActuator() {
+    public void runActuator() throws NoSuchTypeException  {
         switch(controlAgenda) {
 			case START:
                 controlAgenda = ActAgenda.TEST;
                 this.setAgenda(ActAgenda.EXECUTE);
                 Scheduler.addToActQueue(this);
                 NodeSet guards = new NodeSet();
-				System.out.println("Sending requests to guards");
                 for(Node n: this.getDownCableSet().get("obj").getNodeSet()) {
                     guards.addAllTo(n.getDownCableSet().get("guard").getNodeSet());
 					n.sendRequestsToNodeSet(guards, new Substitutions(), new Substitutions(),
@@ -52,7 +56,6 @@ public class SNIFNode extends ActNode {
                         }
                         boolean containsAll = true;
                         for(Node n: act.getDownCableSet().get("guard").getNodeSet()) {
-							System.out.println("Checking if satisfied guards contain: " + n.getName());
                             if(!satisfiedGaurds.contains(n)) {
                                 containsAll = false;
                                 break;
@@ -63,14 +66,25 @@ public class SNIFNode extends ActNode {
                             possibleActs.add((ActNode) act.getDownCableSet().get("act").getNodeSet().getNode(0));
                         }
                     }
-                    sendDoOneToActQueue(possibleActs);
-                } catch(Exception e) {
+                    System.out.println("Possible acts:" + possibleActs.size());
+                    if(possibleActs.size() > 0){
+                        sendDoOneToActQueue(possibleActs);
+                        this.restartAgenda();
+                        Scheduler.addToActQueue(this);
+                    }
+                    else System.out.println("No possible acts found");
+                    this.setAgenda(ActAgenda.EXECUTE);
+                    Scheduler.addToActQueue(this);
+                } catch(NoSuchTypeException e) {
                     System.out.println("SOMETHING WENT WRONG!! EXCEPTION THROWN FROM ACTNODE.JAVA 10");
                 }
+            case DONE:
+                System.out.println("MGITERATE DONE");
+                Scheduler.addToActQueue(this);
                 break;
 			default:
                 System.out.print("UNIDENTIFIED AGENDA FOR ACHIEVE!!");
+                return;
 		}
     }
-
 }
