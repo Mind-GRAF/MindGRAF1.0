@@ -76,22 +76,26 @@ public class ContextController {
     }
 
 
-    //TODO: wael change these to use nodeId
-    public static void addHypothesisToContext(String contextName, int level, int attitudeId, PropositionNode node) {
+    public static void addHypothesisToContext(String contextName, int level, int attitudeId, int nodeId) {
+        System.out.println("In addHypothesisToContext");
+        PropositionNode node = (PropositionNode) Network.getNodeById(nodeId);
         Context c = ContextController.getContext(contextName);
         c.addHypothesisToContext(level, attitudeId, node);
+        System.out.println("Added Node with Id: "+ nodeId +" to context: "+ contextName);
         //TODO: wael uncomment this it's removed to test
 //        Revision.checkContradiction(c,attitudeId,node);
     }
 
-    public static void addHypothesisToContext(int level, int attitudeNumber, PropositionNode node) {
-        ContextController.addHypothesisToContext(ContextController.currContext.getName(), level, attitudeNumber, node);
+    public static void addHypothesisToContext(int level, int attitudeNumber, int nodeId) {
+        ContextController.addHypothesisToContext(ContextController.currContext.getName(), level, attitudeNumber, nodeId);
     }
 
     public static void removeHypothesisFromContext(String contextName, int level, int attitudeId, int nodeId) {
+        System.out.println("In removeHypothesisFromContext");
         Context c = ContextController.getContext(contextName);
-        PropositionNode n = (PropositionNode) Network.getNodeById(nodeId);
-        c.removeHypothesisFromContext(level, attitudeId, n);
+        PropositionNode node = (PropositionNode) Network.getNodeById(nodeId);
+        c.removeHypothesisFromContext(level, attitudeId, node);
+        System.out.println("Removed Node with Id: "+ nodeId +" to context: "+ contextName);
     }
 
     public static void removeHypothesisFromContext(int level, int attitudeId, int nodeId) {

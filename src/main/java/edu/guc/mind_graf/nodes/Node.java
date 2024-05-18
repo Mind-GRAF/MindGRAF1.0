@@ -63,7 +63,7 @@ public abstract class Node {
 
 		this.downCableSet = downCables;
 		freeVariableSet = new NodeSet();
-		System.out.println(freeVariableSet.getValues());
+//		System.out.println(freeVariableSet.getValues());
 		for (Cable c : downCables.getValues())
 			for (Node node : c.getNodeSet().getValues())
 				node.getUpCableSet().updateCables(c.getRelation(), this);

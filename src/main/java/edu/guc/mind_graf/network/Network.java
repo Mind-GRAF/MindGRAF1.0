@@ -79,6 +79,11 @@ public class Network {
 
 	public void addBasicNodes() throws NoSuchTypeException {
 		Network.createNode("0", "individualNode");
+		Network.createNode("1", "individualNode");
+		Network.createNode("2", "individualNode");
+		Network.createNode("3", "individualNode");
+		Network.createNode("4", "individualNode");
+
 	}
 
 	// first constructor for molecular nodes
