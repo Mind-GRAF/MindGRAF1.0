@@ -4,7 +4,7 @@ import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.network.Network;
-import edu.guc.mind_graf.nodes.FlagNode;
+import edu.guc.mind_graf.mgip.ruleHandlers.FlagNode;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.support.Support;
 import org.junit.jupiter.api.Test;

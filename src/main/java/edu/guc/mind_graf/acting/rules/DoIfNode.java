@@ -16,6 +16,7 @@ import edu.guc.mind_graf.mgip.requests.ChannelType;
 import edu.guc.mind_graf.mgip.requests.IfToRuleChannel;
 import edu.guc.mind_graf.mgip.requests.Request;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
+import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.nodes.ActNode;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.RuleNode;
@@ -123,7 +124,7 @@ public class DoIfNode extends RuleNode {
         } else {
             if (knownInstanceSupport != null) {
                 for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> currSupport : knownInstanceSupport
-                        .getJustificationSupport().get(0).get(currentAttitudeId)) {
+                        .getJustificationSupport().get(Network.currentLevel).get(currentAttitudeId)) {
                     HashMap<Integer, PropositionNodeSet> hash = new HashMap<>();
                     for (Integer innerAttitude : currSupport.getFirst().keySet()) {
                         PropositionNodeSet currNodeSet = currSupport.getFirst().get(currentAttitudeId).getFirst();

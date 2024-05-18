@@ -505,6 +505,7 @@ public class Network {
 	}
 
 	public void printNodes() {
+		System.out.println("All the nodes in the network are:");
 		String result = "";
 		for (Node node : nodes.values()) {
 			result += node.toString() + "\n";

@@ -284,6 +284,22 @@ public abstract class Node {
 		}
 	}
 
+
+	// moved from RuleNode up to Node
+	public Substitutions onlyRelevantSubs(Substitutions filterSubs) {
+		NodeSet freeVariablesSet = this.getFreeVariables();
+		Substitutions relevantSubs = new Substitutions();
+		for (Node variableNode : freeVariablesSet.getValues()) {
+			for (Node var : filterSubs.getMap().keySet()) {
+				Node value = filterSubs.getMap().get(var);
+				if (var.getName().equals(variableNode.getName())) {
+					relevantSubs.add(var, value);
+				}
+			}
+		}
+		return relevantSubs;
+	}
+
 	public Node applySubstitution(Substitutions substitutions)
 			throws NoSuchTypeException {
 		HashMap<String, Node> builtNodes = new HashMap<String, Node>();

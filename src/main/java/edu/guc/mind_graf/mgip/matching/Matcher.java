@@ -39,16 +39,11 @@ import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.support.Pair;
 import edu.guc.mind_graf.support.Support;
 
-/*
-TODO:
-
-replace NodeSet with Support
-
-*/
-
 public class Matcher {
-    static ArrayList<Match> matchList;
+    // List of matches to be returned
+    private static ArrayList<Match> matchList;
 
+    // The main matching method (the only one called from outside the class)
     public static List<Match> match(Node queryNode, Context ctx, int attitude) throws DirectCycleException {
         matchList = new ArrayList<>();
         if (queryNode.getSyntacticType() == Syntactic.VARIABLE) {
@@ -109,6 +104,7 @@ public class Matcher {
         return matchList;
     }
 
+    // Main unification method
     private static boolean unify(Node queryNode, Node node, Match match, Context ctx, int attitude, int scope) {
         if (!queryNode.getClass().isAssignableFrom(node.getClass())) {
             matchList.remove(match);
@@ -189,6 +185,7 @@ public class Matcher {
         return true;
     }
 
+    // Unification of two variables
     private static boolean unifyVariable(Node queryNode, Node node, Match match, Context ctx, int attitude, int scope) {
         if ((queryNode.getSyntacticType() == Syntactic.MOLECULAR
                 && occursCheck(node, queryNode, match))
@@ -268,6 +265,7 @@ public class Matcher {
         return true;
     }
 
+    // Unification of a permutation of the two cables of two molecular nodes
     private static Match unifyMolecular(List<Node> queryNodeList, List<Node> nodeList, Relation relation,
             Match match, Context ctx, int attitude, int scope) {
         if (queryNodeList.size() != nodeList.size()) {
@@ -401,6 +399,8 @@ public class Matcher {
         matchList.remove(match);
     }
 
+    // Helper method for changing the bindings in the substitutions to perform
+    // composite substitutions
     private static Node changeBindingHelper(Node node, Node nodeToBeChanged, Node nodeChangedTo) {
         if (node.equals(nodeToBeChanged)) {
             return nodeChangedTo;
@@ -427,6 +427,8 @@ public class Matcher {
         return null;
     }
 
+    // Method for changing the bindings in the substitutions to perform composite
+    // substitutions
     private static void changeBindingInSubs(Node node1, Node node2, boolean checkFilter, Match match) {
         List<Node[]> bindingsToBeChanged = new ArrayList<>();
         Map<Node, Node> map;
@@ -452,6 +454,7 @@ public class Matcher {
         }
     }
 
+    // Helper method for checking if a node passes the first check of a path
     private static boolean passPathFirstCheck(Node node, Match match, Path path) {
         if (path instanceof EmptyPath || path instanceof BangPath || path instanceof KStarPath) {
             return true;
@@ -503,6 +506,7 @@ public class Matcher {
         return newList;
     }
 
+    // Helper method for checking if a UVBR trap is present
     private static boolean uvbrTrap(Node term, Node value, Substitutions subs) {
         NodeSet parents = term.getDirectParents();
         for (Node parent : parents.getValues()) {
@@ -562,6 +566,7 @@ public class Matcher {
         return permutations;
     }
 
+    // Helper method for checking if a variable occurs in a molecular node
     private static boolean occursCheck(Node var, Node node, Match match) {
         if (var.equals(node))
             return true;
@@ -588,6 +593,8 @@ public class Matcher {
         return false;
     }
 
+    // Helper method for checking if a cable can be null (we check the match type of
+    // the current match object and the adjustability of the cable)
     private static boolean checkCable(Node queryNode, Node node, Relation downRelation, Match match,
             boolean isNullInNode) {
         if (downRelation.getAdjust() == Adjustability.NONE)

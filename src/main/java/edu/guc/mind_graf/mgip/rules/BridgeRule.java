@@ -1,5 +1,6 @@
 package edu.guc.mind_graf.mgip.rules;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -14,12 +15,14 @@ import edu.guc.mind_graf.mgip.requests.Channel;
 import edu.guc.mind_graf.mgip.requests.ChannelType;
 import edu.guc.mind_graf.mgip.requests.MatchChannel;
 import edu.guc.mind_graf.mgip.requests.Request;
+import edu.guc.mind_graf.mgip.ruleHandlers.FlagNode;
 import edu.guc.mind_graf.mgip.ruleHandlers.Ptree;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
+import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.nodes.RuleNode;
@@ -27,6 +30,8 @@ import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
+import edu.guc.mind_graf.support.Pair;
+import edu.guc.mind_graf.support.Support;
 
 public class BridgeRule extends RuleNode {
 
@@ -37,6 +42,7 @@ public class BridgeRule extends RuleNode {
 
     public BridgeRule(DownCableSet downCableSet) {
         super(downCableSet);
+        System.out.println("Creating a bridge rule node");
         attitudeToAnt = new HashMap<>();
         attitudeToCq = new HashMap<>();
         for(DownCable downCable : downCableSet){
@@ -58,20 +64,10 @@ public class BridgeRule extends RuleNode {
             }
         }
         cAnt = allAntecedents - antecedents.size();
+        System.out.println("The rule has " + antecedents.size() + " open antecedents and " + cAnt + " closed antecedents.");
         this.ruleInfoHandler = Ptree.constructPtree(antecedents, antecedents.size(), Integer.MAX_VALUE, 2);
         this.ruleInfoHandler.setcMin(cAnt);
     }
-
-//    public boolean mayTryToInfer() {
-//        if(cAnt < this.ruleInfoHandler.getConstantAntecedents().getPcount())
-//            return false;
-//        for(PtreeNode root : ((Ptree)ruleInfoHandler).getRoots()) {
-//            if(root.getSIndex().getAllRuleInfos().isEmpty()) {  // maybe should also check pcount of roots?
-//                return false;
-//            }
-//        }
-//        return true;
-//    }
 
     public RuleInfoSet[] mayInfer() {
         RuleInfoSet[] inferrable = {new RuleInfoSet()};  // at index 0 the set of positively inferred, at index 1 the set of negatively inferred
@@ -84,22 +80,53 @@ public class BridgeRule extends RuleNode {
 
     public void applyRuleHandler(Report report) throws NoSuchTypeException {
         if(attitudeToAnt.containsKey(report.getAttitude()) && attitudeToAnt.get(report.getAttitude()).contains(report.getReporterNode())){
+            int originalAttitude = report.getAttitude();
             report.setAttitude(-1);
             super.applyRuleHandler(report);
+            report.setAttitude(originalAttitude);
         }
     }
 
-    public void sendInferenceReports(HashMap<RuleInfo, Report> reports) {
+    public Support createSupport(RuleInfo ri) throws NoSuchTypeException, DirectCycleException {
+        return null;
+    }
+
+    private Support createReportSup(Report report) throws NoSuchTypeException, DirectCycleException {
+        HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> justSupport = new HashMap<>();
+        for(Integer att : attitudeToAnt.keySet()){
+            PropositionNodeSet supportPropSet = new PropositionNodeSet();
+            for(Node antecedent : attitudeToAnt.get(att)){
+                if(antecedent.isOpen()){
+                    supportPropSet.add(antecedent.applySubstitution(antecedent.onlyRelevantSubs(report.getSubstitutions())));
+                } else {
+                    supportPropSet.add(antecedent);
+                }
+            }
+            justSupport.put(att, new Pair(supportPropSet, new PropositionNodeSet()));
+        }
+        PropositionNodeSet bridgeSet = new PropositionNodeSet();
+        if(this.isOpen()){
+            bridgeSet.add(this.applySubstitution(report.getSubstitutions()));
+        } else {
+            bridgeSet.add(this);
+        }
+        Support reportSup = new Support(-1, report.getAttitude(), Network.currentLevel, justSupport, bridgeSet);
+        return reportSup;
+    }
+
+    public void sendInferenceReports(HashMap<RuleInfo, Report> reports) throws DirectCycleException, NoSuchTypeException {
         for(Report report : reports.values()) {
             for(int att : attitudeToCq.keySet()){
                 Report newReportInAttitude = report.clone();
                 newReportInAttitude.setAttitude(att);
+                newReportInAttitude.setSupport(createReportSup(newReportInAttitude));
+                for(Node node : attitudeToCq.get(att)){
+                    System.out.println("Inferred " + node.applySubstitution(newReportInAttitude.getSubstitutions()));
+                }
                 sendReportToConsequents(attitudeToCq.get(att), newReportInAttitude);
             }
         }
     }
-
-
 
     protected void requestAntecedentsNotAlreadyWorkingOn(Request currentRequest, KnownInstance knownInstance) {
         Channel currentChannel = currentRequest.getChannel();
