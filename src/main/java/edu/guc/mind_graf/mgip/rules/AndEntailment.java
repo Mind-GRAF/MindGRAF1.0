@@ -40,13 +40,16 @@ public class AndEntailment extends RuleNode {
         return inferrable;
     }
 
-    public void sendInferenceReports(HashMap<RuleInfo, Report> reports) {
+    public void sendInferenceReports(HashMap<RuleInfo, Report> reports) throws NoSuchTypeException {
         sendInferenceToCq(reports, cq);
     }
 
     public void applyRuleHandler(Report report) throws NoSuchTypeException {
+        System.out.println("applyRuleHandler called on the report: " + report.stringifyReport());
         if(report.isSign()){
             super.applyRuleHandler(report);
+        } else{
+            System.out.println("The report is negative so it won't be sent to the rule handler.");
         }
     }
 

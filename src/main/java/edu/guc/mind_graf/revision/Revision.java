@@ -11,13 +11,13 @@ import java.util.*;
 public class Revision {
     public static ArrayList<PropositionNodeSet> minimalNoGoods = new ArrayList<>();
 
-    public static void ensureConsistency(Context c, int level, int attitudeNumberOfAddedNode, PropositionNode nodeToAdd) {
-        ArrayList<Contradiction> contradictions = checkContradiction(c, level, attitudeNumberOfAddedNode, nodeToAdd);
+    public static void ensureConsistency(Context c, int level, int attitudeId, PropositionNode nodeToAdd) {
+        ArrayList<Contradiction> contradictions = checkContradiction(c, level, attitudeId, nodeToAdd);
         if (contradictions != null && !contradictions.isEmpty()) {
             if (ContextController.automaticHandlingEnabled()) {
-                automaticContradictionHandling(c, level, attitudeNumberOfAddedNode, contradictions);
+                automaticContradictionHandling(c, level, attitudeId, contradictions);
             } else {
-                manualContradictionHandling(c, level, attitudeNumberOfAddedNode, contradictions);
+                manualContradictionHandling(c, level, attitudeId, contradictions);
             }
         }
     }
@@ -36,14 +36,14 @@ public class Revision {
             ArrayList<PropositionNodeSet> filteredNoGoods = filterNoGoods(node);
             for (ArrayList<Integer> entry : filteredConsistentAttitudes) {
                 Contradiction cont = new Contradiction(node);
-                for (int attitudeNumber : entry) {
-                    if(complimentFoundInCache(c,level,attitudeNumber,filteredNoGoods)){
-                        cont.getContradictions().add(attitudeNumber, nodeCompliment);
+                for (int attitudeId : entry) {
+                    if (complimentFoundInCache(c, level, attitudeId, filteredNoGoods)) {
+                        cont.getContradictions().add(attitudeId, nodeCompliment);
                         continue;
                     }
-                    if (nodeCompliment.supported(c.getName(), attitudeNumber, level)) {
-                        cont.getContradictions().add(attitudeNumber, nodeCompliment);
-                        //TODO: wael add node to cache
+                    if (nodeCompliment.supported(c.getName(), attitudeId, level)) {
+                        cont.getContradictions().add(attitudeId, nodeCompliment);
+                        addNodesToCache(c, level, attitudeId, nodeCompliment);
                     }
                 }
                 if (!cont.getContradictions().isEmpty() && !contradictions.contains(cont)) {
@@ -69,6 +69,29 @@ public class Revision {
         return contradictions;
     }
 
+    public static void addNodesToCache(Context c, int level, int attitudeId, PropositionNode node) {
+        for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> assumptionSupport : node.getSupport().getAssumptionSupport().get(level).get(attitudeId)) {
+            for (Map.Entry<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> support : assumptionSupport.getFirst().entrySet()) {
+                if (c.isInvalidSupport(level, attitudeId, support.getValue().getFirst())) {
+                    continue;
+                }
+                PropositionNodeSet set = support.getValue().getFirst();
+                boolean added = false;
+                for (PropositionNodeSet noGood : minimalNoGoods) {
+                    if (set.isSubset(noGood)) {
+                        added = true;
+                        minimalNoGoods.remove(noGood);
+                        minimalNoGoods.add(set);
+                    }
+                }
+
+                if (!added) {
+                    minimalNoGoods.add(set);
+                }
+            }
+        }
+    }
+
     public static void manualContradictionHandling(Context c, int level, int attitudeNumber, ArrayList<Contradiction> contradictions) {
         print("Contradiction Detected");
         print("Select How to handle this contradiction");
@@ -89,24 +112,20 @@ public class Revision {
             manualContradictionHandling(c, level, attitudeNumber, contradictions);
         }
         if (nodeIsHyp && !contradictingIsHyp) {
-            for (Contradiction cont : contradictions) {
-                for (Map.Entry<Integer, PropositionNode> entry : cont.getContradictions().getSet().entrySet()) {
-                    c.completelyRemoveNodeFromContext(level, entry.getKey(), entry.getValue(), false);
-                }
-            }
+            handleDecision(c, level, attitudeNumber, contradictions, false, false);
         }
         if (!nodeIsHyp && contradictingIsHyp) {
-            c.completelyRemoveNodeFromContext(level, attitudeNumber, contradictions.getFirst().getNode(), false);
+            handleDecision(c, level, attitudeNumber, contradictions, true, false);
         } else {
             //Actual Automatic handling
             int gradeOfNode = contradictions.getFirst().getNode().getGradeOfNode(c, level, attitudeNumber);
-            int gradeOfContradictions = contradictions.stream().mapToInt(cont -> getGradeOfNodes(cont,c,level)).reduce(ContextController.getMergeFunction()).orElse(0);
+            int gradeOfContradictions = contradictions.stream().mapToInt(cont -> getGradeOfNodes(cont, c, level)).reduce(ContextController.getMergeFunction()).orElse(0);
 
             handleDecision(c, level, attitudeNumber, contradictions, gradeOfNode <= gradeOfContradictions, false);
         }
     }
 
-    public static int getGradeOfNodes(Contradiction contradiction, Context c, int level){
+    public static int getGradeOfNodes(Contradiction contradiction, Context c, int level) {
         ArrayList<Integer> gradesOfNodesInContradiction = new ArrayList<>();
         for (Map.Entry<Integer, PropositionNode> entry : contradiction.getContradictions().getSet().entrySet()) {
             gradesOfNodesInContradiction.add(entry.getValue().getGradeOfNode(c, level, entry.getKey()));
@@ -158,7 +177,7 @@ public class Revision {
     public static boolean complimentFoundInCache(Context c, int level, int attitudeId, ArrayList<PropositionNodeSet> cache) {
         for (PropositionNodeSet cacheEntry : cache) {
             boolean areAllHypotheses = cacheEntry.getNodes().stream().allMatch(node -> c.isHypothesis(level, attitudeId, (PropositionNode) node));
-            if(areAllHypotheses){
+            if (areAllHypotheses) {
                 return true;
             }
         }

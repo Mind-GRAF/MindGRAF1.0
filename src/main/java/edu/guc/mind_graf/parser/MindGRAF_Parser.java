@@ -240,7 +240,8 @@ public static void ResetGrading(){
         controller.removeHypothesisFromContext(CName, levelsCount, controller.getAttitudeNumber(attitude),
             propNode.getId());
         CLI.print("");
-        CLI.print("Hypothesis Removed from Context "+CName+" in Attitude " + attitude+".");
+        CLI.print(propNode.toString());
+        //CLI.print("Hypothesis Removed from Context "+CName+" in Attitude " + attitude+".");
 
         return;
       }
@@ -252,7 +253,8 @@ public static void ResetGrading(){
         }
         controller.removeHypothesisFromContext(CName, levelsCount, defaultAttitude, propNode.getId());
         CLI.print("");
-        CLI.print("Hypothesis Removed from Context "+CName+" in Attitude " + controller.getAttitudeName(defaultAttitude)+".");
+        CLI.print(propNode.toString());
+        //CLI.print("Hypothesis Removed from Context "+CName+" in Attitude " + controller.getAttitudeName(defaultAttitude)+".");
 
         return;
       }
@@ -266,7 +268,8 @@ public static void ResetGrading(){
           controller.removeHypothesisFromContext(controller.getCurrContextName(), levelsCount,
               controller.getAttitudeNumber(attitude), propNode.getId());
          CLI.print("");
-        CLI.print("Hypothesis Removed from Context "+controller.getCurrContextName()+" in Attitude " + attitude+".");
+         CLI.print(propNode.toString());
+        //CLI.print("Hypothesis Removed from Context "+controller.getCurrContextName()+" in Attitude " + attitude+".");
 
         } catch (NullPointerException e) {
           CLI.print("");
@@ -278,7 +281,8 @@ public static void ResetGrading(){
         controller.removeHypothesisFromContext(controller.getCurrContextName(), levelsCount, defaultAttitude,
             propNode.getId());
         CLI.print("");
-        CLI.print("Hypothesis Removed from Context "+controller.getCurrContextName()+" in Attitude " + controller.getAttitudeName(defaultAttitude)+".");
+        CLI.print(propNode.toString());
+        //CLI.print("Hypothesis Removed from Context "+controller.getCurrContextName()+" in Attitude " + controller.getAttitudeName(defaultAttitude)+".");
 
       } catch (NullPointerException e) {
         CLI.print("");
@@ -303,9 +307,9 @@ public static void ResetGrading(){
           CLI.print("No such Attitude.");
           return;
         }
-        controller.addHypothesisToContext(CName, levelsCount, controller.getAttitudeNumber(attitude), propNode);
         CLI.print("");
-        CLI.print("Hypothesis Added to Context " + CName+" in Attitude " + attitude+" Successfully.");
+        controller.addHypothesisToContext(CName, levelsCount, controller.getAttitudeNumber(attitude), propNode.getId());
+        //CLI.print("Hypothesis Added to Context " + CName+" in Attitude " + attitude+" Successfully.");
                 CLI.print("");
         CLI.print(propNode.toString());
         return;
@@ -317,10 +321,11 @@ public static void ResetGrading(){
           CLI.print("No such Context.");
           return;
         }
-        controller.addHypothesisToContext(CName, levelsCount, defaultAttitude, propNode);
         CLI.print("");
-        CLI.print("Hypothesis Added to Context " + CName+" in Attitude " + controller.getAttitudeName(defaultAttitude)+" Successfully.");
+        controller.addHypothesisToContext(CName, levelsCount, defaultAttitude, propNode.getId());
         CLI.print("");
+        //CLI.print("Hypothesis Added to Context " + CName+" in Attitude " + controller.getAttitudeName(defaultAttitude)+" Successfully.");
+        //CLI.print("");
         CLI.print(propNode.toString());
         return;
       }
@@ -331,10 +336,11 @@ public static void ResetGrading(){
           return;
         }
         try {
-          controller.addHypothesisToContext(controller.getCurrContextName(), levelsCount,
-              controller.getAttitudeNumber(attitude), propNode);
           CLI.print("");
-          CLI.print("Hypothesis Added to Context " + controller.getCurrContextName()+" in Attitude " + attitude+" Successfully.");
+          controller.addHypothesisToContext(controller.getCurrContextName(), levelsCount,
+              controller.getAttitudeNumber(attitude), propNode.getId());
+          CLI.print("");
+          //CLI.print("Hypothesis Added to Context " + controller.getCurrContextName()+" in Attitude " + attitude+" Successfully.");
                   CLI.print("");
         CLI.print(propNode.toString());
         } catch (NullPointerException e) {
@@ -344,9 +350,10 @@ public static void ResetGrading(){
         }
       }
       try {
-        controller.addHypothesisToContext(controller.getCurrContextName(), levelsCount, defaultAttitude, propNode);
         CLI.print("");
-          CLI.print("Hypothesis Added to Context " + controller.getCurrContextName()+" in Attitude " + controller.getAttitudeName(defaultAttitude)+" Successfully.");
+        controller.addHypothesisToContext(controller.getCurrContextName(), levelsCount, defaultAttitude, propNode.getId());
+        CLI.print("");
+          //CLI.print("Hypothesis Added to Context " + controller.getCurrContextName()+" in Attitude " + controller.getAttitudeName(defaultAttitude)+" Successfully.");
                   CLI.print("");
         CLI.print(propNode.toString());
       } catch (NullPointerException e) {
@@ -2521,9 +2528,11 @@ GetAllHypsInContextAttitude(CName, attitude, c, a);
 
   final public void getAllSupported() throws ParseException, ParseException {
     jj_consume_token(71);
-CLI.print("Printing All Hypotheses Supported in All Contexts...");
+CLI.print("");
+      CLI.print("Printing All Hypotheses Supported in All Contexts...");
       HashMap<String, Context> contextSet = controller.getContextSet().getSet();
     for (Context c : contextSet.values()) {
+      CLI.print("");
       CLI.print("Context " + c.getName() + ":-");
       CLI.print("");
       Collection<Pair<PropositionNodeSet, PropositionNodeSet>[]> hyps = c.getHypotheses().values();

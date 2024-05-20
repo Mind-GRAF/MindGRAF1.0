@@ -10,6 +10,7 @@ import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.mgip.reports.Report;
+import edu.guc.mind_graf.mgip.requests.ChannelType;
 import edu.guc.mind_graf.mgip.ruleHandlers.FlagNode;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.network.Network;
@@ -29,6 +30,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class RuleNodeTest {
 
+    Network network;
+
     @BeforeEach
     void setUp() {
         Scheduler.initiate();
@@ -42,11 +45,12 @@ class RuleNodeTest {
         consistentAttitudes.add(new ArrayList<>(List.of(1)));
         consistentAttitudes.add(new ArrayList<>(List.of(0, 1)));
 
-        Network network = NetworkController.setUp(attitudeNames, consistentAttitudes, false, false, false, 1);
+        network = NetworkController.setUp(attitudeNames, consistentAttitudes, false, false, false, 1);
         ContextController.createNewContext("Dystopia");
         ContextController.createNewContext("Mythology");
         ContextController.createNewContext("PetStore");
         ContextController.setCurrContext("Dystopia");
+
     }
 
     @Test
@@ -101,87 +105,108 @@ class RuleNodeTest {
         Node voldemort = Network.createNode("voldemort", "individualnode");
         govVSubs.add(G, voldemort);
         Report report01 = new Report(govVSubs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M0);
+        report01.setReportType(ChannelType.AntRule);
         report01.setContextName("Dystopia");
-        ((RuleNode)P0).applyRuleHandler(report01);
 
         Substitutions govDSubs = new Substitutions();
         Node daenerys = Network.createNode("daenerys", "individualnode");
         govDSubs.add(G, daenerys);
         Report report00 = new Report(govDSubs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M0);
+        report00.setReportType(ChannelType.AntRule);
         report00.setContextName("Dystopia");
-        ((RuleNode)P0).applyRuleHandler(report00);
 
         Substitutions govSubs = new Substitutions();
         Node henry = Network.createNode("henry", "individualnode");
         govSubs.add(G, henry);
         Report report0 = new Report(govSubs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M0);
+        report0.setReportType(ChannelType.AntRule);
         report0.setContextName("Dystopia");
-        ((RuleNode)P0).applyRuleHandler(report0);
 
         Substitutions civPSubs = new Substitutions();
         Node pam = Network.createNode("pam", "individualnode");
         civPSubs.add(C, pam);
         Report report10 = new Report(civPSubs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M1);
+        report10.setReportType(ChannelType.AntRule);
         report10.setContextName("Dystopia");
-        ((RuleNode)P0).applyRuleHandler(report10);
 
         Substitutions civSubs = new Substitutions();
         Node anne = Network.createNode("anne", "individualnode");
         civSubs.add(C, anne);
         Report report1 = new Report(civSubs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M1);
+        report1.setReportType(ChannelType.AntRule);
         report1.setContextName("Dystopia");
-        ((RuleNode)P0).applyRuleHandler(report1);
 
         Substitutions coSubs = new Substitutions();
         Node england = Network.createNode("england", "individualnode");
         coSubs.add(Co, england);
         Report report2 = new Report(coSubs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M2);
+        report2.setReportType(ChannelType.AntRule);
         report2.setContextName("Dystopia");
-        ((RuleNode)P0).applyRuleHandler(report2);
 
         Substitutions coNSubs = new Substitutions();
         Node neverland = Network.createNode("neverland", "individualnode");
         coNSubs.add(Co, neverland);
         Report report20 = new Report(coNSubs, new Support(-1), 0, false, InferenceType.BACKWARD, P0, M2);
+        report20.setReportType(ChannelType.AntRule);
         report20.setContextName("Dystopia");
-        ((RuleNode)P0).applyRuleHandler(report20);
 
         Substitutions rSubs = new Substitutions();
         rSubs.add(Co, england);
         rSubs.add(G, henry);
         Report report3 = new Report(rSubs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M3);
+        report3.setReportType(ChannelType.AntRule);
         report3.setContextName("Dystopia");
-        ((RuleNode)P0).applyRuleHandler(report3);
+
 
         Substitutions lSubs = new Substitutions();
         lSubs.add(Co, england);
         lSubs.add(C, anne);
         Report report4 = new Report(lSubs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M4);
+        report4.setReportType(ChannelType.AntRule);
         report4.setContextName("Dystopia");
-        ((RuleNode)P0).applyRuleHandler(report4);
 
+
+        network.printNodes();
+        System.out.println("----------------------------------------------------------");
+        ((RuleNode)P0).applyRuleHandler(report01);
+        System.out.println("----------------------------------------------------------");
+        ((RuleNode)P0).applyRuleHandler(report00);
+        System.out.println("----------------------------------------------------------");
+        ((RuleNode)P0).applyRuleHandler(report0);
+        System.out.println("----------------------------------------------------------");
+        ((RuleNode)P0).applyRuleHandler(report10);
+        System.out.println("----------------------------------------------------------");
+        ((RuleNode)P0).applyRuleHandler(report1);
+        System.out.println("----------------------------------------------------------");
+        ((RuleNode)P0).applyRuleHandler(report2);
+        System.out.println("----------------------------------------------------------");
+        ((RuleNode)P0).applyRuleHandler(report20);
+        System.out.println("----------------------------------------------------------");
+        ((RuleNode)P0).applyRuleHandler(report3);
+        System.out.println("----------------------------------------------------------");
+        ((RuleNode)P0).applyRuleHandler(report4);
         assertEquals(1, Scheduler.getHighQueue().size());
 
-        System.out.println(G);
-        System.out.println(C);
-        System.out.println(Co);
-        System.out.println(voldemort);
-        System.out.println(daenerys);
-        System.out.println(henry);
-        System.out.println(pam);
-        System.out.println(anne);
-        System.out.println(england);
-        System.out.println(neverland);
-        System.out.println(government);
-        System.out.println(civilian);
-        System.out.println(country);
-        System.out.println(M0);
-        System.out.println(M1);
-        System.out.println(M2);
-        System.out.println(M3);
-        System.out.println(M4);
-        System.out.println(M5);
-        System.out.println(P0);
+//        System.out.println(G);
+//        System.out.println(C);
+//        System.out.println(Co);
+//        System.out.println(voldemort);
+//        System.out.println(daenerys);
+//        System.out.println(henry);
+//        System.out.println(pam);
+//        System.out.println(anne);
+//        System.out.println(england);
+//        System.out.println(neverland);
+//        System.out.println(government);
+//        System.out.println(civilian);
+//        System.out.println(country);
+//        System.out.println(M0);
+//        System.out.println(M1);
+//        System.out.println(M2);
+//        System.out.println(M3);
+//        System.out.println(M4);
+//        System.out.println(M5);
+//        System.out.println(P0);
 
 
     }
@@ -208,22 +233,28 @@ class RuleNodeTest {
 
         Node P0 = Network.createNode("orentailment", new DownCableSet(new DownCable(Network.getRelations().get("ant"), new NodeSet(M0, M1)), new DownCable(Network.getRelations().get("cq"), new NodeSet(M2))));
         Report report0 = new Report(new Substitutions(), new Support(-1), 0, true, InferenceType.BACKWARD, P0, M0);
+        report0.setReportType(ChannelType.AntRule);
         report0.setContextName("Mythology");
-        ((RuleNode)P0).applyRuleHandler(report0);
-        assertEquals(1, Scheduler.getHighQueue().size());
 
         Report report1 = new Report(new Substitutions(), new Support(-1), 0, false, InferenceType.BACKWARD, P0, M1);
+        report1.setReportType(ChannelType.AntRule);
         report1.setContextName("Mythology");
-        ((RuleNode)P0).applyRuleHandler(report1);
 
-        System.out.println(Patroclus);
-        System.out.println(Hector);
-        System.out.println(Achilles);
-        System.out.println(Alive);
-        System.out.println(M0);
-        System.out.println(M1);
-        System.out.println(M2);
-        System.out.println(P0);
+        network.printNodes();
+        System.out.println("----------------------------------------------------------");
+        ((RuleNode)P0).applyRuleHandler(report0);
+        System.out.println("----------------------------------------------------------");
+        ((RuleNode)P0).applyRuleHandler(report1);
+        assertEquals(1, Scheduler.getHighQueue().size());
+
+//        System.out.println(Patroclus);
+//        System.out.println(Hector);
+//        System.out.println(Achilles);
+//        System.out.println(Alive);
+//        System.out.println(M0);
+//        System.out.println(M1);
+//        System.out.println(M2);
+//        System.out.println(P0);
 
 
 
@@ -298,24 +329,32 @@ class RuleNodeTest {
                 new DownCable(Network.getRelations().get("cq"), new NodeSet(M4))));
 
         Report report0 = new Report(new Substitutions(), new Support(-1), 0, true, InferenceType.BACKWARD, P0, M0);
+        report0.setReportType(ChannelType.AntRule);
         report0.setContextName("Mythology");
-        ((RuleNode)P0).applyRuleHandler(report0);
 
         Substitutions mSubs = new Substitutions();
         mSubs.add(X, Merlin);
         Report report1 = new Report(mSubs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M1);
+        report1.setReportType(ChannelType.AntRule);
         report1.setContextName("Mythology");
-        ((RuleNode)P0).applyRuleHandler(report1);
 
         Substitutions hSubs = new Substitutions();
         hSubs.add(X, Merlin);
         Report report2 = new Report(hSubs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M2);
+        report2.setReportType(ChannelType.AntRule);
         report2.setContextName("Mythology");
-        ((RuleNode)P0).applyRuleHandler(report2);
 
+        System.out.println("----------------------------------------------------------");
+        network.printNodes();
+        System.out.println("----------------------------------------------------------");
+        ((RuleNode)P0).applyRuleHandler(report0);
+        System.out.println("----------------------------------------------------------");
+        ((RuleNode)P0).applyRuleHandler(report1);
+        System.out.println("----------------------------------------------------------");
+        ((RuleNode)P0).applyRuleHandler(report2);
         assertEquals(1, Scheduler.getHighQueue().size());
 
-        System.out.println(X);
+        /*System.out.println(X);
         System.out.println(three);
         System.out.println(Merlin);
         System.out.println(Magic);
@@ -328,7 +367,7 @@ class RuleNodeTest {
         System.out.println(M2);
         System.out.println(M3);
         System.out.println(M4);
-        System.out.println(P0);
+        System.out.println(P0);*/
 
     }
 
@@ -357,11 +396,16 @@ class RuleNodeTest {
         Substitutions subs = new Substitutions();
         subs.add(A, Network.createNode("Nemo", "propositionnode"));
         Report testReport = new Report(subs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M0);
+        testReport.setReportType(ChannelType.AntRule);
         testReport.setContextName("PetStore");
+
+        System.out.println("----------------------------------------------------------");
+        network.printNodes();
+        System.out.println("----------------------------------------------------------");
         ((RuleNode)P0).applyRuleHandler(testReport);
         assertEquals(2, Scheduler.getHighQueue().size());
 
-        System.out.println(A);
+        /*System.out.println(A);
         System.out.println(one);
         System.out.println(Fish);
         System.out.println(Cat);
@@ -369,7 +413,7 @@ class RuleNodeTest {
         System.out.println(M0);
         System.out.println(M1);
         System.out.println(M2);
-        System.out.println(P0);
+        System.out.println(P0);*/
     }
 
     @Test
@@ -399,11 +443,16 @@ class RuleNodeTest {
         Substitutions subs = new Substitutions();
         subs.add(X, Network.createNode("Patroclus", "individualnode"));
         Report testReport = new Report(subs, new Support(-1), 0, true, InferenceType.BACKWARD, P0, M0);
+        testReport.setReportType(ChannelType.AntRule);
         testReport.setContextName("Mythology");
+
+        System.out.println("----------------------------------------------------------");
+        network.printNodes();
+        System.out.println("----------------------------------------------------------");
         ((RuleNode) P0).applyRuleHandler(testReport);
         assertEquals(2, Scheduler.getHighQueue().size());
 
-        System.out.println(X);
+        /*System.out.println(X);
         System.out.println(one);
         System.out.println(two);
         System.out.println(idealistic);
@@ -412,7 +461,7 @@ class RuleNodeTest {
         System.out.println(M0);
         System.out.println(M1);
         System.out.println(M2);
-        System.out.println(P0);
+        System.out.println(P0);*/
     }
 
     @Test
