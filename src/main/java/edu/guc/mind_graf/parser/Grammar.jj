@@ -63,7 +63,7 @@ public class MindGRAF_Parser {
       private static ContextController controller = new ContextController();
       private static int  mode = 1;
       static boolean uvbrEnabled;
-      private Network network =new Network();
+      private static Network network = new Network();
     
       //setting the attitudes 
       private static int attitudeNumber = 1;
@@ -140,55 +140,72 @@ public static void ResetGrading(){
     for (Pair<PropositionNodeSet, PropositionNodeSet> pair : hyps) {
       Collection<Node> firstSet = pair.getFirst().getNodes();
       Collection<Node> secondSet = pair.getSecond().getNodes();
-      CLI.print("Ungraded Nodes:");
+      CLI.print("--> Ungraded:");
+      CLI.print("");
       for (Node n : firstSet)
-        CLI.print(n.toString());
-
-      CLI.print("Graded Nodes:");
+       { CLI.print(n.toString());
+        CLI.print("");}
+      CLI.print("");
+      CLI.print("--> Graded:");
       for (Node n : secondSet)
-        CLI.print(n.toString());
-
+        {CLI.print(n.toString());
+        CLI.print("");
+}
     }
   }
 
   public static void GetAllHypsInContextAttitude(String CName, String attitude, boolean c, boolean a) {
     Pair<PropositionNodeSet, PropositionNodeSet>[] hyps;
+    if(attitude!=null)
+    attitude = attitude.trim();
+    if(CName!=null)
+    CName = CName.trim();
     try {
       if (c && a) {
         if (!controller.getContextSet().getSet().containsKey(CName)) {
+          CLI.print("");
           CLI.print("No such Context.");
           return;
         }
         if (!controller.getAttitudes().getSet().containsKey(attitude)) {
+          CLI.print("");
           CLI.print("No such Attitude.");
           return;
         }
         Integer attNum = controller.getAttitudeNumber(attitude);
         hyps = controller.getContext(CName).getHypotheses().get(attNum);
+        CLI.print("");
         CLI.print("Hypotheses in Context " + CName + " Attitude " + attitude + ":");
+        CLI.print("");
         printHyps(hyps);
         return;
       }
       if (c) {
         if (!controller.getContextSet().getSet().containsKey(CName)) {
+          CLI.print("");
           CLI.print("No such Context.");
           return;
         }
         hyps = controller.getContext(CName).getHypotheses()
             .get(defaultAttitude);
-        printHyps(hyps);
+        CLI.print("");
         CLI.print("Hypotheses in Context " + CName + " Attitude " + controller.getAttitudeName(defaultAttitude) + ":");
+        printHyps(hyps);
+        CLI.print("");
         return;
       }
       if (a) {
         if (!controller.getAttitudes().getSet().containsKey(attitude)) {
+          CLI.print("");
           CLI.print("No such Attitude.");
           return;
         }
         try {
           hyps = controller.getContext(controller.getCurrContextName()).getHypotheses()
               .get(controller.getAttitudeNumber(attitude));
+          CLI.print("");
           CLI.print("Hypotheses in Context " + controller.getCurrContextName() + " Attitude " + attitude + ":");
+          CLI.print("");
           printHyps(hyps);
 
         } catch (NullPointerException e) {
@@ -200,9 +217,11 @@ public static void ResetGrading(){
         hyps = controller.getContext(controller.getCurrContextName()).getHypotheses().get(defaultAttitude);
         CLI.print("Hypotheses in Context " + controller.getCurrContextName() + " Attitude "
             + controller.getAttitudeName(defaultAttitude) + ":");
+        CLI.print("");
         printHyps(hyps);
 
       } catch (NullPointerException e) {
+        CLI.print("");
         CLI.print("Set Current Context First.");
         return;
       }
@@ -216,40 +235,48 @@ public static void ResetGrading(){
     try {
       if (c && a) {
         if (!controller.getContextSet().getSet().containsKey(CName)) {
+          CLI.print("");
           CLI.print("No such Context.");
           return;
         }
         if (!controller.getAttitudes().getSet().containsKey(attitude)) {
+          CLI.print("");
           CLI.print("No such Attitude.");
           return;
         }
         controller.removeHypothesisFromContext(CName, levelsCount, controller.getAttitudeNumber(attitude),
             propNode.getId());
-        CLI.print("Hypothesis Removed.");
+        CLI.print("");
+        CLI.print("Hypothesis Removed from Context "+CName+" in Attitude " + attitude+".");
 
         return;
       }
       if (c) {
         if (!controller.getContextSet().getSet().containsKey(CName)) {
+          CLI.print("");
           CLI.print("No such Context.");
           return;
         }
         controller.removeHypothesisFromContext(CName, levelsCount, defaultAttitude, propNode.getId());
-        CLI.print("Hypothesis Removed.");
-
+        CLI.print("");
+        CLI.print("Hypothesis Removed from Context "+CName+" in Attitude " + controller.getAttitudeName(defaultAttitude)+".");
+  
         return;
       }
       if (a) {
         if (!controller.getAttitudes().getSet().containsKey(attitude)) {
+          CLI.print("");
           CLI.print("No such Attitude.");
           return;
         }
         try {
           controller.removeHypothesisFromContext(controller.getCurrContextName(), levelsCount,
               controller.getAttitudeNumber(attitude), propNode.getId());
-          CLI.print("Hypothesis Removed.");
+         CLI.print("");
+        CLI.print("Hypothesis Removed from Context "+controller.getCurrContextName()+" in Attitude " + attitude+".");
 
         } catch (NullPointerException e) {
+          CLI.print("");
           CLI.print("Set Current Context First.");
           return;
         }
@@ -257,9 +284,11 @@ public static void ResetGrading(){
       try {
         controller.removeHypothesisFromContext(controller.getCurrContextName(), levelsCount, defaultAttitude,
             propNode.getId());
-        CLI.print("Hypothesis Removed.");
+        CLI.print("");
+        CLI.print("Hypothesis Removed from Context "+controller.getCurrContextName()+" in Attitude " + controller.getAttitudeName(defaultAttitude)+".");
 
       } catch (NullPointerException e) {
+        CLI.print("");
         CLI.print("Set Current Context First.");
         return;
       }
@@ -272,45 +301,63 @@ public static void ResetGrading(){
     try {
       if (c && a) {
         if (!controller.getContextSet().getSet().containsKey(CName)) {
+          CLI.print("");
           CLI.print("No such Context.");
           return;
         }
         if (!controller.getAttitudes().getSet().containsKey(attitude)) {
+          CLI.print("");
           CLI.print("No such Attitude.");
           return;
         }
         controller.addHypothesisToContext(CName, levelsCount, controller.getAttitudeNumber(attitude), propNode);
-
+        CLI.print("");
+        CLI.print("Hypothesis Added to Context " + CName+" in Attitude " + attitude+" Successfully.");
+                CLI.print("");
+        CLI.print(propNode.toString());
         return;
 
       }
       if (c) {
         if (!controller.getContextSet().getSet().containsKey(CName)) {
+          CLI.print("");
           CLI.print("No such Context.");
           return;
         }
         controller.addHypothesisToContext(CName, levelsCount, defaultAttitude, propNode);
-
+        CLI.print("");
+        CLI.print("Hypothesis Added to Context " + CName+" in Attitude " + controller.getAttitudeName(defaultAttitude)+" Successfully.");
+        CLI.print("");
+        CLI.print(propNode.toString());
         return;
       }
       if (a) {
         if (!controller.getAttitudes().getSet().containsKey(attitude)) {
+          CLI.print("");
           CLI.print("No such Attitude.");
           return;
         }
         try {
           controller.addHypothesisToContext(controller.getCurrContextName(), levelsCount,
               controller.getAttitudeNumber(attitude), propNode);
- 
+          CLI.print("");
+          CLI.print("Hypothesis Added to Context " + controller.getCurrContextName()+" in Attitude " + attitude+" Successfully.");
+                  CLI.print("");
+        CLI.print(propNode.toString());
         } catch (NullPointerException e) {
+          CLI.print("");
           CLI.print("Set Current Context First.");
           return;
         }
       }
       try {
         controller.addHypothesisToContext(controller.getCurrContextName(), levelsCount, defaultAttitude, propNode);
-
+        CLI.print("");
+          CLI.print("Hypothesis Added to Context " + controller.getCurrContextName()+" in Attitude " + controller.getAttitudeName(defaultAttitude)+" Successfully.");
+                  CLI.print("");
+        CLI.print(propNode.toString());
       } catch (NullPointerException e) {
+        CLI.print("");
         CLI.print("Set Current Context First.");
         return;
       }
@@ -572,9 +619,6 @@ TOKEN :
 | <MODE2: "set-mode-2">
 | <MODE3: "set-mode-3">
 | <N:"N"|"n">
-| < #IDENTIFIER: <LETTER> (<LETTER>|<DIGIT>)* >
-| < #LETTER: ["_","a"-"z","A"-"Z"] >
-| < #DIGIT: ["0"-"9"] >
 | <ANDOR_THRESH: (("andor"|"thresh")"(")>
 | <ADJUST: ("expand"| "reduce"|"none")>
 | <RELATION_TYPE: ("expand"| "reduce"|"none")>
@@ -582,7 +626,6 @@ TOKEN :
 | <QUANTIFIER: "forall(">
 | <ENTAILMENT:("&=>"|"v=>"|(<NUMBER>"=>"))>
 | <VARIABLE: "?">
-| <WFF_NAME: "WFF"(<DIGIT>)+>
 
 | <STRING: (["a"-"z", "A"-"Z"])+ (["a"-"z", "A"-"Z", "0"-"9", "_"])*>
 | <PREDICATE_NAME_BRACKET: ((["a"-"z", "A"-"Z"])+ (["a"-"z", "A"-"Z", "0"-"9", "_"])*"(")>
@@ -604,8 +647,11 @@ Node Expression() throws ParseException : {
   Node result = null;
 }
 {(
-     result = Predicate()| result = AndOrThreshExpression(false) | result = OrAndEntailment(false) | result = forall()
-    | result = WhenIfDo() | result = gradedProp() | result = negatedProp()
+     result = Predicate() | result = AndOrThreshExpression(false) 
+
+     | result = OrAndEntailment(false) | result = forall()
+      
+     | result = WhenIfDo() | result = gradedProp() | result = negatedProp()
 )
     {
       return result;
@@ -902,9 +948,10 @@ String name = null;
 String type = null;
 String adjust = null;
 String limit ;
+Path path = null;
 }
 {
-  "rel{"name = <STRING>.image"," type = <STRING>.image","adjust = <ADJUST>.image","limit = <NUMBER>.image"}"
+  "rel{"name = <STRING>.image"," type = <STRING>.image","adjust = <ADJUST>.image","limit = <NUMBER>.image(","path = Path())?"}"
   {
 
     name = name.trim().toLowerCase();
@@ -912,7 +959,19 @@ String limit ;
     adjust = adjust.trim();
     Relation relation = Network.createRelation(name, type, adjust.equals("expand") ? Adjustability.EXPAND
         : adjust.equals("reduce") ? Adjustability.REDUCE : Adjustability.NONE, Integer.parseInt(limit));
+
+
+    CLI.print("");
+    CLI.print("Relation '" + name + "' Successfully Defined.");
+    CLI.print("--> Can Point to Nodes of Type: " + type +".");
+    CLI.print("--> Adjustability: " + adjust+".");
+    CLI.print("--> Limit: " + limit + ".");
+    if (path != null) {
+      relation.setPath(path);
+      CLI.print("--> Path: " + path.toString() + ".");
+    }
     return relation;
+
   }
 }
 
@@ -931,11 +990,12 @@ Path FUnit() throws ParseException :
   FUnitPath fUnit = new FUnitPath(relation);
   return fUnit;
 }
+
   relationName = relationName.trim().toLowerCase();
-  if(!Network.getRelations().containsKey(relationName))
+  if(!network.getRelations().containsKey(relationName))
     throw new ParseException("No Such Relation.");
   
-  relation = Network.getRelations().get(relationName);
+  relation = network.getRelations().get(relationName);
   FUnitPath fUnit = new FUnitPath(relation);
   return fUnit;
 
@@ -959,10 +1019,10 @@ Path BUnit() throws ParseException :
   return bUnit;
 }
   relationName = relationName.trim().toLowerCase();
-  if(!Network.getRelations().containsKey(relationName))
+  if(!network.getRelations().containsKey(relationName))
     throw new ParseException("No Such Relation.");
   
-  relation = Network.getRelations().get(relationName);
+  relation = network.getRelations().get(relationName);
   BUnitPath bUnit = new BUnitPath(relation);
   return bUnit;
 
@@ -999,7 +1059,7 @@ Path KStar() throws ParseException :
   Path path = null;
 }
 {
- "k-start("path = Path()")"
+ "k-star("path = Path()")"
  {
     KStarPath kstar = new KStarPath(path);
     return kstar;
@@ -1183,16 +1243,17 @@ void definePath() throws ParseException:
    if(relationName == null)
 {
     relation.setPath(path);
-    CLI.print("Path '" + relation.getPath().toString()+"' is Defined for relation " + relation.getName()+"." );
+    CLI.print("Path '" + relation.getPath().toString()+"' is Defined for Relation " + relation.getName()+"." );
 
     return;
 }
   relationName = relationName.trim().toLowerCase();
-  if(!Network.getRelations().containsKey(relationName))
+  if(!network.getRelations().containsKey(relationName))
     throw new ParseException("No Such Relation.");
   
-  relation = Network.getRelations().get(relationName);
+  relation = network.getRelations().get(relationName);
   relation.setPath(path);
+  CLI.print("");
   CLI.print("Path '" + relation.getPath().toString()+"' is Defined for relation " + "'"+relation.getName()+"'"+"." );
 
     
@@ -1841,10 +1902,13 @@ void Arguments(String pName) :
     if (mode == 3) {
       if (!caseFrames.containsKey(pName))
         throw new ParseException("No Such Case Frame.");
+        
       ArrayList<String> frame = caseFrames.get(pName);
+      if(leafNodes.size()!=frame.size()-1)
+        throw new ParseException("No Such Case Frame");
       Relation firstRel = null;
       if (frame.get(0) != "null") {
-        firstRel = network.createRelation(frame.get(1), "propositionnode", Adjustability.EXPAND, 2);
+        firstRel = network.createRelation(frame.get(0), "propositionnode", Adjustability.EXPAND, 2);
         DownCable dcb = null;
         try {
           dcb = new DownCable(firstRel, new NodeSet(network.createNode(pName, "propositionnode")));
@@ -1855,6 +1919,7 @@ void Arguments(String pName) :
           e.printStackTrace();
         }
       }
+
       for (int i = 0; i < leafNodes.size(); i++) {
         Relation r = network.createRelation(frame.get(i + 1), "propositionnode", Adjustability.EXPAND, 2);
         DownCable dcb = new DownCable(r, new NodeSet(leafNodes.get(i)));
@@ -1887,8 +1952,8 @@ Node leafNode = null;
 }
 {
  ( Argument=<STRING>(var=<VARIABLE>)? 
-  {String argString = Argument.image.trim().toLowerCase();
-  System.out.println(argString);   
+  {
+    String argString = Argument.image.trim().toLowerCase();
         try {
           if (var != null)
             leafNode = network.createVariableNode(argString, "propositionnode");
@@ -1936,6 +2001,8 @@ predicateName = <PREDICATE_NAME_BRACKET> relName = relationName() {if (!allRelat
         output += ", " + s;
       else
         output += s;
+            isFirst = false;
+
     }
     output += ") is Defined.";
     CLI.print(output);
@@ -1970,9 +2037,11 @@ void Command() throws ParseException :
         {
          try {
         String s = ContextController.getCurrContextName();
-        System.out.println(s);
+        CLI.print("");
+        CLI.print(s);
       } catch (Exception e) {
-        System.out.println("No Current Context");
+        CLI.print("");
+        CLI.print("No Current Context");
       }
 
         }
@@ -1980,32 +2049,32 @@ void Command() throws ParseException :
         <GetAttitudeNames>
         { 
         HashMap<String, Integer> attitudeNames = ContextController.getAttitudes().getSet();
-            System.out.println("List of attitude names:");
+            CLI.print("");
 
           // Iterate over the attitude names and print them
         for (String key : attitudeNames.keySet()) {
-          System.out.println(key);
+          System.out.println("-->" + key);
         }
         }
     | <MODE1>
     {
       mode = 1;
-       System.out.println("Operating in mode 1 (Default)");
-      System.out.println(mode);
+       CLI.print("");
+       CLI.print("Operating in Mode 1 (Default)");
 
     } 
     | <MODE2>
     {
       mode = 2;
-      System.out.println("Operating in mode 2");
-      System.out.println(mode);
+       CLI.print("");
+       CLI.print("Operating in Mode 2");
 
     }
     | <MODE3>
     {
       mode = 3;
-      System.out.println("Operating in mode 3");
-      System.out.println(mode);
+      CLI.print("");
+      CLI.print("Operating in Mode 3");
 
 
     }
@@ -2034,7 +2103,11 @@ void Command() throws ParseException :
     }
     |
     setCurrentContext()
-
+    |
+    "get-rels"  {    for(String rel : network.getRelations().keySet())
+      CLI.print(rel);}
+      |
+    getAllSupportedInContextAttitude()
     |
     getAllContexts()
     |
@@ -2053,6 +2126,7 @@ void Command() throws ParseException :
     definePath()
     |
     "define-relation" Relation()
+
     |
     DescribeContext()
     |
@@ -2074,6 +2148,10 @@ void Command() throws ParseException :
     "ask-why"AskWh()
     |
     "ask-whynot"AskWhNot()
+    |
+    getCurrentAttitude()
+    |
+    "get-mode"{ CLI.print(""); CLI.print("--Currently Operating in Mode " + mode+"--");}
     }
 
 
@@ -2214,7 +2292,7 @@ void definePrimitive() throws ParseException :
 
 }
 
-void getAllSupportedInContext() throws ParseException :
+void getAllSupportedInContextAttitude() throws ParseException :
 {
   String CName = null;
   boolean c = false;
@@ -2226,7 +2304,7 @@ void getAllSupportedInContext() throws ParseException :
    ("a{"attitude = <STRING>.image"}"{ a = true ;})?
  {
 
-  //GetAllHypsInContextAttitude(CName, attitude, c, a);
+  GetAllHypsInContextAttitude(CName, attitude, c, a);
 }
 }
 
@@ -2236,23 +2314,30 @@ void getAllSupported() throws ParseException :
 {
   "get-supported"
  {
-
+      CLI.print("");
       CLI.print("Printing All Hypotheses Supported in All Contexts...");
       HashMap<String, Context> contextSet = controller.getContextSet().getSet();
     for (Context c : contextSet.values()) {
-      CLI.print("Context " + c + ":");
+      CLI.print("");
+      CLI.print("Context " + c.getName() + ":-");
+      CLI.print("");
       Collection<Pair<PropositionNodeSet, PropositionNodeSet>[]> hyps = c.getHypotheses().values();
       for (Pair<PropositionNodeSet, PropositionNodeSet>[] pairArray : hyps) {
         for (Pair<PropositionNodeSet, PropositionNodeSet> pair : pairArray) {
           Collection<Node> firstSet = pair.getFirst().getNodes();
           Collection<Node> secondSet = pair.getSecond().getNodes();
-          CLI.print("Ungraded Nodes:");
+          CLI.print("--> Ungraded:");
+          CLI.print("");
           for (Node n : firstSet)
-            CLI.print(n.toString());
-
-          CLI.print("Graded Nodes:");
+           { CLI.print("");
+            CLI.print(n.toString());}
+          
+          CLI.print("");
+          CLI.print("--> Graded:");
+          CLI.print("");
           for (Node n : secondSet)
-            CLI.print(n.toString());
+           { CLI.print("");
+            CLI.print(n.toString());}
 
         }
       }
@@ -2341,16 +2426,7 @@ void AddToContext() throws ParseException :
       
     PropositionNode propNode = (PropositionNode) nn;
     addToContext(CName, attitude, a, c, propNode);
-        firstExpression = true;
-        isGrading = true;
-        levelsCount = 0;
-    // printing
-    HashMap<String, HashMap<String, Node>> molecN = network.getMolecularNodes();
-    for (HashMap<String, Node> x : molecN.values()) {
-      for (Node n : x.values()) {
-        System.out.println(n.toString());
-      }
-    }
+    ResetGrading();
     }
 }
 
@@ -2606,9 +2682,11 @@ void getAllContexts() throws ParseException :
   {
     
     HashMap<String, Context> set = controller.getContextSet().getSet();
-     System.out.println("All Contexts Defined:");
+     CLI.print("");
+     System.out.println("Contexts Defined:");
+     CLI.print("");
     for(String cName  : set.keySet()){
-      System.out.println(cName);
+      CLI.print("--> "+cName);
     }
   }
 }
@@ -2621,11 +2699,12 @@ void setCurrentContext() throws ParseException :
   "set-curr-context" cName = <STRING>.image
   {
     cName = cName.trim().toLowerCase();
+    CLI.print("");
     try {
       controller.setCurrContext(cName);
       CLI.print("Current Context is Set to " + cName);
     } catch (Exception e) {
-      System.out.println(e.getMessage());
+          CLI.print("No Such Context Exists.");
       // TODO: handle exception
     }
 
@@ -2640,18 +2719,28 @@ void setCurrentAttitude() throws ParseException :
   "set-attitude" attitude = <STRING>.image
   {
     attitude = attitude.trim().toLowerCase();
-    
+    try{
     Integer num = controller.getAttitudeNumber(attitude);
-    if(num == null)
-    {
-      CLI.print("no such attitude. The current default attitude is " + controller.getAttitudeName(defaultAttitude)+".");
-
-    }
-    else{
-      defaultAttitude = num;
-      CLI.print("The default attitude has been set to "+attitude+".");
+    defaultAttitude = num;
+    CLI.print("");
+    CLI.print("The Current Attitude is Set to "+attitude+".");
+    }catch(NullPointerException e){
+      CLI.print("");
+      CLI.print("No Such Attitude. The Current Default Attitude is " + controller.getAttitudeName(defaultAttitude)+".");
     }
 
+
+  }
+}
+
+void getCurrentAttitude() throws ParseException :
+{
+}
+{
+  "get-curr-attitude" 
+  {
+    CLI.print("");
+    CLI.print(controller.getAttitudeName(defaultAttitude));
 
   }
 }
@@ -2888,18 +2977,21 @@ void automaticHandling() throws ParseException:
 {}
 {
  ( "set-automatic-handling on"
-  {automaticHandling = true;}
+  {automaticHandling = true; CLI.print(""); CLI.print("Automatic Handling is ON");}
   |
   "set-automatic-handling off"
-  {automaticHandling = false;})
-  {
-        CLI.print("Enable Cache?");
-    System.out.print(":");
+  {automaticHandling = false; CLI.print(""); CLI.print("Automatic Handling is OFF");})
+  {     
+    CLI.print("");
+    CLI.print("Enable Cache?");
+    CLI.print("");
+    System.out.print(": ");
     while (true) {
       String input = CLI.readInput();
       if (input.trim().toLowerCase().equals("exit")) {
-      System.out.println("Session ended.");
+      CLI.print("Exiting MindGRAF...");
       CLI.loop = false;
+      break;
     }
       MindGRAF_Parser parser = new MindGRAF_Parser(
           new StringReader(input.trim()));
@@ -2918,27 +3010,31 @@ void EnableCache() throws ParseException:
 {}
 {
  ( "set-cache on"
-  {cacheEnabled = true;}
+  {cacheEnabled = true;CLI.print(""); CLI.print("Cache is ON");}
   |
   "set-cache off"
-  {cacheEnabled = false;})
-  {
+  {cacheEnabled = false;CLI.print(""); CLI.print("Cache is OFF");})
+  {   CLI.print("");
       CLI.print("Enter Merge Function Number");
+      CLI.print("");
       System.out.print(":");
       while (true) {
       String input = CLI.readInput();
       if (input.trim().toLowerCase().equals("exit")) {
-      System.out.println("Session ended.");
+      CLI.print("Exiting MindGRAF...");
       CLI.loop = false;
+      break;
     }
       MindGRAF_Parser parser = new MindGRAF_Parser(
           new StringReader(input.trim()));
       try {
         parser.MergeFunctionNumber();
-        parser.MergeFunctionNumber();
         Set attitudeNames = new Set();
         attitudeNames.setSet(initialAttitudes);
         NetworkController.setUp(attitudeNames, consisAttitudeLists, uvbrEnabled, automaticHandling, cacheEnabled, mergeFN);
+        CLI.print("");
+        CLI.print("Set Up Complete.");
+        
         break;
       } catch (ParseException e) {
         CLI.print("Wrong Command.");
@@ -2956,7 +3052,7 @@ void MergeFunctionNumber() throws ParseException:
 {
   "set-mfn" mfn = <NUMBER>.image
   {
-    mergeFN = mergeFN = Integer.parseInt(mfn);
+    mergeFN = Integer.parseInt(mfn);
   }
 }
 
@@ -2970,6 +3066,7 @@ void UVBR() throws ParseException :
     "set-uvbr on" 
     {
       uvbrEnabled=true;
+      CLI.print("");
       System.out.println("UVBR is ON");
       
     }
@@ -2978,22 +3075,23 @@ void UVBR() throws ParseException :
     "set-uvbr off"
     { 
       uvbrEnabled=false;
-      System.out.println("UVBR is OFF");
-
-
-
+      CLI.print("");
+      CLI.print("UVBR is OFF");
     }
   )
   {
     Set attitudeNames = new Set();
     attitudeNames.setSet(initialAttitudes);
-    CLI.print("Set Automatic Handling:");
-    System.out.print(":");
+    CLI.print("");
+    CLI.print("Enable Automatic Handling?");
+    CLI.print("");
+    System.out.print(": ");
     while (true) {
       String input = CLI.readInput();
       if (input.trim().toLowerCase().equals("exit")) {
-      System.out.println("Session ended.");
+      CLI.print("Exiting MindGRAF...");
       CLI.loop = false;
+      break;
     }
       MindGRAF_Parser parser = new MindGRAF_Parser(
           new StringReader(input.trim()));
@@ -3021,12 +3119,13 @@ void setAttitudes() throws ParseException :
 {
    ("set-attitudes" "{"attitude()(","attitude())*"}"
    {
-
-    System.out.println("Attitudes Defined:");
-    for(String key : initialAttitudes.keySet()){
-    System.out.println(key);
-   }
-
+    CLI.print("");
+    CLI.print("Attitudes Defined:");
+    CLI.print("");
+    for (HashMap.Entry<String, Integer> entry : initialAttitudes.entrySet()) {
+      CLI.print("--> " + entry.getKey() + " ID: " + entry.getValue());
+     }
+     CLI.print("");
    })
    |
    <N>
@@ -3038,25 +3137,20 @@ void defineContext() throws ParseException :
   String CName;
 }
 {
-  "define-context" "["CName = <STRING>.image"]" 
+  "define-context" CName = <STRING>.image
   {
     CName = CName.trim().toLowerCase();
+    CLI.print("");
     try{
     controller.createNewContext(CName);
     CLI.print("Context "+ CName +" is Created.");
 
     }catch(Exception e)
     {
-      CLI.print(e.getMessage());
+      CLI.print("Context Already Exists.");
     }
   }
    
-}
-
-void wffAttitudeSet() throws ParseException :
-{}
-{
-"{"<WFF_NAME>","<STRING>"}"
 }
 
 
@@ -3089,10 +3183,19 @@ void TelescopableAttitudes() throws ParseException :
    "set-telescopable" (list = telescopableAttitudeList())?
    {
     finalTelList = list;
+    CLI.print("");
+    CLI.print("Telescopable Attitudes:-");
+    CLI.print("");
     for (Integer in : list) {
-                System.out.print(in + " ");
-            System.out.println(); // Move to the next line after printing each inner list
+      for (HashMap.Entry entry : initialAttitudes.entrySet()) {
+        if (entry.getValue() == in) {
+         CLI.print("--> " + entry.getKey());
         }
+      }
+    }
+    CLI.print("");
+    CLI.print("------------------------------------------------------------");
+    CLI.print("");
    }
 
 }
@@ -3122,8 +3225,10 @@ Integer OneAttitudeInList() throws ParseException :
 attitude=<STRING>
 {
   String s = attitude.image.trim().toLowerCase();
-  if(!initialAttitudes.containsKey(s))
+  if(!initialAttitudes.containsKey(s)){
+    CLI.print("");
     throw new ParseException("Not in initially Defined Attitudes");
+  }
   
   return initialAttitudes.get(s);
  
@@ -3144,10 +3249,19 @@ void underConsequenceAttitudes() throws ParseException :
    "set-closed-consequence" (list = consequenceAttitudeList())?
    {
     finalConseqList = list;
+    CLI.print("");
+    CLI.print("Attitudes Closed Under Consequence:-");
+    CLI.print("");
     for (Integer in : list) {
-                System.out.print(in + " ");
-            System.out.println(); // Move to the next line after printing each inner list
+      for (HashMap.Entry entry : initialAttitudes.entrySet()) {
+        if (entry.getValue() == in) {
+         CLI.print("--> " + entry.getKey());
         }
+      }
+    }
+    CLI.print("");
+    CLI.print("------------------------------------------------------------");
+    CLI.print("");
    }
 
 }
@@ -3161,7 +3275,7 @@ ArrayList<Integer> consequenceAttitudeList() throws ParseException :
   Integer att ;
 }
 {
-("{"att = OneAttitudeInList(){conseqList.add(att);}(","att = OneAttitudeInList(){conseqList.add(att);})*"}")
+("{"att = OneAttitudeInList(){if(!conseqList.contains(att))conseqList.add(att);}(","att = OneAttitudeInList(){if(!conseqList.contains(att))conseqList.add(att);})*"}")
 {
   return conseqList;
 }
@@ -3180,10 +3294,19 @@ void underConjunctionAttitudes() throws ParseException :
    "set-closed-conjunction" (list = conjunctionAttitudeList())?
    {
     finalConjList = list;
+    CLI.print("");
+    CLI.print("Attitudes Closed Under Conjunction:-");
+    CLI.print("");
     for (Integer in : list) {
-                System.out.print(in + " ");
-            System.out.println(); // Move to the next line after printing each inner list
+      for (HashMap.Entry entry : initialAttitudes.entrySet()) {
+        if (entry.getValue() == in) {
+         CLI.print("--> " + entry.getKey());
         }
+      }
+    }
+    CLI.print("");
+    CLI.print("------------------------------------------------------------");
+    CLI.print("");
    }
 
 }
@@ -3197,7 +3320,7 @@ ArrayList<Integer> conjunctionAttitudeList() throws ParseException :
   Integer att ;
 }
 {
-("{"att = OneAttitudeInList(){conjList.add(att);}(","att = OneAttitudeInList(){conjList.add(att);})*"}")
+("{"att = OneAttitudeInList(){if(!conjList.contains(att))conjList.add(att);}(","att = OneAttitudeInList(){if(!conjList.contains(att))conjList.add(att);})*"}")
 {
   return conjList;
 }
@@ -3216,12 +3339,25 @@ void consistentAttitudes() throws ParseException :
    "set-consistent-attitudes " (consisAttitudeList())+
    {
 
+    CLI.print("");
+    CLI.print("Consistent Attitudes:-");
+    CLI.print("");
     for (ArrayList<Integer> list : consisAttitudeLists) {
-            for (Integer num : list) {
-                System.out.print(num + " ");
-            }
-            System.out.println(); // Move to the next line after printing each inner list
+      System.out.print("--> ");
+      for (int i = 0; i < list.size(); i++) {
+        Integer attNum = list.get(i);
+        for (HashMap.Entry entry : initialAttitudes.entrySet()) {
+          if (entry.getValue() == attNum) {
+            System.out.print((String) entry.getKey());
+            if (i != list.size() - 1)
+              System.out.print(", ");
+          }
         }
+      }
+     CLI.print("");
+    }
+         CLI.print("");
+
    }
 
    
@@ -3244,17 +3380,6 @@ void consisAttitudeList() throws ParseException :
 consisAttitudeLists.add(finalConsisList);
 consisAttitudeList.clear();
 
-  System.out.println("now printing all contents:");
-
-    for (ArrayList<Integer> list : consisAttitudeLists) {
-            for (Integer num : list) {
-                System.out.print(num + " ");
-            }
-            System.out.println(); // Move to the next line after printing each inner list
-        }
-System.out.print(consisAttitudeList.size()+" the size..");
-System.out.println(consisAttitudeList.size()+" the size..");
-System.out.println(finalConsisList.size()+" the size of the final list");
 
 }
 
@@ -3268,9 +3393,12 @@ void OneAttitudeInConsisList() throws ParseException :
 attitude=<STRING>
 {
   String s = attitude.image.trim().toLowerCase();
-  if(!initialAttitudes.containsKey(s))
+    if(!initialAttitudes.containsKey(s)){
+    CLI.print("");
     throw new ParseException("Not in initially Defined Attitudes");
+  }
   currConsisAttitude = initialAttitudes.get(s);
+  if(!consisAttitudeList.contains(currConsisAttitude))
   consisAttitudeList.add(currConsisAttitude);
  
 

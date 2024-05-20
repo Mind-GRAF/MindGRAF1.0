@@ -4,8 +4,13 @@ import java.io.StringReader;
 // import java.util.ArrayList;
 // import java.util.Collections;
 // import java.util.HashMap;
-
+import java.util.Collection;
 import java.util.Scanner;
+
+import edu.guc.mind_graf.context.ContextController;
+import edu.guc.mind_graf.nodes.Node;
+import edu.guc.mind_graf.set.PropositionNodeSet;
+import edu.guc.mind_graf.support.Pair;
 
 //import edu.guc.mind_graf.context.ContextController;
 
@@ -30,16 +35,37 @@ public class CLI {
         System.out.println(s);
     }
 
+    public static void trial() {
+        Collection<Pair<PropositionNodeSet, PropositionNodeSet>[]> x = ContextController.getContext("hogwarts")
+                .getHypotheses()
+                .values();
+        for (Pair<PropositionNodeSet, PropositionNodeSet>[] pairArray : x) {
+            for (Pair<PropositionNodeSet, PropositionNodeSet> p : pairArray) {
+                Collection<Node> f = p.getFirst().getNodes();
+                Collection<Node> s = p.getSecond().getNodes();
+                CLI.print("ummmmmm OKKAYY??????");
+                for (Node n : f)
+                    CLI.print(n.toString());
+                for (Node n : s)
+                    CLI.print(n.toString());
+
+            }
+        }
+    }
+
     public static void main(String[] args) {
 
         while (loop) {
 
             if (attitudesSet) {
-                System.out.println("Enter attitudes or 'N' to proceed:");
+                CLI.print("");
+                System.out.println("Enter Attitudes or 'N' to Proceed");
+                CLI.print("");
+                System.out.print(": ");
                 // String input = scanner.nextLine();
                 String s = readInput();
                 if (s.trim().toLowerCase().equals("exit")) {
-                    System.out.println("Session ended.");
+                    CLI.print("Exiting MindGRAF...");
                     break;
                 }
                 MindGRAF_Parser parser = new MindGRAF_Parser(
@@ -47,6 +73,8 @@ public class CLI {
 
                 try {
                     parser.setAttitudes();
+                    CLI.print("");
+                    CLI.print("------------------------------------------------------------");
                     consistentAttitudes = true;
                     attitudesSet = false;
                 } catch (ParseException e) {
@@ -59,11 +87,14 @@ public class CLI {
                 }
             } else {
                 if (consistentAttitudes) {
-                    System.out.println("Enter sets of consistent attitudes");
+                    CLI.print("");
+                    CLI.print("Enter Sets of Consistent Attitudes");
+                    CLI.print("");
+                    System.out.print(": ");
                     // String input = scanner.nextLine();
                     String s = readInput();
                     if (s.trim().toLowerCase().equals("exit")) {
-                        System.out.println("Session ended.");
+                        CLI.print("Exiting MindGRAF...");
                         break;
                     }
                     MindGRAF_Parser parser = new MindGRAF_Parser(
@@ -72,6 +103,8 @@ public class CLI {
                         parser.consistentAttitudes();
                         consistentAttitudes = false;
                         conjunctionAttitudes = true;
+                        CLI.print("");
+                        CLI.print("------------------------------------------------------------");
                         // uvbr = true;
                     } catch (ParseException e) {
                         // TODO Auto-generated catch block
@@ -82,10 +115,12 @@ public class CLI {
                     }
                 } else {
                     if (conjunctionAttitudes) {
-                        System.out.println("Enter sets of attitudes closed under conjunction");
+                        CLI.print("Enter Attitudes Closed Under Conjunction");
+                        CLI.print("");
+                        System.out.print(": ");
                         String input = readInput();
                         if (input.trim().toLowerCase().equals("exit")) {
-                            System.out.println("Session ended.");
+                            CLI.print("Exiting MindGRAF...");
                             break;
                         }
                         MindGRAF_Parser parser = new MindGRAF_Parser(
@@ -94,6 +129,7 @@ public class CLI {
                             parser.underConjunctionAttitudes();
                             conjunctionAttitudes = false;
                             consequentAttitudes = true;
+
                             // uvbr = true;
                         } catch (ParseException e) {
                             // TODO Auto-generated catch block
@@ -104,10 +140,12 @@ public class CLI {
                         }
                     } else {
                         if (consequentAttitudes) {
-                            System.out.println("Enter sets of attitudes closed under consequence");
+                            System.out.println("Enter Attitudes Closed Under Consequence");
+                            CLI.print("");
+                            System.out.print(": ");
                             String input = readInput();
                             if (input.trim().toLowerCase().equals("exit")) {
-                                System.out.println("Session ended.");
+                                CLI.print("Exiting MindGRAF...");
                                 break;
                             }
                             MindGRAF_Parser parser = new MindGRAF_Parser(
@@ -127,10 +165,12 @@ public class CLI {
 
                         {
                             if (telescopable) {
-                                System.out.println("Enter sets of Telescopable Attitudes");
+                                CLI.print("Enter Sets of Telescopable Attitudes");
+                                CLI.print("");
+                                System.out.print(": ");
                                 String input = readInput();
                                 if (input.trim().toLowerCase().equals("exit")) {
-                                    System.out.println("Session ended.");
+                                    CLI.print("Exiting MindGRAF...");
                                     break;
                                 }
                                 MindGRAF_Parser parser = new MindGRAF_Parser(
@@ -148,12 +188,14 @@ public class CLI {
                                 }
                             } else {
                                 if (uvbr) {
-                                    System.out.print("set UVBR Variable to \"true\" or \"false\"\n" + ":");
+                                    CLI.print("Enable UVBR?");
+                                    CLI.print("");
+                                    System.out.print(": ");
                                     String input = readInput();
                                     MindGRAF_Parser parser = new MindGRAF_Parser(
                                             new StringReader(input.trim()));
                                     if (input.trim().toLowerCase().equals("exit")) {
-                                        System.out.println("Session ended.");
+                                        CLI.print("Exiting MindGRAF...");
                                         break;
                                     }
                                     try {
@@ -162,17 +204,19 @@ public class CLI {
                                     } catch (ParseException e) {
                                         // TODO Auto-generated catch block
                                         // e.printStackTrace();
-                                        System.out.print("set UVBR Variable to \"true\" or \"false\"\n" + ":");
+                                        CLI.print("Wrong Command");
                                         continue;
                                     }
                                 } else {
-
-                                    System.out.print("Enter a command (or 'exit' to quit):");
-
+                                    CLI.print("");
+                                    CLI.print("---------------------------------------------------------------");
+                                    CLI.print("Enter a command (or 'exit' to quit)");
+                                    CLI.print("");
+                                    System.out.print(": ");
                                     String input = readInput();
 
                                     if (input.trim().toLowerCase().equals("exit")) {
-                                        System.out.println("Session ended.");
+                                        CLI.print("Exiting MindGRAF...");
                                         break;
                                     } else {
                                         MindGRAF_Parser parser = new MindGRAF_Parser(

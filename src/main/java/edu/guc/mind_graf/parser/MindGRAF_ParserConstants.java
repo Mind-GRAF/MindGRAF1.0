@@ -25,31 +25,23 @@ public interface MindGRAF_ParserConstants {
   /** RegularExpression Id. */
   int N = 11;
   /** RegularExpression Id. */
-  int IDENTIFIER = 12;
+  int ANDOR_THRESH = 12;
   /** RegularExpression Id. */
-  int LETTER = 13;
+  int ADJUST = 13;
   /** RegularExpression Id. */
-  int DIGIT = 14;
+  int RELATION_TYPE = 14;
   /** RegularExpression Id. */
-  int ANDOR_THRESH = 15;
+  int WHENDO_DOIF = 15;
   /** RegularExpression Id. */
-  int ADJUST = 16;
+  int QUANTIFIER = 16;
   /** RegularExpression Id. */
-  int RELATION_TYPE = 17;
+  int ENTAILMENT = 17;
   /** RegularExpression Id. */
-  int WHENDO_DOIF = 18;
+  int VARIABLE = 18;
   /** RegularExpression Id. */
-  int QUANTIFIER = 19;
+  int STRING = 19;
   /** RegularExpression Id. */
-  int ENTAILMENT = 20;
-  /** RegularExpression Id. */
-  int VARIABLE = 21;
-  /** RegularExpression Id. */
-  int WFF_NAME = 22;
-  /** RegularExpression Id. */
-  int STRING = 23;
-  /** RegularExpression Id. */
-  int PREDICATE_NAME_BRACKET = 24;
+  int PREDICATE_NAME_BRACKET = 20;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -68,9 +60,6 @@ public interface MindGRAF_ParserConstants {
     "\"set-mode-2\"",
     "\"set-mode-3\"",
     "<N>",
-    "<IDENTIFIER>",
-    "<LETTER>",
-    "<DIGIT>",
     "<ANDOR_THRESH>",
     "<ADJUST>",
     "<RELATION_TYPE>",
@@ -78,7 +67,6 @@ public interface MindGRAF_ParserConstants {
     "\"forall(\"",
     "<ENTAILMENT>",
     "\"?\"",
-    "<WFF_NAME>",
     "<STRING>",
     "<PREDICATE_NAME_BRACKET>",
     "\"~\"",
@@ -95,7 +83,7 @@ public interface MindGRAF_ParserConstants {
     "\"b-unit(\"",
     "\"compose-path(\"",
     "\"converse-path(\"",
-    "\"k-start(\"",
+    "\"k-star(\"",
     "\"k-plus(\"",
     "\"or-path(\"",
     "\"and-path(\"",
@@ -115,12 +103,14 @@ public interface MindGRAF_ParserConstants {
     "\"define-frame\"",
     "\"define-semantic\"",
     "\"add-bridge\"",
+    "\"get-rels\"",
     "\"define-relation\"",
     "\"back-infer\"",
     "\"ask-if-true\"",
     "\"ask-if-not\"",
     "\"ask-why\"",
     "\"ask-whynot\"",
+    "\"get-mode\"",
     "\"clear-network\"",
     "\"clear-infer\"",
     "\"perform-act\"",
@@ -139,6 +129,7 @@ public interface MindGRAF_ParserConstants {
     "\"get-contexts\"",
     "\"set-curr-context\"",
     "\"set-attitude\"",
+    "\"get-curr-attitude\"",
     "\"[\"",
     "\"]\"",
     "\"custom-method\"",
