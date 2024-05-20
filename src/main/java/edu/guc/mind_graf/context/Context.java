@@ -3,6 +3,8 @@ package edu.guc.mind_graf.context;
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.PropositionNode;
+import edu.guc.mind_graf.parser.CLI;
+import edu.guc.mind_graf.parser.MindGRAF_Parser;
 import edu.guc.mind_graf.revision.Revision;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.PropositionNodeSet;
@@ -12,7 +14,6 @@ import edu.guc.mind_graf.support.Pair;
 import java.util.*;
 import java.util.stream.IntStream;
 
-
 public class Context {
 
     private final HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>[]> hypotheses;
@@ -20,7 +21,6 @@ public class Context {
 
     private static int clonedContextsCount;
     private static final ArrayList<Context> assumedContexts = new ArrayList<>();
-
 
     public Context(String name, Set<String, Integer> attitudeNames) {
         this.name = name;
@@ -41,27 +41,24 @@ public class Context {
         }
         throw new RuntimeException("PropositionNode is not in any attitude");
 
-//        DEPRECATED CODE:
-//        // loop through all the Integer keys of attitudesBitset
-//        for (Integer key : this.AttitudesBitset.getSet().keySet()) {
-//            // If the propositionNode is in the attitude then return the name of the
-//            // attitude
-//            if (this.AttitudesBitset.get(key).get(nodeId)) {
-//                return key;
-//            }
-//        }
-//        throw new RuntimeException("PropositionNode is not in any attitude");
+        // DEPRECATED CODE:
+        // // loop through all the Integer keys of attitudesBitset
+        // for (Integer key : this.AttitudesBitset.getSet().keySet()) {
+        // // If the propositionNode is in the attitude then return the name of the
+        // // attitude
+        // if (this.AttitudesBitset.get(key).get(nodeId)) {
+        // return key;
+        // }
+        // }
+        // throw new RuntimeException("PropositionNode is not in any attitude");
     }
 
     public String getName() {
         return name;
     }
 
-    public HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>[]> getHypotheses() {
-        return hypotheses;
-    }
-
     public void addHypothesisToContext(int level, int attitudeId, PropositionNode node) {
+
         if (this.hypotheses.get(level) == null) {
             Pair<PropositionNodeSet, PropositionNodeSet>[] hyps = new Pair[this.hypotheses.get(0).length];
             for (int i = 0; i < this.hypotheses.get(0).length; i++) {
@@ -71,6 +68,7 @@ public class Context {
         }
         this.hypotheses.get(level)[attitudeId].getFirst().add(node);
         node.getSupport().setHyp(attitudeId);
+
     }
 
     public ArrayList<Integer> getLevels() {
@@ -98,7 +96,6 @@ public class Context {
         }
         return false;
     }
-
 
     public boolean isOriginHypothesis(int level, int attitudeId, PropositionNode node) {
         System.out.println("in isOriginHypothesis");
@@ -169,17 +166,20 @@ public class Context {
                 this.completelyRemoveNodeFromContext(level, attitudeId, nodeToRemove, true);
             }
         }
-        Revision.print("successfully removed Node: " + node + " from attitude: " + ContextController.getAttitudeName(attitudeId) + " from Context: " + this.getName());
+        Revision.print("successfully removed Node: " + node + " from attitude: "
+                + ContextController.getAttitudeName(attitudeId) + " from Context: " + this.getName());
     }
 
     public Context cloneContext(int attitudeId, NodeSet assumptionNodes) {
 
-        boolean contextHasContradictingNodes = assumptionNodes.getValues().stream().allMatch(node -> this.isHypothesis(0, attitudeId, (PropositionNode) node.getNegation()));
-        if(contextHasContradictingNodes){
-            return  null;
+        boolean contextHasContradictingNodes = assumptionNodes.getValues().stream()
+                .allMatch(node -> this.isHypothesis(0, attitudeId, (PropositionNode) node.getNegation()));
+        if (contextHasContradictingNodes) {
+            return null;
         }
 
-        Context clonedContext = new Context(this.getName() + " " + clonedContextsCount, ContextController.getAttitudes());
+        Context clonedContext = new Context(this.getName() + " " + clonedContextsCount,
+                ContextController.getAttitudes());
         assumedContexts.add(clonedContext);
         clonedContextsCount++;
         ContextController.getContextSet().add(name, clonedContext);
@@ -207,5 +207,9 @@ public class Context {
             ContextController.getContextSet().remove(c.getName());
         }
         clonedContextsCount = 0;
+    }
+
+    public HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>[]> getHypotheses() {
+        return hypotheses;
     }
 }

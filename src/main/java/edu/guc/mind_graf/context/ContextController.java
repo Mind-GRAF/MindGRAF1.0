@@ -11,8 +11,8 @@ import java.util.function.IntBinaryOperator;
 
 public class ContextController {
     private static Context currContext;
-    private static ContextSet contextSet;
-    private static Set<String, Integer> attitudes;
+    private static ContextSet contextSet = new ContextSet();;
+    private static Set<String, Integer> attitudes = new Set<String, Integer>();
     private static boolean automaticHandlingEnabled;
     private static boolean cacheEnabled;
     private static int mergeFunctionNumber;

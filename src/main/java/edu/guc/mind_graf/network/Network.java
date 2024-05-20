@@ -3,7 +3,6 @@ package edu.guc.mind_graf.network;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
-
 import edu.guc.mind_graf.mgip.rules.*;
 import edu.guc.mind_graf.relations.Relation;
 import edu.guc.mind_graf.acting.rules.DoIfNode;
@@ -72,9 +71,13 @@ public class Network {
 		Network.createRelation("threshmax", "propositionnode", Adjustability.NONE, 1);
 		Network.createRelation("action", "propositionnode", Adjustability.NONE, 1);
 		Network.createRelation("do", "actnode", Adjustability.NONE, 1);
+		Network.createRelation("act", "actnode", Adjustability.NONE, 1);
+		Network.createRelation("plan", "actnode", Adjustability.NONE, 1);
+		Network.createRelation("guard", "proposition", Adjustability.NONE, 1);
 		Network.createRelation("grade", "individualNode", Adjustability.NONE, 0);
-		Network.createRelation("prop", "pro positionnode", Adjustability.NONE, 0);
+		Network.createRelation("prop", "propositionnode", Adjustability.NONE, 0);
 
+	
 	}
 
 	public void addBasicNodes() throws NoSuchTypeException {
@@ -408,6 +411,8 @@ public class Network {
 		Class<?> newClass = c.createClass(methods, constructors);
 		userDefinedClasses.put(name, c);
 		return c;
+
+			
 	}
 
 	public static void RemoveNode(Node node) throws NodeNotInNetworkException,
@@ -447,6 +452,10 @@ public class Network {
 
 	public static Node getNodeById(int id) {
 		return nodes.get(id);
+	}
+
+	public static HashMap<String, CustomClass> getUserDefinedClasses() {
+		return userDefinedClasses;
 	}
 
 	public static boolean isAssignable(Node parent, Node child) {

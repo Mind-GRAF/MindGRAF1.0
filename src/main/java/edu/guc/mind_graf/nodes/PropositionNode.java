@@ -989,25 +989,25 @@ public class PropositionNode extends Node {
      * @throws DirectCycleException
      *
      */
-    public void deduce() throws NoSuchTypeException, NoPlansExistForTheActException, DirectCycleException {
+    public void deduce(String contextName, int attitudeID) throws NoSuchTypeException, NoPlansExistForTheActException, DirectCycleException {
         /* BEGIN - Helpful Prints */
         System.out.println("deduce() method initated.");
         System.out.println("-------------------------\n");
         /* END - Helpful Prints */
         Scheduler.initiate();
-        String currentContextName = ContextController.getCurrContextName();
+       // String contextName = ContextController.getCurrContextName();
         // Scanner scanner = new Scanner(System.in);
         // System.out.print("Enter your desired attitude: ");
         // String att = scanner.nextLine();
         // scanner.close();
-        int currentattitudeID = 0;
+        // int currentattitudeID = 1;
         // given by the user
-        System.out.println("Backward Inference initiated in Context: " + currentContextName + " & Attitude: "
-                + currentattitudeID);
+        System.out.println("Backward Inference initiated in Context: " + contextName + " & Attitude: "
+                + attitudeID);
         Scheduler.setOriginOfBackInf(this);
         Collection<KnownInstance> thePveKnownInstancesSet = knownInstances
                 .getPositiveCollectionbyAttribute(
-                        currentattitudeID);
+                    attitudeID);
         if (thePveKnownInstancesSet != null) {
             for (KnownInstance currentPveKnownInstance : thePveKnownInstancesSet) {
 
@@ -1017,7 +1017,7 @@ public class PropositionNode extends Node {
                         currentPveKnownInstance.getSupports(), currentPveKnownInstance.getAttitudeID(),
                         true,
                         InferenceType.BACKWARD, this, this);
-                currentPveReport.setContextName(currentContextName);
+                currentPveReport.setContextName(contextName);
                 System.out.println("A reply has been succefully added to the set of backward asserted reply nodes");
                 Scheduler.addNodeAssertionThroughBReport(currentPveReport, replyNode);
             }
@@ -1025,7 +1025,7 @@ public class PropositionNode extends Node {
             System.out.println(this.getName() + " doesn't have any positive known instances");
         }
         Collection<KnownInstance> theNveKnownInstancesSet = knownInstances
-                .getNegativeCollectionbyAttribute(currentattitudeID);
+                .getNegativeCollectionbyAttribute(attitudeID);
         if (theNveKnownInstancesSet != null) {
 
             for (KnownInstance currentNveKnownInstance : theNveKnownInstancesSet) {
@@ -1035,7 +1035,7 @@ public class PropositionNode extends Node {
                         currentNveKnownInstance.getSupports(), currentNveKnownInstance.getAttitudeID(),
                         false,
                         InferenceType.BACKWARD, this, this);
-                currentNveReport.setContextName(currentContextName);
+                currentNveReport.setContextName(contextName);
                 System.out.println("A reply has been succefully added to the set of backward asserted reply nodes");
 
                 Scheduler.addNodeAssertionThroughBReport(currentNveReport, replyNode);
@@ -1048,15 +1048,15 @@ public class PropositionNode extends Node {
         /* BEGIN - Helpful Prints */
         System.out.println("Sending to rule nodes during deduce()");
         /* END - Helpful Prints */
-        getNodesToSendRequest(ChannelType.RuleCons, currentContextName, currentattitudeID, null);
+        getNodesToSendRequest(ChannelType.RuleCons, contextName, attitudeID, null);
         /* BEGIN - Helpful Prints */
         System.out.println("Sending to matching nodes during deduce()");
         /* BEGIN - Helpful Prints */
-        getNodesToSendRequest(ChannelType.Matched, currentContextName,
-                currentattitudeID, null);
+        getNodesToSendRequest(ChannelType.Matched, contextName,
+        attitudeID, null);
         /* BEGIN - Helpful Prints */
         System.out.println("Sending to DoIf rule nodes during deduce()");
-        getNodesToSendRequest(ChannelType.IfRule, currentContextName, currentattitudeID, null);
+        getNodesToSendRequest(ChannelType.IfRule, contextName, attitudeID, null);
 
         System.out.println(Scheduler.schedule());
         System.out.println(Scheduler.getBackwardAssertedReplyNodes().values().toString());
@@ -1071,36 +1071,36 @@ public class PropositionNode extends Node {
      * @throws NoPlansExistForTheActException
      * @throws DirectCycleException
      */
-    public void add() throws NoSuchTypeException, NoPlansExistForTheActException, DirectCycleException {
+    public void add(String contextName, int attitudeID) throws NoSuchTypeException, NoPlansExistForTheActException, DirectCycleException {
         /* BEGIN - Helpful Prints */
         System.out.println("add() method initated.\n");
         System.out.println("-------------------------");
         /* END - Helpful Prints */
         Scheduler.initiate();
-        String currentContextName = ContextController.getCurrContextName();
+        //String currentContextName = ContextController.getCurrContextName();
 
         // Scanner scanner = new Scanner(System.in);
         // System.out.print("Enter your desired attitude: ");
         // String att = scanner.nextLine();
         // scanner.close();
-        int currentAttitudeID = 0;
+        // int currentAttitudeID = 0;
         // given by the user
         boolean reportSign = true;
-        System.out.println("Forward Inference initiated in Context: " + currentContextName + " & Attitude: "
-                + currentAttitudeID);
+        System.out.println("Forward Inference initiated in Context: " + contextName + " & Attitude: "
+                + attitudeID);
         /* BEGIN - Helpful Prints */
         System.out.println("Sending to rule nodes during add()");
         /* END - Helpful Prints */
-        getNodesToSendReport(ChannelType.AntRule, currentContextName, currentAttitudeID, null, reportSign,
+        getNodesToSendReport(ChannelType.AntRule, contextName, attitudeID, null, reportSign,
                 InferenceType.FORWARD);
         /* BEGIN - Helpful Prints */
         System.out.println("Sending to matching nodes during add()");
         /* END - Helpful Prints */
-        getNodesToSendReport(ChannelType.Matched, currentContextName, currentAttitudeID, null, reportSign,
+        getNodesToSendReport(ChannelType.Matched, contextName, attitudeID, null, reportSign,
                 InferenceType.FORWARD);
         System.out.println("Sending to WhenDo rule nodes during add()");
         /* END - Helpful Prints */
-        getNodesToSendReport(ChannelType.WhenRule, currentContextName, currentAttitudeID, null, reportSign,
+        getNodesToSendReport(ChannelType.WhenRule, contextName, attitudeID, null, reportSign,
                 InferenceType.FORWARD);
         System.out.println(Scheduler.schedule());
         System.out.println("*New Knowledge inferred: " + Scheduler.getForwardAssertedNodes().values().toString());

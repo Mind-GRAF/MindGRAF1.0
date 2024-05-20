@@ -2,9 +2,8 @@ package edu.guc.mind_graf.Context;
 
 import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
+import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.context.ContextController;
-import edu.guc.mind_graf.context.Context;
-import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.network.NetworkController;
