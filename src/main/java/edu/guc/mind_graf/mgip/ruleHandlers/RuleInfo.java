@@ -5,7 +5,6 @@ import java.util.Map;
 import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.mgip.reports.Report;
-import edu.guc.mind_graf.nodes.FlagNode;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.set.FlagNodeSet;
 import edu.guc.mind_graf.set.FreeVariableSet;
@@ -19,7 +18,6 @@ public class RuleInfo {
     private int ncount;
     private Substitutions subs;
     private FlagNodeSet fns;
-    private Support support;
     // dont have inference type since it should always be backward, will revise this
     // if needed
 
@@ -30,7 +28,6 @@ public class RuleInfo {
         ncount = 0;
         subs = new Substitutions();
         fns = new FlagNodeSet();
-        support = new Support(-1);
     }
 
     public RuleInfo(String context, int attitude, int pcount, int ncount, Substitutions subs, FlagNodeSet fns, Support support) {
@@ -40,7 +37,6 @@ public class RuleInfo {
         this.ncount = ncount;
         this.subs = subs;
         this.fns = fns;
-        this.support = support;
     }
 
     public static RuleInfo createRuleInfo(Report report){
@@ -51,7 +47,9 @@ public class RuleInfo {
         else
             ncount++;
         FlagNode reporter = new FlagNode(report.getReporterNode(), report.isSign(), report.getSupport());
-        return new RuleInfo(report.getContextName(), report.getAttitude(), pcount, ncount, report.getSubstitutions(), new FlagNodeSet(reporter), new Support(-1));
+        RuleInfo newRuleInfo =  new RuleInfo(report.getContextName(), report.getAttitude(), pcount, ncount, report.getSubstitutions(), new FlagNodeSet(reporter), report.getSupport());
+        System.out.println(newRuleInfo + " is created with context " + newRuleInfo.getContext() + " and attitude " + newRuleInfo.getAttitude());
+        return newRuleInfo;
     }
 
     public boolean isCompatible(RuleInfo r) {
@@ -60,7 +58,7 @@ public class RuleInfo {
         for (Map.Entry<Node, Node> entry : this.subs.getMap().entrySet()) {
             Node var = entry.getKey();
             Node value = entry.getValue();
-            if (r.getSubs().contains(var) && !r.getSubs().get(var).equals(value)) {
+            if (r.getSubs().contains(var) && !(r.getSubs().get(var) == null) && !r.getSubs().get(var).equals(value)) {
                 return false;
             }
         }
@@ -86,26 +84,23 @@ public class RuleInfo {
             else
                 resNcount--;
         }
-
         Substitutions resSubs = new Substitutions();
         resSubs.addSubs(this.subs);
-        resSubs.addSubs(r.getSubs()); // counting on that if the subs are not compatible, the method will not be
-        // called and that adding overwrites repeated nodes ==> a variable wouldn't
-        // exist twice in two different nodes
         FlagNodeSet resFns = this.fns.combine(r.getFns());
         res.pcount = resPcount;
         res.ncount = resNcount;
         res.subs = resSubs;
         res.fns = resFns;
-        res.support = new Support(-1);
-        res.support.union(this.support);
-        res.support.union(r.support);
+        res.removeNullSubs();
+        resSubs.addSubs(r.getSubs()); // counting on that if the subs are not compatible, the method will not be
+        // called and that adding overwrites repeated nodes ==> a variable wouldn't
+        // exist twice in two different nodes
         return res;
     }
 
-    public RuleInfo addNullSubs(FreeVariableSet ns){
+    public RuleInfo addNullSubs(FreeVariableSet vars){
         RuleInfo ruleInfoWithNulls = clone();
-        for(Node n : ns.getFreeVariables()){
+        for(Node n : vars.getFreeVariables()){
             if(!ruleInfoWithNulls.getSubs().contains(n)){
                 ruleInfoWithNulls.getSubs().add(n, null);
             }
@@ -176,10 +171,10 @@ public class RuleInfo {
 
     @Override
     public String toString() {
-        return "RuleInfo{" +
-                "context=" + context +
-                ", attitude=" + attitude +
-                ", pcount=" + pcount +
+        return "RI{" +
+                /*"context=" + context +
+                ", attitude=" + attitude + */
+                "pcount=" + pcount +
                 ", ncount=" + ncount +
                 ", subs=" + subs +
                 ", fns=" + fns +
@@ -192,16 +187,7 @@ public class RuleInfo {
         ri.setNcount(this.ncount);
         ri.setSubs(this.subs.clone());
         ri.setFns(this.fns.clone());
-        ri.setSupport(this.support.clone());
         return ri;
-    }
-
-    public Support getSupport() {
-        return support;
-    }
-
-    public void setSupport(Support support) {
-        this.support = support;
     }
 
     public String getContext() {

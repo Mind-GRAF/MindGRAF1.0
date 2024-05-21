@@ -75,8 +75,8 @@ class RevisionTest {
     @Test
     void testDetectingContradictions1() {
         System.out.println("contradiction detection test 1");
-        ContextController.addHypothesisToContext(0, 0, p);
-        ContextController.addHypothesisToContext(0, 0, notP);
+        ContextController.addHypothesisToContext(0, 0, p.getId());
+        ContextController.addHypothesisToContext(0, 0, notP.getId());
 
         Assertions.assertEquals(1, Revision.checkContradiction(ContextController.getContext("guc"), 0, 0, p).size());
     }
@@ -84,9 +84,9 @@ class RevisionTest {
     @Test
     void testDetectingContradictions2() {
         System.out.println("contradiction detection test 2");
-        ContextController.addHypothesisToContext(0, 0, p);
-        ContextController.addHypothesisToContext(0,2, notP);
-        ContextController.addHypothesisToContext(0,3, notP);
+        ContextController.addHypothesisToContext(0, 0, p.getId());
+        ContextController.addHypothesisToContext(0,2, notP.getId());
+        ContextController.addHypothesisToContext(0,3, notP.getId());
 
         Assertions.assertEquals(2, Revision.checkContradiction(ContextController.getContext("guc"), 0, 0, p).size());
     }
@@ -94,8 +94,8 @@ class RevisionTest {
     @Test
     void testDetectingContradictions3() {
         System.out.println("contradiction detection test 3");
-        ContextController.addHypothesisToContext(0,0, p);
-        ContextController.addHypothesisToContext(0,1, notP);
+        ContextController.addHypothesisToContext(0,0, p.getId());
+        ContextController.addHypothesisToContext(0,1, notP.getId());
 
         Assertions.assertEquals(0, Revision.checkContradiction(ContextController.getContext("guc"), 0, 0, p).size());
     }

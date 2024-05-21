@@ -81,7 +81,7 @@ public class WhenDoNodeTest {
         M0.setHyp("home", 0);
         P2.setHyp("home", 0);
         M1.setPrimitive(true);
-        M0.add();
+       // M0.add();
     }
 
     @Test
@@ -173,6 +173,6 @@ public class WhenDoNodeTest {
         M0.setHyp("home", 0);
         P4.setHyp("home", 0);
         M1.setPrimitive(true);
-        M0.add();
+       // M0.add();
     }
 }

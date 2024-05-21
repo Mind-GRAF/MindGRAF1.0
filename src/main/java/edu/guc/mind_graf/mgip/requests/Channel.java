@@ -47,7 +47,6 @@ public class Channel {
             Substitutions newReportSubs = report.getSubstitutions().switchReport(getSwitcherSubstitutions());
             if (report.getSubstitutions().size() == 0)
                 report.setSubstitutions(getSwitcherSubstitutions());
-
             else if (getSwitcherSubstitutions().size() == 0)
                 report.setSubstitutions(report.getSubstitutions());
             else

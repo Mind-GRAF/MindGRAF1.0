@@ -11,6 +11,11 @@ public class Match {
     // variables to constants)
     private Substitutions switchSubs;
     private Node node;
+    /*
+     * 0: exact match
+     * 1: positive match
+     * 2: negative match
+     */
     private int matchType;
     private Object support;
 

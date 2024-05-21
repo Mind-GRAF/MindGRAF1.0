@@ -23,7 +23,7 @@ public class Support implements Cloneable{
 	//	private HashMap<Integer, HashMap<Integer, SupportTree>> supportsTree;
 	//	private HashMap<Integer, HashSet<Integer>> isTreeCalculated;
 
-	public Support(int nodeID){
+	public Support(int nodeID) {
 		// Constructor
 		this.nodeID = nodeID;
 		justificationSupport = new HashMap<>();
@@ -39,7 +39,7 @@ public class Support implements Cloneable{
 		array.add(new Pair<>(justificationSupport, bridgeRules));
 		HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>> outerHashMap = new HashMap<>();
 		outerHashMap.put(currentAttitudeID, array);
-		HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>>> levelHash = new HashMap<>();
+		HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>>>> levelHash = new HashMap<>();
 		levelHash.put(level, outerHashMap);
 		setJustificationSupport(levelHash);
 		this.nodeID = nodeID;
@@ -780,7 +780,8 @@ public class Support implements Cloneable{
 		ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>> newJustificationSupport = this.getJustificationSupport().get(level).get(attitude);
 
 		for(Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> currSupp : newJustificationSupport){
-			currSupp.getFirst().get(attitude).getFirst().add(nodeID);
+			currSupp.getFirst().get(attitude).getFirst().add(propositionNode.getId());
+
 		}
 
 		this.justificationSupport.remove(level);
@@ -1057,10 +1058,9 @@ public class Support implements Cloneable{
 //			sb.append("Level").append(level).append(": ").append("\n");
 			sb.append(mapToString("  Level" + level + ": ", justificationSupport.get(level)));
 		}
-		sb.append(" Assumption Support: ").append("\n");
 		for(Integer level : assumptionSupport.keySet()) {
-//			sb.append("Level").append(level).append(": ").append("\n");
-			sb.append(mapToString("  Level" + level + ": ", assumptionSupport.get(level)));
+			sb.append("Level").append(level).append(": ").append("\n");
+			sb.append(mapToString(" AssumptionSupport", assumptionSupport.get(level)));
 		}
 		return sb.toString();
 	}
@@ -1112,7 +1112,7 @@ public class Support implements Cloneable{
 
 		return clone;
 	}
-	
+
 	/*
 	public void calculateSupportsTree() {
 

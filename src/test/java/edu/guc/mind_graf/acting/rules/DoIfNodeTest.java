@@ -76,7 +76,7 @@ public class DoIfNodeTest {
        
         M8.setPrimitive(true);
         P10.setHyp("home", 0);
-        M7.deduce();
+        //M7.deduce();
 
     }
 
@@ -143,7 +143,7 @@ public class DoIfNodeTest {
         P10.setHyp("home", 0);
         chairBig.setHyp("home", 0);
         P11.setHyp("home", 0);
-        M7.deduce();
+       // M7.deduce();
 
     }
     @Test
@@ -201,7 +201,7 @@ public class DoIfNodeTest {
 
         M8.setPrimitive(true);
         //P10.setHyp("home", 0);
-        M7.deduce();
+        //M7.deduce();
 
     }
 

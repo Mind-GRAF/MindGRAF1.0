@@ -39,6 +39,7 @@ public abstract class SIndex extends RuleInfoHandler {
 
     @Override
     public RuleInfoSet insertVariableRI(RuleInfo ri) throws InvalidRuleInfoException, DirectCycleException {
+        System.out.println("Inserting rule info with the substitutions: " + ri.getSubs() + " into SIndex");
         int hash = customHash(ri.getSubs());
         return insertIntoMap(ri, hash);
     }

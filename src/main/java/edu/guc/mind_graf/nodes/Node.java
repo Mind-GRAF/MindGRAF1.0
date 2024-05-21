@@ -63,7 +63,7 @@ public abstract class Node {
 
 		this.downCableSet = downCables;
 		freeVariableSet = new NodeSet();
-		System.out.println(freeVariableSet.getValues());
+//		System.out.println(freeVariableSet.getValues());
 		for (Cable c : downCables.getValues())
 			for (Node node : c.getNodeSet().getValues())
 				node.getUpCableSet().updateCables(c.getRelation(), this);
@@ -282,6 +282,22 @@ public abstract class Node {
 				return null;
 			}
 		}
+	}
+
+
+	// moved from RuleNode up to Node
+	public Substitutions onlyRelevantSubs(Substitutions filterSubs) {
+		NodeSet freeVariablesSet = this.getFreeVariables();
+		Substitutions relevantSubs = new Substitutions();
+		for (Node variableNode : freeVariablesSet.getValues()) {
+			for (Node var : filterSubs.getMap().keySet()) {
+				Node value = filterSubs.getMap().get(var);
+				if (var.getName().equals(variableNode.getName())) {
+					relevantSubs.add(var, value);
+				}
+			}
+		}
+		return relevantSubs;
 	}
 
 	public Node applySubstitution(Substitutions substitutions)

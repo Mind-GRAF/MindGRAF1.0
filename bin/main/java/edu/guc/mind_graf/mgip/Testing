@@ -238,9 +238,9 @@ public static void main(String[] args) throws ClassCastException, NoSuchTypeExce
             Adjustability.EXPAND, 2);
     Relation property = Network.createRelation("property", "",
             Adjustability.EXPAND, 2);
-    Relation antecedent = Network.createRelation("ant", "",
+    Relation antecedent = Network.createRelation("antecedent", "",
             Adjustability.EXPAND, 2);
-    Relation cons = Network.createRelation("cq", "",
+    Relation cons = Network.createRelation("consequent", "",
             Adjustability.EXPAND, 2);
     Network.quantifiers.put("forall", "forall");
 
@@ -299,9 +299,9 @@ Relation Class = Network.createRelation("Class", "",
         Adjustability.EXPAND, 2);
 Relation property = Network.createRelation("property", "",
         Adjustability.EXPAND, 2);
-Relation antecedent = Network.createRelation("ant", "",
+Relation antecedent = Network.createRelation("antecedent", "",
         Adjustability.EXPAND, 2);
-Relation cons = Network.createRelation("cq", "",
+Relation cons = Network.createRelation("consequent", "",
         Adjustability.EXPAND, 2);
 Network.quantifiers.put("forall", "forall");
 
@@ -367,9 +367,9 @@ Relation Class = Network.createRelation("Class", "",
         Adjustability.EXPAND, 2);
 Relation property = Network.createRelation("property", "",
         Adjustability.EXPAND, 2);
-Relation antecedent = Network.createRelation("ant", "",
+Relation antecedent = Network.createRelation("antecedent", "",
         Adjustability.EXPAND, 2);
-Relation cons = Network.createRelation("cq", "",
+Relation cons = Network.createRelation("consequent", "",
         Adjustability.EXPAND, 2);
 Network.quantifiers.put("forall", "forall");
 

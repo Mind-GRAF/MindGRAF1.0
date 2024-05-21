@@ -171,6 +171,10 @@ public class NodeSet implements Iterable<Node> {
     public int getIntValue() {
         if(this.getNames().size() != 1)
             throw new IllegalArgumentException("NodeSet doesn't represent a number");
-        return Integer.parseInt(this.getNames().get(0));
+        String number = this.getNames().get(0);
+        if(number.contains("temp")){
+            number = number.substring(0, number.length() - 4);
+        }
+        return Integer.parseInt(number);
     }
 }

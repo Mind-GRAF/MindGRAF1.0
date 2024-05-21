@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
+import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.exceptions.InvalidRuleInfoException;
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.Scheduler;
@@ -18,9 +19,11 @@ import edu.guc.mind_graf.mgip.requests.IfToRuleChannel;
 import edu.guc.mind_graf.mgip.requests.MatchChannel;
 import edu.guc.mind_graf.mgip.requests.Request;
 import edu.guc.mind_graf.mgip.requests.WhenToRuleChannel;
+import edu.guc.mind_graf.mgip.ruleHandlers.FlagNode;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfoHandler;
 import edu.guc.mind_graf.mgip.rules.AndOr;
+import edu.guc.mind_graf.mgip.rules.BridgeRule;
 import edu.guc.mind_graf.mgip.rules.Thresh;
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.set.NodeSet;
@@ -29,12 +32,14 @@ import edu.guc.mind_graf.acting.rules.WhenDoNode;
 import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.components.Substitutions;
-import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
+import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.RuleInfoSet;
+import edu.guc.mind_graf.support.Pair;
 import edu.guc.mind_graf.support.Support;
 
 public abstract class RuleNode extends PropositionNode {
+
     private boolean forwardReport;
     protected RuleInfoHandler ruleInfoHandler;
     protected RuleInfoSet rootRuleInfos;
@@ -47,13 +52,16 @@ public abstract class RuleNode extends PropositionNode {
     }
 
     public void applyRuleHandler(Report report) throws NoSuchTypeException {
-
+        System.out.println("applyRuleHandler called on the report: " + report.stringifyReport());
         try {
             RuleInfoSet inserted = ruleInfoHandler.insertRI(RuleInfo.createRuleInfo(report));
             if (inserted != null && !inserted.isEmpty()) {
                 rootRuleInfos.addRootRuleInfo(inserted);
                 RuleInfoSet[] mayInfer = mayInfer();
                 createInferenceReports(mayInfer);
+            }
+            else{
+                System.out.println("Nothing can be inferred yet");
             }
         } catch (InvalidRuleInfoException e) {
             System.out.println("Inserting RI failed");
@@ -65,33 +73,15 @@ public abstract class RuleNode extends PropositionNode {
 
     public abstract RuleInfoSet[] mayInfer();
 
-    public void createInferenceReports(RuleInfoSet[] inferrable) throws DirectCycleException {
+    public void createInferenceReports(RuleInfoSet[] inferrable) throws DirectCycleException, NoSuchTypeException {
         HashMap<RuleInfo, Report> reports = new HashMap<>();
         for (int i = 0; i < inferrable.length; i++) {
             for (RuleInfo ri : inferrable[i]) {
                 rootRuleInfos.removeRuleInfo(ri);
                 ri.removeNullSubs();
-                Support supports = new Support(-1); // probably wrong (maybe should make new support of the flag nodes
-                                                    // and rule node
-                supports.addNode(ri.getAttitude(), this);
-                if (this.isOpen()) {
-                    Collection<KnownInstance> theKnownInstanceSet = knownInstances.mergeKInstancesBasedOnAtt(
-                            ri.getAttitude());
-                    knownInstances.printKnownInstanceSet(theKnownInstanceSet);
-                    for (KnownInstance currentKnownInstance : theKnownInstanceSet) {
-                        Substitutions currentKISubs = currentKnownInstance.getSubstitutions();
-                        boolean compatibilityCheck = currentKISubs.compatible(onlyRelevantSubs(ri.getSubs()));
-                        boolean supportCheck = currentKnownInstance.anySupportSupportedInAttitudeContext(
-                                ri.getContext(),
-                                ri.getAttitude());
-                        if (compatibilityCheck && supportCheck) {
-                            supports.union(currentKnownInstance.getSupports());
-                        }
-                    }
-                }
-                Report newReport = new Report(ri.getSubs() == null ? new Substitutions() : ri.getSubs(), supports,
+                Report newReport = new Report(ri.getSubs() == null ? new Substitutions() : ri.getSubs(), createSupport(ri),
                         ri.getAttitude(),
-                        (i == 0), InferenceType.FORWARD, null, this);
+                        (i == 0), (forwardReport ? InferenceType.FORWARD : InferenceType.BACKWARD), null, this);
                 newReport.setContextName(ri.getContext());
                 newReport.setReportType(ReportType.RuleCons);
                 reports.put(ri, newReport);
@@ -100,26 +90,52 @@ public abstract class RuleNode extends PropositionNode {
         sendInferenceReports(reports);
     }
 
-    public void sendResponseToArgs(HashMap<RuleInfo, Report> reports, NodeSet arg) {
+    public Support createSupport(RuleInfo ri) throws NoSuchTypeException, DirectCycleException {
+        System.out.println("Creating the inference support");
+        PropositionNodeSet supportPropSet = new PropositionNodeSet();
+        for(FlagNode fn : ri.getFns()){
+            Node n = fn.getNode();
+            if(n.isOpen()){
+                supportPropSet.add(n.applySubstitution(n.onlyRelevantSubs(ri.getSubs())));
+            } else {
+                supportPropSet.add(n);
+            }
+        }
+        if(!this.isOpen()){
+            supportPropSet.add(this);
+        } else {
+            supportPropSet.add(this.applySubstitution(ri.getSubs()));
+        }
+        HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> justSupport = new HashMap<>();
+        justSupport.put(ri.getAttitude(), new Pair(supportPropSet, new PropositionNodeSet()));
+        Support reportSup = new Support(-1, ri.getAttitude(), Network.currentLevel, justSupport, new PropositionNodeSet());
+        return reportSup;
+    }
+
+    public void sendResponseToArgs(HashMap<RuleInfo, Report> reports, NodeSet arg) throws NoSuchTypeException {
         for (RuleInfo ri : reports.keySet()) {
             Report report = reports.get(ri);
             NodeSet filteredArgs = new NodeSet();
             for (Node node : arg) {
                 if (!ri.getFns().containsNode(node)) {
                     filteredArgs.add(node);
+                    System.out.println("Inferred " + node.applySubstitution(report.getSubstitutions()));
                 }
             }
             this.sendReportToConsequents(filteredArgs, report);
         }
     }
 
-    public void sendInferenceToCq(HashMap<RuleInfo, Report> reports, NodeSet cq) {
+    public void sendInferenceToCq(HashMap<RuleInfo, Report> reports, NodeSet cq) throws NoSuchTypeException {
         for (Report report : reports.values()) {
+            for(Node node : cq){
+                System.out.println("Inferred " + node.applySubstitution(report.getSubstitutions()));
+            }
             this.sendReportToConsequents(cq, report);
         }
     }
 
-    public abstract void sendInferenceReports(HashMap<RuleInfo, Report> reports);
+    public abstract void sendInferenceReports(HashMap<RuleInfo, Report> reports) throws DirectCycleException, NoSuchTypeException;
 
     /***
      * this method gets all the consequents and arguments that this node is a rule
@@ -150,20 +166,6 @@ public abstract class RuleNode extends PropositionNode {
      * @param filterSubs
      * @return substitutions
      */
-
-    public Substitutions onlyRelevantSubs(Substitutions filterSubs) {
-        NodeSet freeVariablesSet = this.getFreeVariables();
-        Substitutions relevantSubs = new Substitutions();
-        for (Node variableNode : freeVariablesSet.getValues()) {
-            for (Node var : filterSubs.getMap().keySet()) {
-                Node value = filterSubs.getMap().get(var);
-                if (var.getName().equals(variableNode.getName())) {
-                    relevantSubs.add(var, value);
-                }
-            }
-        }
-        return relevantSubs;
-    }
 
     /***
      * Method comparing opened outgoing channels over each node of the
@@ -413,12 +415,10 @@ public abstract class RuleNode extends PropositionNode {
                         // i removed the apply rule handler here because i call it only when the
                         // antecedents report back replying to my request thus whenever its a backward
                         // inference
-
                     } else {
                         super.processSingleRequests(tempRequest);
                     }
                 } else {
-
                     Collection<KnownInstance> theKnownInstanceSet = knownInstances.mergeKInstancesBasedOnAtt(
                             currentReportAttitudeID);
                     knownInstances.printKnownInstanceSet(theKnownInstanceSet);
@@ -456,13 +456,11 @@ public abstract class RuleNode extends PropositionNode {
                     if (!this.isForwardReport()) {
                         this.setForwardReport(true);
                         super.processSingleRequests(tempRequest);
-
                     }
                 }
             } else {
                 /** Backward Inference */
                 applyRuleHandler(currentReport);
-
             }
         }   else {
             Substitutions switchSubs = new Substitutions();
