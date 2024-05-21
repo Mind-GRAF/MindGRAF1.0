@@ -49,20 +49,16 @@ public class AttitudeNodeTest {
         try {
             System.out.println("Testing example 1");
             ContextController.setCurrContext("guc");
-            Node maro = Network.createNode("maro", "propositionnode");
-            Node beliefs = Network.createNode("beliefs", "actnode");
+            Node prop = Network.createNode("fun", "propositionnode");
+            Node beliefs = Network.createNode("beliefs", "individualnode");
+
             Relation obj = Network.createRelation("obj", "", Adjustability.NONE,2);
             Relation action = Network.createRelation("action", "", Adjustability.NONE,2);
 
-            NodeSet ns1 = new NodeSet();
-            ns1.add(maro);
-            NodeSet ns2 = new NodeSet();
-            ns2.add(beliefs);
+            DownCable d1 = new DownCable(obj, new NodeSet(prop));
+            DownCable d2 = new DownCable(action, new NodeSet(beliefs));
 
-            DownCable downCableMemM0 = new DownCable(obj, ns1);
-            DownCable downCableClassM0 = new DownCable(action, ns2);
-
-            DownCableSet downCableSetM0 = new DownCableSet(downCableMemM0,downCableClassM0);
+            DownCableSet downCableSetM0 = new DownCableSet(d1,d2);
 
             AttitudeNode M0 = new AttitudeNode(downCableSetM0);
 
@@ -72,7 +68,6 @@ public class AttitudeNodeTest {
 
             Scheduler.schedule();
 
-//			Node ruleNode1 = Network.createNode("ruleNode1", "rulenode");
         }catch (NoSuchTypeException e){
             e.printStackTrace();
         }

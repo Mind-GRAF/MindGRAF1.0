@@ -34,14 +34,14 @@ public class AchieveNode extends ActNode {
 					if(goal.supported(c.getName(), 0, 0)){
 						System.out.println("Goal is already supported");
 						controlAgenda = ActAgenda.DONE;
+						Scheduler.addToActQueue(this);
 						return;
 					}
 				}
 				try {
 					controlAgenda = ActAgenda.FIND_PLANS;
-					this.setAgenda(ActAgenda.EXECUTE);
-					Scheduler.addToActQueue(this);
 					searchForPlansInAchieve(goal);
+					this.setAgenda(ActAgenda.EXECUTE);
 					Scheduler.addToActQueue(this);
 				} catch (NoSuchTypeException e) {
 					e.printStackTrace();
@@ -52,8 +52,10 @@ public class AchieveNode extends ActNode {
 				System.out.println("Plans found: " + plans);
 				try{
 					if(!plans.isEmpty()) {
-						controlAgenda = ActAgenda.DONE;
 						sendDoOneToActQueue(plans);
+						controlAgenda = ActAgenda.DONE;
+						this.setAgenda(ActAgenda.EXECUTE);
+                		Scheduler.addToActQueue(this);
 					}
 				}
 				catch(NullPointerException e){
@@ -62,7 +64,6 @@ public class AchieveNode extends ActNode {
 				break;
 			case DONE:
 				System.out.println("Achieve is done");
-				Scheduler.addToActQueue(this);
 				break;
 			default:
 				System.out.print("UNIDENTIFIED AGENDA FOR ACHIEVE!!");

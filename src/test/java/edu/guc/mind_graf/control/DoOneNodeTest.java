@@ -47,24 +47,17 @@ public class DoOneNodeTest {
         try {
             System.out.println("Testing example 1");
             ContextController.setCurrContext("guc");
-            Node maro = Network.createNode("doit", "actnode");
-            Node maro2 = Network.createNode("dontdoit", "actnode");
-            Node maro3 = Network.createNode("pleasedontdoit", "actnode");
-            Node doone = Network.createNode("doone", "actnode");
+            Node act1 = Network.createNode("do this", "actnode");
+            Node act2 = Network.createNode("no do this", "actnode");
+            Node act3 = Network.createNode("no please do this", "actnode");
+            Node doone = Network.createNode("doone", "individualnode");
             Relation obj = Network.createRelation("obj", "", Adjustability.NONE,2);
             Relation action = Network.createRelation("action", "", Adjustability.NONE,2);
 
-            NodeSet ns1 = new NodeSet();
-            ns1.add(maro);
-            ns1.add(maro2);
-            ns1.add(maro3);
-            NodeSet ns4 = new NodeSet();
-            ns4.add(doone);
+            DownCable d1 = new DownCable(obj, new NodeSet(act1, act2, act3));
+            DownCable d2 = new DownCable(action, new NodeSet(doone));
 
-            DownCable downCableMemM0 = new DownCable(obj, ns1);
-            DownCable downCableClassM0 = new DownCable(action, ns4);
-
-            DownCableSet downCableSetM0 = new DownCableSet(downCableMemM0,downCableClassM0);
+            DownCableSet downCableSetM0 = new DownCableSet(d1,d2);
 
             DoOneNode M0 = new DoOneNode(downCableSetM0);
 
@@ -73,8 +66,7 @@ public class DoOneNodeTest {
             Scheduler.addToActQueue(M0);
 
             Scheduler.schedule();
-
-//			Node ruleNode1 = Network.createNode("ruleNode1", "rulenode");
+            
         }catch (Exception e){
             e.printStackTrace();
         }

@@ -24,7 +24,6 @@ public class MGSequenceNode extends ActNode {
 			act.restartAgenda();
 			acts.push(act);
 			next = this.getDownCableSet().get("obj" + i);
-            System.out.println(i);
 		}
         while(!acts.isEmpty()) {
             System.out.println(acts.peek().getName());

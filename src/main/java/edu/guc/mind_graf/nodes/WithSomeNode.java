@@ -34,7 +34,8 @@ public class WithSomeNode extends ActNode {
                 controlAgenda = ActAgenda.TEST;
                 List<Match> matches;
                 try {
-                    matches = Matcher.match(act, ContextController.getContext(ContextController.getCurrContextName()), 0);
+                    matches = Matcher.match(qualifiers, ContextController.getContext(ContextController.getCurrContextName()), 0);
+                    System.out.println("Matches found: " + matches);
                     ((PropositionNode)qualifiers).sendRequestsToMatches(matches, new Substitutions(), new Substitutions(),
                     ContextController.getCurrContextName(), 0, ChannelType.Matched, act);
                 } catch (DirectCycleException ex) {
@@ -57,8 +58,10 @@ public class WithSomeNode extends ActNode {
                     newActs.add(newAct);
                     System.out.println(newAct.getDownCableSet().get("obj").getNodeSet().getNode(0).getName() + " added to newActs");
                 }
-                System.out.println("Substitutions are applied successfully");
-                sendDoOneToActQueue(newActs);
+                if(!newActs.isEmpty()){
+                    System.out.println("Substitutions are applied successfully");
+                    sendDoOneToActQueue(newActs);
+                }
                 break;
             case DONE:
                 System.out.println("WithSome done");

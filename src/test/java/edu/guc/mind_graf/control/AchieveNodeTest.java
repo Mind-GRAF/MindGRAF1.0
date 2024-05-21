@@ -52,21 +52,17 @@ public class AchieveNodeTest {
         try {
             System.out.println("Testing example 1");
             ContextController.setCurrContext("guc");
-            Context c = ContextController.getContext(ContextController.getCurrContextName());
-            Node maro = Network.createNode("maro", "propositionnode");
+            Context c = ContextController.getContext("guc");
+            Node prop = Network.createNode("fun", "propositionnode");
             Node achieve = Network.createNode("achieve", "actnode");
+
             Relation obj = Network.createRelation("obj", "", Adjustability.NONE,2);
             Relation action = Network.createRelation("action", "", Adjustability.NONE,2);
 
-            NodeSet ns1 = new NodeSet();
-            ns1.add(maro);
-            NodeSet ns2 = new NodeSet();
-            ns2.add(achieve);
+            DownCable d1 = new DownCable(obj, new NodeSet(prop));
+            DownCable d2 = new DownCable(action, new NodeSet(achieve));
 
-            DownCable downCableMemM0 = new DownCable(obj, ns1);
-            DownCable downCableClassM0 = new DownCable(action, ns2);
-
-            DownCableSet downCableSetM0 = new DownCableSet(downCableMemM0,downCableClassM0);
+            DownCableSet downCableSetM0 = new DownCableSet(d1,d2);
 
             AchieveNode M0 = new AchieveNode(downCableSetM0);
 

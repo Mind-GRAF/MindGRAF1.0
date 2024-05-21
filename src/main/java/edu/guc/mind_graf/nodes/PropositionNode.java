@@ -1139,7 +1139,7 @@ public class PropositionNode extends Node {
             Support reportSupport = new Support(-1);
             reportSupport.addNode(currentAttitude, this);
             Report NewReport = new Report(reportSubstitutions, reportSupport, currentAttitude, true,
-                    InferenceType.BACKWARD, requesterNode, requesterNode);
+                    InferenceType.BACKWARD, requesterNode, this);
             NewReport.setContextName(currentContext);
             NewReport.setReportType(currentChannel.getChannelType());
             sendReport(NewReport, currentRequest.getChannel());

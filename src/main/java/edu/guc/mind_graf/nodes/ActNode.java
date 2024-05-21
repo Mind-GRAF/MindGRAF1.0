@@ -177,6 +177,7 @@ public class ActNode extends Node {
         DownCableSet doOneDownCableSet = new DownCableSet(actionCable, objCable);
         DoOneNode doOneMolecularNode = (DoOneNode) Network.createNode("doonenode", doOneDownCableSet);
         Scheduler.addToActQueue(doOneMolecularNode);
+        System.out.println(doOneMolecularNode.getName());
         System.out.println("A DoOne control act of doing the plans of " + this.getName()
                 + " act is scheduled successfully on the act stack.");
 
