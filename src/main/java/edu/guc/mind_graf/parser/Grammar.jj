@@ -8,6 +8,7 @@ options {
 // Define the parser class
 PARSER_BEGIN(MindGRAF_Parser)
 package edu.guc.mind_graf.parser;
+import edu.guc.mind_graf.mgip.requests.ChannelSet;
 import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.components.CustomMethod;
 import edu.guc.mind_graf.nodes.IndividualNode;
@@ -347,9 +348,8 @@ public static void ResetGrading(){
           controller.addHypothesisToContext(controller.getCurrContextName(), levelsCount,
               controller.getAttitudeNumber(attitude), propNode.getId());
           CLI.print("");
-          //CLI.print("Hypothesis Added to Context " + controller.getCurrContextName()+" in Attitude " + attitude+" Successfully.");
-                  CLI.print("");
         CLI.print(propNode.toString());
+        return;
         } catch (NullPointerException e) {
           CLI.print("");
           CLI.print("Set Current Context First.");
@@ -494,6 +494,7 @@ public static void ResetGrading(){
 
   }
     public static void fInference(PropositionNode propNode, boolean c, boolean a, String CName, String attitude) {
+      CLI.print("");
     try {
       if (c && a) {
         if (!controller.getContextSet().getSet().containsKey(CName)) {
@@ -2122,7 +2123,7 @@ void Command() throws ParseException :
     |
     activate()
     |
-    AssertActivate()
+    SupportActivate()
     |
  setCurrentAttitude()
   |
@@ -2172,7 +2173,7 @@ void clearNetwork() throws ParseException :
     network.setMolecularNodes(new HashMap<String,HashMap<String,Node>>());
     network.setRelations(new HashMap<String,Relation>());
     network.getPropositionNodes().clear();
-
+    CLI.print("");
     CLI.print("Network is Cleared.");
   }
 }
@@ -2182,8 +2183,16 @@ void clearInfer() throws ParseException :
 {
   "clear-infer"
   {
-        String x;
-  }
+    HashMap<Integer, Node> allNodes = network.getNodes();
+    for (Node x : allNodes.values()) {
+      if (x instanceof PropositionNode) {
+        PropositionNode propNode = (PropositionNode) x;
+        propNode.setForwardChannels(new ChannelSet());
+        propNode.setOutgoingChannels(new ChannelSet());
+      }
+    }
+    CLI.print("");
+    CLI.print("---All Channels Cleared----");  }
 
 }
 
@@ -2322,7 +2331,7 @@ void getAllSupported() throws ParseException :
   "get-supported"
  {
       CLI.print("");
-      CLI.print("Printing All Hypotheses Supported in All Contexts...");
+      CLI.print("Printing all Hypotheses Supported in all Contexts...");
       HashMap<String, Context> contextSet = controller.getContextSet().getSet();
     for (Context c : contextSet.values()) {
       CLI.print("");
@@ -2360,35 +2369,49 @@ void getAllSupported() throws ParseException :
   String CName=null;
 }
 {
-"describe-context" (CName = <STRING>.image)?
-{
+"describe-context" ("c{"CName = <STRING>.image"}")?
+{ 
+    CLI.print("");
     if (CName == null) {
-      try{
-      CName = controller.getCurrContextName();
-      CName = CName.trim();
-      }catch(Exception e){
+      try {
+        CName = controller.getCurrContextName();
+        CName = CName.trim();
+      } catch (Exception e) {
         CLI.print("Set Default Context First.");
       }
-      
-    }
-    else{
-      CName = CName.trim();
-      if(!controller.getContextSet().getSet().containsKey(CName.trim()))
-        throw new ParseException("Context Does Not Exist.");
-          CLI.print("Hypothesis in Context " + CName + ":");
-    for (ArrayList<String> contexts : wffs.values()) {
-      String wffName = contexts.get(0);
-      for (int i = 1; i < contexts.size(); i++) {
-        String cxt = contexts.get(i);
-        String[] name_attitude = cxt.split("_");
-        CLI.print(wffName + " supported in attitude " + name_attitude[1]);
+    } 
+    else 
+      CName = CName.trim().toLowerCase();
+      if(CName!=null){
+      if (!controller.getContextSet().getSet().containsKey(CName)) {
+          throw new ParseException("Context Does Not Exist.");
       }
+      CLI.print("Hypotheses in Context " + CName + ":");
+      Context cxt = controller.getContext(CName);
+      HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>[]> hyps = controller.getContext(CName)
+          .getHypotheses();
+      for (HashMap.Entry entry : hyps.entrySet()) {
+        CLI.print("");
+        Pair<PropositionNodeSet, PropositionNodeSet>[] pairCollection = (Pair<PropositionNodeSet, PropositionNodeSet>[]) entry
+            .getValue();
+        CLI.print("Level " + (Integer) entry.getKey()+":");
+        CLI.print("");
+        for(int i = 0 ; i < pairCollection.length;i++){
+           int[] firsPropSet = pairCollection[i].getFirst().getProps();
+           int[] secPropSet = pairCollection[i].getSecond().getProps();
+          for(int propID : firsPropSet)
+            CLI.print("Node with ID "+propID+" in Attitude '"+controller.getAttitudeName(i)+"'.");
+          
+          for(int propID : secPropSet)
+            CLI.print("Node with ID "+propID+" in Attitude '"+controller.getAttitudeName(i)+"'.");
 
+        
+
+      }
     }
-    }
 
 
-   
+}
 
 }
 }
@@ -2452,12 +2475,10 @@ void backwardInference() throws ParseException :
    ("c{"CName = <STRING>.image"}"{ c = true;})?
    ("a{"attitude = <STRING>.image"}"{ a = true ;})?
    node = Expression()
- {
+ {  CLI.print("");
     PropositionNode propNode = (PropositionNode) node;
     bInference(propNode, c, a, CName, attitude);
-        firstExpression = true;
-        isGrading = true;
-        levelsCount = 0;
+        ResetGrading();
  }
 } 
 
@@ -2476,29 +2497,31 @@ void AskWh() throws ParseException :
    node = Expression()
  {
     PropositionNode propNode = (PropositionNode) node;
+    CLI.print("");
     bInference(propNode, c, a, CName, attitude);
+    CLI.print("");
     Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> positiveInstances = propNode
         .getKnownInstances().positiveKInstances;
 
     Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> negativeInstances = propNode
         .getKnownInstances().negativeKInstances;
+        CLI.print("Printing all Instances of Node with ID " +propNode.getId()+"...");
+        CLI.print("");
     for (Hashtable<Substitutions, KnownInstance> value : positiveInstances.values()) {
       for (Substitutions sub : value.keySet()) {
         for (HashMap.Entry<Node, Node> entry : sub.getMap().entrySet()) {
-          CLI.print("Variable: " + entry.getKey().toString() + ", Value: " + entry.getValue().toString());
+          CLI.print("--> Variable: " + entry.getKey().toString() + ", Value: " + entry.getValue().toString());
         }
       }
     }
     for (Hashtable<Substitutions, KnownInstance> value : negativeInstances.values()) {
       for (Substitutions sub : value.keySet()) {
         for (HashMap.Entry<Node, Node> entry : sub.getMap().entrySet()) {
-          CLI.print("Variable: " + entry.getKey().toString() + ", Value: " + entry.getValue().toString());
+          CLI.print("--> Variable: " + entry.getKey().toString() + ", Value: " + entry.getValue().toString());
         }
       }
     }
-        firstExpression = true;
-        isGrading = true;
-        levelsCount = 0;
+        ResetGrading();
  }
 } 
 
@@ -2516,7 +2539,10 @@ void AskWhNot() throws ParseException :
    node = Expression()
  {
     PropositionNode propNode = (PropositionNode) node;
+    CLI.print("");
     bInference(propNode, c, a, CName, attitude);
+    CLI.print("");
+    CLI.print("Getting Negation...");
     PropositionNode negatedProp = null;
     try {
       negatedProp = (PropositionNode) propNode.createNegation(propNode);
@@ -2524,6 +2550,9 @@ void AskWhNot() throws ParseException :
       // TODO Auto-generated catch block
       CLI.print(e.getMessage());
     }
+    CLI.print("");
+    CLI.print("Printing all Instances of the Negated Node with ID "+ negatedProp.getId()+"...");
+    CLI.print("");
     Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> positiveInstances = negatedProp
         .getKnownInstances().positiveKInstances;
 
@@ -2532,20 +2561,18 @@ void AskWhNot() throws ParseException :
     for (Hashtable<Substitutions, KnownInstance> value : positiveInstances.values()) {
       for (Substitutions sub : value.keySet()) {
         for (HashMap.Entry<Node, Node> entry : sub.getMap().entrySet()) {
-          CLI.print("Variable: " + entry.getKey().toString() + ", Value: " + entry.getValue().toString());
+          CLI.print("--> Variable: " + entry.getKey().toString() + ", Value: " + entry.getValue().toString());
         }
       }
     }
     for (Hashtable<Substitutions, KnownInstance> value : negativeInstances.values()) {
       for (Substitutions sub : value.keySet()) {
         for (HashMap.Entry<Node, Node> entry : sub.getMap().entrySet()) {
-          CLI.print("Variable: " + entry.getKey().toString() + ", Value: " + entry.getValue().toString());
+          CLI.print("--> Variable: " + entry.getKey().toString() + ", Value: " + entry.getValue().toString());
         }
       }
     }
-        firstExpression = true;
-        isGrading = true;
-        levelsCount = 0;
+        ResetGrading();
  }
 } 
 
@@ -2564,17 +2591,19 @@ void AskifNot() throws ParseException :
    node = Expression()
  {
     PropositionNode propNode = (PropositionNode) node;
+    CLI.print("");
     bInference(propNode, c, a, CName, attitude);
+    CLI.print("");
+    CLI.print("Printing Negative Instances of Node with ID " + propNode.getId()+"...");
+    CLI.print("");
     Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> negativeInstances = propNode
         .getKnownInstances().negativeKInstances;
     for (Hashtable<Substitutions, KnownInstance> value : negativeInstances.values()) {
       for (KnownInstance KI : value.values()) {
-        CLI.print(KI.toString());
+        CLI.print("--> "+KI.toString());
       }
     }
-        firstExpression = true;
-        isGrading = true;
-        levelsCount = 0;
+        ResetGrading();
  }
 }
 
@@ -2590,19 +2619,20 @@ void Ask() throws ParseException :
    ("c{"CName = <STRING>.image"}"{ c = true;})?
    ("a{"attitude = <STRING>.image"}"{ a = true ;})?
    node = Expression()
- {
+ {  CLI.print("");
     PropositionNode propNode = (PropositionNode) node;
     bInference(propNode, c, a, CName, attitude);
+    CLI.print("");
+    CLI.print("Printing Positive Instances of Node with ID " + propNode.getId()+"...");
+    CLI.print("");
     Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> positiveInstances = propNode
         .getKnownInstances().positiveKInstances;
     for (Hashtable<Substitutions, KnownInstance> value : positiveInstances.values()) {
       for (KnownInstance KI : value.values()) {
-        CLI.print(KI.toString());
+        CLI.print("--> "+KI.toString());
       }
     }
-        firstExpression = true;
-        isGrading = true;
-        levelsCount = 0;
+        ResetGrading();
  }
 } 
 
@@ -2623,10 +2653,9 @@ void forwardInference() throws ParseException :
     {
 
     PropositionNode propNode = (PropositionNode) node;
+    CLI.print("");
     fInference(propNode, c, a, CName, attitude);
-        firstExpression = true;
-        isGrading = true;
-        levelsCount = 0;
+        ResetGrading();
     }
 } 
 
@@ -2646,17 +2675,17 @@ void activate() throws ParseException:
     PropositionNode propNode = (PropositionNode) node;
 
     Collection<Node> set = propNode.getDirectParents().getValues();
+    CLI.print("");
+    CLI.print("Printing Parent Nodes of Node with ID " + propNode.getId()+ "...");
     for (Node n : set) {
       if (isSupported(propNode, c, a, CName, attitude) == 1)
         fInference(propNode, c, a, CName, attitude);
     }
-        firstExpression = true;
-        isGrading = true;
-        levelsCount = 0;
+       ResetGrading();
    }
 }
 
-void AssertActivate() throws ParseException:
+void SupportActivate() throws ParseException:
 {
   String CName = null;
   boolean c = false;
@@ -2669,16 +2698,17 @@ void AssertActivate() throws ParseException:
    ("a{"attitude = <STRING>.image"}"{ a = true ;})?
    node = Expression()
    {
+    CLI.print("");
     PropositionNode propNode = (PropositionNode) node;
     addToContext(CName, attitude, a, c, propNode);
     Collection<Node> set = propNode.getDirectParents().getValues();
+    CLI.print("");
+    CLI.print("Printing Parent Nodes of Node with ID " + propNode.getId()+ "...");
     for (Node n : set) {
       if (isSupported(propNode, c, a, CName, attitude) == 1)
         fInference(propNode, c, a, CName, attitude);
     }
-        firstExpression = true;
-        isGrading = true;
-        levelsCount = 0;
+        ResetGrading();
    }
 }
 
@@ -3106,6 +3136,7 @@ void UVBR() throws ParseException :
         parser.automaticHandling();
         break;
       } catch (ParseException e) {
+        CLI.print("");
         CLI.print("Wrong Command.");
         System.out.print(":");
       }
@@ -3343,7 +3374,7 @@ ArrayList<Integer> conjunctionAttitudeList() throws ParseException :
 void consistentAttitudes() throws ParseException : 
 {}
 {
-   "set-consistent-attitudes " (consisAttitudeList())+
+   "set-consistent-attitudes" ((consisAttitudeList())+)?
    {
 
     CLI.print("");

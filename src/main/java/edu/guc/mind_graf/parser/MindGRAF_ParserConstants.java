@@ -166,7 +166,7 @@ public interface MindGRAF_ParserConstants {
     "\"set-telescopable\"",
     "\"set-closed-consequence\"",
     "\"set-closed-conjunction\"",
-    "\"set-consistent-attitudes \"",
+    "\"set-consistent-attitudes\"",
   };
 
 }

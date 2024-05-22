@@ -188,6 +188,7 @@ public class CLI {
                                 }
                             } else {
                                 if (uvbr) {
+                                   // CLI.print("");
                                     CLI.print("Enable UVBR?");
                                     CLI.print("");
                                     System.out.print(": ");
@@ -204,7 +205,9 @@ public class CLI {
                                     } catch (ParseException e) {
                                         // TODO Auto-generated catch block
                                         // e.printStackTrace();
+                                        print("");
                                         CLI.print("Wrong Command");
+                                        print("");
                                         continue;
                                     }
                                 } else {
