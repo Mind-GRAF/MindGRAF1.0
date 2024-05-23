@@ -77,7 +77,6 @@ public class Network {
 		Network.createRelation("grade", "individualNode", Adjustability.NONE, 0);
 		Network.createRelation("prop", "propositionnode", Adjustability.NONE, 0);
 
-	
 	}
 
 	public void addBasicNodes() throws NoSuchTypeException {
@@ -396,7 +395,11 @@ public class Network {
 	public static CustomClass createNewSemanticType(String name,
 			String SuperClass, ArrayList<CustomMethod> methods)
 			throws Exception {
-		CustomClass c = new CustomClass(name, SuperClass);
+		CustomClass c;
+		if (SuperClass != null)
+			c = new CustomClass(name, SuperClass);
+		else
+			c = new CustomClass(name);
 		Class<?>[] params = { String.class, Boolean.class };
 		String[] arguments = { "name", "isVariable" };
 		Class<?>[] params2 = { DownCableSet.class };
@@ -412,7 +415,6 @@ public class Network {
 		userDefinedClasses.put(name, c);
 		return c;
 
-			
 	}
 
 	public static void RemoveNode(Node node) throws NodeNotInNetworkException,

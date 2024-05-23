@@ -223,7 +223,7 @@ public class CLI {
                                         break;
                                     } else {
                                         MindGRAF_Parser parser = new MindGRAF_Parser(
-                                                new StringReader(input.trim().toLowerCase()));
+                                                new StringReader(input.trim()));
                                         try {
                                             parser.Command();
                                         } catch (ParseException e) {

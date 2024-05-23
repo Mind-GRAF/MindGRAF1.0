@@ -48,6 +48,10 @@ import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.caseFrames.Adjustability;
 import edu.guc.mind_graf.context.Context;
 import java.util.Collection;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.StringReader;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.mgip.reports.KnownInstance;
 import edu.guc.mind_graf.exceptions.DirectCycleException;
@@ -130,6 +134,22 @@ public class MindGRAF_Parser {
     }
     return groupedMap;
 }
+
+    public static String readFile(String fileName) {
+        StringBuilder stringBuilder = new StringBuilder();
+        String line;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            while ((line = reader.readLine()) != null) {
+                stringBuilder.append(line).append("\n");
+            }
+
+            return stringBuilder.toString();
+        } catch (IOException e) {
+            System.err.println("Error: " + e.getMessage());
+            return null;
+        }
+    }
 
 public static void ResetGrading(){
     isGrading = true;
@@ -374,18 +394,6 @@ public static void ResetGrading(){
     }
   }
 
-
-        @SuppressWarnings("static-access")
-        public static void removeDuplicates(ArrayList<String> list) {
-        HashSet<String> set = new HashSet<>();
-        for (int i = 0; i < list.size(); i++) {
-            String str = list.get(i);
-            if (!set.add(str)) { // If adding the string returns false, it's a duplicate
-                list.remove(i); // Remove the duplicate string
-                i--; // Decrement i to adjust for the removed element
-            }
-        }
-    }
       public static void bInference(PropositionNode propNode, boolean c, boolean a, String CName, String attitude) {
     try {
       if (c && a) {
@@ -439,37 +447,7 @@ public static void ResetGrading(){
     }
   }
 
-  public static int indexOfList(ArrayList<ArrayList<String>> listOfLists, ArrayList<String> listToAdd) {
-    // Iterate over the listOfLists and compare each inner list with listToAdd
-    for (int i = 0; i < listOfLists.size(); i++) {
-      ArrayList<String> currentList = listOfLists.get(i);
-      if (areListsEqual(currentList, listToAdd)) {
-        return i; // If found, return the index
-      }
-    }
-    return -1; // If not found, return -1
-  }
 
-  private static boolean areListsEqual(ArrayList<String> list1, ArrayList<String> list2) {
-    // Check if the lists have the same size
-    if (list1.size() != list2.size()) {
-      return false;
-    }
-    // Check if the elements in list1 exist in list2
-    for (String element : list1) {
-      if (!list2.contains(element)) {
-        return false;
-      }
-    }
-    // Check if the elements in list2 exist in list1
-    for (String element : list2) {
-      if (!list1.contains(element)) {
-        return false;
-      }
-    }
-    // If all elements are found in both lists, they are equal
-    return true;
-  }
   public Node compareMolecularNode(DownCableSet dcs) {
     Node returnNode = null;
     for (Node nn : network.getNodes().values()) {
@@ -598,19 +576,7 @@ public static void ResetGrading(){
     }
   }
 
-  public static void main(String[] args) throws ParseException {
-    // Instantiate the parser
-    MindGRAF_Parser parser = new MindGRAF_Parser(System.in);
-   /* try {
-      // Start parsing
-      parser.Start();
-
-      System.out.println("Parsing successful!");
-    } catch (ParseException e) {
-      // Handle parsing errors
-      System.err.println("Parsing failed: " + e.getMessage());
-    }*/
-  }
+  
 }
 
  
@@ -739,7 +705,7 @@ Node ForallExpressionList() throws ParseException :
   Node arg;
 }
 {
- arg = andOrThreshEnt() | arg = gradedAndOrThreshEnt() | arg = negatedAndOrThreshEnt()
+ (arg = andOrThreshEnt() | arg = gradedAndOrThreshEnt() | arg = negatedAndOrThreshEnt())
 
   {
     return arg;
@@ -1272,10 +1238,14 @@ void definePath() throws ParseException:
 AttitudeNode Attitude() throws ParseException : 
 {
   Node prop = null;
+  String attitude = null;
 }
 {
-  "attitude{"prop = Expression()"}"
+  attitude = <STRING>.image"{"prop = Expression()"}"
   {
+    attitude = attitude.trim().toLowerCase();
+    if(!controller.getAttitudes().contains(attitude))
+      throw new ParseException("No Such Attitude.");
     ResetGrading();
     // relations
     Relation action = network.getRelations().get("action");
@@ -1285,10 +1255,10 @@ AttitudeNode Attitude() throws ParseException :
     IndividualNode attitudeIndividual = null;
     AttitudeNode attitudeActNode = null;
     try {
-      if (network.getBaseNodes().containsKey("attitude"))
-        attitudeIndividual =(IndividualNode) network.getBaseNodes().get("attitude");
+      if (network.getBaseNodes().containsKey(attitude))
+        attitudeIndividual =(IndividualNode) network.getBaseNodes().get(attitude);
       else
-        attitudeIndividual =(IndividualNode) network.createNode("attitude", "individualnode"); 
+        attitudeIndividual =(IndividualNode) network.createNode(attitude, "individualnode"); 
       // cables
       DownCable objDC = new DownCable(obj, new NodeSet(prop));
       DownCable actionDC = new DownCable(action, new NodeSet(attitudeIndividual));
@@ -1296,7 +1266,7 @@ AttitudeNode Attitude() throws ParseException :
       // attitude act node
       Node shouldCreate = compareMolecularNode(alldcs);
       if(shouldCreate == null)
-        attitudeActNode =(AttitudeNode) network.createNode("actnode", new DownCableSet(objDC, actionDC));
+        attitudeActNode =(AttitudeNode) network.createNode("attitudenode", new DownCableSet(objDC, actionDC));
       else 
         attitudeActNode = (AttitudeNode)shouldCreate;
       CLI.print("Attitude Act Node Created.");
@@ -1337,7 +1307,7 @@ AchieveNode Achieve() throws ParseException :
       // achieve act node
       Node shouldCreate = compareMolecularNode(alldcs);
       if(shouldCreate == null)
-        achieveActNode =(AchieveNode) network.createNode("actnode", new DownCableSet(objDC, actionDC));
+        achieveActNode =(AchieveNode) network.createNode("achievenode", new DownCableSet(objDC, actionDC));
       else 
         achieveActNode =(AchieveNode) shouldCreate;
       CLI.print("Achieve Act Node Created.");
@@ -1378,7 +1348,7 @@ DoOneNode DoOne() throws ParseException :
       DownCableSet allCables = new DownCableSet(actionDC, objDC);
       Node shouldCreate = compareMolecularNode(allCables);
       if (shouldCreate == null)
-        doOneActNode =(DoOneNode) network.createNode("actnode", allCables);
+        doOneActNode =(DoOneNode) network.createNode("doonenode", allCables);
       else
         doOneActNode =(DoOneNode) shouldCreate;
       CLI.print("DoOne Act Node Created.");
@@ -1560,7 +1530,8 @@ Node AndOrThreshExpression(boolean quantifier) throws ParseException : {
   }
 {
     rule = <ANDOR_THRESH> i = <NUMBER> "," j = <NUMBER> ")" "{" nodes = ExpressionList() "}"
-    {    String ruleType = rule.image.trim().toLowerCase();
+    {   CLI.print("");
+       String ruleType = rule.image.trim().toLowerCase();
     ruleType = ruleType.substring(0, ruleType.length() - 1);
     try {
       if (ruleType.equals("andor")) {
@@ -1664,10 +1635,11 @@ Token ent;
 } 
 { ("{" ant = ExpressionList()"}"ent=<ENTAILMENT>"{" cq = ExpressionList()"}")
 {
+  CLI.print("");
     HashMap<String, DownCable> sett = new HashMap<String,DownCable>();
   if(ent.image.trim().toLowerCase().equals("&=>"))
 {
-    Relation antecedent = network.getRelations().get("&ant");
+    Relation antecedent = network.getRelations().get("ant");
     Relation consequent = network.getRelations().get("cq");
     HashMap<String, Node> antHash = new HashMap<String, Node>();
     HashMap<String, Node> cqHash = new HashMap<String, Node>();
@@ -1700,7 +1672,7 @@ Token ent;
     return andEntailmentNode;
 }
 else {
-  if(ent.image.trim().toLowerCase().equals("&=>"))
+  if(ent.image.trim().toLowerCase().equals("v=>"))
 {   
     Relation antecedent = network.getRelations().get("ant");
     Relation consequent = network.getRelations().get("cq");
@@ -1736,7 +1708,7 @@ else {
 } else 
 {
         String i = ent.image.trim().toLowerCase().charAt(0) + "";
-        Relation antecedent = network.getRelations().get("&ant");
+        Relation antecedent = network.getRelations().get("ant");
         Relation consequent = network.getRelations().get("cq");
         HashMap<String, Node> antHash = new HashMap<String, Node>();
         HashMap<String, Node> cqHash = new HashMap<String, Node>();
@@ -1797,6 +1769,10 @@ Node negatedProp() :
         // TODO Auto-generated catch block
         e.printStackTrace();
       }
+
+    CLI.print("");
+    CLI.print("Negation of Node with ID  " +node.getId()+" (ID: "+negatedNode.getId()+") is Created.");
+    CLI.print("");
     return negatedNode;
   }    
   }
@@ -2096,19 +2072,8 @@ void Command() throws ParseException :
       "define-semantic" defineSemantic()
     )
     |
-    {
-    Token CName;
-   }
-    ("add-bridge" Bridge())
-    {
-       HashMap<String, HashMap<String, Node>> molecN = network.getMolecularNodes();
-      for(HashMap<String, Node> x : molecN.values()){
-       for(Node n : x.values()){
-        System.out.println(n.toString());
-       }
+"add-bridge" Bridge()
 
-    }
-    }
     |
     setCurrentContext()
     |
@@ -2209,6 +2174,7 @@ void performAct() throws ParseException :
 
     try {
       actNode.perform();
+      CLI.print("");
     } catch (NoSuchTypeException e) {
       // TODO Auto-generated catch block
       CLI.print(e.getMessage());
@@ -2218,6 +2184,9 @@ void performAct() throws ParseException :
     } catch (DirectCycleException e) {
       // TODO Auto-generated catch block
       CLI.print(e.getMessage());
+    }catch (NullPointerException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
   }
 
@@ -2277,9 +2246,11 @@ ActNode defineNonPrimitive() throws ParseException :
           planActNode = (ActNode) network.createNode("actnode", planACtDC);
         else
           planActNode = (ActNode) shouldCreate2;
+        CLI.print("");
         CLI.print("Non-Primitive Act '" + actName + "' with Plan is Defined.");
         return planActNode; // p
       }
+      CLI.print("");
       CLI.print("Non-Primitive Act '" + actName + "' is Defined.");
 
       return actNode;
@@ -2302,7 +2273,18 @@ void definePrimitive() throws ParseException :
 {
   "define-primitive-act" actName = <STRING>.image fileName = <STRING>.image
   {
-    String xxxxxxxxxxxxxxxxxx;
+        fileName = fileName.trim();
+    actName = actName.trim();
+
+    CustomMethod actuator = new CustomMethod("runActuator", fileName);
+    ArrayList<CustomMethod> method = new ArrayList<CustomMethod>();
+    method.add(actuator);
+    try {
+      network.createNewSemanticType(actName, "ActNode", method);
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      CLI.print(e.getMessage());
+    }
   }
   
 
@@ -2791,11 +2773,11 @@ Node Bridge() throws ParseException :
 {
   "{"antec = bridgeExpressionList()"}""{" conseq = bridgeExpressionList()"}"
   {
+      CLI.print("");
         HashMap<Integer, ArrayList<Node>> antecGroupedByAttitude = groupByValue(antec);
     HashMap<Integer, ArrayList<Node>> conseqGroupedByAttitude = groupByValue(conseq);
     HashMap<String, DownCable> allDCs = new HashMap<String,DownCable>();
-    for(Integer n : antecGroupedByAttitude.keySet())
-      System.out.println(n+" lol");
+
     for (Integer n : antecGroupedByAttitude.keySet()) {
       ArrayList<Node> nodes = antecGroupedByAttitude.get(n);
       Relation antRel = network.createRelation(n + "-ant", "propositionnode", Adjustability.EXPAND, 2);
@@ -2827,6 +2809,8 @@ Node Bridge() throws ParseException :
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
+    CLI.print("");
+    CLI.print(bridgeNode.toString());
     return bridgeNode;
 
   }
@@ -2848,9 +2832,9 @@ Node Bridge() throws ParseException :
   {
     ArrayList<Integer> attitudeNo = new ArrayList<Integer>();
    for(String s  : attitudes) {
-    Integer num = controller.getAttitudeNumber(s);
-    if(num==null)
+    if(!controller.getAttitudes().contains(s))
       throw new ParseException("No such attitude");
+    Integer num = controller.getAttitudeNumber(s);
     attitudeNo.add(num);
    }
     HashMap<Node, Integer> node_attitude = new HashMap<Node, Integer>();
@@ -2864,7 +2848,7 @@ Node Bridge() throws ParseException :
 
 void defineSemantic() throws ParseException :
 {
-  String typeName;
+  String typeName = null;
   String superClass = null;
 
 }
@@ -2872,28 +2856,24 @@ void defineSemantic() throws ParseException :
   ("[" typeName = <STRING>.image"]" ("["superClass = <STRING>.image"]")?)
 {
     typeName = typeName.trim();
+    if(superClass!=null)
     superClass = superClass.trim();
-
     if (network.getUserDefinedClasses().containsKey(typeName)) {
-      if (true)
-        throw new ParseException("User Defined Class with the Same Name Already Exists.");
+          throw new ParseException("User Defined Class with the Same Name Already Exists.");
     }
 
     while (true) {
-      CLI.print("Create Custom Methods to Create Your Custom Class Using Command 'custom-method' ");
+              CLI.print("");
+      CLI.print(
+          "Create Custom Methods to Create Your Custom Class Using Command 'custom-method'. Enter 'Done' When Finished.");
+        CLI.print("");
       String s = CLI.readInput();
-      if (s.trim().toLowerCase().equals("done")){
-        try {
-          network.createNewSemanticType(typeName, superClass, customMethods);
-        } catch (Exception e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-        }
+      if (s.trim().toLowerCase().equals("done")) {
         break;
       }
       MindGRAF_Parser parser = new MindGRAF_Parser(
           new StringReader(s));
-          
+
       try {
         parser.customMethod();
       } catch (ParseException e) {
@@ -2905,8 +2885,76 @@ void defineSemantic() throws ParseException :
         continue;
       }
     }
+    try {
+      network.createNewSemanticType(typeName, superClass, customMethods);
+ 
+
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
 }
 
+}
+
+String charInMethodCode() throws ParseException:
+{
+  String character = null;
+}
+{
+   ( character = <STRING>.image
+    |character = ".".image
+    | character = ",".image
+    | character = ";".image
+    | character = ":".image
+    | character = "(".image
+    | character = ")".image
+    | character = "[".image
+    | character = "]".image
+    | character = "{".image
+    | character = "}".image
+    | character = "<".image
+    | character = ">".image
+    | character = "'".image
+    | character = "\"".image
+    | character = "-".image
+    | character = "+".image
+    | character = "*".image
+    | character = "/".image
+    | character = "\\".image
+    | character = "=".image
+    | character = "&".image
+    | character = "|".image
+    | character = "^".image
+    | character = "!".image
+    | character = "?".image
+    | character = "%".image
+    | character = "@".image
+    | character = "#".image
+    | character = "$".image
+    | character = "~".image
+    |character = <NUMBER>.image)
+    {   character = character.trim();
+    if(character == null)
+      throw new ParseException("character cant be null!");
+      return character;
+    }
+}
+
+String methodCode() throws ParseException :
+{
+  StringBuilder methodCodeBuilder = new StringBuilder();
+  String character = null;
+}
+{
+  
+   character = charInMethodCode(){methodCodeBuilder.append(character);}(character = charInMethodCode(){methodCodeBuilder.append(character);})*
+  
+  {
+    CLI.print(methodCodeBuilder.toString().trim());
+    return methodCodeBuilder.toString().trim();
+
+  }
 }
 
 void customMethod() throws ParseException :
@@ -2915,49 +2963,42 @@ void customMethod() throws ParseException :
   String returnType  = null;
   ArrayList<String> params = new ArrayList<String>();
   ArrayList<String> args = new ArrayList<String>();
-  String methodCode = null;
+  String filePath = null;
 
   
 }
 {
-(  "custom-method" "["methodName = <STRING>.image"]" "["params = methodParams()"]" "["args = methodArgs()"]" "["returnType = <STRING>.image"]" methodCode = methodCode()
+   "custom-method" "["methodName = <STRING>.image"]" "["params = methodParams()"]" "["args = methodArgs()"]" "["returnType = <STRING>.image"]" filePath = methodCode()
 {
     methodName = methodName.trim();
     returnType = returnType.trim();
-  
+    CLI.print(filePath);
     if (args.size() != params.size())
-      throw new ParseException("args != params");
+      throw new ParseException("Numbers of Arguments and Parameters are Unequal.");
+
     ArrayList<Class<?>> methodParams = new ArrayList<Class<?>>();
     CustomMethod customMethod = null;
+    String methodCode = readFile(filePath.trim());
+
     try {
-      for (int i = 0; i < params.size(); i++)
-        methodParams.add(Class.forName(params.get(i)));
-      customMethod = new CustomMethod(methodName, methodCode, Class.forName(returnType), methodParams,
+      for (int i = 0; i < params.size(); i++){
+        CLI.print(params.get(i));
+        methodParams.add(Class.forName(params.get(i)));}
+      customMethod = new CustomMethod(methodName, methodCode,
+          Class.forName(returnType), methodParams,
           args);
-          customMethods.add(customMethod);
+      CLI.print("");
+      CLI.print("Custom Method Created.");
+      customMethods.add(customMethod);
     } catch (ClassNotFoundException e) {
       // TODO: handle exception
+     CLI.print(e.getMessage());
     }
 }
-)
+
 }
 
-String methodCode() throws ParseException :
-{
-  StringBuilder methodCodeBuilder = new StringBuilder();
-}
-{
-  (
-    <STRING> | "." | "," | ";" | ":" | "(" | ")" | "[" | "]" | "{" | "}" | "<" | ">" | "'" 
-    | "\"" | "-" | "+" | "*" | "/" | "\\" | "=" | "&" | "|" | "^" | "!" | "?" | "%" | "@" 
-    | "#" | "$" | "~"|<NUMBER>
-  )+
-  {
-    methodCodeBuilder.append(token.image);
-    return methodCodeBuilder.toString();
 
-  }
-}
 
 
 
@@ -3036,7 +3077,9 @@ void automaticHandling() throws ParseException:
         parser.EnableCache();
         break;
       } catch (ParseException e) {
+        CLI.print("");
         CLI.print("Wrong Command.");
+        CLI.print("");
         System.out.print(":");
       }
     }
@@ -3074,7 +3117,9 @@ void EnableCache() throws ParseException:
         
         break;
       } catch (ParseException e) {
+        CLI.print("");
         CLI.print("Wrong Command.");
+        CLI.print("");
         System.out.print(":");
       }
     }
@@ -3138,6 +3183,7 @@ void UVBR() throws ParseException :
       } catch (ParseException e) {
         CLI.print("");
         CLI.print("Wrong Command.");
+        CLI.print("");
         System.out.print(":");
       }
     }
