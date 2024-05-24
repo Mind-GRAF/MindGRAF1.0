@@ -2008,7 +2008,9 @@ if (mode == 3) {
       if(leafNodes.size()!=frame.size()-1)
         {if (true) throw new ParseException("No Such Case Frame");}
       Relation firstRel = null;
-      if (frame.get(0) != "null") {
+      CLI.print(frame.get(0));
+      if (!frame.get(0).trim().equals("null")) {
+        CLI.print("here");
         firstRel = network.createRelation(frame.get(0), "propositionnode", Adjustability.EXPAND, 2);
         DownCable dcb = null;
         try {
