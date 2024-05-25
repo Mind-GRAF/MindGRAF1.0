@@ -1891,9 +1891,9 @@ void Arguments(String pName) :
       if(leafNodes.size()!=frame.size()-1)
         throw new ParseException("No Such Case Frame");
       Relation firstRel = null;
-      CLI.print(frame.get(0));
+      //CLI.print(frame.get(0));
       if (!frame.get(0).trim().equals("null")) {
-        CLI.print("here");
+        //CLI.print("here");
         firstRel = network.createRelation(frame.get(0), "propositionnode", Adjustability.EXPAND, 2);
         DownCable dcb = null;
         try {
@@ -2953,7 +2953,7 @@ String methodCode() throws ParseException :
    character = charInMethodCode(){methodCodeBuilder.append(character);}(character = charInMethodCode(){methodCodeBuilder.append(character);})*
   
   {
-    CLI.print(methodCodeBuilder.toString().trim());
+    //CLI.print(methodCodeBuilder.toString().trim());
     return methodCodeBuilder.toString().trim();
 
   }
@@ -2974,7 +2974,7 @@ void customMethod() throws ParseException :
 {
     methodName = methodName.trim();
     returnType = returnType.trim();
-    CLI.print(filePath);
+    //CLI.print(filePath);
     if (args.size() != params.size())
       throw new ParseException("Numbers of Arguments and Parameters are Unequal.");
 
@@ -2984,7 +2984,7 @@ void customMethod() throws ParseException :
 
     try {
       for (int i = 0; i < params.size(); i++){
-        CLI.print(params.get(i));
+        //CLI.print(params.get(i));
         methodParams.add(Class.forName(params.get(i)));}
       customMethod = new CustomMethod(methodName, methodCode,
           Class.forName(returnType), methodParams,
