@@ -7,12 +7,18 @@ import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.cables.UpCable;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.context.Context;
+import edu.guc.mind_graf.mgip.matching.Match;
 
 public class BUnitPath extends Path {
 	private Relation relation;
 
 	public BUnitPath(Relation relation) {
 		this.relation = relation;
+	}
+
+	@Override
+	public boolean passFirstCheck(Node node, Match match) {
+		return node.getUpCable(relation.getName()) != null;
 	}
 
 	@Override

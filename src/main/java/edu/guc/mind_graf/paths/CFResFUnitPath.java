@@ -6,6 +6,7 @@ import edu.guc.mind_graf.relations.Relation;
 import edu.guc.mind_graf.caseFrames.CaseFrame;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.context.Context;
+import edu.guc.mind_graf.mgip.matching.Match;
 
 public class CFResFUnitPath extends Path {
 	private Relation relation;
@@ -31,6 +32,11 @@ public class CFResFUnitPath extends Path {
 
 	public void setCaseFrame(CaseFrame caseFrame) {
 		this.caseFrame = caseFrame;
+	}
+
+	@Override
+	public boolean passFirstCheck(Node node, Match match) {
+		return true;
 	}
 
 	@Override
