@@ -162,6 +162,7 @@ class PropositionNodeTest {
 
     }
 
+    
     @Test
     void testSupported() {
 

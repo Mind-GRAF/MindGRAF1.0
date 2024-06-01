@@ -14,12 +14,12 @@ import edu.guc.mind_graf.set.RuleInfoSet;
 public class Ptree extends RuleInfoHandler {
 
     private final HashMap <Integer, PtreeNode> varSetLeafMap;
-    private int minPcount; // minimum number of positive RIs needed to be sent
-    private int minNcount; // minimum number of negative RIs needed to be sent
+    private int minPcount;
+    private int minNcount;
     // either minPcount or minNcount needs to be satisfied for propagation to start
-    private int pcount = 0; // number of antecedents that reported positively
-    private int ncount = 0; // number of antecedents that reported negatively
-    private boolean isPropagating = false;
+    private int posAntecedents;
+    private int negAntecedents;
+    private boolean isPropagating;
     private HashMap <Integer, int[]> antecedentRIcount = new HashMap<>(); // keeps track of how many positive/negative report was received from each antecedent
 
     public Ptree (int minPcount, int minNcount){ // should edit: shouldn't have constructors I don't need/want
@@ -174,23 +174,23 @@ public class Ptree extends RuleInfoHandler {
             int[] count = antecedentRIcount.get(n.getId());  // till the end of the else is really unnecessary after start of propagation but code was moved up bcz it's nice info to keep track of. could move down for after return since it's usually unnecessary info later
             if(fn.isFlag()){
                 if(count[0] == 0)
-                    pcount++;
+                    posAntecedents++;
                 count[0]++;
             }
             else{
                 if(count[1] == 0)
-                    ncount++;
+                    negAntecedents++;
                 count[1]++;
             }
             System.out.println("The antecedent " + n.getName() + " has " + count[0] + " positive and " + count[1] + " negative reports.");
-            System.out.println("So far the P-Tree has " + pcount + " positively reporting antecedents and " + ncount + " negatively reporting antecedents.");
+            System.out.println("So far the P-Tree has " + posAntecedents + " positively reporting antecedents and " + negAntecedents + " negatively reporting antecedents.");
             int hash = n.getFreeVariablesHash();
             RuleInfoSet mayInfer = varSetLeafMap.get(hash).insertIntoNode(ri, isPropagating);
             if(mayInfer != null && !mayInfer.isEmpty()){
                 return mayInfer;
             }
 
-            if((pcount >= minPcount || ncount >= minNcount) && !isPropagating){
+            if((posAntecedents >= minPcount || negAntecedents >= minNcount) && !isPropagating){
                 isPropagating = true;
                 return startPropagation();
             }

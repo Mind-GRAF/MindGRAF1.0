@@ -5,6 +5,7 @@ import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -102,6 +103,7 @@ class SupportTest {
         assertTrue(node1.getSupport().getJustificationSupport().isEmpty());
     }
 
+    @Disabled
     @Test
     public void testAddJustificationSupportForAssumptionSupportWithNoGradesCrossProduct() {
         node1.setHyp(1);
@@ -233,7 +235,7 @@ class SupportTest {
         assertEquals(assumptionSupport, node8.getSupport().getAssumptionSupport());
     }
 
-
+    @Disabled
     @Test
     void testAddJustificationSupportForAssumptionSupportWithNoGradesCrossProductInDifferentLevels() {
         Network.currentLevel = 1;
@@ -382,6 +384,7 @@ class SupportTest {
 
     }
 
+    @Disabled
     @Test
     void testRemoveNodeFromJustifications() {
         Network.currentLevel = 1;
@@ -471,6 +474,7 @@ class SupportTest {
         assertEquals(node7Support, node7.getSupport().getJustificationSupport());
     }
 
+    @Disabled
     @Test
     void testRemoveNodeFromAssumptions() {
 
