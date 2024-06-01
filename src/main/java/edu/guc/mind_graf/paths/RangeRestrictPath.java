@@ -4,6 +4,7 @@ import java.util.LinkedList;
 
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.context.Context;
+import edu.guc.mind_graf.mgip.matching.Match;
 
 public class RangeRestrictPath extends Path {
 	private Path q;
@@ -39,6 +40,11 @@ public class RangeRestrictPath extends Path {
 
 	public void setzNode(Node zNode) {
 		this.zNode = zNode;
+	}
+
+	@Override
+	public boolean passFirstCheck(Node node, Match match) {
+		return p.passFirstCheck(node, match);
 	}
 
 	@Override

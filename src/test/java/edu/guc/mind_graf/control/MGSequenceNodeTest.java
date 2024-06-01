@@ -24,7 +24,7 @@ public class MGSequenceNodeTest {
     @BeforeEach
     void setUp() {
         n = new Network();
-        System.out.println("Testing SNSequence Node");
+        System.out.println("Testing MGSequence Node");
         Set<String,Integer> attitudeNames = new Set<>();
         attitudeNames.add( "beliefs",0);
         attitudeNames.add("obligations",1);
@@ -47,30 +47,21 @@ public class MGSequenceNodeTest {
         try {
             System.out.println("Testing example 1");
             ContextController.setCurrContext("guc");
-            Node maro = Network.createNode("doit", "actnode");
-            Node maro2 = Network.createNode("dontdoit", "actnode");
-            Node maro3 = Network.createNode("pleasedontdoit", "actnode");
-            Node snsequence = Network.createNode("snsequence", "actnode");
+            Node act1 = Network.createNode("do this", "actnode");
+            Node act2 = Network.createNode("no do this", "actnode");
+            Node act3 = Network.createNode("no please do this", "actnode");
+            Node snsequence = Network.createNode("snsequence", "individualnode");
             Relation obj1 = Network.createRelation("obj1", "", Adjustability.NONE,2);
             Relation obj2 = Network.createRelation("obj2", "", Adjustability.NONE,2);
             Relation obj3 = Network.createRelation("obj3", "", Adjustability.NONE,2);
             Relation action = Network.createRelation("action", "", Adjustability.NONE,2);
 
-            NodeSet ns1 = new NodeSet();
-            ns1.add(maro);
-            NodeSet ns2 = new NodeSet();
-            ns2.add(maro2);
-            NodeSet ns3 = new NodeSet();
-            ns3.add(maro3);
-            NodeSet ns4 = new NodeSet();
-            ns4.add(snsequence);
+            DownCable d1 = new DownCable(obj1, new NodeSet(act1));
+            DownCable d2 = new DownCable(obj2, new NodeSet(act2));
+            DownCable d3 = new DownCable(obj3, new NodeSet(act3));
+            DownCable d4 = new DownCable(action, new NodeSet(snsequence));
 
-            DownCable downCableMemM0 = new DownCable(obj1, ns1);
-            DownCable downCableMemM1 = new DownCable(obj2, ns2);
-            DownCable downCableMemM2 = new DownCable(obj3, ns3);
-            DownCable downCableClassM0 = new DownCable(action, ns4);
-
-            DownCableSet downCableSetM0 = new DownCableSet(downCableMemM0,downCableMemM1,downCableMemM2,downCableClassM0);
+            DownCableSet downCableSetM0 = new DownCableSet(d1,d2,d3,d4);
 
             MGSequenceNode M0 = new MGSequenceNode(downCableSetM0);
 

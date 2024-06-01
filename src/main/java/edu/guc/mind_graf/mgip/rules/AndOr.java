@@ -1,5 +1,6 @@
 package edu.guc.mind_graf.mgip.rules;
 
+import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.mgip.reports.Report;
 import edu.guc.mind_graf.mgip.ruleHandlers.Ptree;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
@@ -40,7 +41,7 @@ public class AndOr extends RuleNode {
         return inferrable;
     }
 
-    public void sendInferenceReports(HashMap<RuleInfo, Report> reports) {
+    public void sendInferenceReports(HashMap<RuleInfo, Report> reports) throws NoSuchTypeException {
         sendResponseToArgs(reports, arg);
     }
 

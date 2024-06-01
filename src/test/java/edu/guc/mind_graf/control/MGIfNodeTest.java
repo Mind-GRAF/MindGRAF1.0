@@ -13,6 +13,7 @@ import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.mgip.Scheduler;
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.network.NetworkController;
+import edu.guc.mind_graf.nodes.ActNode;
 import edu.guc.mind_graf.nodes.MGIfNode;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.PropositionNode;
@@ -49,22 +50,25 @@ public class MGIfNodeTest {
             ContextController.setCurrContext("guc");
 
 			Node act = Network.createNode("act", "actnode");
-            Node guard = Network.createNode("guard", "propositionnode");
+            Node guard = Network.createNode("this is a guard", "propositionnode");
+            Node mgif = Network.createNode("MGIf", "individualnode");
 
             Relation actR = Network.createRelation("act", "", Adjustability.NONE, 0);
             Relation guardR = Network.createRelation("guard", "", Adjustability.NONE, 0);
             Relation obj = Network.createRelation("obj", "", Adjustability.NONE, 0);
+            Relation action = Network.createRelation("action", "", Adjustability.NONE, 0);
 
-            ContextController.getContext(ContextController.getCurrContextName()).addHypothesisToContext(0, 0, (PropositionNode)guard);
+            ContextController.getContext("guc").addHypothesisToContext(0, 0, (PropositionNode)guard);
 
             DownCable d1 = new DownCable(actR, new NodeSet(act));
             DownCable d2 = new DownCable(guardR, new NodeSet(guard));
+            DownCable d3 = new DownCable(action, new NodeSet(mgif));
 
-            Node guardedAct = Network.createNode("actnode", new DownCableSet(d1, d2));
+            ActNode guardedAct = (ActNode)(Network.createNode("actnode", new DownCableSet(d1, d2)));
 
-            DownCable d3 = new DownCable(obj, new NodeSet(guardedAct));
+            DownCable d4 = new DownCable(obj, new NodeSet(guardedAct));
 
-            MGIfNode M0 = new MGIfNode(new DownCableSet(d3));
+            MGIfNode M0 = new MGIfNode(new DownCableSet(d3,d4));
 
             Scheduler.initiate();
 

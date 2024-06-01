@@ -5,6 +5,7 @@ import java.util.LinkedList;
 
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.context.Context;
+import edu.guc.mind_graf.mgip.matching.Match;
 
 public class AndPath extends Path {
 	private LinkedList<Path> paths;
@@ -43,6 +44,16 @@ public class AndPath extends Path {
 	}
 
 	@Override
+	public boolean passFirstCheck(Node node, Match match) {
+		for (Path p : paths) {
+			if (!p.passFirstCheck(node, match)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	@Override
 	public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context, int attitude) {
 		if (this.paths.isEmpty())
 			return new LinkedList<Object[]>();
@@ -51,7 +62,8 @@ public class AndPath extends Path {
 		Path p = pList.removeFirst();
 		AndPath andPath = new AndPath(pList);
 		if (pList.size() > 0)
-			return intersection(p.follow(node, trace, context, attitude), andPath.follow(node, trace, context, attitude));
+			return intersection(p.follow(node, trace, context, attitude),
+					andPath.follow(node, trace, context, attitude));
 		else
 			return p.follow(node, trace, context, attitude);
 
@@ -67,7 +79,8 @@ public class AndPath extends Path {
 		Path p = pList.removeFirst();
 		AndPath andPath = new AndPath(pList);
 		if (pList.size() > 0)
-			return intersection(p.followConverse(node, trace, context, attitude), andPath.followConverse(node, trace, context, attitude));
+			return intersection(p.followConverse(node, trace, context, attitude),
+					andPath.followConverse(node, trace, context, attitude));
 		else
 			return p.followConverse(node, trace, context, attitude);
 
@@ -80,7 +93,7 @@ public class AndPath extends Path {
 			map.put(((Node) objects[0]), objects);
 		}
 		for (Object[] objects : list2) {
-			if(map.get(((Node) objects[0])) != null)
+			if (map.get(((Node) objects[0])) != null)
 				result.add(objects);
 		}
 
@@ -137,5 +150,4 @@ public class AndPath extends Path {
 		AndPath and = new AndPath(result);
 		return and;
 	}
-
 }

@@ -18,7 +18,6 @@ public class RuleInfo {
     private int ncount;
     private Substitutions subs;
     private FlagNodeSet fns;
-    private Support support;
     // dont have inference type since it should always be backward, will revise this
     // if needed
 
@@ -29,7 +28,6 @@ public class RuleInfo {
         ncount = 0;
         subs = new Substitutions();
         fns = new FlagNodeSet();
-        support = new Support(-1);
     }
 
     public RuleInfo(String context, int attitude, int pcount, int ncount, Substitutions subs, FlagNodeSet fns, Support support) {
@@ -39,7 +37,6 @@ public class RuleInfo {
         this.ncount = ncount;
         this.subs = subs;
         this.fns = fns;
-        this.support = support;
     }
 
     public static RuleInfo createRuleInfo(Report report){
@@ -94,9 +91,6 @@ public class RuleInfo {
         res.ncount = resNcount;
         res.subs = resSubs;
         res.fns = resFns;
-        res.support = new Support(-1);
-        res.support.union(this.support);
-        res.support.union(r.support);
         res.removeNullSubs();
         resSubs.addSubs(r.getSubs()); // counting on that if the subs are not compatible, the method will not be
         // called and that adding overwrites repeated nodes ==> a variable wouldn't
@@ -104,9 +98,9 @@ public class RuleInfo {
         return res;
     }
 
-    public RuleInfo addNullSubs(FreeVariableSet ns){
+    public RuleInfo addNullSubs(FreeVariableSet vars){
         RuleInfo ruleInfoWithNulls = clone();
-        for(Node n : ns.getFreeVariables()){
+        for(Node n : vars.getFreeVariables()){
             if(!ruleInfoWithNulls.getSubs().contains(n)){
                 ruleInfoWithNulls.getSubs().add(n, null);
             }
@@ -193,16 +187,7 @@ public class RuleInfo {
         ri.setNcount(this.ncount);
         ri.setSubs(this.subs.clone());
         ri.setFns(this.fns.clone());
-        ri.setSupport(this.support.clone());
         return ri;
-    }
-
-    public Support getSupport() {
-        return support;
-    }
-
-    public void setSupport(Support support) {
-        this.support = support;
     }
 
     public String getContext() {

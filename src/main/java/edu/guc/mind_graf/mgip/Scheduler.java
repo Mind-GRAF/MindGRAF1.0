@@ -62,7 +62,7 @@ public class Scheduler {
                 System.out.println("Processing report with " + toRunNext.stringifyReport() + ".");
                 if (toRunNext.getRequesterNode() instanceof ActNode) {
                     ((ActNode) toRunNext.getRequesterNode()).addReport(highQueue.poll());
-                    System.out.println("Report added successfully to act node"+toRunNext.getRequesterNode().getName()+"'s set of reports");
+                    System.out.println("Report added successfully to act node "+toRunNext.getRequesterNode().getName()+"'s set of reports, and reporterNode is" + toRunNext.getReporterNode().getName());
                 } else {
                     Node requesterNode = toRunNext.getRequesterNode();
                     requesterNode.processReports();
@@ -77,6 +77,7 @@ public class Scheduler {
                 Request toRunNext = lowQueue.peek();
                 System.out.println("Processing request with " + toRunNext.stringifyRequest() + ".");
                 Node reporterNode = toRunNext.getReporterNode();
+                System.out.println("Reporter node is " + reporterNode.getName());
                 reporterNode.processRequests();
                 sequence += "L ";
                 if (!highQueue.isEmpty())

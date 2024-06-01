@@ -1,3 +1,4 @@
+
 package edu.guc.mind_graf.components;
 
 import java.io.File;
@@ -100,7 +101,7 @@ public class CustomClass {
 			}
 
 			result += "\n" + " public " + constructor.getName() + "(" + Params
-					+ ")" + "{" + "\n" + "super(" + Args + ");" + "\n" + "}";
+					+ ")" + "{" + "\n" + /* "super(" + Args + ");" + */ "\n" + "}";
 		}
 		return result;
 	}
@@ -190,7 +191,8 @@ public class CustomClass {
 				.append("}");
 
 		// Create the class using the generated code
-		Class<?> myClass = buildClass(className, classCode.toString(), className, superClass);
+		Class<?> myClass = buildClass(className, "package edu.guc.mind_graf.parser;" + classCode.toString(), className,
+				superClass);
 		newClass = myClass;
 		return myClass;
 	}
@@ -263,7 +265,7 @@ public class CustomClass {
 		StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
 
 		// Set the output location for compiled class files
-		fileManager.setLocation(StandardLocation.CLASS_OUTPUT, Arrays.asList(new File("bin")));
+		fileManager.setLocation(StandardLocation.CLASS_OUTPUT, Arrays.asList(new File("Customclasses")));
 
 		// Create a JavaFileObject representing the source file
 		JavaFileObject sourceFile = new SourceFile(className, classCode);
@@ -308,7 +310,7 @@ public class CustomClass {
 			StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
 
 			// Set the output location to the "bin" directory
-			fileManager.setLocation(StandardLocation.CLASS_OUTPUT, Arrays.asList(new File("bin")));
+			fileManager.setLocation(StandardLocation.CLASS_OUTPUT, Arrays.asList(new File("Customclasses")));
 
 			// Create a Java source file object with the given class name and code
 			JavaFileObject sourceFile = new SourceFile(className, code);

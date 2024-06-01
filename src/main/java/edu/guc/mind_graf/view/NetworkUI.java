@@ -232,33 +232,16 @@ public class NetworkUI extends JFrame {
 		SwingUtilities.invokeLater(() -> {
 			try {
 				Network network = new Network();
-			Node cs = Network.createNode("cs", "propositionnode");
-            Node fun = Network.createNode("fun", "propositionnode");
-            Node var1 = Network.createVariableNode("var1", "propositionnode");
-            Node actionN = Network.createNode("pickup", "individualnode");
+            Node prop = Network.createNode("fun", "propositionnode");
+            Node achieve = Network.createNode("beliefs", "actnode");
 
-            Relation obj = Network.createRelation("obj", "", Adjustability.NONE, 2);
-            Relation prop = Network.createRelation("prop", "", Adjustability.NONE, 2);
-            Relation action = Network.createRelation("action", "", Adjustability.NONE, 2);
-            Relation qualifiers = Network.createRelation("qualifiers", "", Adjustability.NONE, 2);
+            Relation obj = Network.createRelation("obj", "", Adjustability.NONE,2);
+            Relation action = Network.createRelation("action", "", Adjustability.NONE,2);
 
-            DownCable d1 = new DownCable(obj, new NodeSet(cs));
-            DownCable d2 = new DownCable(prop, new NodeSet(fun));
+            DownCable d1 = new DownCable(obj, new NodeSet(prop));
+            DownCable d2 = new DownCable(action, new NodeSet(achieve));
 
-            DownCable d3 = new DownCable(obj, new NodeSet(var1));
-
-            Node M0 = Network.createNode("propositionnode", new DownCableSet(d1, d2));
-            Node M1 = Network.createNode("propositionnode", new DownCableSet(d3, d2));
-
-            
-            DownCable d4 = new DownCable(action, new NodeSet(actionN));
-            
-            Node actNode = Network.createNode("actnode", new DownCableSet(d4, d3));
-
-            DownCable d5 = new DownCable(qualifiers, new NodeSet(M0,M1));
-            DownCable d7 = new DownCable(obj, new NodeSet(actNode));
-
-            Node M2 = Network.createNode("propositionnode", new DownCableSet(d5,d7));
+            Node M0 = Network.createNode("actnode",new DownCableSet(d1,d2));
 
 				System.out.println(Network.getNodes());
 				// ======================================================

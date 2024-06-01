@@ -6,6 +6,7 @@ import edu.guc.mind_graf.relations.Relation;
 import edu.guc.mind_graf.caseFrames.CaseFrame;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.context.Context;
+import edu.guc.mind_graf.mgip.matching.Match;
 
 public class CFResBUnitPath extends Path {
 	private Relation relation ;
@@ -36,6 +37,12 @@ public CaseFrame getCaseFrame() {
 public void setCaseFrame(CaseFrame caseFrame) {
 	this.caseFrame = caseFrame;
 }
+
+	@Override
+	public boolean passFirstCheck(Node node, Match match) {
+		return true;
+	}
+
 	@Override
 	public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context, int attitude) {
 		// TODO Auto-generated method stub

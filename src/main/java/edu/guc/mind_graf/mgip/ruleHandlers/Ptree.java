@@ -29,8 +29,12 @@ public class Ptree extends RuleInfoHandler {
     }
 
     public static Ptree constructPtree(PropositionNodeSet antecedents, int minPcount, int minNcount, int ptreeNodeMin){
-        System.out.println("Constructing the P-Tree");
         Ptree ptree = new Ptree(minPcount, minNcount);
+        if(antecedents.size() == 0){
+            System.out.println("There are no open nodes so there is no need for a P-Tree.");
+            return ptree;
+        }
+        System.out.println("Constructing the P-Tree");
         System.out.println("The P-Tree has a minimum of " + minPcount + " positive RIs" + (minNcount < Integer.MAX_VALUE ? (" or " + minNcount + " negative RIs" ) : "")+ " needed for propagation to start.");
         HashMap <Node, HashSet<PtreeNode>> vpList = ptree.processAntecedents(antecedents, ptreeNodeMin);
         System.out.println("The variable-pattern list contructed is:");
@@ -179,7 +183,7 @@ public class Ptree extends RuleInfoHandler {
                 count[1]++;
             }
             System.out.println("The antecedent " + n.getName() + " has " + count[0] + " positive and " + count[1] + " negative reports.");
-            System.out.println("So far the P-Tree has " + pcount + " positively reporting antecedents and " + ncount + " negatively reports antecedents.");
+            System.out.println("So far the P-Tree has " + pcount + " positively reporting antecedents and " + ncount + " negatively reporting antecedents.");
             int hash = n.getFreeVariablesHash();
             RuleInfoSet mayInfer = varSetLeafMap.get(hash).insertIntoNode(ri, isPropagating);
             if(mayInfer != null && !mayInfer.isEmpty()){

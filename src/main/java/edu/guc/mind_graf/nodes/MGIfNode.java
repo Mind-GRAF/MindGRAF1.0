@@ -27,7 +27,7 @@ public class MGIfNode extends ActNode {
 
     @Override
     public void runActuator() throws NoSuchTypeException {
-        NodeSet allActs = getDownCableSet().get("obj").getNodeSet();
+        NodeSet allActs = this.getDownCableSet().get("obj").getNodeSet();
         switch(controlAgenda) {
 			case START:
                 controlAgenda = ActAgenda.TEST;
@@ -35,7 +35,11 @@ public class MGIfNode extends ActNode {
                 Scheduler.addToActQueue(this);
                 NodeSet guards = new NodeSet();
                 for(Node n: allActs) {
-                    guards.addAllTo(n.getDownCableSet().get("guard").getNodeSet());
+                    System.out.println(n);
+                    for(Node guard: n.getDownCableSet().get("guard").getNodeSet()) {
+                        guards.add(guard);
+                    }
+                    System.out.println(guards);
 					n.sendRequestsToNodeSet(guards, new Substitutions(), new Substitutions(),
                 		ContextController.getCurrContextName(), 0, ChannelType.Act, n);
                 }
@@ -49,8 +53,10 @@ public class MGIfNode extends ActNode {
 					System.out.println("Checking if guards are satisfied");
                     for(Node act: allActs) {
                         ArrayList<Report> reports = ((ActNode) act).getReports();
+                        System.out.println(reports);
                         for(Report report: reports){
                             if(report.isSign()==true){
+                                System.out.println(report.getReporterNode().getName());
                                 satisfiedGaurds.add((PropositionNode) report.getReporterNode());
                             }
                         }

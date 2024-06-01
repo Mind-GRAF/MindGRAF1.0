@@ -4,6 +4,7 @@ import java.util.LinkedList;
 
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.context.Context;
+import edu.guc.mind_graf.mgip.matching.Match;
 
 public class ComposePath extends Path {
 	private LinkedList<Path> paths;
@@ -37,6 +38,11 @@ public class ComposePath extends Path {
 	}
 
 	@Override
+	public boolean passFirstCheck(Node node, Match match) {
+		return paths.getFirst().passFirstCheck(node, match);
+	}
+
+	@Override
 	public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context, int attitude) {
 		if (this.paths.isEmpty())
 			return new LinkedList<Object[]>();
@@ -48,7 +54,8 @@ public class ComposePath extends Path {
 		return follow(pathList, cPath, context, attitude);
 	}
 
-	private LinkedList<Object[]> follow(LinkedList<Object[]> pathList, ComposePath cPath, Context context, int attitude) {
+	private LinkedList<Object[]> follow(LinkedList<Object[]> pathList, ComposePath cPath, Context context,
+			int attitude) {
 		if (cPath.getPaths().isEmpty())
 			return pathList;
 		LinkedList<Object[]> result = new LinkedList<Object[]>();
@@ -74,7 +81,8 @@ public class ComposePath extends Path {
 
 	}
 
-	private LinkedList<Object[]> followConverse(LinkedList<Object[]> pathList, ComposePath cPath, Context context, int attitude) {
+	private LinkedList<Object[]> followConverse(LinkedList<Object[]> pathList, ComposePath cPath, Context context,
+			int attitude) {
 		if (cPath.getPaths().isEmpty())
 			return pathList;
 		LinkedList<Object[]> result = new LinkedList<Object[]>();

@@ -24,8 +24,8 @@ public class CustomConstructor {
 			k++;
 		}
 		String result = "\n" + " public " + name + "("
-				+ Params + ")" + "{" + "\n" + "super("
-				+ Args + ");" + "\n" + "}";
+				+ Params + ")" + "{" + "\n"  /*+ "super("
+				+ Args + ");"*/ + "\n" + "}";
 		return result;
 	}
 
