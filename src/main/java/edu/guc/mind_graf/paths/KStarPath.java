@@ -5,6 +5,7 @@ import java.util.LinkedList;
 
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.context.Context;
+import edu.guc.mind_graf.mgip.matching.Match;
 
 public class KStarPath extends Path {
 	Path path;
@@ -21,6 +22,11 @@ public class KStarPath extends Path {
 
 	public void setPath(Path path) {
 		this.path = path;
+	}
+
+	@Override
+	public boolean passFirstCheck(Node node, Match match) {
+		return true;
 	}
 
 	@Override

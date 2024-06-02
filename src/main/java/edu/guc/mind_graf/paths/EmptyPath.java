@@ -4,8 +4,14 @@ import java.util.LinkedList;
 
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.context.Context;
+import edu.guc.mind_graf.mgip.matching.Match;
 
 public class EmptyPath extends Path {
+
+	@Override
+	public boolean passFirstCheck(Node node, Match match) {
+		return true;
+	}
 
 	@Override
 	public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context, int attitude) {

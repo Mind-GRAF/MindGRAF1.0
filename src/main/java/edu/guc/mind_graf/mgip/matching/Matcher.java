@@ -357,7 +357,7 @@ public class Matcher {
             if (downCable == null)
                 continue;
             nullCables = false;
-            if (path != null && passPathFirstCheck(node, match, path)) {
+            if (path != null && path.passFirstCheck(node, match)) {
                 LinkedList<Object[]> listOfNodeList = path.follow(node, new PathTrace(), ctx, attitude);
                 if (listOfNodeList == null || listOfNodeList.isEmpty()) {
                     continue;
@@ -452,45 +452,6 @@ public class Matcher {
         for (Node[] arr : bindingsToBeChanged) {
             changeBindingInSubs(arr[0], arr[1], !checkFilter, match);
         }
-    }
-
-    // Helper method for checking if a node passes the first check of a path
-    private static boolean passPathFirstCheck(Node node, Match match, Path path) {
-        if (path instanceof EmptyPath || path instanceof BangPath || path instanceof KStarPath) {
-            return true;
-        } else if (path instanceof FUnitPath) {
-            return node.getDownCable(((FUnitPath) path).getRelation().getName()) != null;
-        } else if (path instanceof BUnitPath) {
-            return node.getUpCable(((BUnitPath) path).getRelation().getName()) != null;
-        } else if (path instanceof AndPath) {
-            for (Path p : ((AndPath) path).getPaths()) {
-                if (!passPathFirstCheck(node, match, p)) {
-                    return false;
-                }
-            }
-        } else if (path instanceof OrPath) {
-            for (Path p : ((OrPath) path).getPaths()) {
-                if (passPathFirstCheck(node, match, p)) {
-                    return true;
-                }
-            }
-            return false;
-        } else if (path instanceof ComposePath
-                && !passPathFirstCheck(node, match, ((ComposePath) path).getPaths().getFirst())) {
-            return false;
-        } else if (path instanceof ConversePath) {
-            return passPathFirstCheck(node, match, ((ConversePath) path).getPath().converse());
-        } else if (path instanceof IrreflexiveRestrictPath) {
-            return passPathFirstCheck(node, match, ((IrreflexiveRestrictPath) path).getPath());
-        } else if (path instanceof DomainRestrictPath) {
-            return passPathFirstCheck(node, match, ((DomainRestrictPath) path).getP())
-                    && passPathFirstCheck(node, match, ((DomainRestrictPath) path).getQ());
-        } else if (path instanceof RangeRestrictPath) {
-            return passPathFirstCheck(node, match, ((RangeRestrictPath) path).getP());
-        } else if (path instanceof KPlusPath) {
-            return passPathFirstCheck(node, match, ((KPlusPath) path).getPath());
-        }
-        return true;
     }
 
     private static List<Match> removeDuplicates(List<Match> list) {

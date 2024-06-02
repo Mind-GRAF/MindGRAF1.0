@@ -7,6 +7,7 @@ import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.context.Context;
+import edu.guc.mind_graf.mgip.matching.Match;
 
 public class FUnitPath extends Path {
 	private Relation relation;
@@ -14,6 +15,11 @@ public class FUnitPath extends Path {
 	public FUnitPath(Relation relation) {
 		super();
 		this.relation = relation;
+	}
+
+	@Override
+	public boolean passFirstCheck(Node node, Match match) {
+		return node.getDownCable(relation.getName()) != null;
 	}
 
 	@Override
@@ -48,8 +54,8 @@ public class FUnitPath extends Path {
 
 	@Override
 	public boolean equals(Object obj) {
-        return obj instanceof FUnitPath && ((FUnitPath) obj).getRelation().equals(this.getRelation());
-    }
+		return obj instanceof FUnitPath && ((FUnitPath) obj).getRelation().equals(this.getRelation());
+	}
 
 	@Override
 	public Path converse() {

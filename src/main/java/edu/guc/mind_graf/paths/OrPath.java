@@ -5,6 +5,7 @@ import java.util.LinkedList;
 
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.context.Context;
+import edu.guc.mind_graf.mgip.matching.Match;
 
 public class OrPath extends Path {
 	private LinkedList<Path> paths;
@@ -43,6 +44,16 @@ public class OrPath extends Path {
 	}
 
 	@Override
+	public boolean passFirstCheck(Node node, Match match) {
+		for (Path p : paths) {
+			if (p.passFirstCheck(node, match)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
 	public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context, int attitude) {
 		if (this.paths.isEmpty())
 			return new LinkedList<Object[]>();
@@ -67,7 +78,8 @@ public class OrPath extends Path {
 		Path p = pList.removeFirst();
 		OrPath orPath = new OrPath(pList);
 		if (pList.size() > 0)
-			return union(p.followConverse(node, trace, context, attitude), orPath.followConverse(node, trace, context, attitude));
+			return union(p.followConverse(node, trace, context, attitude),
+					orPath.followConverse(node, trace, context, attitude));
 		else
 			return p.followConverse(node, trace, context, attitude);
 
