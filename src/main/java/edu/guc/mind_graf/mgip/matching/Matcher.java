@@ -81,7 +81,7 @@ public class Matcher {
             for (Node molecular : molecularSet.values()) {
                 if (molecular.equals(queryNode))
                     continue;
-                Match match = new Match(new Substitutions(), new Substitutions(), molecular, -1, new NodeSet());
+                Match match = new Match(new Substitutions(), new Substitutions(), molecular, 0, new NodeSet());
                 matchList.add(match);
                 unify(queryNode, molecular, match, ctx, attitude, 0);
             }
@@ -96,9 +96,6 @@ public class Matcher {
                 HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> map = new HashMap<>();
                 map.put(attitude, pair);
                 match.setSupport(new Support(-2, attitude, Network.currentLevel, map, new PropositionNodeSet()));
-            }
-            if (match.getMatchType() == -1) {
-                match.setMatchType(0);
             }
         }
         return matchList;
