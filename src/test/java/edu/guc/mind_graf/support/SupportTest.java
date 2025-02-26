@@ -31,6 +31,9 @@ class SupportTest {
     @BeforeEach
     public void setUp() {
         new Network();
+    }
+
+    private void createNodes(){
         try {
             node1 = (PropositionNode) Network.createNode("1", "propositionnode");
             node2 = (PropositionNode) Network.createNode("2", "propositionnode");
@@ -52,6 +55,7 @@ class SupportTest {
 
     @Test
     public void testAddJustificationSupportForNewAttitudeAndLevelForAnEmptySupport(){
+        createNodes();
         int attitudeID = 1;
         int level = 1;
         HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> hash = new HashMap<>();
@@ -67,6 +71,7 @@ class SupportTest {
 
     @Test
     public void testAddJustificationSupportForExistingAttitudeAndLevel() {
+        createNodes();
         // First, add some initial support data
         HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> hash = new HashMap<>();
         hash.put(0, new Pair<>(new PropositionNodeSet(3), new PropositionNodeSet()));
@@ -96,6 +101,7 @@ class SupportTest {
 
     @Test
     public void testAddJustificationSupportWithDirectCycle() {
+        createNodes();
 
         int attitudeID = 1;
         int level = 1;
@@ -110,6 +116,7 @@ class SupportTest {
 
     @Test
     public void testAddJustificationSupportForAssumptionSupportWithoutGradesCrossProduct() {
+        createNodes();
         node1.setHyp(1);
         node1.setHyp(2);
         node1.setHyp(3);
@@ -251,6 +258,7 @@ class SupportTest {
 
     @Test
     public void testAddJustificationSupportForAssumptionSupportWithGradesCrossProduct() {
+        createNodes();
         node1.setHyp(1);
         node1.setHyp(2);
         node1.setHyp(3);
@@ -397,6 +405,7 @@ class SupportTest {
 
     @Test
     void testAddJustificationSupportForAssumptionSupportWithoutGradesCrossProductInDifferentLevels() {
+        createNodes();
         Network.currentLevel = 1;
         node1.setHyp(1);
         node1.setHyp(2);
@@ -553,6 +562,7 @@ class SupportTest {
 
     @Test
     void testRemoveNodeFromJustifications() {
+        createNodes();
         Network.currentLevel = 1;
         node1.setHyp(1);
         node1.setHyp(2);
@@ -642,6 +652,7 @@ class SupportTest {
 
     @Test
     void testRemoveNodeFromAssumptions() {
+        createNodes();
 
         Network.currentLevel = 1;
         node1.setHyp(1);
@@ -773,6 +784,7 @@ class SupportTest {
 
     @Test
     void testUnion(){
+        createNodes();
 
         Network.currentLevel = 0;
         node1.setHyp(1);
@@ -843,6 +855,7 @@ class SupportTest {
 
     @Test
     void testCombine(){
+        createNodes();
 
         Network.currentLevel = 0;
         node1.setHyp(1);
@@ -922,6 +935,7 @@ class SupportTest {
     }
     @Test
     void testConstructor(){
+        createNodes();
         Network.currentLevel = 0;
         node1.setHyp(1);
         node1.setHyp(2);

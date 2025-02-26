@@ -30,6 +30,18 @@ class PropositionNodeTest {
     @BeforeEach
     void setUp() {
         new Network();
+
+        Set<String, Integer> attitudeNames = new Set<>();
+        attitudeNames.add("Belief", 0);
+        attitudeNames.add("Hate", 1);
+        attitudeNames.add("Intend", 2);
+        ContextController.setup(attitudeNames, new ArrayList<ArrayList<Integer>>(), false, false, 0);
+        ContextController.createNewContext("Context1");
+
+
+    }
+
+    private void createNodes(){
         try {
             node1 = (PropositionNode) Network.createNode("1", "propositionnode");
             node2 = (PropositionNode) Network.createNode("2", "propositionnode");
@@ -42,13 +54,6 @@ class PropositionNodeTest {
         } catch (NoSuchTypeException e) {
             throw new RuntimeException(e);
         }
-
-        Set<String, Integer> attitudeNames = new Set<>();
-        attitudeNames.add("Belief", 0);
-        attitudeNames.add("Hate", 1);
-        attitudeNames.add("Intend", 2);
-        ContextController.setup(attitudeNames, new ArrayList<ArrayList<Integer>>(), false, false, 0);
-        ContextController.createNewContext("Context1");
 
         Network.currentLevel = 1;
         node1.setHyp(0);
@@ -139,6 +144,7 @@ class PropositionNodeTest {
 
     @Test
     void testSupportedWithNoHypotheses() {
+        createNodes();
 
         assertFalse(node1.supported("Context1",0,0));
         assertFalse(node6.supported("Context1",0,0));
@@ -149,6 +155,7 @@ class PropositionNodeTest {
 
     @Test
     void testSupported() {
+        createNodes();
 
         Network.currentLevel = 0;
         node1.setHyp("Context1",0);
