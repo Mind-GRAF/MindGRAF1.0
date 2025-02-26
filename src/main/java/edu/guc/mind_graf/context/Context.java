@@ -10,7 +10,6 @@ import edu.guc.mind_graf.set.Set;
 import edu.guc.mind_graf.support.Pair;
 
 import java.util.*;
-import java.util.stream.IntStream;
 
 
 public class Context {
@@ -127,7 +126,7 @@ public class Context {
     }
 
     public void automaticallyRemoveInferredNodeFromContext(int level, int attitudeId, PropositionNode node) {
-        for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> assumptionSupport : node.getSupport().getAssumptionSupport().get(level).get(attitudeId)) {
+        for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> assumptionSupport : node.getSupport().getAssumptionBasedSupport().get(level).get(attitudeId)) {
             for (Map.Entry<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> support : assumptionSupport.getFirst().entrySet()) {
                 PropositionNodeSet supportOriginSet = support.getValue().getFirst();
                 if (isInvalidSupport(level, attitudeId, supportOriginSet)) {
@@ -144,7 +143,7 @@ public class Context {
 
     public void manuallyRemoveInferredNodeFromContext(int level, int attitudeId, PropositionNode node) {
         Revision.print("Starting removal of node: " + node.printShortData() + " from attitude: " + ContextController.getAttitudeName(attitudeId) + " from Context: " + this.getName());
-        for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> assumptionSupport : node.getSupport().getAssumptionSupport().get(level).get(attitudeId)) {
+        for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> assumptionSupport : node.getSupport().getAssumptionBasedSupport().get(level).get(attitudeId)) {
             for (Map.Entry<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> support : assumptionSupport.getFirst().entrySet()) {
                 if (isInvalidSupport(level, attitudeId, support.getValue().getFirst())) {
                     continue;

@@ -488,17 +488,17 @@ public class PropositionNode extends Node {
             return false;
         }
 
-        if(!this.support.getAssumptionSupport().containsKey(level)){
+        if(!this.support.getAssumptionBasedSupport().containsKey(level)){
             return false;
         }
 
-        if(!this.support.getAssumptionSupport().get(level).containsKey(desiredAttitudeID)){
+        if(!this.support.getAssumptionBasedSupport().get(level).containsKey(desiredAttitudeID)){
             return false;
         }
 
-        for(Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> currSupport : this.support.getAssumptionSupport().get(level).get(desiredAttitudeID)) {
+        for(Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> currSupport : this.support.getAssumptionBasedSupport().get(level).get(desiredAttitudeID)) {
             for(Integer key : currSupport.getFirst().keySet()) {
-                if(currSupport.getFirst().get(key).getFirst().isSubset(desiredContext.getAttitudeProps(level, key).getFirst()) && currSupport.getFirst().get(key).getSecond().isSubset(desiredContext.getAttitudeProps(level, key).getSecond()) && currSupport.getSecond().isSubset(desiredContext.getAttitudeProps(level, key).getFirst())) {
+                if(currSupport.getFirst().get(key).getFirst().isSubset(desiredContext.getAttitudeProps(level, key).getFirst()) && currSupport.getFirst().get(key).getSecond().isSubset(desiredContext.getAttitudeProps(level, key).getSecond())) { //&& currSupport.getSecond().isSubset(desiredContext.getAttitudeProps(level, key).getFirst())
                     supported = true;
                 } else {
                     supported = false;
@@ -1433,7 +1433,7 @@ public class PropositionNode extends Node {
 
     public int getGradeOfNode(Context c, int level, int attitudeId) {
         ArrayList<Integer> grades = new ArrayList<>();
-        for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> assumptionSupport : this.getSupport().getAssumptionSupport().get(level).get(attitudeId)) {
+        for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> assumptionSupport : this.getSupport().getAssumptionBasedSupport().get(level).get(attitudeId)) {
             for (Map.Entry<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> support : assumptionSupport.getFirst().entrySet()) {
                 if (c.isInvalidSupport(level, attitudeId, support.getValue().getFirst())) {
                     //TODO: wael see if we can make this is hyp

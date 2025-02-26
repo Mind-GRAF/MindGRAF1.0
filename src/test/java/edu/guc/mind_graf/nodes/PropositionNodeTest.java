@@ -121,7 +121,7 @@ class PropositionNodeTest {
         supports.add(new Pair<>(new HashMap<>(support), new PropositionNodeSet()));
         support.clear();
         support.put(2, new Pair<>(new PropositionNodeSet(7), new PropositionNodeSet()));
-        supports.add(new Pair<>(support, new PropositionNodeSet()));
+        supports.add(new Pair<>(new HashMap<>(support), new PropositionNodeSet()));
         node8.addJustificationBasedSupports(0,Network.currentLevel, new ArrayList<>(supports));
 
         supports.clear();
@@ -131,7 +131,7 @@ class PropositionNodeTest {
         supports.add(new Pair<>(new HashMap<>(support), new PropositionNodeSet()));
         support.clear();
         support.put(0, new Pair<>(new PropositionNodeSet(6), new PropositionNodeSet()));
-        supports.add(new Pair<>(support, new PropositionNodeSet()));
+        supports.add(new Pair<>(new HashMap<>(support), new PropositionNodeSet()));
         HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>>>> node8Justification = new HashMap<>();
         node8.addJustificationBasedSupports(1,Network.currentLevel, new ArrayList<>(supports));
 
@@ -162,9 +162,13 @@ class PropositionNodeTest {
 
         assertTrue(node6.supported("Context1", 0, Network.currentLevel));
         assertFalse(node6.supported("Context1", 1, Network.currentLevel));
+        assertFalse(node6.supported("Context1", 2, Network.currentLevel));
         assertTrue(node7.supported("Context1", 0, Network.currentLevel));
+        assertFalse(node7.supported("Context1", 1, Network.currentLevel));
         assertTrue(node7.supported("Context1", 2, Network.currentLevel));
+        assertTrue(node8.supported("Context1", 0, Network.currentLevel));
         assertTrue(node8.supported("Context1", 1, Network.currentLevel));
+        assertFalse(node8.supported("Context1", 2, Network.currentLevel));
 
     }
 }
