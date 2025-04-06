@@ -1,6 +1,5 @@
 package nodes;
 
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -114,53 +113,52 @@ public abstract class Node {
 	}
 
 	public NodeSet fetchFreeVariables() {
-	    NodeSet freeVariables = new NodeSet();
-	    HashSet<String> invalidPairs = new HashSet<>();
-	    LinkedList<Node> pathTrace = new LinkedList<>();
+		NodeSet freeVariables = new NodeSet();
+		HashSet<String> invalidPairs = new HashSet<>();
+		LinkedList<Node> pathTrace = new LinkedList<>();
 
-	    findFreeVariables(freeVariables, invalidPairs, pathTrace);
+		findFreeVariables(freeVariables, invalidPairs, pathTrace);
 
-	    setFreeVariableSet(freeVariables);
-	    return freeVariables;
+		setFreeVariableSet(freeVariables);
+		return freeVariables;
 	}
 
 	private void findFreeVariables(NodeSet freeVariables, HashSet<String> invalidPairs, LinkedList<Node> pathTrace) {
-	    pathTrace.addLast(this);
-	    if (this.isVariable()) {
-	        for (Node node : pathTrace) {
-	            String inValidPair = node.getName() + "_" + this.getName();
-	            if (invalidPairs.contains(inValidPair)) {
-	                return;
-	            }
-	        }
-	        freeVariables.add(this);
-	        return;
-	    }
+		pathTrace.addLast(this);
+		if (this.isVariable()) {
+			for (Node node : pathTrace) {
+				String inValidPair = node.getName() + "_" + this.getName();
+				if (invalidPairs.contains(inValidPair)) {
+					return;
+				}
+			}
+			freeVariables.add(this);
+			return;
+		}
 
-	    if (this.isBase()) {
-	        return;
-	    }
+		if (this.isBase()) {
+			return;
+		}
 
-	    for (Cable cable : this.getDownCableSet().getValues()) {
-	        if (cable.getRelation().isQuantifier()) {
-	            for (Node child : cable.getNodeSet().getValues()) {
-	                if (child.isVariable()) {
-	                	invalidPairs.add(this.getName() + '_' + child.getName());
-	                }
-	            }
-	        }
-	    }
+		for (Cable cable : this.getDownCableSet().getValues()) {
+			if (cable.getRelation().isQuantifier()) {
+				for (Node child : cable.getNodeSet().getValues()) {
+					if (child.isVariable()) {
+						invalidPairs.add(this.getName() + '_' + child.getName());
+					}
+				}
+			}
+		}
 
-	    for (Cable cable : this.getDownCableSet().getValues()) {
-	        if (!cable.getRelation().isQuantifier()) {
-	            for (Node child : cable.getNodeSet().getValues()) {
-	                child.findFreeVariables(freeVariables, invalidPairs, pathTrace);
-	                pathTrace.removeLast();
-	            }
-	        }
-	    }
+		for (Cable cable : this.getDownCableSet().getValues()) {
+			if (!cable.getRelation().isQuantifier()) {
+				for (Node child : cable.getNodeSet().getValues()) {
+					child.findFreeVariables(freeVariables, invalidPairs, pathTrace);
+					pathTrace.removeLast();
+				}
+			}
+		}
 	}
-
 
 	public Node getNegation() {
 
@@ -267,7 +265,6 @@ public abstract class Node {
 		pathTrace.add(this);
 		String Semantic = this.getClass().getSimpleName();
 		if (this.isBase() || this.isVariable()) {
-
 
 			for (Entry<Node, Node> sub : substitutions.getMap().entrySet()) {
 				if (this.isVariable()) {
@@ -417,8 +414,18 @@ public abstract class Node {
 		} else {
 			return this.getId() == n.getId()
 					|| (this.getName().equals(n.getName())
-					&& this.getSyntacticType() == n.getSyntacticType());
+							&& this.getSyntacticType() == n.getSyntacticType());
 		}
+
+	}
+
+	public void processReports() {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void processRequests() {
+		// TODO Auto-generated method stub
 
 	}
 

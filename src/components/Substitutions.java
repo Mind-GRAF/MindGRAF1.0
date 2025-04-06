@@ -5,7 +5,6 @@ import java.util.Map;
 
 import nodes.Node;
 
-
 public class Substitutions {
 
     private Map<Node, Node> map;
@@ -64,24 +63,18 @@ public class Substitutions {
 
     // method for the switch substitutions
     public Substitutions switchReport(Substitutions switchSubs) {
+
         Substitutions newReportSubstitutions = new Substitutions();
+
         for (Node var : map.keySet()) {
-            // System.out.println(var);
+
             Node value = map.get(var);
-            // System.out.println(value);
-
             for (Node var1 : switchSubs.getMap().keySet()) {
-                // System.out.println(var1);
                 Node value1 = switchSubs.getMap().get(var1);
-                // System.out.println("z " + value1);
-
                 if (!var1.getName().equals(value.getName())) {
-                    // System.out.println("in first condition");
                     newReportSubstitutions.add(var, value);
                 } else {
-                    // System.out.println("in second condition");
                     newReportSubstitutions.add(var, value1);
-
                 }
             }
 

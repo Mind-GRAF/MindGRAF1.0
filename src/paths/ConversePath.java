@@ -7,12 +7,12 @@ import context.Context;
 
 public class ConversePath extends Path {
 	Path path;
+
 	public ConversePath(Path path) {
-		// TODO Auto-generated constructor stub
-		this.path=path;
-	
+		this.path = path;
+
 	}
-		
+
 	public Path getPath() {
 		return path;
 	}
@@ -29,7 +29,6 @@ public class ConversePath extends Path {
 	@Override
 	public LinkedList<Object[]> followConverse(Node node, PathTrace trace,
 			Context context) {
-		// TODO Auto-generated method stub
 		return this.path.follow(node, trace, context);
 	}
 
@@ -41,7 +40,7 @@ public class ConversePath extends Path {
 
 	@Override
 	public boolean equals(Object obj) {
-		if(obj instanceof ConversePath && ((ConversePath) obj).getPath().equals(this.getPath()))
+		if (obj instanceof ConversePath && ((ConversePath) obj).getPath().equals(this.getPath()))
 			return true;
 		return false;
 	}
@@ -50,9 +49,9 @@ public class ConversePath extends Path {
 	public Path converse() {
 		return this.path;
 	}
-	public String toString(){
-		return "Converse("+this.path.toString()+")";
-	}
 
+	public String toString() {
+		return "Converse(" + this.path.toString() + ")";
+	}
 
 }

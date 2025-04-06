@@ -1,5 +1,5 @@
 package nodes;
 
 public enum MolecularType {
-	OPEN,CLOSED
+	OPEN, CLOSED
 }

@@ -1,6 +1,5 @@
 package paths;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 
@@ -8,72 +7,69 @@ import nodes.Node;
 import context.Context;
 
 public class KStarPath extends Path {
-		Path path;
+	Path path;
+
 	public KStarPath(Path path) {
 		// TODO Auto-generated constructor stub
-		this.path=path;
+		this.path = path;
 
-		}
-			
-		public Path getPath() {
-			return path;
-		}
+	}
 
-		public void setPath(Path path) {
-			this.path = path;
-		}
+	public Path getPath() {
+		return path;
+	}
 
+	public void setPath(Path path) {
+		this.path = path;
+	}
 
+	@Override
+	public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context) {
+		LinkedList<Object[]> visited = new LinkedList<>();
+		HashSet<Node> seen = new HashSet<>();
+		LinkedList<Object[]> queue = new LinkedList<>();
+		queue.add(new Object[] { node, trace });
 
-		@Override
-		public LinkedList<Object[]> follow(Node node, PathTrace trace, Context context) {
-		    LinkedList<Object[]> visited = new LinkedList<>();
-		    HashSet<Node> seen = new HashSet<>();
-		    LinkedList<Object[]> queue = new LinkedList<>();
-		    queue.add(new Object[] {node, trace});
+		while (!queue.isEmpty()) {
+			Object[] current = queue.removeFirst();
+			Node current_node = (Node) current[0];
+			PathTrace current_trace = (PathTrace) current[1];
 
-		    while (!queue.isEmpty()) {
-		        Object[] current = queue.removeFirst();
-		        Node current_node = (Node) current[0];
-		        PathTrace current_trace = (PathTrace) current[1];
+			if (!seen.contains(current_node)) {
+				visited.add(current);
+				seen.add(current_node);
 
-		        if (!seen.contains(current_node)) {
-		            visited.add(current);
-		            seen.add(current_node);
-
-		            LinkedList<Object[]> neighbors = this.path.follow(current_node, current_trace, context);
-		            queue.addAll(neighbors);
-		        }
-		    }
-
-		    return visited;
+				LinkedList<Object[]> neighbors = this.path.follow(current_node, current_trace, context);
+				queue.addAll(neighbors);
+			}
 		}
 
-		@Override
-		public LinkedList<Object[]> followConverse(Node node, PathTrace trace, Context context) {
-		    LinkedList<Object[]> visited = new LinkedList<>();
-		    HashSet<Node> seen = new HashSet<>();
-		    LinkedList<Object[]> queue = new LinkedList<>();
-		    queue.add(new Object[]{node, trace});
+		return visited;
+	}
 
-		    while (!queue.isEmpty()) {
-		        Object[] current = queue.removeFirst();
-		        Node current_node = (Node) current[0];
-		        PathTrace current_trace = (PathTrace) current[1];
+	@Override
+	public LinkedList<Object[]> followConverse(Node node, PathTrace trace, Context context) {
+		LinkedList<Object[]> visited = new LinkedList<>();
+		HashSet<Node> seen = new HashSet<>();
+		LinkedList<Object[]> queue = new LinkedList<>();
+		queue.add(new Object[] { node, trace });
 
-		        if (!seen.contains(current_node)) {
-		            visited.add(current);
-		            seen.add(current_node);
+		while (!queue.isEmpty()) {
+			Object[] current = queue.removeFirst();
+			Node current_node = (Node) current[0];
+			PathTrace current_trace = (PathTrace) current[1];
 
-		            LinkedList<Object[]> neighbors = this.path.followConverse(current_node, current_trace, context);
-		            queue.addAll(neighbors);
-		        }
-		    }
+			if (!seen.contains(current_node)) {
+				visited.add(current);
+				seen.add(current_node);
 
-		    return visited;
+				LinkedList<Object[]> neighbors = this.path.followConverse(current_node, current_trace, context);
+				queue.addAll(neighbors);
+			}
 		}
 
-
+		return visited;
+	}
 
 	@Override
 	public Path clone() {
@@ -82,7 +78,7 @@ public class KStarPath extends Path {
 
 	@Override
 	public boolean equals(Object obj) {
-		if(obj instanceof KStarPath && ((KStarPath) obj).getPath().equals(this.getPath()))
+		if (obj instanceof KStarPath && ((KStarPath) obj).getPath().equals(this.getPath()))
 			return true;
 		return false;
 	}
@@ -92,8 +88,9 @@ public class KStarPath extends Path {
 		return new KStarPath(path.converse());
 
 	}
-	public String toString(){
-		return "KStar Path("+this.path.toString()+")";
+
+	public String toString() {
+		return "KStar Path(" + this.path.toString() + ")";
 	}
-	
+
 }
