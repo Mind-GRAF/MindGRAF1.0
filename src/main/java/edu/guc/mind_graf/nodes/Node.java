@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.relations.Relation;
 import edu.guc.mind_graf.set.NodeSet;
+import edu.guc.mind_graf.support.Support;
 import edu.guc.mind_graf.cables.Cable;
 import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
@@ -283,6 +284,22 @@ public abstract class Node {
 		}
 	}
 
+
+	// moved from RuleNode up to Node
+	public Substitutions onlyRelevantSubs(Substitutions filterSubs) {
+		NodeSet freeVariablesSet = this.getFreeVariables();
+		Substitutions relevantSubs = new Substitutions();
+		for (Node variableNode : freeVariablesSet.getValues()) {
+			for (Node var : filterSubs.getMap().keySet()) {
+				Node value = filterSubs.getMap().get(var);
+				if (var.getName().equals(variableNode.getName())) {
+					relevantSubs.add(var, value);
+				}
+			}
+		}
+		return relevantSubs;
+	}
+
 	public Node applySubstitution(Substitutions substitutions)
 			throws NoSuchTypeException {
 		HashMap<String, Node> builtNodes = new HashMap<String, Node>();
@@ -365,6 +382,10 @@ public abstract class Node {
 					+ this.downCableSet + "}";
 
 		return "{" + this.name + ", " + this.syntacticType + "}";
+	}
+
+	public String printShortData(){
+		return "{ id: " + this.id + ", name: " + this.name + "}";
 	}
 
 	public MolecularType getMolecularType() {
@@ -467,7 +488,7 @@ public abstract class Node {
 			Substitutions switchSubs,
 			Substitutions filterSubs, String contextName,
 			int attitudeId,
-			int matchType, Node requesterNode) {
+			int matchType, Node requesterNode,Support support) {
 		/* BEGIN - Helpful Prints */
 		String reporterIdent = targetNode.getName();
 		String requesterIdent = requesterNode.getName();
@@ -482,7 +503,7 @@ public abstract class Node {
 			case Matched:
 				newChannel = new MatchChannel(switchSubstitutions, filterSubstitutions,
 						contextName, attitudeId,
-						matchType, requesterNode);
+						matchType, requesterNode,support);
 				break;
 			case AntRule:
 				newChannel = new AntecedentToRuleChannel(switchSubstitutions,
@@ -546,7 +567,7 @@ public abstract class Node {
 			ChannelType channelType, Node requesterNode) {
 		for (Node sentTo : nodeSet) {
 			Request newRequest = establishChannel(channelType, sentTo, switchSubs, filterSubs,
-					contextName, attitudeId, -1, requesterNode);
+					contextName, attitudeId, -1, requesterNode,null);
 			Scheduler.addToLowQueue(newRequest);
 		}
 	}

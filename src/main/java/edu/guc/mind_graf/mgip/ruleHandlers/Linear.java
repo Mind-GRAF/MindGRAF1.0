@@ -17,9 +17,12 @@ public class Linear extends SIndex{
 
     @Override
     public RuleInfoSet insertIntoMap(RuleInfo ri, int hash) throws DirectCycleException {
-        if(ri.getPcount() < min)
+        if(ri.getPcount() < min) {
+            System.out.println("RuleInfo has pcount less than min so will not be inserted");
             return null;   // basically dont insert
+        }
         RuleInfoSet afterInsertion = ruleInfoMap.computeIfAbsent(hash, k -> new RuleInfoSet()).combineAdd(ri);
+        System.out.println("Inserted RuleInfo and now there are " + afterInsertion.size() + " RuleInfos in the map with substitutions " + ri.getSubs());
         return afterInsertion;
     }
 

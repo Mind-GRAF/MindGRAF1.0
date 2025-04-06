@@ -21,10 +21,12 @@ public class AndEntailment extends RuleNode {
 
     public AndEntailment(DownCableSet downcableSet) {
         super(downcableSet);
+        System.out.println("Creating an and-entailment rule node");
         ant = downcableSet.get("ant").getNodeSet();
         cq = downcableSet.get("cq").getNodeSet();
         PropositionNodeSet antecedents = RuleInfoHandler.getVariableAntecedents(ant);
         cAnt = ant.size() - antecedents.size();
+        System.out.println("The rule has " + antecedents.size() + " open antecedents and " + cAnt + " closed antecedents.");
         this.ruleInfoHandler = Ptree.constructPtree(antecedents, antecedents.size(), Integer.MAX_VALUE, 2);
         this.ruleInfoHandler.setcMin(cAnt);
     }

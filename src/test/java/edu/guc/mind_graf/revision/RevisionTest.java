@@ -6,6 +6,7 @@ import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.network.Network;
+import edu.guc.mind_graf.network.NetworkController;
 import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.relations.Relation;
 import edu.guc.mind_graf.set.NodeSet;
@@ -25,7 +26,6 @@ class RevisionTest {
 
     @BeforeEach
     void setUp() throws NoSuchTypeException {
-        n = new Network();
         System.out.println("Testing Revision");
         Set<String, Integer> attitudeNames = new Set<>();
         attitudeNames.add("beliefs", 0);
@@ -39,10 +39,10 @@ class RevisionTest {
         consistentAttitudes.add(new ArrayList<>(List.of(0, 2)));
         consistentAttitudes.add(new ArrayList<>(List.of(0, 2, 3)));
 
-        ContextController.setUp(attitudeNames, consistentAttitudes, false);
+        n = NetworkController.setUp(attitudeNames, consistentAttitudes, false, false, false, 1);
         ContextController.createNewContext("guc");
-
         ContextController.setCurrContext("guc");
+
         p = (PropositionNode) Network.createNode("p", "propositionnode");
         HashMap<String, Relation> relations = Network.getRelations();
 
@@ -75,8 +75,8 @@ class RevisionTest {
     @Test
     void testDetectingContradictions1() {
         System.out.println("contradiction detection test 1");
-        ContextController.addHypothesisToContext(0, p);
-        ContextController.addHypothesisToContext(0, notP);
+        ContextController.addHypothesisToContext(0, 0, p);
+        ContextController.addHypothesisToContext(0, 0, notP);
 
         Assertions.assertEquals(1, Revision.checkContradiction(ContextController.getContext("guc"), 0, 0, p).size());
     }
@@ -84,9 +84,9 @@ class RevisionTest {
     @Test
     void testDetectingContradictions2() {
         System.out.println("contradiction detection test 2");
-        ContextController.addHypothesisToContext(0, p);
-        ContextController.addHypothesisToContext(2, notP);
-        ContextController.addHypothesisToContext(3, notP);
+        ContextController.addHypothesisToContext(0, 0, p);
+        ContextController.addHypothesisToContext(0,2, notP);
+        ContextController.addHypothesisToContext(0,3, notP);
 
         Assertions.assertEquals(2, Revision.checkContradiction(ContextController.getContext("guc"), 0, 0, p).size());
     }
@@ -94,9 +94,14 @@ class RevisionTest {
     @Test
     void testDetectingContradictions3() {
         System.out.println("contradiction detection test 3");
-        ContextController.addHypothesisToContext(0, p);
-        ContextController.addHypothesisToContext(1, notP);
+        ContextController.addHypothesisToContext(0,0, p);
+        ContextController.addHypothesisToContext(0,1, notP);
 
         Assertions.assertEquals(0, Revision.checkContradiction(ContextController.getContext("guc"), 0, 0, p).size());
+    }
+
+    @Test
+    void manualContradictionHandling1() {
+        System.out.println("manual contradiction handling test 1");
     }
 }

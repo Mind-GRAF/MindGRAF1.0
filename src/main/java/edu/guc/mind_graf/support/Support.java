@@ -6,61 +6,44 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 
-import edu.guc.mind_graf.exceptions.DirectCycleException;
-import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.PropositionNode;
+import edu.guc.mind_graf.set.PropositionNodeSet;
 
 
-public class Support {
+public class Support implements Cloneable{
 
-	private int nodeID;
-	private HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>>> justificationSupport;
-	private HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>>> assumptionSupport;
-	private HashMap<Integer, HashMap<Integer, SupportTree>> supportsTree;
-	private HashSet<Integer> isHyp;
-	private HashMap<Integer, HashSet<Integer>> isTreeCalculatetd;
+	private final int nodeID;
+	private HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>>> justificationBasedSupport;
+	private HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>>> assumptionBasedSupport;
+	private HashMap<Integer, HashSet<Integer>> isHyp;
+	//	private HashMap<Integer, HashMap<Integer, SupportTree>> supportsTree;
+	//	private HashMap<Integer, HashSet<Integer>> isTreeCalculated;
 
-	public Support(int nodeID){
+	public Support(int nodeID) {
 		// Constructor
 		this.nodeID = nodeID;
-		justificationSupport = new HashMap<>();
-		justificationSupport.put(0,new HashMap<>());
+		justificationBasedSupport = new HashMap<>();
 
-		assumptionSupport = new HashMap<>();
-		assumptionSupport.put(0,new HashMap<>());
+		assumptionBasedSupport = new HashMap<>();
 
-		isHyp = new HashSet<>();
-		isTreeCalculatetd = new HashMap<>();
-		supportsTree = new HashMap<>();
+		isHyp = new HashMap<>();
 	}
 
-	public Support(int nodeID, HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>>> justificationSupport) throws DirectCycleException{
+	public Support(int nodeID, int currentAttitudeID, int level, HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>> justificationSupport, PropositionNodeSet bridgeRules) {
 		// Constructor
-		setJustificationSupport(justificationSupport);
-		this.nodeID = nodeID;
-		isHyp = new HashSet<>();
-		isTreeCalculatetd = new HashMap<>();
-		supportsTree = new HashMap<>();
-	}
-
-	public Support(int nodeID, int currentAttitudeID, int level, Pair<PropositionNodeSet,PropositionNodeSet> justificationSupport) throws DirectCycleException{
-		// Constructor
-		HashMap<Integer,Pair<PropositionNodeSet,PropositionNodeSet>> innerHashMap = new HashMap<>();
-		innerHashMap.put(currentAttitudeID, justificationSupport);
 		ArrayList< Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>> array = new ArrayList<>();
-		array.add(new Pair<HashMap<Integer,Pair<PropositionNodeSet,PropositionNodeSet>>, PropositionNodeSet>(innerHashMap,new PropositionNodeSet()));
+		array.add(new Pair<>(justificationSupport, bridgeRules));
 		HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>> outerHashMap = new HashMap<>();
 		outerHashMap.put(currentAttitudeID, array);
-		HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>>> levelHash = new HashMap<>();
+		HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>>>> levelHash = new HashMap<>();
 		levelHash.put(level, outerHashMap);
-		setJustificationSupport(levelHash);
+		setJustificationBasedSupport(levelHash);
 		this.nodeID = nodeID;
-		isHyp = new HashSet<>();
-		isTreeCalculatetd = new HashMap<>();
-		supportsTree = new HashMap<>();
+		isHyp = new HashMap<>();
 	}
 
 
@@ -71,65 +54,92 @@ public class Support {
 		return nodeID;
 	}
 
+
 	/**
-	 * @param nodeID the nodeID to set
+	 * @return a copy of isHyp
 	 */
-	public void setNodeID(int nodeID) {
-		this.nodeID = nodeID;
+	public HashMap<Integer, HashSet<Integer>> getIsHyp() {
+		HashMap<Integer, HashSet<Integer>> cloneIsHyp = new HashMap<>();
+		for(Integer level : isHyp.keySet()){
+			cloneIsHyp.put(level, new HashSet<>(this.isHyp.get(level)));
+		}
+		return cloneIsHyp;
 	}
 
 	/**
-	 * @return the supportsTree
+	 * @return a copy of justificationSupport
 	 */
-	public HashMap<Integer, HashMap<Integer, SupportTree>> getSupportsTree() {
-		return supportsTree;
+	public HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>>> getJustificationBasedSupport() {
+		return cloneSupport(justificationBasedSupport);
 	}
 
 	/**
-	 * @return the isHyp
+	 * @return a copy of assumptionSupport
 	 */
-	public HashSet<Integer> getIsHyp() {
-		return isHyp;
+	public HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>>> getAssumptionBasedSupport() {
+		return cloneSupport(assumptionBasedSupport);
+	}
+
+	private HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>>> cloneSupport(HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>>> support){
+		HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>>> copy = new HashMap<>();
+
+		for (Map.Entry<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>>> entry : support.entrySet()) {
+			int level = entry.getKey();
+			HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>> attitudeMap = new HashMap<>();
+
+			for (Map.Entry<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>> innerEntry : entry.getValue().entrySet()) {
+				int innerKey = innerEntry.getKey();
+				ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>> list = new ArrayList<>();
+
+				for (Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> pair : innerEntry.getValue()) {
+
+					HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>> innerAttitudeMap = new HashMap<>();
+					for (Map.Entry<Integer, Pair<PropositionNodeSet,PropositionNodeSet>> innerentry : pair.getFirst().entrySet()) {
+						Integer key = innerentry.getKey();
+
+						Pair<PropositionNodeSet,PropositionNodeSet> value = innerentry.getValue();
+						PropositionNodeSet originSet = new PropositionNodeSet();
+
+						originSet.putAll(value.getFirst().getValues());
+						PropositionNodeSet gradeSet = new PropositionNodeSet();
+						gradeSet.putAll(value.getSecond().getValues());
+
+						innerAttitudeMap.put(key, new Pair<>(originSet, gradeSet));
+					}
+
+					PropositionNodeSet bridgeRules = new PropositionNodeSet();
+					bridgeRules.putAll(pair.getSecond().getValues());
+
+					// Add the Outer Pair object to the list
+					list.add(new Pair<>(innerAttitudeMap, bridgeRules));
+				}
+
+				// Put the list into the attitudeMap
+				attitudeMap.put(innerKey, list);
+			}
+
+			// Put the attitudeMap into the copy map
+			copy.put(level, attitudeMap);
+		}
+
+		return copy;
 	}
 
 	/**
-	 * @return the isTreeCalculatetd
+	 * @param justificationBasedSupport the justificationSupport to set
 	 */
-	public HashMap<Integer, HashSet<Integer>> getisTreeCalculatetd() {
-		return isTreeCalculatetd;
-	}
+	private void setJustificationBasedSupport(
+			HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>>> justificationBasedSupport) {
 
-	/**
-	 * @return the justificationSupport
-	 */
-	public HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>>> getJustificationSupport() {
-		return justificationSupport;
-	}
+		this.justificationBasedSupport = new HashMap<>();
+		this.assumptionBasedSupport = new HashMap<>();
 
-	/**
-	 * @return the assumptionSupport
-	 */
-	public HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>>> getAssumptionSupport() {
-		return assumptionSupport;
-	}
-
-	/**
-	 * @param justificationSupport the justificationSupport to set
-	 * @throws DirectCycleException
-	 */
-	private void setJustificationSupport(
-			HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>>> justificationSupport) throws DirectCycleException {
-		for(Integer level : justificationSupport.keySet()) {
-			if(hasCycle(justificationSupport.get(level))){
-				throw new DirectCycleException("Direct Cycle found");
+		for (Integer level : justificationBasedSupport.keySet()) {
+			for (Integer attitude : justificationBasedSupport.get(level).keySet()) {
+				addJustificationSupportForAttitude(attitude, level, justificationBasedSupport.get(level).get(attitude));
 			}
 		}
 
-		for(Integer level : justificationSupport.keySet()) {
-			this.assumptionSupport = createAssumptionSupport(justificationSupport.get(level));
-		}
-
-		this.justificationSupport = justificationSupport;
 	}
 
 	/**
@@ -138,45 +148,150 @@ public class Support {
 	 * @param attitudeID attitude to add justification in
 	 * @param level Grade level to add justification in
 	 * @param justificationSupport list of supports to add
-	 * @throws DirectCycleException
 	 */
-	public void addJustificatoinSupportForAttitude(int attitudeID, int level,  ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>> justificationSupport) throws DirectCycleException {
-		HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>> temp = new HashMap<>();
-		temp.put(attitudeID, justificationSupport);
-		if(hasCycle(temp)){
-			throw new DirectCycleException("Direct Cycle found");
-		}
-		else {
+	public void addJustificationSupportForAttitude(int attitudeID, int level, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>> justificationSupport) {
 
-			HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>>> assumptionsTemp = createAssumptionSupport(temp);
-
-			for(Integer assumptionlevel : assumptionsTemp.keySet()) {
-				if(this.assumptionSupport.containsKey(assumptionlevel)) {
-					if(this.assumptionSupport.get(assumptionlevel).containsKey(attitudeID)){
-						this.assumptionSupport.get(assumptionlevel).get(attitudeID).addAll(assumptionsTemp.get(assumptionlevel).get(attitudeID));
-					}
-					else {
-						this.assumptionSupport.get(assumptionlevel).put(assumptionlevel, assumptionsTemp.get(assumptionlevel).get(attitudeID));
+		//Clean empty hashmaps and proposition sets and check if justification support to be added is empty and clean duplicates
+		ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>> justificationTempSupports = new ArrayList<>();
+		for(int i = 0; i < justificationSupport.size(); i++){
+			if(justificationTempSupports.contains(justificationSupport.get(i))){
+				justificationSupport.remove(i);
+				i--;
+			}
+			else {
+				justificationTempSupports.add(justificationSupport.get(i));
+				ArrayList<Integer> innerAttitudes = new ArrayList<>(justificationSupport.get(i).getFirst().keySet());
+				for (Integer innerAttitude : innerAttitudes) {
+					if (justificationSupport.get(i).getFirst().get(innerAttitude).getFirst().isEmpty()) {
+						justificationSupport.get(i).getFirst().remove(innerAttitude);
 					}
 				}
-				else {
-					this.assumptionSupport.put(assumptionlevel, assumptionsTemp.get(assumptionlevel));
+				if (justificationSupport.get(i).getFirst().isEmpty()) {
+					justificationSupport.remove(i);
+					i--;
 				}
 			}
+		}
+		if(justificationSupport.isEmpty()){
+			return;
+		}
 
-			if(this.justificationSupport.containsKey(level)) {
-				if(this.justificationSupport.get(level).containsKey(attitudeID)){
-					this.justificationSupport.get(level).get(attitudeID).addAll(justificationSupport);
+		HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>> temp = new HashMap<>();
+		temp.put(attitudeID, justificationSupport);
+
+		//Check for direct cycles
+		if(hasCycle(temp)){
+			return;
+		}
+
+		ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>> clone = new ArrayList<>();
+
+		for (Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> pair : justificationSupport) {
+
+			HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>> innerAttitudeMap = new HashMap<>();
+			for (Map.Entry<Integer, Pair<PropositionNodeSet,PropositionNodeSet>> innerentry : pair.getFirst().entrySet()) {
+				Integer key = innerentry.getKey();
+
+				Pair<PropositionNodeSet,PropositionNodeSet> value = innerentry.getValue();
+				PropositionNodeSet originSet = new PropositionNodeSet();
+
+				originSet.putAll(value.getFirst().getValues());
+				PropositionNodeSet gradeSet = new PropositionNodeSet();
+				gradeSet.putAll(value.getSecond().getValues());
+
+				innerAttitudeMap.put(key, new Pair<>(originSet, gradeSet));
+			}
+
+			PropositionNodeSet bridgeRules = new PropositionNodeSet();
+			bridgeRules.putAll(pair.getSecond().getValues());
+
+			// Add the Outer Pair object to the list
+			clone.add(new Pair<>(innerAttitudeMap, bridgeRules));
+		}
+
+		HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>>> assumptionsTemp = createAssumptionSupport(attitudeID, clone);
+
+		//Clean empty hashmaps and proposition sets and check if assumptionsTemp support to be added is empty and clean duplicates
+		ArrayList<Integer> levels = new ArrayList<>(assumptionsTemp.keySet());
+		for(Integer assumptionLevel : levels) {
+			if(assumptionsTemp.get(assumptionLevel)!= null) {
+				ArrayList<Integer> attitudes = new ArrayList<>(assumptionsTemp.get(assumptionLevel).keySet());
+				for (Integer attitude : attitudes) {
+					if(assumptionsTemp.get(assumptionLevel).get(attitude)!= null) {
+						ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>> tempSupports = new ArrayList<>();
+						for (int i = 0; i < assumptionsTemp.get(assumptionLevel).get(attitude).size(); i++) {
+							if(tempSupports.contains(assumptionsTemp.get(assumptionLevel).get(attitude).get(i))){
+								assumptionsTemp.get(assumptionLevel).get(attitude).remove(i);
+								i--;
+							}
+							else {
+								tempSupports.add(assumptionsTemp.get(assumptionLevel).get(attitude).get(i));
+								ArrayList<Integer> innerAttitudes = new ArrayList<>(assumptionsTemp.get(assumptionLevel).get(attitude).get(i).getFirst().keySet());
+								for (Integer innerAttitude : innerAttitudes) {
+									if (assumptionsTemp.get(assumptionLevel).get(attitude).get(i).getFirst().get(innerAttitude).getFirst().isEmpty()) {
+										assumptionsTemp.get(assumptionLevel).get(attitude).get(i).getFirst().remove(innerAttitude);
+									}
+								}
+								if (assumptionsTemp.get(assumptionLevel).get(attitude).get(i).getFirst().isEmpty()) {
+									assumptionsTemp.get(assumptionLevel).get(attitude).remove(i);
+									i--;
+								}
+							}
+						}
+					}
+					else{
+						assumptionsTemp.get(assumptionLevel).remove(attitude);
+					}
+					if (assumptionsTemp.get(assumptionLevel).get(attitude).isEmpty()) {
+						assumptionsTemp.get(assumptionLevel).remove(attitude);
+					}
 				}
-				else {
-					this.justificationSupport.get(level).put(attitudeID, justificationSupport);
+			}
+			else{
+				assumptionsTemp.remove(assumptionLevel);
+			}
+			if (assumptionsTemp.get(assumptionLevel).isEmpty()) {
+				assumptionsTemp.remove(assumptionLevel);
+			}
+		}
+
+		for(Integer assumptionLevel : assumptionsTemp.keySet()) {
+			if(this.assumptionBasedSupport.containsKey(assumptionLevel)) {
+				for(Integer attitude : assumptionsTemp.get(assumptionLevel).keySet()) {
+					if (this.assumptionBasedSupport.get(assumptionLevel).containsKey(attitude)) {
+						for(Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> support : assumptionsTemp.get(assumptionLevel).get(attitude)) {
+							if(!this.assumptionBasedSupport.get(assumptionLevel).get(attitude).contains(support)) {
+								this.assumptionBasedSupport.get(assumptionLevel).get(attitude).add(support);
+							}
+						}
+					} else if(assumptionsTemp.get(assumptionLevel).get(attitude) != null){
+						this.assumptionBasedSupport.get(assumptionLevel).put(attitude, assumptionsTemp.get(assumptionLevel).get(attitude));
+					}
+				}
+			}
+			else if(assumptionsTemp.get(assumptionLevel) != null){
+				this.assumptionBasedSupport.put(assumptionLevel, assumptionsTemp.get(assumptionLevel));
+			}
+		}
+
+		if(this.justificationBasedSupport.containsKey(level)) {
+			if(this.justificationBasedSupport.get(level).containsKey(attitudeID)){
+				for(Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> support : clone) {
+					if(!this.justificationBasedSupport.get(level).get(attitudeID).contains(support)) {
+						this.justificationBasedSupport.get(level).get(attitudeID).add(support);
+					}
 				}
 			}
 			else {
-				this.justificationSupport.put(level, temp);
+				this.justificationBasedSupport.get(level).put(attitudeID, clone);
 			}
-			isTreeCalculatetd.remove(attitudeID);
 		}
+		else {
+			HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>> cloneOuterHash = new HashMap<>();
+			cloneOuterHash.put(attitudeID, clone);
+			this.justificationBasedSupport.put(level, cloneOuterHash);
+		}
+
 	}
 
 	private boolean hasCycle(
@@ -190,7 +305,7 @@ public class Support {
 					PropositionNodeSet supportProps1 = supportAttitudes.getFirst().get(attitude).getFirst();
 					int[] propsIDs1 = supportProps1.getProps();
 					for (int id : propsIDs1) {
-						if(attitude == supportedAttitude && id == nodeID) {
+						if(Objects.equals(attitude, supportedAttitude) && id == nodeID) {
 							return true;
 						}
 						dependents.add(id);
@@ -199,11 +314,13 @@ public class Support {
 			}
 		}
 
-		HashMap<Integer, Node> networkPropositions = Network.getPropositionNodes();
-		for(int currProp : dependents.getValues()) {
-			PropositionNode depNode = (PropositionNode) networkPropositions.get(currProp);
-			if(nodeID != -1) {
-				depNode.getJustificationSupportDependents().add(nodeID);
+		if(nodeID >= 1) {
+			HashMap<Integer, Node> networkPropositions = Network.getPropositionNodes();
+			for(int currProp : dependents.getValues()) {
+				if(nodeID != currProp && networkPropositions.containsKey(currProp)) {
+					PropositionNode depNode = (PropositionNode) networkPropositions.get(currProp);
+					depNode.addNodeToJustificationSupportDependents(nodeID);
+				}
 			}
 		}
 		return false;
@@ -211,56 +328,105 @@ public class Support {
 
 
 	private HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>>> createAssumptionSupport(
-			HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>> justificationSupport) {
+			int supportedAttitude, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>> justificationSupports) {
 
-		PropositionNodeSet dependents = new PropositionNodeSet();
 		HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>>> newAssumptionSupport = new HashMap<>();
 		//get Propositions of the network
 		HashMap<Integer, Node> networkPropositions = Network.getPropositionNodes();
 
-		//iterate over the supported attitudes of the justification support(Outer HashMap)
-		for (Integer supportedAttitude : justificationSupport.keySet()) {
-			ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>> supportsHashMapArray = justificationSupport.get(supportedAttitude);
-			HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>> newAssumptionsHashMapArray = new HashMap<>();
+		HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>> newAssumptionsHashMapArray = new HashMap<>();
 
-			//iterate over the Supporting Attitudes of current supported attitude(Outer HashMap)
-			for (Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> supportingAttitudes : supportsHashMapArray) {
-				ArrayList<HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>>> temptogetcrossproduct = new ArrayList<>();
+		//iterate over the supports
+		for (Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> support : justificationSupports) {
+			ArrayList<HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>>> tempToGetCrossProduct = new ArrayList<>();
 
-				//iterate over the supports of current support to get cross product(ArrayList of HashMap<Integer, PropositionNodeSet> of supports)(Inner HashMap)
-				for (Integer supportingAttitude : supportingAttitudes.getFirst().keySet()) {
+			//iterate over the supporting attitudes in the current support
+			for (Integer supportingAttitude : support.getFirst().keySet()) {
+				PropositionNodeSet supportPropsSet = new PropositionNodeSet();
+				supportPropsSet.putAll(support.getFirst().get(supportingAttitude).getFirst().getValues());
+				supportPropsSet.putAll(support.getFirst().get(supportingAttitude).getSecond().getValues());
+				int[] propsIDs = supportPropsSet.getProps();
 
-					Pair<PropositionNodeSet,PropositionNodeSet> supportPropsSets = supportingAttitudes.getFirst().get(supportingAttitude);
-					PropositionNodeSet supportPropsSet = supportPropsSets.getFirst();
-					supportPropsSet.putAll(supportPropsSets.getSecond().getValues());
-					int[] propsIDs = supportPropsSet.getProps();
-
-
-					temptogetcrossproduct.add(getCrossProductOfNodeSet(propsIDs, networkPropositions, supportingAttitude, supportedAttitude, dependents,supportingAttitudes.getSecond()));
-				}
-				newAssumptionsHashMapArray = getCrossProductBetweenAttitudes(temptogetcrossproduct);
+				//get cross product between the assumption supports of the supporting proposition nodes
+				tempToGetCrossProduct.add(getCrossProductOfNodeSet(propsIDs, networkPropositions, supportingAttitude, supportedAttitude,support.getSecond()));
 			}
-			newAssumptionSupport.put(supportedAttitude, newAssumptionsHashMapArray);
+			if(tempToGetCrossProduct.size()>1){
+				HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>> tempHash = getCrossProductBetweenAttitudes(tempToGetCrossProduct);
+				for(Integer level : tempHash.keySet()) {
+					if(newAssumptionsHashMapArray.containsKey(level)) {
+						newAssumptionsHashMapArray.get(level).addAll(tempHash.get(level));
+					}
+					else{
+						newAssumptionsHashMapArray.put(level, tempHash.get(level));
+					}
+				}
+			}
+			else{
+				if(!tempToGetCrossProduct.isEmpty() && !tempToGetCrossProduct.get(0).isEmpty()){
+					HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>> tempHash = getCrossProductBetweenAttitudes(tempToGetCrossProduct);
+					for(Integer level : tempHash.keySet()) {
+						if(newAssumptionsHashMapArray.containsKey(level)) {
+							newAssumptionsHashMapArray.get(level).addAll(tempHash.get(level));
+						}
+						else{
+							newAssumptionsHashMapArray.put(level, tempHash.get(level));
+						}
+					}
+				}
+			}
 		}
-
-		for(Integer dep: dependents.getValues()) {
-			PropositionNode depNode = (PropositionNode) networkPropositions.get(dep);
-			depNode.getAssumptionSupportDependents().add(nodeID);
+		for(Integer level : newAssumptionsHashMapArray.keySet()){
+			if(newAssumptionsHashMapArray.get(level) != null){
+				for(int i = 0; i < newAssumptionsHashMapArray.get(level).size(); i++){
+					ArrayList<Integer> innerAttitudes = new ArrayList<>(newAssumptionsHashMapArray.get(level).get(i).getFirst().keySet());
+					for(Integer innerAttitude : innerAttitudes){
+						if(newAssumptionsHashMapArray.get(level).get(i).getFirst().get(innerAttitude).getFirst().isEmpty()){
+							newAssumptionsHashMapArray.get(level).get(i).getFirst().remove(innerAttitude);
+						}
+					}
+					if(newAssumptionsHashMapArray.get(level).get(i).getFirst().isEmpty()){
+						newAssumptionsHashMapArray.get(level).remove(i);
+						i--;
+					}
+				}
+			}
+			if(newAssumptionsHashMapArray.get(level) != null && !newAssumptionsHashMapArray.get(level).isEmpty()) {
+				HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>>> innerHash = new HashMap<>();
+				innerHash.put(supportedAttitude, newAssumptionsHashMapArray.get(level));
+				newAssumptionSupport.put(level, innerHash);
+			}
 		}
 		return newAssumptionSupport;
 	}
 
-	private HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>> getCrossProductOfNodeSet(int[]propsIDs, HashMap<Integer, Node> networkPropositions, int supportingAttitude, int supportedAttitude, PropositionNodeSet dependents,PropositionNodeSet bridgeRules) {
+	private HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>> getCrossProductOfNodeSet(int[]propsIDs, HashMap<Integer, Node> networkPropositions, int supportingAttitude, int supportedAttitude,PropositionNodeSet bridgeRules) {
 
-		PropositionNode firstSupp = (PropositionNode) networkPropositions.get(propsIDs[0]);
 		HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>> result = new HashMap<>();
-		for(Integer level : firstSupp.getSupport().getAssumptionSupport().keySet()) {
-			result.put(level, firstSupp.getSupport().getAssumptionSupport().get(level).get(supportingAttitude));
+		PropositionNode firstNode = null;
+		int k = 0;
+		while(k < propsIDs.length) {
+			if(networkPropositions.containsKey(propsIDs[k])) {
+				firstNode = (PropositionNode) networkPropositions.get(propsIDs[k]);
+				if(!firstNode.getSupport().getAssumptionBasedSupport().isEmpty()){
+					break;
+				}
+			}
+			k++;
+		}
+		if(k == propsIDs.length){
+				return result;
+		}
+		Support firstSupp = firstNode.getSupport();
+		for(Integer level : firstSupp.assumptionBasedSupport.keySet()) {
+			if(firstSupp.assumptionBasedSupport.get(level).get(supportingAttitude) != null && !firstSupp.assumptionBasedSupport.get(level).get(supportingAttitude).isEmpty()) {
+				result.put(level, firstSupp.assumptionBasedSupport.get(level).get(supportingAttitude));
+			}
 		}
 
+		//handling Indirect Cycles and bridge rules
 		ArrayList<Integer> keys = new ArrayList<>(result.keySet());
 		for(Integer level : keys) {
-			for(int i = 0; i < result.get(level).size(); i++) {//handling Indirect Cycles and bridge rules
+			for(int i = 0; i < result.get(level).size(); i++) {
 				Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> curr = result.get(level).get(i);
 				if(curr.getFirst().containsKey(supportedAttitude) && curr.getFirst().get(supportedAttitude).getFirst().contains(nodeID)) {
 					result.get(level).get(i).getFirst().remove(supportedAttitude);
@@ -278,73 +444,89 @@ public class Support {
 			}
 		}
 
-		for(int i = 1; i < propsIDs.length; i++) {
+		for(int i = k+1; i < propsIDs.length; i++) {
 
-			HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>> levelstemp = new HashMap<>();
+			PropositionNode currNode = null;
 
-			PropositionNode currNode = (PropositionNode) networkPropositions.get(propsIDs[i]);
-			for(Integer level : currNode.getSupport().getAssumptionSupport().keySet()) {
+			while(i < propsIDs.length) {
+				if(networkPropositions.containsKey(propsIDs[i])) {
+					currNode = (PropositionNode) networkPropositions.get(propsIDs[i]);
+					break;
+				}
+				else{
+					i++;
+				}
+			}
+			if(i == propsIDs.length){
+				return result;
+			}
+			HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>> levelsTemp = new HashMap<>();
+
+			for(Integer level : currNode.getSupport().assumptionBasedSupport.keySet()) {
 
 				ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>> temp = new ArrayList<>();
 
-				ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>> currSuppAssumptions = currNode.getSupport().getAssumptionSupport().get(level).get(supportingAttitude);
+				ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>> currSuppAssumptions = currNode.getSupport().assumptionBasedSupport.get(level).get(supportingAttitude);
 
 				if(result.containsKey(level)) {
 
-					for(Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> currSupport : currSuppAssumptions) {
+					for(Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> combination : result.get(level)) {
 
-						for(Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> combination : result.get(level)) {
+						for(Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> currSupport : currSuppAssumptions) {
 
-							Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> newSupport = combination;
+
+							Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> newSupport = new Pair<>();
+							HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>> innerAttitudeMap = new HashMap<>();
+							for (Map.Entry<Integer, Pair<PropositionNodeSet,PropositionNodeSet>> innerentry : combination.getFirst().entrySet()) {
+								Integer key = innerentry.getKey();
+
+								Pair<PropositionNodeSet,PropositionNodeSet> value = innerentry.getValue();
+
+								PropositionNodeSet originSet = value.getFirst().clone();
+
+								PropositionNodeSet gradeSet = value.getSecond().clone();
+
+								innerAttitudeMap.put(key, new Pair<>(originSet, gradeSet));
+							}
+							newSupport.setFirst(innerAttitudeMap);
+
+							PropositionNodeSet bridge = combination.getSecond();
+							bridge.putAll(currSupport.getSecond().getValues());
+							bridge.putAll(bridgeRules.getValues());
+							newSupport.setSecond(bridge);
 
 							for(Integer currAttitude : currSupport.getFirst().keySet()) {
 								if(!(currAttitude == supportedAttitude && currSupport.getFirst().get(currAttitude).getFirst().contains(nodeID))) {//handling Indirect Cycles
 									if(combination.getFirst().containsKey(currAttitude)) {
-										Pair<PropositionNodeSet,PropositionNodeSet> oldPair = combination.getFirst().get(currAttitude);
+										Pair<PropositionNodeSet,PropositionNodeSet> oldPair = new Pair<>(combination.getFirst().get(currAttitude).getFirst().clone(), combination.getFirst().get(currAttitude).getSecond().clone());
 										Pair<PropositionNodeSet,PropositionNodeSet> currPair = currSupport.getFirst().get(currAttitude);
 
-										PropositionNodeSet newPropSet1 = oldPair.getFirst();
-										PropositionNodeSet newPropSet2 = oldPair.getSecond();
+										PropositionNodeSet newPropSet1 = new PropositionNodeSet();
+										PropositionNodeSet newPropSet2 = new PropositionNodeSet();
 
+										newPropSet1.putAll(oldPair.getFirst().getValues());
 										newPropSet1.putAll(currPair.getFirst().getValues());
+
+										newPropSet2.putAll(oldPair.getSecond().getValues());
 										newPropSet2.putAll(currPair.getSecond().getValues());
-
-
-
-										// for(int oldProp : oldPropsSet.getProps()) {
-										// 	newPropSet.add(oldProp);
-										// 	dependents.add(oldProp);
-										// }
-										// for(int currProp : currPropsSet.getProps()) {
-										// 	newPropSet.add(currProp);
-										// 	dependents.add(currProp);
-										// }
 
 										for(int currProp : newPropSet1.getValues()) {
 											PropositionNode depNode = (PropositionNode) networkPropositions.get(currProp);
-											if(nodeID != -1) {
-												depNode.getAssumptionSupportDependents().add(nodeID);
+											if(nodeID != currProp && nodeID >= 1) {
+												depNode.addNodeToAssumptionSupportDependents(nodeID);
 											}
 										}
-										HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>> Inner = new HashMap<>();
-										Inner.put(currAttitude, new Pair<PropositionNodeSet,PropositionNodeSet>(newPropSet1,newPropSet2));
-										PropositionNodeSet bridge = combination.getSecond();
-										bridge.putAll(currSupport.getSecond().getValues());
-										newSupport = new Pair<>(Inner, bridge);
+
+										newSupport.getFirst().put(currAttitude, new Pair<>(newPropSet1,newPropSet2));
 									}
 									else {
 										for(int currProp : currSupport.getFirst().get(currAttitude).getFirst().getProps()) {
 											PropositionNode depNode = (PropositionNode) networkPropositions.get(currProp);
-											if(nodeID != -1) {
-												depNode.getAssumptionSupportDependents().add(nodeID);
+											if(nodeID != currProp && nodeID >= 1) {
+												depNode.addNodeToAssumptionSupportDependents(nodeID);
 											}
 										}
-										HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>> Inner = new HashMap<>();
-										Inner.put(currAttitude, currSupport.getFirst().get(currAttitude));
-										PropositionNodeSet bridge = combination.getSecond();
-										bridge.putAll(bridgeRules.getValues());
-										bridge.putAll(currSupport.getSecond().getValues());
-										newSupport = new Pair<>(Inner, bridge);
+										newSupport.getFirst().put(currAttitude, currSupport.getFirst().get(currAttitude));
 									}
 								}
 							}
@@ -353,28 +535,33 @@ public class Support {
 					}
 				}
 				else {
-					for(int y = 0; y < currSuppAssumptions.size(); y++) {//handling Indirect Cycles
-						Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> curr = currSuppAssumptions.get(y);
-						if(curr.getFirst().containsKey(supportedAttitude) && curr.getFirst().get(supportedAttitude).getFirst().contains(nodeID)) {
-							currSuppAssumptions.get(y).getFirst().remove(supportedAttitude);
+					if(currSuppAssumptions != null) {
+						for (int y = 0; y < currSuppAssumptions.size(); y++) {//handling Indirect Cycles
+							Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> curr = currSuppAssumptions.get(y);
+							if (curr.getFirst().containsKey(supportedAttitude) && curr.getFirst().get(supportedAttitude).getFirst().contains(nodeID)) {
+								currSuppAssumptions.get(y).getFirst().remove(supportedAttitude);
+							}
+							if (curr.getFirst().isEmpty()) {
+								currSuppAssumptions.remove(y);
+								y--;
+							} else {
+								currSuppAssumptions.get(y).getSecond().putAll(bridgeRules.getValues());
+							}
 						}
-						if(curr.getFirst().isEmpty()) {
-							currSuppAssumptions.remove(y);
-							y--;
+						if (!currSuppAssumptions.isEmpty()) {
+							temp = currSuppAssumptions;
 						}
-						else {
-							currSuppAssumptions.get(y).getSecond().putAll(bridgeRules.getValues());
-						}
-					}
-					if(!currSuppAssumptions.isEmpty()) {
-						temp = currSuppAssumptions;
 					}
 				}
 				if(!temp.isEmpty()) {
-					levelstemp.put(level, temp);
+					levelsTemp.put(level, temp);
 				}
 			}
-			result = levelstemp;
+			if(!levelsTemp.isEmpty()) {
+				for(Integer level : levelsTemp.keySet()){
+					result.put(level, levelsTemp.get(level));
+				}
+			}
 		}
 		return result;
 
@@ -387,7 +574,7 @@ public class Support {
 
 		for(int i = 1; i < input.size(); i++) {
 
-			HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>> levelstemp = new HashMap<>();
+			HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>> levelsTemp = new HashMap<>();
 
 			for(Integer level : input.get(i).keySet()) {
 
@@ -395,18 +582,36 @@ public class Support {
 
 				if(result.containsKey(level)) {
 
-					for(Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> curr : input.get(level).get(i)) {
+					for(Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> combination : result.get(level)) {
 
-						for(Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> combination : result.get(level)) {
+						for(Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> curr : input.get(i).get(level)) {
 
-							Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> newSupport = combination;
+
+							Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> newSupport = new Pair<>();
+							HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>> innerAttitudeMap = new HashMap<>();
+							for (Map.Entry<Integer, Pair<PropositionNodeSet,PropositionNodeSet>> innerentry : combination.getFirst().entrySet()) {
+								Integer key = innerentry.getKey();
+
+								Pair<PropositionNodeSet,PropositionNodeSet> value = innerentry.getValue();
+
+								PropositionNodeSet originSet = value.getFirst().clone();
+
+								PropositionNodeSet gradeSet = value.getSecond().clone();
+
+								innerAttitudeMap.put(key, new Pair<>(originSet, gradeSet));
+							}
+							newSupport.setFirst(innerAttitudeMap);
+
+							PropositionNodeSet bridge = combination.getSecond();
+							bridge.putAll(curr.getSecond().getValues());
+							newSupport.setSecond(bridge);
 
 							for(Integer currAttitude : curr.getFirst().keySet()) {
 
 								if(combination.getFirst().containsKey(currAttitude)) {
 
 
-									Pair<PropositionNodeSet,PropositionNodeSet> oldPair = combination.getFirst().get(currAttitude);
+									Pair<PropositionNodeSet,PropositionNodeSet> oldPair = new Pair<>(combination.getFirst().get(currAttitude).getFirst().clone(), combination.getFirst().get(currAttitude).getSecond().clone());
 									Pair<PropositionNodeSet,PropositionNodeSet> currPair = curr.getFirst().get(currAttitude);
 
 									PropositionNodeSet newPropSet1 = oldPair.getFirst();
@@ -414,19 +619,11 @@ public class Support {
 
 									newPropSet1.putAll(currPair.getFirst().getValues());
 									newPropSet2.putAll(currPair.getSecond().getValues());
-									HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>> Inner = new HashMap<>();
-									Inner.put(currAttitude, new Pair<PropositionNodeSet,PropositionNodeSet>(newPropSet1,newPropSet2));
-									PropositionNodeSet bridge = combination.getSecond();
-									bridge.putAll(curr.getSecond().getValues());
-									newSupport = new Pair<>(Inner, bridge);
 
+									newSupport.getFirst().put(currAttitude, new Pair<>(newPropSet1,newPropSet2));
 								}
 								else {
-									HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>> Inner = new HashMap<>();
-									Inner.put(currAttitude, curr.getFirst().get(currAttitude));
-									PropositionNodeSet bridge = combination.getSecond();
-									bridge.putAll(curr.getSecond().getValues());
-									newSupport = new Pair<>(Inner, bridge);
+									newSupport.getFirst().put(currAttitude, curr.getFirst().get(currAttitude));
 								}
 							}
 							temp.add(newSupport);
@@ -436,126 +633,231 @@ public class Support {
 				else {
 					temp = input.get(level).get(i);
 				}
-				if(!temp.isEmpty()) {
-					levelstemp.put(level, temp);
-				}
+				levelsTemp.put(level, temp);
 			}
-			result = levelstemp;
+			for(Integer level : levelsTemp.keySet()){
+				result.put(level, levelsTemp.get(level));
+			}
 		}
 		return result;
 	}
 
 	/**
-	 * Union two whole supports with each other
+	 * Unions the given support with the current one
 	 * @param support support to be unionized with
-	 * @throws DirectCycleException
 	 */
-	public void union(Support support) throws DirectCycleException {
-		for(Integer level : support.getJustificationSupport().keySet()){
-			for(Integer attitude : support.getJustificationSupport().get(level).keySet()) {
-				this.addJustificatoinSupportForAttitude(attitude, level, support.getJustificationSupport().get(level).get(attitude));
-				if(this.justificationSupport.containsKey(level)) {
-					if(this.justificationSupport.get(level).containsKey(attitude)){
-						this.justificationSupport.get(level).get(attitude).addAll(support.getJustificationSupport().get(level).get(attitude));
+	public void union(Support support) {
+		Support clonedSupport = support.clone();
+		for(Integer level : clonedSupport.justificationBasedSupport.keySet()){
+			//Handle direct cycles
+			if(hasCycle(clonedSupport.justificationBasedSupport.get(level))){
+				return;
+			}
+			for(Integer attitude : clonedSupport.justificationBasedSupport.get(level).keySet()) {
+				if(this.justificationBasedSupport.containsKey(level)) {
+					if(this.justificationBasedSupport.get(level).containsKey(attitude)){
+						for(Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> supp : clonedSupport.justificationBasedSupport.get(level).get(attitude)) {
+							if(!this.justificationBasedSupport.get(level).get(attitude).contains(supp)) {
+								this.justificationBasedSupport.get(level).get(attitude).add(supp);
+							}
+						}
 					}
-					else {
-						this.justificationSupport.get(level).put(attitude, support.getJustificationSupport().get(level).get(attitude));
+					else if(clonedSupport.justificationBasedSupport.get(level).get(attitude) != null){
+						this.justificationBasedSupport.get(level).put(attitude, clonedSupport.justificationBasedSupport.get(level).get(attitude));
 					}
 				}
-				else {
-					this.justificationSupport.put(level, support.getJustificationSupport().get(level));
+				else if(clonedSupport.justificationBasedSupport.get(level) != null){
+					this.justificationBasedSupport.put(level, clonedSupport.justificationBasedSupport.get(level));
 				}
 			}
 		}
 
-		for(Integer level : support.getJustificationSupport().keySet()){
-			for(Integer attitude : support.getJustificationSupport().get(level).keySet()) {
-				if(this.assumptionSupport.containsKey(level)) {
-					if(this.assumptionSupport.get(level).containsKey(attitude)){
-						this.assumptionSupport.get(level).get(attitude).addAll(support.getAssumptionSupport().get(level).get(attitude));
+		//handling Indirect Cycles
+		ArrayList<Integer> levels = new ArrayList<>(clonedSupport.assumptionBasedSupport.keySet());
+		for(Integer level : levels) {
+			ArrayList<Integer> attitudes = new ArrayList<>(clonedSupport.assumptionBasedSupport.get(level).keySet());
+			for(Integer supportedAttitude : attitudes) {
+				for (int i = 0; i < clonedSupport.assumptionBasedSupport.get(level).get(supportedAttitude).size(); i++) {
+					Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> curr = clonedSupport.assumptionBasedSupport.get(level).get(supportedAttitude).get(i);
+					if (curr.getFirst().containsKey(supportedAttitude) && curr.getFirst().get(supportedAttitude).getFirst().contains(nodeID)) {
+						clonedSupport.assumptionBasedSupport.get(level).get(supportedAttitude).get(i).getFirst().remove(supportedAttitude);
 					}
-					else {
-						this.assumptionSupport.get(level).put(attitude, support.getAssumptionSupport().get(level).get(attitude));
+					if (clonedSupport.assumptionBasedSupport.get(level).get(supportedAttitude).get(i).getFirst().isEmpty()) {
+						clonedSupport.assumptionBasedSupport.get(level).get(supportedAttitude).remove(i);
+						i--;
 					}
 				}
-				else {
-					this.assumptionSupport.put(level, support.getAssumptionSupport().get(level));
+				if(clonedSupport.assumptionBasedSupport.get(level).get(supportedAttitude).isEmpty()){
+					clonedSupport.assumptionBasedSupport.remove(supportedAttitude);
+				}
+			}
+			if(clonedSupport.assumptionBasedSupport.get(level).isEmpty()) {
+				clonedSupport.assumptionBasedSupport.remove(level);
+			}
+		}
+
+		for(Integer level : clonedSupport.assumptionBasedSupport.keySet()){
+			for(Integer attitude : clonedSupport.assumptionBasedSupport.get(level).keySet()) {
+				if(this.assumptionBasedSupport.containsKey(level)) {
+					if(this.assumptionBasedSupport.get(level).containsKey(attitude)){
+						for(Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> supp : clonedSupport.assumptionBasedSupport.get(level).get(attitude)) {
+							if(!this.assumptionBasedSupport.get(level).get(attitude).contains(supp)) {
+								this.assumptionBasedSupport.get(level).get(attitude).add(supp);
+							}
+						}
+					}
+					else if(clonedSupport.assumptionBasedSupport.get(level).get(attitude) != null){
+						this.assumptionBasedSupport.get(level).put(attitude, clonedSupport.assumptionBasedSupport.get(level).get(attitude));
+					}
+				}
+				else if(clonedSupport.assumptionBasedSupport.get(level) !=null){
+					this.assumptionBasedSupport.put(level, clonedSupport.assumptionBasedSupport.get(level));
 				}
 			}
 		}
+	}
+
+	/**
+	 * Combines the given support into the current one
+	 * by getting the cross product or their justification supports
+	 * and then getting the new assumption support
+	 * @param support support to be combined with
+	 * @param attitude attitude to combine in
+	 */
+	public void combine(int attitude, Support support){
+		Support clonedSupport = support.clone();
+		HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>>> newJustificationSupport = this.getJustificationBasedSupport();
+
+		for(Integer level : clonedSupport.justificationBasedSupport.keySet()){
+			if(newJustificationSupport.containsKey(level)) {
+				if(newJustificationSupport.get(level).containsKey(attitude)){
+					ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>> tempList = new ArrayList<>();
+					for(Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> currSupport : clonedSupport.justificationBasedSupport.get(level).get(attitude)){
+						for(Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> thisSupport : newJustificationSupport.get(level).get(attitude)){
+							Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> tempSupport = new Pair<>();
+							HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>> innerAttitudeMap = new HashMap<>();
+							for (Map.Entry<Integer, Pair<PropositionNodeSet,PropositionNodeSet>> innerentry : currSupport.getFirst().entrySet()) {
+								Integer key = innerentry.getKey();
+
+								Pair<PropositionNodeSet,PropositionNodeSet> value = innerentry.getValue();
+
+								PropositionNodeSet originSet = value.getFirst().clone();
+
+								PropositionNodeSet gradeSet = value.getSecond().clone();
+
+								innerAttitudeMap.put(key, new Pair<>(originSet, gradeSet));
+							}
+							tempSupport.setFirst(innerAttitudeMap);
+
+							PropositionNodeSet bridge = currSupport.getSecond();
+							bridge.putAll(thisSupport.getSecond().getValues());
+							tempSupport.setSecond(bridge);
+
+							for(Integer innerAttitude : thisSupport.getFirst().keySet()){
+								if(tempSupport.getFirst().containsKey(innerAttitude)){
+									tempSupport.getFirst().get(innerAttitude).getFirst().putAll(thisSupport.getFirst().get(innerAttitude).getFirst().getValues());
+									tempSupport.getFirst().get(innerAttitude).getSecond().putAll(thisSupport.getFirst().get(innerAttitude).getSecond().getValues());
+								}
+								else {
+									tempSupport.getFirst().put(innerAttitude, thisSupport.getFirst().get(innerAttitude));
+								}
+							}
+							tempList.add(tempSupport);
+						}
+					}
+					for(Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> supp : tempList) {
+						if(!newJustificationSupport.get(level).get(attitude).contains(supp)) {
+							newJustificationSupport.get(level).get(attitude).add(supp);
+						}
+					}
+				}
+				else if(clonedSupport.justificationBasedSupport.get(level).get(attitude) != null){
+					newJustificationSupport.get(level).put(attitude, clonedSupport.justificationBasedSupport.get(level).get(attitude));
+				}
+			}
+			else if(clonedSupport.justificationBasedSupport.get(level) != null){
+				newJustificationSupport.put(level, clonedSupport.justificationBasedSupport.get(level));
+			}
+		}
+
+		setJustificationBasedSupport(newJustificationSupport);
 	}
 
 	/**
 	 * Adds a Proposition Node to this support
 	 * @param attitude attitude to add the node in
 	 * @param propositionNode Proposition Node to be added
-	 * @throws DirectCycleException
 	 */
-	public void addNode(int attitude, PropositionNode propositionNode) throws DirectCycleException {
+	public void addNode(int attitude, PropositionNode propositionNode) {
 
-		if(this.nodeID == propositionNode.getId()) {
-			throw new DirectCycleException("Direct Cycle found");
-		}
-
-		PropositionNodeSet prop = new PropositionNodeSet(propositionNode);
-		Pair<PropositionNodeSet, PropositionNodeSet> innerPair = new Pair<>(prop, new PropositionNodeSet());
+		Pair<PropositionNodeSet, PropositionNodeSet> innerPair = new Pair<>(new PropositionNodeSet(propositionNode), new PropositionNodeSet());
 		HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> hash = new HashMap<>();
 		hash.put(attitude, innerPair);
 		Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> outerPair = new Pair<>(hash, new PropositionNodeSet());
 		ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> list = new ArrayList<>();
 		list.add(outerPair);
-		HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>>> outerHash = new HashMap<>();
-		outerHash.put(attitude, list);
 
-		if(this.justificationSupport.containsKey(0)) {
-			if(this.justificationSupport.get(0).containsKey(attitude)){
-				this.justificationSupport.get(0).get(attitude).add(outerPair);
-			}
-			else {
-				this.justificationSupport.get(0).put(attitude, list);
-			}
-		}
-		else {
-			this.justificationSupport.put(0, outerHash);
-		}
+		addJustificationSupportForAttitude(attitude, Network.currentLevel, list);
 
-		for(Integer nodeLevel : propositionNode.getSupport().getAssumptionSupport().keySet()) {
-			if(this.assumptionSupport.containsKey(nodeLevel)) {
-				if(this.assumptionSupport.get(nodeLevel).containsKey(attitude)){
-					this.assumptionSupport.get(nodeLevel).get(attitude).addAll(propositionNode.getSupport().getAssumptionSupport().get(nodeLevel).get(attitude));
-				}
-				else {
-					this.assumptionSupport.get(nodeLevel).put(attitude, propositionNode.getSupport().getAssumptionSupport().get(nodeLevel).get(attitude));
-				}
-			}
-			else {
-				this.assumptionSupport.put(nodeLevel, propositionNode.getSupport().getAssumptionSupport().get(nodeLevel));
-			}
-		}
-		propositionNode.getJustificationSupportDependents().add(this.nodeID);
 	}
+
+
+	public void combineNode(int attitude, PropositionNode propositionNode){
+
+		if(propositionNode.getId() == nodeID){
+			return;
+		}
+		int level = Network.currentLevel;
+		ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>> newJustificationSupport = this.getJustificationBasedSupport().get(level).get(attitude);
+
+		for(Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> currSupp : newJustificationSupport){
+			currSupp.getFirst().get(attitude).getFirst().add(propositionNode.getId());
+
+		}
+
+		this.justificationBasedSupport.remove(level);
+		addJustificationSupportForAttitude(attitude, level, newJustificationSupport);
+	}
+
 
 	/**
 	 * Make this support a hypothesis in the specified attitude
 	 * @param attitudeID attitude to this support a hypothesis in
 	 */
 	public void setHyp(int attitudeID) {
-		if(isHyp.contains(attitudeID)){
-			return;
+		int level = Network.currentLevel;
+		if(isHyp.containsKey(level)) {
+			if (isHyp.get(level).contains(attitudeID)) {
+				return;
+			}
 		}
 		//Add itself to its own assumptionSupport
-		PropositionNodeSet hypSet = new PropositionNodeSet(this.nodeID);
-		Pair<PropositionNodeSet,PropositionNodeSet> hypPair = new Pair<>(hypSet, new PropositionNodeSet());
 		HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>> Hyp = new HashMap<>();
-		Hyp.put(attitudeID, hypPair);
-		Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> pair = new Pair<>(Hyp, new PropositionNodeSet());
-		if (!assumptionSupport.get(0).containsKey(attitudeID)) {
-			assumptionSupport.get(0).put(attitudeID, new ArrayList<>());
+		Hyp.put(attitudeID, new Pair<>(new PropositionNodeSet(this.nodeID), new PropositionNodeSet()));
+		ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>> list = new ArrayList<>();
+		list.add(new Pair<>(Hyp, new PropositionNodeSet()));
+
+		if(assumptionBasedSupport.containsKey(level)) {
+			if (!assumptionBasedSupport.get(level).containsKey(attitudeID)) {
+				assumptionBasedSupport.get(level).put(attitudeID, list);
+			}
+			else if(!this.assumptionBasedSupport.get(level).get(attitudeID).containsAll(list)) {
+				this.assumptionBasedSupport.get(level).get(attitudeID).addAll(list);
+			}
 		}
-		this.assumptionSupport.get(0).get(attitudeID).add(pair);
+		else{
+			HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>> outerHash = new HashMap<>();
+			outerHash.put(attitudeID, list);
+			this.assumptionBasedSupport.put(level, outerHash);
+		}
+
 		//Add the attitude to the isHyp
-		isHyp.add(attitudeID);
-		isTreeCalculatetd.remove(attitudeID);
+		if(isHyp.containsKey(level)){
+			isHyp.get(level).add(attitudeID);
+		}
+		else {
+			isHyp.put(level, new HashSet<>(attitudeID));
+		}
 	}
 
 	/**
@@ -564,36 +866,36 @@ public class Support {
 	 */
 	public boolean hasChildren(int attitudeID) {
 
-		if(!justificationSupport.containsKey(attitudeID) && ! assumptionSupport.containsKey(attitudeID)) {
+		if(!justificationBasedSupport.containsKey(attitudeID) && ! assumptionBasedSupport.containsKey(attitudeID)) {
 			return false;
 		}
 
 		boolean empty = true;
 
-		for(Integer level : justificationSupport.keySet()) {
-			for(Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> curr : justificationSupport.get(level).get(attitudeID)) {
+		for(Integer level : justificationBasedSupport.keySet()) {
+			for(Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> curr : justificationBasedSupport.get(level).get(attitudeID)) {
 				for(Integer currKey : curr.getFirst().keySet()) {
-					if(!curr.getFirst().get(currKey).getFirst().equals(null)) {
+					if(!curr.getFirst().get(currKey).getFirst().isEmpty()) {
 						empty = false;
 						break;
 					}
 				}
-				if(empty == false) {
+				if(!empty) {
 					break;
 				}
 				break;
 			}
 		}
 
-		for(Integer level : assumptionSupport.keySet()) {
-			for(Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> curr : assumptionSupport.get(level).get(attitudeID)) {
+		for(Integer level : assumptionBasedSupport.keySet()) {
+			for(Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> curr : assumptionBasedSupport.get(level).get(attitudeID)) {
 				for(Integer currKey : curr.getFirst().keySet()) {
-					if(!curr.getFirst().get(currKey).getFirst().equals(null)) {
+					if(!curr.getFirst().get(currKey).getFirst().isEmpty()) {
 						empty = false;
 						break;
 					}
 				}
-				if(empty == false) {
+				if(!empty) {
 					break;
 				}
 				break;
@@ -609,8 +911,33 @@ public class Support {
 	 * @param id node to be removed
 	 */
 	public void removeNodeFromJustifications (int id) {
-		for(Integer level : justificationSupport.keySet()) {
-			removeNodeFromSupportHelper(id, justificationSupport.get(level));
+		ArrayList<Integer> levels = new ArrayList<>(justificationBasedSupport.keySet());
+		for(Integer level : levels) {
+			removeNodeFromSupportHelper(id, justificationBasedSupport.get(level));
+			if(justificationBasedSupport.get(level).isEmpty()){
+				justificationBasedSupport.remove(level);
+			}
+			else{
+				ArrayList<Integer> attitudes = new ArrayList<>(justificationBasedSupport.get(level).keySet());
+				for(Integer attitude : attitudes) {
+					ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>> tempSupports = new ArrayList<>();
+					for(int i = 0; i < justificationBasedSupport.get(level).get(attitude).size(); i++){
+						if(tempSupports.contains(justificationBasedSupport.get(level).get(attitude).get(i))){
+							justificationBasedSupport.get(level).get(attitude).remove(i);
+							i--;
+						}
+						else{
+							tempSupports.add(justificationBasedSupport.get(level).get(attitude).get(i));
+						}
+					}
+					if(justificationBasedSupport.get(level).get(attitude).isEmpty()){
+						justificationBasedSupport.get(level).remove(attitude);
+					}
+				}
+				if(justificationBasedSupport.get(level).isEmpty()){
+					justificationBasedSupport.remove(level);
+				}
+			}
 		}
 	}
 
@@ -620,8 +947,33 @@ public class Support {
 	 * @param id node to be removed
 	 */
 	public void removeNodeFromAssumptions (int id) {
-		for(Integer level : assumptionSupport.keySet()) {
-			removeNodeFromSupportHelper(id, assumptionSupport.get(level));
+		ArrayList<Integer> levels = new ArrayList<>(assumptionBasedSupport.keySet());
+		for(Integer level : levels) {
+			removeNodeFromSupportHelper(id, assumptionBasedSupport.get(level));
+			if(assumptionBasedSupport.get(level).isEmpty()){
+				assumptionBasedSupport.remove(level);
+			}
+			else{
+				ArrayList<Integer> attitudes = new ArrayList<>(assumptionBasedSupport.get(level).keySet());
+				for(Integer attitude : attitudes) {
+					ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>> tempSupports = new ArrayList<>();
+					for(int i = 0; i < assumptionBasedSupport.get(level).get(attitude).size(); i++){
+						if(tempSupports.contains(assumptionBasedSupport.get(level).get(attitude).get(i))){
+							assumptionBasedSupport.get(level).get(attitude).remove(i);
+							i--;
+						}
+						else{
+							tempSupports.add(assumptionBasedSupport.get(level).get(attitude).get(i));
+						}
+					}
+					if(assumptionBasedSupport.get(level).get(attitude).isEmpty()){
+						assumptionBasedSupport.get(level).remove(attitude);
+					}
+				}
+				if(assumptionBasedSupport.get(level).isEmpty()){
+					assumptionBasedSupport.remove(level);
+				}
+			}
 		}
 	}
 
@@ -636,7 +988,6 @@ public class Support {
 				boolean flag = true;
 				if (support.getSecond().contains(id)) {
 					innerIterator.remove(); // Safely remove the support from the list
-					isTreeCalculatetd.remove(supportedAttitude);
 					flag = false;
 
 				}
@@ -645,13 +996,11 @@ public class Support {
 						PropositionNodeSet supportProps1 = support.getFirst().get(supportingAttitude).getFirst();
 						PropositionNodeSet supportProps2 = support.getFirst().get(supportingAttitude).getSecond();
 						if (supportProps1.contains(id)) {
-							innerIterator.remove(); // Safely remove the support from the list
-							isTreeCalculatetd.remove(supportedAttitude);
+							innerIterator.remove();// Safely remove the support from the list
 							break;
 						}
 						if (supportProps2.contains(id)) {
 							innerIterator.remove(); // Safely remove the support from the list
-							isTreeCalculatetd.remove(supportedAttitude);
 							break;
 						}
 					}
@@ -671,8 +1020,8 @@ public class Support {
 	 * @param id node to be forgotten
 	 */
 	public void ForgetNodeFromJustifications (int id) {
-		for(Integer level : justificationSupport.keySet()) {
-			ForgetNodeFromSupportHelper(id, justificationSupport.get(level),1);
+		for(Integer level : justificationBasedSupport.keySet()) {
+			ForgetNodeFromSupportHelper(id, justificationBasedSupport.get(level),1);
 		}
 	}
 
@@ -683,8 +1032,8 @@ public class Support {
 	 * @param id node to be forgotten
 	 */
 	public void ForgetNodeFromAssumptions (int id) {
-		for(Integer level : assumptionSupport.keySet()) {
-			ForgetNodeFromSupportHelper(id, assumptionSupport.get(level),2);
+		for(Integer level : assumptionBasedSupport.keySet()) {
+			ForgetNodeFromSupportHelper(id, assumptionBasedSupport.get(level),2);
 		}
 	}
 
@@ -701,7 +1050,6 @@ public class Support {
 				boolean flag = true;
 				if (support.getSecond().contains(id)) {
 					innerIterator.remove(); // Safely remove the support from the list
-					isTreeCalculatetd.remove(supportedAttitude);
 					flag = false;
 
 				}
@@ -711,12 +1059,10 @@ public class Support {
 						PropositionNodeSet supportProps2 = support.getFirst().get(supportingAttitude).getSecond();
 						if (supportProps1.contains(id)) {
 							innerIterator.remove(); // Safely remove the support from the list
-							isTreeCalculatetd.remove(supportedAttitude);
 							break;
 						}
 						if (supportProps2.contains(id)) {
 							innerIterator.remove(); // Safely remove the support from the list
-							isTreeCalculatetd.remove(supportedAttitude);
 							break;
 						}
 					}
@@ -728,8 +1074,8 @@ public class Support {
 				temp.add(supportedAttitude);
 			}
 		}
-		for(Integer supps : temp){
-			setHyp(supps);
+		for(Integer supports : temp){
+			setHyp(supports);
 		}
 	}
 
@@ -738,13 +1084,14 @@ public class Support {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Node").append(nodeID).append(": ").append("\n");
-		for(Integer level : justificationSupport.keySet()) {
-			sb.append("Level").append(level).append(": ").append("\n");
-			sb.append(mapToString(" JustificationSupport", justificationSupport.get(level)));
+		sb.append(" Justification Based Support: ").append("\n");
+		for(Integer level : justificationBasedSupport.keySet()) {
+//			sb.append("Level").append(level).append(": ").append("\n");
+			sb.append(mapToString("  Level" + level + ": ", justificationBasedSupport.get(level)));
 		}
-		for(Integer level : justificationSupport.keySet()) {
-			sb.append("Level").append(level).append(": ").append("\n");
-			sb.append(mapToString(" AssumptionSupport", assumptionSupport.get(level)));
+		sb.append(" Assumption Based Support: ").append("\n");
+		for(Integer level : assumptionBasedSupport.keySet()) {
+			sb.append(mapToString("  Level" + level + ": ", assumptionBasedSupport.get(level)));
 		}
 		return sb.toString();
 	}
@@ -752,7 +1099,7 @@ public class Support {
 
 	private String mapToString(String title, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>> map) {
 		StringBuilder sb = new StringBuilder();
-		sb.append(title).append(":\n");
+		sb.append(title).append("\n");
 
 		// Iterate through the outer HashMap
 		for (Map.Entry<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet>>> entry : map.entrySet()) {
@@ -779,7 +1126,7 @@ public class Support {
 
 					sb.append("       Graded PropositionNodeSet: ").append(GradedNodeSet.toString()).append("\n");
 				}
-				sb.append("               Bridge Rules: ").append(innerMap.getSecond().toString()).append("\n");
+				sb.append("       Bridge Rules: ").append(innerMap.getSecond().toString()).append("\n");
 			}
 			sb.append("\n"); // Extra newline for better separation
 		}
@@ -787,25 +1134,25 @@ public class Support {
 		return sb.toString();
 	}
 
-	public Support clone(){
-		Support cloned = new Support(nodeID);
-        try {
-            cloned.union(this);
-        } catch (DirectCycleException e) {
-            System.out.println("Couldn't clone");
-        }
-		return cloned;
+	@Override
+    public Support clone(){
+		Support clone = new Support(nodeID);
+		clone.justificationBasedSupport = this.getJustificationBasedSupport();
+		clone.assumptionBasedSupport = this.getAssumptionBasedSupport();
+		clone.isHyp = this.getIsHyp();
+
+		return clone;
 	}
-	
+
 	/*
 	public void calculateSupportsTree() {
 
 		for(Integer level : justificationSupport.keySet()) {
-			if(!isTreeCalculatetd.containsKey(level)) {
-				isTreeCalculatetd.put(level, new HashSet<Integer>());
+			if(!isTreeCalculated.containsKey(level)) {
+				isTreeCalculated.put(level, new HashSet<Integer>());
 			}
 			for(Integer attitude : justificationSupport.get(level).keySet()) {
-				if(!isTreeCalculatetd.get(level).contains(attitude)) {
+				if(!isTreeCalculated.get(level).contains(attitude)) {
 					if(!supportsTree.containsKey(level)) {
 						supportsTree.put(level, new HashMap<Integer, SupportTree>());
 					}
@@ -831,7 +1178,7 @@ public class Support {
 				for(int id : currSupports1.getProps()) {
 					PropositionNode currNode = (PropositionNode)networkPropositions.get(id);
 					//If the tree is calculated for supporting attitude add it to the supportTrees
-					if(currNode.getSupport().isTreeCalculatetd.contains(supportingAttitude)) {
+					if(currNode.getSupport().isTreeCalculated.contains(supportingAttitude)) {
 						supportTrees.getFirst().add(currNode.getSupport().getSupportsTree().get(supportingAttitude));
 					}
 					else {
@@ -846,7 +1193,7 @@ public class Support {
 //				for(int id : currSupports2.getProps()) {
 //					PropositionNode currNode = (PropositionNode)networkPropositions.get(id);
 //					//If the tree is calculated for supporting attitude add it to the supportTrees
-//					if(currNode.getSupport().isTreeCalculatetd.contains(supportingAttitude)) {
+//					if(currNode.getSupport().isTreeCalculated.contains(supportingAttitude)) {
 //						supportTrees.getSecond().add(currNode.getSupport().getSupportsTree().get(supportingAttitude));
 //					}
 //					else {
@@ -860,7 +1207,7 @@ public class Support {
 			}
 			supportTree.getChildren().add(attitudesSupportTrees);
 		}
-		isTreeCalculatetd.add(Attitude);
+		isTreeCalculated.add(Attitude);
 		return supportTree;
 	}
 	*/

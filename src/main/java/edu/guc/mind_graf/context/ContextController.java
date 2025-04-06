@@ -12,51 +12,51 @@ import java.util.function.IntBinaryOperator;
 public class ContextController {
     private static Context currContext;
     private static ContextSet contextSet;
-    private static Set<String,Integer> attitudes;
-    private static Network network;
-    private static boolean uvbrEnabled;
+    private static Set<String, Integer> attitudes;
     private static boolean automaticHandlingEnabled;
-    private static int mergeFunctionNumber;    
+    private static boolean cacheEnabled;
+    private static int mergeFunctionNumber;
     private static ArrayList<ArrayList<Integer>> consistentAttitudes;
 
-    public static void setUp(Set<String,Integer> attitudeNames, ArrayList<ArrayList<Integer>> consistentAttitudes, boolean uvbrEnabled){
-        ContextController.network = new Network();
+    public static void setup(Set<String, Integer> attitudeNames, ArrayList<ArrayList<Integer>> consistentAttitudes, boolean automaticHandlingEnabled, boolean cacheEnabled, int mergeFunctionNumber) {
         ContextController.attitudes = attitudeNames;
-        ContextController.uvbrEnabled = uvbrEnabled;
         ContextController.consistentAttitudes = consistentAttitudes;
-        ContextController.automaticHandlingEnabled = false;
-        ContextController.mergeFunctionNumber = 0;
-        //TODO: wael update the setup method
+        ContextController.automaticHandlingEnabled = automaticHandlingEnabled;
+        ContextController.mergeFunctionNumber = mergeFunctionNumber;
         contextSet = new ContextSet();
-
-    }
-    public static void setCurrContext(String currContext) {
-        Context c = contextSet.get(currContext);
-        if(c == null){
-            throw new RuntimeException("no such context exists");
-        }
-        ContextController.currContext = c;
-    }
-    
-    public static int getAttitudeNumber(String attitudeName) {
-        return attitudes.get(attitudeName);
     }
 
     public static String getAttitudeName(int attitudeNumber) {
-        for(Map.Entry<String,Integer> entry: attitudes.getSet().entrySet()){
-            if(entry.getValue() == attitudeNumber){
+        for (Map.Entry<String, Integer> entry : attitudes.getSet().entrySet()) {
+            if (entry.getValue() == attitudeNumber) {
                 return entry.getKey();
             }
         }
         return null;
     }
 
+    public static Set<String, Integer> getAttitudes() {
+        return attitudes;
+    }
+
+    public static int getAttitudeNumber(String attitudeName) {
+        return attitudes.get(attitudeName);
+    }
+
     public static Context getContext(String contextName) {
         Context c = contextSet.get(contextName);
-        if(c == null){
+        if (c == null) {
             throw new RuntimeException("no such context exists");
         }
         return c;
+    }
+
+    public static void setCurrContext(String currContextName) {
+        Context c = contextSet.get(currContextName);
+        if (c == null) {
+            throw new RuntimeException("no such context exists");
+        }
+        ContextController.currContext = c;
     }
 
     public static String getCurrContextName() {
@@ -67,54 +67,57 @@ public class ContextController {
         return contextSet;
     }
 
-    public static ArrayList<ArrayList<Integer>> getConsistentAttitudes() {
-        return consistentAttitudes;
-    }
-
-    public static void createNewContext(String name){
-        if(contextSet.contains(name)){
+    public static void createNewContext(String name) {
+        if (contextSet.contains(name)) {
             throw new RuntimeException("context Already Exists");
         }
         Context c = new Context(name, ContextController.attitudes);
-        contextSet.add(name,c);
+        contextSet.add(name, c);
     }
 
-    public static Set<String,Integer> getAttitudes() {
-        return attitudes;
+
+    //TODO: wael change these to use nodeId
+    public static void addHypothesisToContext(String contextName, int level, int attitudeId, PropositionNode node) {
+        Context c = ContextController.getContext(contextName);
+        c.addHypothesisToContext(level, attitudeId, node);
+        //TODO: wael uncomment this it's removed to test
+//        Revision.checkContradiction(c,attitudeId,node);
+    }
+
+    public static void addHypothesisToContext(int level, int attitudeNumber, PropositionNode node) {
+        ContextController.addHypothesisToContext(ContextController.currContext.getName(), level, attitudeNumber, node);
+    }
+
+    public static void removeHypothesisFromContext(String contextName, int level, int attitudeId, int nodeId) {
+        Context c = ContextController.getContext(contextName);
+        PropositionNode n = (PropositionNode) Network.getNodeById(nodeId);
+        c.removeHypothesisFromContext(level, attitudeId, n);
+    }
+
+    public static void removeHypothesisFromContext(int level, int attitudeId, int nodeId) {
+        ContextController.removeHypothesisFromContext(ContextController.getCurrContextName(), level, attitudeId, nodeId);
+    }
+
+
+    public static ArrayList<ArrayList<Integer>> getConsistentAttitudes() {
+        return consistentAttitudes;
     }
 
     public static boolean automaticHandlingEnabled() {
         return automaticHandlingEnabled;
     }
 
-    public static void addHypothesisToContext(String contextName, int attitudeNumber, PropositionNode node) {
-        Context c = ContextController.getContext(contextName);
-        c.addHypothesisToContext(attitudeNumber, node);
-        //TODO: wael uncomment this it's removed to test
-//        Revision.checkContradiction(c,attitudeNumber,node);
-    }
-
-    public static void addHypothesisToContext(int attitudeNumber, PropositionNode node) {
-       ContextController.addHypothesisToContext(ContextController.currContext.getName(),attitudeNumber,node);
-    }
-
-    public static void removeFromContext(String contextName, int attitudeNumber, int nodeId) {
-        //TODO: level
-//        Context c = ContextController.getContext(contextName);
-//        PropositionNode n = (PropositionNode) Network.getNodeById(nodeId);
-//        c.removeHypothesisFromContext(attitudeNumber, n);
-    }
-
-    public static int max(int x, int y){
-        return Math.max(x,y);
-    }
-
-    public static IntBinaryOperator mergeGrades() {
+    public static IntBinaryOperator getMergeFunction() {
         return switch (ContextController.mergeFunctionNumber) {
             case 2 -> Math::min;
             case 3 -> (a, b) -> (a + b) / 2;
             default -> Math::max;
         };
+    }
+
+
+    public static boolean isCacheEnabled() {
+        return cacheEnabled;
     }
 
 }

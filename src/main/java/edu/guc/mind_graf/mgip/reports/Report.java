@@ -1,10 +1,18 @@
 package edu.guc.mind_graf.mgip.reports;
 
+import edu.guc.mind_graf.context.Context;
+import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.mgip.InferenceType;
 import edu.guc.mind_graf.mgip.requests.ChannelType;
 import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.nodes.Node;
+import edu.guc.mind_graf.nodes.PropositionNode;
+import edu.guc.mind_graf.set.PropositionNodeSet;
+import edu.guc.mind_graf.support.Pair;
 import edu.guc.mind_graf.support.Support;
+
+import java.util.HashMap;
 
 public class Report {
     private Substitutions substitutions;
@@ -35,7 +43,7 @@ public class Report {
         Node requesterNode = this.getRequesterNode();
         String report = "Context " + reportContextName + " and Attitude " + reportAttitudeId + " and substitutions "
                 + subs.toString() +
-                " to " + requesterNode.getName();
+                " to " + ((requesterNode!=null)?requesterNode.getName():"null");
         return report;
     }
 
@@ -46,7 +54,7 @@ public class Report {
      * @param //reportContextName
      * @param //reportAttitudeID
      */
-    public boolean anySupportSupportedInAttitudeContext(String ChnlContextName, int ChnlAttitudeID) {
+    public boolean anySupportSupportedInAttitudeContext(String chnlContextName, int chnlAttitudeID) {
         // int[] supportIds = support.getProps();
         // int currentPropNodeId;
         // for (int index = 0; index < supportIds.length; index++) {
@@ -57,8 +65,39 @@ public class Report {
         // return false;
 
         // }
-        return true;
+//        System.out.println("Checking if the report " + this.stringifyReport() + " is supported in the attitude " + chnlAttitudeID + " in the context " + chnlContextName);
+//        System.out.println(support);
+//
+//        Context chnlContext = ContextController.getContext(chnlContextName);
+//        int level = Network.currentLevel;
+//
+//        boolean supported = false;
+//
+//        if(!this.support.getAssumptionSupport().containsKey(level)){
+//            return false;
+//        }
+//
+//        if(!this.support.getAssumptionSupport().get(level).containsKey(chnlAttitudeID)){
+//            return false;
+//        }
+//
+//        for(Pair<HashMap<Integer, Pair<PropositionNodeSet,PropositionNodeSet>>,PropositionNodeSet> currSupport : this.support.getAssumptionSupport().get(level).get(chnlAttitudeID)) {
+//            for(Integer key : currSupport.getFirst().keySet()) {
+//                if(currSupport.getFirst().get(key).getFirst().isSubset(chnlContext.getAttitudeProps(level, key).getFirst()) && currSupport.getFirst().get(key).getSecond().isSubset(chnlContext.getAttitudeProps(level, key).getSecond()) && currSupport.getSecond().isSubset(chnlContext.getAttitudeProps(level, key).getFirst())) {
+//                    supported = true;
+//                } else {
+//                    supported = false;
+//                    break;
+//                }
+//            }
+//            if (supported) {
+//                return true;
+//            }
+//        }
+//
+//        return false;
 
+        return true;
     }
 
     public Substitutions getSubstitutions() {
@@ -163,7 +202,9 @@ public class Report {
     }
 
     public Report clone() {
-        return new Report(this.substitutions, this.support, this.attitude, this.sign, this.inferenceType, this.requesterNode, this.reporterNode);
+        Report res =  new Report(this.substitutions, this.support, this.attitude, this.sign, this.inferenceType, this.requesterNode, this.reporterNode);
+        res.setContextName(this.contextName);
+        return res;
     }
 
 }
