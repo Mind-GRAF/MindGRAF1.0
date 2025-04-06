@@ -1,0 +1,426 @@
+
+// stringset test
+
+public static void main(String[] args) {
+    Channel matchChannel1 = new MatchChannel(null, null, "reality", 2, 0, null);
+    Channel channel2 = new AntecedentToRuleChannel(null, null, "fiction", 2, null);
+    Channel channel3Channel = new RuleToConsequentChannel(null, null, "myth", 3, null);
+    Channel matchChannel2 = new MatchChannel(null, null, "dcbjdsv", 2, 1, null);
+    Channel matchChannel3 = new MatchChannel(null, null, "dcbjdsv", 3, 1, null);
+    Channel channelAnt = new AntecedentToRuleChannel(null, null, "bfdbfdb", 2, null);
+    Channel matchChannel4 = new MatchChannel(null, null, "hfghgfh", 3, 1, null);
+    Channel ruletocons = new RuleToConsequentChannel(null, null, "mythology", 3, null);
+    Channel fdegfdg = new RuleToConsequentChannel(null, null, "fdgdfgdfgdf", 5, null);
+
+    String match1 = matchChannel1.stringifyChannelID();
+    String ant = channel2.stringifyChannelID();
+
+    String rule = channel3Channel.stringifyChannelID();
+
+    String match2 = matchChannel2.stringifyChannelID();
+    String ruleToCons = matchChannel3.stringifyChannelID();
+    String match3 = channelAnt.stringifyChannelID();
+    String ant2 = matchChannel4.stringifyChannelID();
+    String match4 = ruletocons.stringifyChannelID();
+    StringSet stringSet = new StringSet();
+
+    stringSet.addChannel(matchChannel1);
+    stringSet.addChannel(channel2);
+    stringSet.addChannel(channel3Channel);
+    stringSet.addChannel(matchChannel2);
+
+    stringSet.addChannel(matchChannel3);
+    stringSet.addChannel(channelAnt);
+    stringSet.addChannel(matchChannel4);
+    stringSet.addChannel(ruletocons);
+    printHashtableContents(channelsIDs);
+
+    System.out.println(getChannelsIDS());
+    System.out.println(stringSet.getChannelID(fdegfdg));
+}
+
+
+
+
+
+
+//knownInstanceset test
+
+public static void main(String[] args) {
+    KnownInstanceSet set = new KnownInstanceSet();
+    int[] k1 = { 1, 2 };
+    int[] k2 = { 4, 5 };
+    int[] k3 = { 6, 7 };
+    int[] k4 = { 8, 9 };
+    int[] k5 = { 10, 11 };
+
+    KnownInstance KI1 = new KnownInstance("a/b", k1, 11, true);
+    KnownInstance KI2 = new KnownInstance("c/b", k2, 12, false);
+    KnownInstance KI3 = new KnownInstance("f/s", k3, 13, false);
+    KnownInstance KI4 = new KnownInstance("d/a", k4, 11, true);
+    KnownInstance KI6 = new KnownInstance("a/b", k4, 12, true);
+    KnownInstance KI5 = new KnownInstance("a/b", k5, 11, true);
+
+    set.addKnownInstance(KI1);
+    printKnownInstances(set.positiveKInstances, set.negativeKInstances);
+    System.out.println("end");
+    set.addKnownInstance(KI2);
+    printKnownInstances(set.positiveKInstances, set.negativeKInstances);
+    System.out.println("end");
+
+    set.addKnownInstance(KI3);
+    printKnownInstances(set.positiveKInstances, set.negativeKInstances);
+    System.out.println("end");
+
+    set.addKnownInstance(KI4);
+    printKnownInstances(set.positiveKInstances, set.negativeKInstances);
+    System.out.println("end");
+    set.addKnownInstance(KI5);
+    printKnownInstances(set.positiveKInstances, set.negativeKInstances);
+    System.out.println("end");
+    set.addKnownInstance(KI6);
+    printKnownInstances(set.positiveKInstances, set.negativeKInstances);
+    System.out.println("end");
+
+}
+
+
+
+
+//establish channel test
+Network network = new Network();
+Scheduler.initiate();
+
+Node base1 = Network.createNode("M1", "propositionnode"); // Proposition Node
+Node base2 = Network.createNode("M2", "propositionnode"); // Proposition Node
+Node base3 = Network.createNode("M5", "propositionnode"); // Proposition Node
+Node var1 = Network.createVariableNode("X", "propositionnode"); // Proposition Node
+Substitutions filterSubs = new Substitutions();
+filterSubs.add(var1, base1);
+filterSubs.add(var1, base1);
+Substitutions switchSubs = new Substitutions();
+// NodeSet sentTo = new NodeSet();
+// sentTo.add(base3);
+// sentTo.add(base2);
+// sentTo.add(base3);
+Request newRequest = ((PropositionNode) base1).establishChannel(ChannelType.MATCHED, base2, switchSubs,
+        filterSubs,
+        "reality", 1, 2, base1);
+Request newRequest2 = ((PropositionNode) base1).establishChannel(ChannelType.RuleCons, base3, switchSubs,
+        filterSubs,
+        "reality", 1, 2, base1);
+Request newRequest3 = ((PropositionNode) base1).establishChannel(ChannelType.RuleCons, base3, switchSubs,
+        filterSubs,
+        "reality", 1, 2, base1);
+Scheduler.addToLowQueue(newRequest);
+Scheduler.addToLowQueue(newRequest2);
+Scheduler.addToLowQueue(newRequest3);
+Scheduler.printLowQueue();
+
+
+
+//testing send Report
+Network network = new Network();
+Scheduler.initiate();
+
+Node base1 = Network.createNode("a", "propositionnode"); // Proposition Node
+Node base2 = Network.createVariableNode("X", "propositionnode"); // Proposition Node
+Node base3 = Network.createNode("b", "propositionnode"); // Proposition
+Node base4 = Network.createVariableNode("Y", "propositionnode"); // Proposition
+Node base5 = Network.createNode("Y", "propositionnode"); // Proposition
+Node base6 = Network.createVariableNode("Z", "propositionnode"); // Proposition
+Node base7 = Network.createNode("d", "propositionnode"); // Proposition
+Node base8 = Network.createVariableNode("F", "propositionnode"); // Proposition
+Substitutions filter = new Substitutions();
+filter.add(base2, base1);
+filter.add(base4, base3);
+Substitutions switchsubs = new Substitutions();
+switchsubs.add(base6, base5);
+
+Substitutions reportSubs = new Substitutions();
+reportSubs.add(base2, base1);
+
+// subs2.add(base2, base1);
+// System.out.println(subs1.toString());
+// System.out.println(subs2.toString());
+Channel matchChannel = new MatchChannel(switchsubs, filter, "reality", 2, 1,
+        base3);
+Report newReport = new Report(reportSubs, null, 1, true, InferenceType.BACKWARD,
+        base1);
+newReport.setContextName("reality");
+System.out.println(((PropositionNode) base1).sendReport(newReport, matchChannel));
+Scheduler.printHighQueue();
+
+//switchSubs
+
+Network network = new Network();
+Scheduler.initiate();
+
+Node base1 = Network.createNode("X", "propositionnode"); // Proposition Node
+Node base2 = Network.createVariableNode("A", "propositionnode"); // Proposition Node
+Node base3 = Network.createNode("Y", "propositionnode"); // Proposition
+Node base4 = Network.createVariableNode("B", "propositionnode"); // Proposition
+Node base5 = Network.createNode("Z", "propositionnode"); // Proposition
+Node base6 = Network.createVariableNode("Y", "propositionnode"); // Proposition
+Substitutions subs1 = new Substitutions();
+subs1.add(base2, base1);
+subs1.add(base4, base3);
+Substitutions subs2 = new Substitutions();
+subs2.add(base6, base5);
+Substitutions newSubs = subs1.switchReport(subs2);
+System.out.println(newSubs.toString());
+
+
+//openNodeNotBound
+Network network = new Network();
+Scheduler.initiate();
+
+Node base1 = Network.createNode("X", "propositionnode"); // Proposition Node
+Node base2 = Network.createVariableNode("A", "propositionnode"); // Proposition Node
+Node base3 = Network.createNode("Y", "propositionnode"); // Proposition
+Node base4 = Network.createVariableNode("B", "propositionnode"); // Proposition
+Node base5 = Network.createNode("Z", "propositionnode"); // Proposition
+Node base6 = Network.createVariableNode("Y", "propositionnode"); // Proposition
+Substitutions subs1 = new Substitutions();
+subs1.add(base4, base3);
+subs1.add(base2, base1);
+NodeSet freeVariables = new NodeSet();
+freeVariables.add(base2);
+freeVariables.add(base6);
+freeVariables.add(base4);
+base5.setFreeVariableSet(freeVariables);
+boolean newSubs = ((PropositionNode) base5).isOpenNodeNotBound(subs1);
+System.out.println(newSubs);
+
+//onlyRelevantSubs
+Network network = new Network();
+Scheduler.initiate();
+
+Node base1 = Network.createNode("A", "propositionnode"); // Proposition Node
+Node base2 = Network.createVariableNode("X", "propositionnode"); // Proposition Node
+Node base4 = Network.createVariableNode("X", "propositionnode"); // Proposition Node
+
+Node base3 = Network.createNode("B", "propositionnode"); // Proposition
+Node base5 = Network.createNode("C", "propositionnode"); // Proposition
+Node base6 = Network.createVariableNode("Y", "propositionnode"); // Proposition
+Node base7 = Network.createVariableNode("Z", "propositionnode"); // Proposition
+
+Substitutions subs1 = new Substitutions();
+subs1.add(base2, base3);
+subs1.add(base4, base1);
+subs1.add(base6, base5);
+
+NodeSet freeVariables = new NodeSet();
+freeVariables.add(base7);
+base5.setFreeVariableSet(freeVariables);
+Substitutions newSubs = ((PropositionNode) base5).onlyRelevantSubs(subs1);
+System.out.println(newSubs.toString());
+
+
+//backward inference
+public static void main(String[] args) throws ClassCastException, NoSuchTypeException {
+    Network network = new Network();
+
+    // ======================================================
+
+    // // 1. create the base nodes
+    Node nemo = Network.createNode("Nemo", "propositionNode");
+    Node clown = Network.createNode("clownFish", "propositionNode");
+    Node X = Network.createVariableNode("X", "propositionNode");
+    Node aquatic = Network.createNode("aquatic", "propositionNode");
+
+    // 2. create the needed relations
+    Relation object = Network.createRelation("object", "",
+            Adjustability.EXPAND, 2);
+    Relation member = Network.createRelation("member", "",
+            Adjustability.EXPAND, 2);
+    Relation Class = Network.createRelation("Class", "",
+            Adjustability.EXPAND, 2);
+    Relation property = Network.createRelation("property", "",
+            Adjustability.EXPAND, 2);
+    Relation antecedent = Network.createRelation("ant", "",
+            Adjustability.EXPAND, 2);
+    Relation cons = Network.createRelation("cq", "",
+            Adjustability.EXPAND, 2);
+    Network.quantifiers.put("forall", "forall");
+
+    Relation forAll = Network.createRelation("forall", "",
+            Adjustability.EXPAND, 2);
+    // 3. create downcables for each molecularNode
+
+    DownCable d1 = new DownCable(object, new NodeSet(X));
+    DownCable d2 = new DownCable(member, new NodeSet(nemo));
+    DownCable d5 = new DownCable(member, new NodeSet(X));
+    DownCable d3 = new DownCable(Class, new NodeSet(clown));
+    DownCable d4 = new DownCable(property, new NodeSet(aquatic));
+
+    // 4.create molecular nodes
+    Node M0 = Network.createNode("propositionnode",
+            new DownCableSet(d2, d3));
+
+    Node M1 = Network.createNode("propositionnode",
+            new DownCableSet(d3, d5));
+    Node M2 = Network.createNode("propositionnode",
+            new DownCableSet(d1, d4));
+    DownCable d6 = new DownCable(antecedent, new NodeSet(M1));
+    DownCable d7 = new DownCable(cons, new NodeSet(M2));
+    DownCable d8 = new DownCable(forAll, new NodeSet(X));
+    Node P3 = Network.createNode("rulenode",
+            new DownCableSet(d6, d8, d7));
+            
+    network.printNodes();
+    List<Node> match = new ArrayList<Node>();
+    match.add(M0);
+    Network.setMatches(match);
+    Network.setX(X);
+    Network.setNemo(nemo);
+
+    ((PropositionNode) M2).deduce();
+}
+
+//forward inference
+Network network = new Network();
+
+// ======================================================
+
+// // 1. create the base nodes
+Node nemo = Network.createNode("Nemo", "propositionNode");
+Node marlin = Network.createNode("Marlin", "propositionNode");
+Node clown = Network.createNode("clownFish", "propositionNode");
+Node X = Network.createVariableNode("X", "propositionNode");
+Node aquatic = Network.createNode("aquatic", "propositionNode");
+
+// 2. create the needed relations
+Relation object = Network.createRelation("object", "",
+        Adjustability.EXPAND, 2);
+Relation member = Network.createRelation("member", "",
+        Adjustability.EXPAND, 2);
+Relation Class = Network.createRelation("Class", "",
+        Adjustability.EXPAND, 2);
+Relation property = Network.createRelation("property", "",
+        Adjustability.EXPAND, 2);
+Relation antecedent = Network.createRelation("ant", "",
+        Adjustability.EXPAND, 2);
+Relation cons = Network.createRelation("cq", "",
+        Adjustability.EXPAND, 2);
+Network.quantifiers.put("forall", "forall");
+
+Relation forAll = Network.createRelation("forall", "",
+        Adjustability.EXPAND, 2);
+// 3. create downcables for each molecularNode
+
+DownCable d1 = new DownCable(object, new NodeSet(X));
+DownCable d2 = new DownCable(member, new NodeSet(nemo));
+DownCable d9 = new DownCable(member, new NodeSet(marlin));
+DownCable d5 = new DownCable(member, new NodeSet(X));
+DownCable d3 = new DownCable(Class, new NodeSet(clown));
+DownCable d4 = new DownCable(property, new NodeSet(aquatic));
+
+// 4.create molecular nodes
+Node M0 = Network.createNode("propositionnode",
+        new DownCableSet(d2, d3));
+
+Node M1 = Network.createNode("propositionnode",
+        new DownCableSet(d3, d5));
+Node M2 = Network.createNode("propositionnode",
+        new DownCableSet(d1, d4));
+DownCable d6 = new DownCable(antecedent, new NodeSet(M1));
+DownCable d7 = new DownCable(cons, new NodeSet(M2));
+DownCable d8 = new DownCable(forAll, new NodeSet(X));
+Node P3 = Network.createNode("rulenode",
+        new DownCableSet(d6, d8, d7));
+Node M4 = Network.createNode("propositionnode",
+        new DownCableSet(d9, d3));
+
+network.printNodes();
+List<Node> match = new ArrayList<Node>();
+match.add(M0);
+match.add(M1);
+Network.setMatches(match);
+Network.setX(X);
+Network.setNemo(nemo);
+Network.setMarlin(marlin);
+
+((PropositionNode) M4).add();
+
+
+
+
+//forwardInference
+Network network = new Network();
+
+// ======================================================
+
+// // 1. create the base nodes
+Node Y = Network.createVariableNode("Y", "propositionNode");
+Node clown = Network.createNode("clownFish", "propositionNode");
+Node X = Network.createVariableNode("X", "propositionNode");
+Node aquatic = Network.createNode("aquatic", "propositionNode");
+Node nemo = Network.createNode("Nemo", "propositionNode");
+
+// 2. create the needed relations
+Relation object = Network.createRelation("object", "",
+        Adjustability.EXPAND, 2);
+Relation member = Network.createRelation("member", "",
+        Adjustability.EXPAND, 2);
+Relation Class = Network.createRelation("Class", "",
+        Adjustability.EXPAND, 2);
+Relation property = Network.createRelation("property", "",
+        Adjustability.EXPAND, 2);
+Relation antecedent = Network.createRelation("ant", "",
+        Adjustability.EXPAND, 2);
+Relation cons = Network.createRelation("cq", "",
+        Adjustability.EXPAND, 2);
+Network.quantifiers.put("forall", "forall");
+
+Relation forAll = Network.createRelation("forall", "",
+        Adjustability.EXPAND, 2);
+// 3. create downcables for each molecularNode
+
+DownCable d1 = new DownCable(object, new NodeSet(X));
+DownCable d5 = new DownCable(member, new NodeSet(X));
+DownCable d10 = new DownCable(member, new NodeSet(Y));
+DownCable d11 = new DownCable(object, new NodeSet(Y));
+
+DownCable d2 = new DownCable(member, new NodeSet(nemo));
+
+DownCable d3 = new DownCable(Class, new NodeSet(clown));
+DownCable d4 = new DownCable(property, new NodeSet(aquatic));
+
+// 4.create molecular nodes
+Node M0 = Network.createNode("propositionnode",
+        new DownCableSet(d10, d3));
+
+Node M1 = Network.createNode("propositionnode",
+        new DownCableSet(d3, d5));
+Node M2 = Network.createNode("propositionnode",
+        new DownCableSet(d1, d4));
+DownCable d6 = new DownCable(antecedent, new NodeSet(M1));
+DownCable d7 = new DownCable(cons, new NodeSet(M2));
+// DownCable d8 = new DownCable(forAll, new NodeSet(X));
+Node P3 = Network.createNode("rulenode",
+        new DownCableSet(d6, d7));
+Node M4 = Network.createNode("propositionnode",
+        new DownCableSet(d11, d4));
+DownCable d12 = new DownCable(antecedent, new NodeSet(M0));
+DownCable d13 = new DownCable(cons, new NodeSet(M4));
+DownCable d8 = new DownCable(forAll, new NodeSet(Y));
+Node P5 = Network.createNode("rulenode",
+        new DownCableSet(d12, d8, d13));
+Node M6 = Network.createNode("propositionnode",
+        new DownCableSet(d2, d3));
+network.printNodes();
+List<Node> match = new ArrayList<Node>();
+match.add(M0);
+match.add(M1);
+List<Node> matchRule = new ArrayList<Node>();
+matchRule.add(P5);
+List<Node> matchesLast = new ArrayList<Node>();
+matchesLast.add(M2);
+Network.setMatchRule(matchRule);
+Network.setMatches(match);
+Network.setMatchesLast(matchesLast);
+Network.setX(X);
+Network.setNemo(nemo);
+Network.setY(Y);
+((PropositionNode) M6).add();
