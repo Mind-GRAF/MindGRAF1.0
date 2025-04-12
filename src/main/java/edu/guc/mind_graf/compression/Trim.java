@@ -72,6 +72,9 @@ public class Trim{
             isHyp.get(level).remove(attitudeID);
             if(isHyp.get(level).isEmpty()){
               isHyp.remove(level);
+              if(isHyp.isEmpty()){
+                //remove the node from the network
+              }
             }
           }
         }
