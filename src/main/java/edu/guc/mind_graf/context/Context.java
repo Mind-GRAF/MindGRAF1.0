@@ -41,6 +41,7 @@ public class Context {
         throw new RuntimeException("PropositionNode is not in any attitude");
     // public HashSet<Integer> getPropositionAttitudes(Integer nodeID){
 
+    // }
 //        DEPRECATED CODE:
 //        // loop through all the Integer keys of attitudesBitset
 //        for (Integer key : this.AttitudesBitset.getSet().keySet()) {
@@ -200,23 +201,24 @@ public class Context {
     }
     public HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>[]> getMaximalHypotheses(){
         HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>[]> maxHyp =new HashMap<>();
-        Pair<PropositionNodeSet, PropositionNodeSet>[] hyps = new Pair[ContextController.getAttitudes().size()];
-        for (int i = 0; i < ContextController.getAttitudes().size(); i++) {
-            hyps[i] = (new Pair<>(new PropositionNodeSet(), new PropositionNodeSet()));
-        }
-        Context currentContext = ContextController.getContext(context);
-        HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>[]> contextHyps = currentContext.getHypotheses();
+        HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>[]> contextHyps = hypotheses;
         for(int level : contextHyps.keySet()){
             for(int attitudeID = 0; attitudeID < contextHyps.get(level).length; attitudeID++){
                 PropositionNodeSet originSet = contextHyps.get(level)[attitudeID].getFirst();
                 PropositionNodeSet gradedSet = contextHyps.get(level)[attitudeID].getSecond();
                 for(int hyp : originSet.getProps()){
                     if(isMaximalHyp(hyp, attitudeID, level)){
+                        if(!maxHyp.containsKey(level)){
+                            addNewLevel(level, maxHyp);
+                        }
                         maxHyp.get(level)[attitudeID].getFirst().add(hyp);
                     }
                 }
                 for(int hyp : gradedSet.getProps()){
                     if(isMaximalHyp(hyp, attitudeID, level)){
+                        if(!maxHyp.containsKey(level)){
+                            addNewLevel(level, maxHyp);
+                        }
                         maxHyp.get(level)[attitudeID].getSecond().add(hyp);
                     }
                 }
@@ -224,10 +226,17 @@ public class Context {
         }
         return maxHyp;
     }
+    public void addNewLevel(int level, HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>[]> maxHyps){
+        Pair<PropositionNodeSet, PropositionNodeSet>[] hyps = new Pair[ContextController.getAttitudes().size()];
+        for (int i = 0; i < ContextController.getAttitudes().size(); i++) {
+            hyps[i] = (new Pair<>(new PropositionNodeSet(), new PropositionNodeSet()));
+        }
+        maxHyps.put(level, hyps);
+        
+    }
     public boolean isMaximalHyp(int nodeID, int attitude, int level){
         boolean isMaxHyp = false;
         PropositionNode node =(PropositionNode) Network.getNodeById(nodeID); 
-       // Context currentContext = ContextController.getContext(context);
         ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> supports = node.getSupport().getAssumptionBasedSupport().get(level).get(attitude);
         for(Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support : supports){
             HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> supportNodesInAttitudes = support.getFirst();
@@ -237,14 +246,16 @@ public class Context {
                 PropositionNodeSet gradedSet = supportNodesInAttitudes.get(supportingAttitude).getSecond();
                 if(this.isInvalidSupport(level, supportingAttitude,  originSet) || this.isInvalidSupport(level, supportingAttitude,  gradedSet)){   
                     isValidSupport = false;
+                    break;
                 }
-                
             }
-            boolean isHypSupport = isHypSupport(attitude, nodeID, support);
-            if(isValidSupport && isHypSupport)
-                isMaxHyp = true;
-            if(isValidSupport && !isHypSupport)
-                return false;
+            if(isValidSupport){
+                boolean isHypSupport = isHypSupport(attitude, nodeID, support);
+                if(isHypSupport)
+                    isMaxHyp = true;
+                if(!isHypSupport)
+                    return false;
+            }
         }
         return isMaxHyp;
         
