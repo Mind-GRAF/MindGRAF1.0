@@ -38,7 +38,6 @@ public class PropositionNode extends Node {
 
     public PropositionNode(String name, Boolean isVariable) {
         super(name, isVariable);
-
         outgoingChannels = new ChannelSet();
         forwardChannels = new ChannelSet();
         forwardDone = false;
