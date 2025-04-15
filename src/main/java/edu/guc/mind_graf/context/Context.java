@@ -1,5 +1,5 @@
 package edu.guc.mind_graf.context;
-
+import java.util.*;
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.PropositionNode;
@@ -9,7 +9,9 @@ import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.Set;
 import edu.guc.mind_graf.support.Pair;
 
-import java.util.*;
+import java.util.stream.Collectors;
+
+
 
 
 public class Context {
@@ -257,9 +259,9 @@ public class Context {
                     return false;
             }
         }
-        return isMaxHyp;
-        
+        return isMaxHyp;  
     }
+
     public  static boolean isHypSupport( int attitudeID, int nodeID, Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support){
         if(support.getFirst().keySet().size() != 1 || !support.getSecond().isEmpty())
             return false;
@@ -270,4 +272,30 @@ public class Context {
         }
         return false;
     } 
+   public boolean isOriginHypNode(int level, int attitude, int nodeID){
+    List<Integer> levels = hypotheses.keySet().stream()
+    .filter(key -> key <= level)
+    .collect(Collectors.toList());
+    for(int key : levels){
+        PropositionNodeSet originSet = hypotheses.get(key)[attitude].getFirst();
+        if(originSet.contains(nodeID)){
+            return true;
+        }
+    }
+    return false;
+
+   }
+   public boolean isGradedHypNode(int level, int attitude, int nodeID){
+    List<Integer> levels = hypotheses.keySet().stream()
+    .filter(key -> key <= level)
+    .collect(Collectors.toList());
+    for(int key : levels){
+        PropositionNodeSet gradedSet = hypotheses.get(key)[attitude].getSecond();
+        if(gradedSet.contains(nodeID)){
+            return true;
+        }
+    }
+    return false;
+   }
+    
 }
