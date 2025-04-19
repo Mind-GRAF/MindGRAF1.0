@@ -1,5 +1,6 @@
 package edu.guc.mind_graf.context;
 import java.util.*;
+
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.PropositionNode;
@@ -272,17 +273,12 @@ public class Context {
         }
         return false;
     } 
-   public boolean isOriginHypNode(int level, int attitude, int nodeID){
-    List<Integer> levels = hypotheses.keySet().stream()
-    .filter(key -> key <= level)
-    .collect(Collectors.toList());
-    for(int key : levels){
-        PropositionNodeSet originSet = hypotheses.get(key)[attitude].getFirst();
+   public boolean isOriginHypNode(int attitude, int nodeID){
+        PropositionNodeSet originSet = hypotheses.get(0)[attitude].getFirst();
         if(originSet.contains(nodeID)){
             return true;
         }
-    }
-    return false;
+        return false;
 
    }
    public boolean isGradedHypNode(int level, int attitude, int nodeID){
@@ -297,5 +293,4 @@ public class Context {
     }
     return false;
    }
-    
 }
