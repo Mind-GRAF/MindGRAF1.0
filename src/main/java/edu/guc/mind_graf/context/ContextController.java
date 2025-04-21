@@ -3,9 +3,11 @@ package edu.guc.mind_graf.context;
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.set.ContextSet;
+import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.Set;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.IntBinaryOperator;
 
@@ -119,5 +121,6 @@ public class ContextController {
     public static boolean isCacheEnabled() {
         return cacheEnabled;
     }
+    
 
 }

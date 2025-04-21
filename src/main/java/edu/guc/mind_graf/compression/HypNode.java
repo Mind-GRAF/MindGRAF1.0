@@ -26,4 +26,7 @@ public class HypNode implements Comparable{
     return Objects.equals(nodeID, myClass.nodeID) &&
            Objects.equals(attitudeID, myClass.attitudeID);
     }
+    public int hashCode() {
+        return Objects.hash(nodeID, attitudeID);
+    }
 }

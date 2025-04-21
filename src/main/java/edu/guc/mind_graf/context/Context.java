@@ -293,4 +293,10 @@ public class Context {
     }
     return false;
    }
+  public PropositionNodeSet getGradedHypotheses(int level, int attitudeID){
+    return hypotheses.get(level)[attitudeID].getSecond();
+  }
+  public PropositionNodeSet getOriginHypotheses(int attitudeID){
+    return hypotheses.get(0)[attitudeID].getFirst();
+  }
 }
