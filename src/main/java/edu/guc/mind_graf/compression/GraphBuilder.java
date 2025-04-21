@@ -18,10 +18,10 @@ public class GraphBuilder {
     HashMap<Integer, SupportNode> supportNodes;
     int sizeV1;
     int sizeV2;
-    ArrayList<HashSet<Integer>> hypAdj;
-    ArrayList<HashSet<Integer>> hypAdjRev;
-    ArrayList<HashSet<Integer>> supportAdj;
-    ArrayList<HashSet<Integer>> supportAdjRev;
+    HashMap<Integer, HashSet<Integer>> hypAdj;
+    HashMap<Integer, HashSet<Integer>> hypAdjRev;
+    HashMap<Integer, HashSet<Integer>> supportAdj;
+    HashMap<Integer, HashSet<Integer>> supportAdjRev;
     HashMap<HypNode, Integer> hypothesesNodesRev;
     HashMap<SupportNode, Integer> supportNodesRev;
 
@@ -31,10 +31,10 @@ public class GraphBuilder {
         supportNodes = new HashMap<>();
         sizeV1 = 0;
         sizeV2 = 0;
-        hypAdj = new ArrayList<>();
-        hypAdjRev = new ArrayList<>();
-        supportAdj = new ArrayList<>();
-        supportAdjRev = new ArrayList<>();
+        hypAdj = new HashMap<>();
+        hypAdjRev = new HashMap<>();
+        supportAdj = new HashMap<>();
+        supportAdjRev = new HashMap<>();
         hypothesesNodesRev = new HashMap<>();
         supportNodesRev = new HashMap<>();
     }
@@ -45,81 +45,81 @@ public class GraphBuilder {
         for (int attitudeID : attitudes) {
             int[] originSet = currentContext.getOriginHypotheses(attitudeID).getProps();
             int[] gradedSet = currentContext.getGradedHypotheses(0, attitudeID).getProps();
-            for (int i = 0; i < originSet.length; i++) {
-                createHypNode(originSet[i], attitudeID);
-                PropositionNode node = (PropositionNode) Network.getNodeById(originSet[i]);
-                boolean isSupportedAtLevel0 = node.getSupport().getAssumptionBasedSupport().get(0) != null;
-                if (isSupportedAtLevel0) {
-                    boolean isSupportedAtLevel0InAttitude = node.getSupport().getAssumptionBasedSupport().get(0)
-                            .get(attitudeID) != null;
-                    if (isSupportedAtLevel0InAttitude) {
-                        ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> supportedLevel = node
-                                .getSupport().getAssumptionBasedSupport().get(0).get(attitudeID);
-                        for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support : supportedLevel) {
-                            createSupport(originSet[i], attitudeID, support);
-                        }
-                    }
-                }
-
-            }
-            for (int i = 0; i < gradedSet.length; i++) {
-                createHypNode(gradedSet[i], attitudeID);
-                PropositionNode node = (PropositionNode) Network.getNodeById(gradedSet[i]);
-                boolean isSupportedAtLevel0 = node.getSupport().getAssumptionBasedSupport().get(0) != null;
-                if (isSupportedAtLevel0) {
-                    boolean isSupportedAtLevel0InAttitude = node.getSupport().getAssumptionBasedSupport().get(0)
-                            .get(attitudeID) != null;
-                    if (isSupportedAtLevel0InAttitude) {
-                        ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> supportedLevel = node
-                                .getSupport().getAssumptionBasedSupport().get(0).get(attitudeID);
-                        for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support : supportedLevel) {
-                            createSupport(gradedSet[i], attitudeID, support);
-                        }
-                    }
-                }
-
-            }
+            processHypothesesSet(originSet, attitudeID);
+            processHypothesesSet(gradedSet, attitudeID);
         }
-        return null;
+        HashSet<Integer>[] adjList = createAdjList(hypAdj, supportAdj); 
+        HashSet<Integer>[] adjRevList = createAdjList(hypAdjRev, supportAdjRev); 
+        return new BipartiteGraph(sizeV1, sizeV2, adjList, adjRevList);
+    }
+
+    public HashSet<Integer>[] createAdjList(HashMap<Integer, HashSet<Integer>> hypAdjList,
+            HashMap<Integer, HashSet<Integer>> supportAdjList) {
+        HashSet<Integer>[] adj = new HashSet[sizeV1 + sizeV2];
+        for (int nodeId : hypAdjList.keySet()) {
+            adj[nodeId] = new HashSet<>(hypAdjList.get(nodeId));
+        }
+        for (int supportId : supportAdjList.keySet()) {
+            adj[supportId + sizeV1] = new HashSet<>(supportAdjList.get(supportId));
+        }
+        return adj;
+    }
+
+    public void processHypothesesSet(int[] hyps, int attitudeID) {
+        for (int i = 0; i < hyps.length; i++) {
+            createHypNode(hyps[i], attitudeID);
+            PropositionNode node = (PropositionNode) Network.getNodeById(hyps[i]);
+            boolean isSupportedAtLevel0 = node.getSupport().getAssumptionBasedSupport().get(0) != null;
+            if (isSupportedAtLevel0) {
+                boolean isSupportedAtLevel0InAttitude = node.getSupport().getAssumptionBasedSupport().get(0)
+                        .get(attitudeID) != null;
+                if (isSupportedAtLevel0InAttitude) {
+                    ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> supportedLevel = node
+                            .getSupport().getAssumptionBasedSupport().get(0).get(attitudeID);
+                    for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support : supportedLevel) {
+                        createSupport(hyps[i], attitudeID, support);
+                    }
+                }
+            }
+
+        }
     }
 
     public int createHypNode(int nodeID, int attitudeID) {
         HypNode newNode = new HypNode(nodeID, attitudeID);
-        int baseSupportGraphHypNodeID = -1;
-        if (hypothesesNodesRev.get(newNode) == null) {
-            baseSupportGraphHypNodeID = sizeV1;
-            sizeV1++;
-            hypothesesNodes.put(baseSupportGraphHypNodeID, newNode);
-            hypothesesNodesRev.put(newNode, baseSupportGraphHypNodeID);
-        } else {
-            baseSupportGraphHypNodeID = hypothesesNodesRev.get(newNode);
+        if (hypothesesNodesRev.get(newNode) != null) {
+            return hypothesesNodesRev.get(newNode);
         }
+        int baseSupportGraphHypNodeID = sizeV1;
+        sizeV1++;
+        hypothesesNodes.put(baseSupportGraphHypNodeID, newNode);
+        hypothesesNodesRev.put(newNode, baseSupportGraphHypNodeID);
         return baseSupportGraphHypNodeID;
     }
 
     public int createSupportNode(ArrayList<HypNode> hypNodes) {
-        int baseSupportGraphSupportNodeID = -1;
         SupportNode supportingNode = new SupportNode(hypNodes);
-        if (supportNodesRev.containsKey(supportingNode)) {
-            baseSupportGraphSupportNodeID = supportNodesRev.get(supportingNode);
-        } else {
-            baseSupportGraphSupportNodeID = sizeV2;
-            supportNodes.put(baseSupportGraphSupportNodeID, supportingNode);
-            supportNodesRev.put(supportingNode, baseSupportGraphSupportNodeID);
-            sizeV2++;
-            for (HypNode node : hypNodes) {
-                int nodeId = hypothesesNodesRev.get(node);
-                if (hypAdj.get(nodeId) == null) {
-                    hypAdj.add(nodeId, new HashSet<>());
-                }
-                hypAdj.get(nodeId).add(baseSupportGraphSupportNodeID);
-                if (supportAdjRev.get(baseSupportGraphSupportNodeID) == null) {
-                    supportAdjRev.add(baseSupportGraphSupportNodeID, new HashSet<>());
-                }
-                supportAdjRev.get(baseSupportGraphSupportNodeID).add(nodeId);
-            }
+        if (supportNodesRev.get(supportingNode) != null) {
+            return supportNodesRev.get(supportingNode);
         }
+        int baseSupportGraphSupportNodeID = sizeV2;
+        supportNodes.put(baseSupportGraphSupportNodeID, supportingNode);
+        supportNodesRev.put(supportingNode, baseSupportGraphSupportNodeID);
+        sizeV2++;
+        for (HypNode node : hypNodes) {
+            int nodeId = hypothesesNodesRev.get(node);
+            hypAdj.computeIfAbsent(nodeId, k -> new HashSet<>()).add(baseSupportGraphSupportNodeID);
+            supportAdjRev.computeIfAbsent(baseSupportGraphSupportNodeID, k -> new HashSet<>()).add(nodeId);
+        }
+
         return baseSupportGraphSupportNodeID;
+    }
+
+    public void processSupportingSet(int[] supportingNodes, int supportingAttitude, ArrayList<HypNode> hypNodes) {
+        for (int j = 0; j < supportingNodes.length; j++) {
+            int baseSupportGraphHypNodeID = createHypNode(supportingNodes[j], supportingAttitude);
+            hypNodes.add(hypothesesNodes.get(baseSupportGraphHypNodeID));
+        }
     }
 
     public void createSupport(int nodeID, int attitudeID,
@@ -131,25 +131,15 @@ public class GraphBuilder {
                     .get(supportingAttitude);
             int[] originSupportingNodesInAttitude = supportingNodesInAttitude.getFirst().getProps();
             int[] gradedSupportingNodesInAttitude = supportingNodesInAttitude.getSecond().getProps();
-            for (int j = 0; j < originSupportingNodesInAttitude.length; j++) {
-                int baseSupportGraphHypNodeID = createHypNode(originSupportingNodesInAttitude[j], supportingAttitude);
-                hypNodes.add(hypothesesNodes.get(baseSupportGraphHypNodeID));
-            }
-            for (int j = 0; j < gradedSupportingNodesInAttitude.length; j++) {
-                int baseSupportGraphHypNodeID = createHypNode(originSupportingNodesInAttitude[j], supportingAttitude);
-                hypNodes.add(hypothesesNodes.get(baseSupportGraphHypNodeID));
-            }
+            processSupportingSet(originSupportingNodesInAttitude, supportingAttitude, hypNodes);
+            processSupportingSet(gradedSupportingNodesInAttitude, supportingAttitude, hypNodes);
         }
         int baseSupportGraphSupportNodeID = createSupportNode(hypNodes);
         int baseSupportGraphSupportedNodeID = hypothesesNodesRev.get(new HypNode(nodeID, attitudeID));
-        if (hypAdjRev.get(baseSupportGraphSupportedNodeID) == null) {
-            hypAdjRev.add(baseSupportGraphSupportedNodeID, new HashSet<>());
-        }
-        hypAdjRev.get(baseSupportGraphSupportedNodeID).add(baseSupportGraphSupportNodeID);
-        if (supportAdj.get(baseSupportGraphSupportNodeID) == null) {
-            supportAdj.add(baseSupportGraphSupportNodeID, new HashSet<>());
-        }
-        supportAdj.get(baseSupportGraphSupportNodeID).add(baseSupportGraphSupportedNodeID);
+        hypAdjRev.computeIfAbsent(baseSupportGraphSupportedNodeID, k -> new HashSet<>())
+                .add(baseSupportGraphSupportNodeID);
+        supportAdj.computeIfAbsent(baseSupportGraphSupportNodeID, k -> new HashSet<>())
+                .add(baseSupportGraphSupportedNodeID);
     }
 
     public static void main(String[] args) throws NoSuchTypeException {
