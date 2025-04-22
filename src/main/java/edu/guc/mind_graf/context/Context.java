@@ -210,7 +210,6 @@ public class Context {
         clonedContextsCount = 0;
     }
 
-    
     public boolean isOriginHypNode(int attitude, int nodeID) {
         PropositionNodeSet originSet = hypotheses.get(0)[attitude].getFirst();
         if (originSet.contains(nodeID)) {
@@ -234,7 +233,17 @@ public class Context {
     }
 
     public PropositionNodeSet getGradedHypotheses(int level, int attitudeID) {
-        return hypotheses.get(level)[attitudeID].getSecond();
+        List<Integer> levels = hypotheses.keySet().stream()
+                .filter(key -> key <= level)
+                .collect(Collectors.toList());
+        HashSet<Integer> gradedSet = new HashSet<>();
+        for (int key : levels) {
+            int[] gradedNodes = hypotheses.get(key)[attitudeID].getSecond().getProps();
+            for (int nodeID : gradedNodes) {
+                gradedSet.add(nodeID);
+            }
+        }
+        return new PropositionNodeSet(gradedSet);
     }
 
     public PropositionNodeSet getOriginHypotheses(int attitudeID) {
