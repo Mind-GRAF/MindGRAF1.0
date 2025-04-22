@@ -1,4 +1,5 @@
 package edu.guc.mind_graf.context;
+
 import java.util.*;
 
 import edu.guc.mind_graf.network.Network;
@@ -12,9 +13,6 @@ import edu.guc.mind_graf.support.Pair;
 
 import java.util.stream.Collectors;
 
-
-
-
 public class Context {
 
     private final HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>[]> hypotheses;
@@ -22,7 +20,6 @@ public class Context {
 
     private static int clonedContextsCount;
     private static final ArrayList<Context> assumedContexts = new ArrayList<>();
-
 
     public Context(String name, Set<String, Integer> attitudeNames) {
         this.name = name;
@@ -42,19 +39,19 @@ public class Context {
             }
         }
         throw new RuntimeException("PropositionNode is not in any attitude");
-    // public HashSet<Integer> getPropositionAttitudes(Integer nodeID){
+        // public HashSet<Integer> getPropositionAttitudes(Integer nodeID){
 
-    // }
-//        DEPRECATED CODE:
-//        // loop through all the Integer keys of attitudesBitset
-//        for (Integer key : this.AttitudesBitset.getSet().keySet()) {
-//            // If the propositionNode is in the attitude then return the name of the
-//            // attitude
-//            if (this.AttitudesBitset.get(key).get(nodeId)) {
-//                return key;
-//            }
-//        }
-//        throw new RuntimeException("PropositionNode is not in any attitude");
+        // }
+        // DEPRECATED CODE:
+        // // loop through all the Integer keys of attitudesBitset
+        // for (Integer key : this.AttitudesBitset.getSet().keySet()) {
+        // // If the propositionNode is in the attitude then return the name of the
+        // // attitude
+        // if (this.AttitudesBitset.get(key).get(nodeId)) {
+        // return key;
+        // }
+        // }
+        // throw new RuntimeException("PropositionNode is not in any attitude");
     }
 
     public String getName() {
@@ -96,7 +93,6 @@ public class Context {
         return false;
     }
 
-
     public boolean isOriginHypothesis(int level, int attitudeId, PropositionNode node) {
         return this.getHypotheses().get(level)[attitudeId].getFirst().contains(node);
     }
@@ -131,15 +127,19 @@ public class Context {
     }
 
     public void automaticallyRemoveInferredNodeFromContext(int level, int attitudeId, PropositionNode node) {
-        for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> assumptionSupport : node.getSupport().getAssumptionBasedSupport().get(level).get(attitudeId)) {
-            for (Map.Entry<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> support : assumptionSupport.getFirst().entrySet()) {
+        for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> assumptionSupport : node
+                .getSupport().getAssumptionBasedSupport().get(level).get(attitudeId)) {
+            for (Map.Entry<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> support : assumptionSupport.getFirst()
+                    .entrySet()) {
                 PropositionNodeSet supportOriginSet = support.getValue().getFirst();
                 if (isInvalidSupport(level, attitudeId, supportOriginSet)) {
                     continue;
                 }
-                //TODO: wael what about when the support of p is G(p,2) doesn't this mean we handle different grades?
+                // TODO: wael what about when the support of p is G(p,2) doesn't this mean we
+                // handle different grades?
                 ArrayList<Node> supportNodesList = new ArrayList<>(supportOriginSet.getNodes());
-                int indexOfNodeToRemove = supportNodesList.stream().map(supportNode -> (PropositionNode) supportNode).mapToInt(supportNode -> supportNode.getGradeOfNode(this, level, attitudeId)).min().orElse(0);
+                int indexOfNodeToRemove = supportNodesList.stream().map(supportNode -> (PropositionNode) supportNode)
+                        .mapToInt(supportNode -> supportNode.getGradeOfNode(this, level, attitudeId)).min().orElse(0);
                 PropositionNode supportingNodeToRemove = (PropositionNode) supportNodesList.get(indexOfNodeToRemove);
                 this.completelyRemoveNodeFromContext(level, attitudeId, supportingNodeToRemove, false);
             }
@@ -147,9 +147,12 @@ public class Context {
     }
 
     public void manuallyRemoveInferredNodeFromContext(int level, int attitudeId, PropositionNode node) {
-        Revision.print("Starting removal of node: " + node.printShortData() + " from attitude: " + ContextController.getAttitudeName(attitudeId) + " from Context: " + this.getName());
-        for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> assumptionSupport : node.getSupport().getAssumptionBasedSupport().get(level).get(attitudeId)) {
-            for (Map.Entry<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> support : assumptionSupport.getFirst().entrySet()) {
+        Revision.print("Starting removal of node: " + node.printShortData() + " from attitude: "
+                + ContextController.getAttitudeName(attitudeId) + " from Context: " + this.getName());
+        for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> assumptionSupport : node
+                .getSupport().getAssumptionBasedSupport().get(level).get(attitudeId)) {
+            for (Map.Entry<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> support : assumptionSupport.getFirst()
+                    .entrySet()) {
                 if (isInvalidSupport(level, attitudeId, support.getValue().getFirst())) {
                     continue;
                 }
@@ -163,25 +166,29 @@ public class Context {
                 this.completelyRemoveNodeFromContext(level, attitudeId, nodeToRemove, true);
             }
         }
-        Revision.print("successfully removed Node: " + node + " from attitude: " + ContextController.getAttitudeName(attitudeId) + " from Context: " + this.getName());
+        Revision.print("successfully removed Node: " + node + " from attitude: "
+                + ContextController.getAttitudeName(attitudeId) + " from Context: " + this.getName());
     }
 
     public Context cloneContext(int attitudeId, NodeSet assumptionNodes) {
 
-        boolean contextHasContradictingNodes = assumptionNodes.getValues().stream().allMatch(node -> this.isHypothesis(0, attitudeId, (PropositionNode) node.getNegation()));
-        if(contextHasContradictingNodes){
-            return  null;
+        boolean contextHasContradictingNodes = assumptionNodes.getValues().stream()
+                .allMatch(node -> this.isHypothesis(0, attitudeId, (PropositionNode) node.getNegation()));
+        if (contextHasContradictingNodes) {
+            return null;
         }
 
-        Context clonedContext = new Context(this.getName() + " " + clonedContextsCount, ContextController.getAttitudes());
+        Context clonedContext = new Context(this.getName() + " " + clonedContextsCount,
+                ContextController.getAttitudes());
         assumedContexts.add(clonedContext);
         clonedContextsCount++;
         ContextController.getContextSet().add(name, clonedContext);
 
         for (int level : this.getLevels()) {
             for (int i = 0; i < this.hypotheses.get(0).length; i++) {
-                if(i == 0){
-                    assumptionNodes.getValues().forEach(node -> clonedContext.addHypothesisToContext(0,attitudeId,(PropositionNode)node));
+                if (i == 0) {
+                    assumptionNodes.getValues().forEach(
+                            node -> clonedContext.addHypothesisToContext(0, attitudeId, (PropositionNode) node));
                 }
                 Pair<PropositionNodeSet, PropositionNodeSet> pair = this.hypotheses.get(level)[i];
                 for (PropositionNode node : pair.getFirst()) {
@@ -202,24 +209,25 @@ public class Context {
         }
         clonedContextsCount = 0;
     }
-    public HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>[]> getMaximalHypotheses(){
-        HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>[]> maxHyp =new HashMap<>();
+
+    public HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>[]> getMaximalHypotheses() {
+        HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>[]> maxHyp = new HashMap<>();
         HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>[]> contextHyps = hypotheses;
-        for(int level : contextHyps.keySet()){
-            for(int attitudeID = 0; attitudeID < contextHyps.get(level).length; attitudeID++){
+        for (int level : contextHyps.keySet()) {
+            for (int attitudeID = 0; attitudeID < contextHyps.get(level).length; attitudeID++) {
                 PropositionNodeSet originSet = contextHyps.get(level)[attitudeID].getFirst();
                 PropositionNodeSet gradedSet = contextHyps.get(level)[attitudeID].getSecond();
-                for(int hyp : originSet.getProps()){
-                    if(isMaximalHyp(hyp, attitudeID, level)){
-                        if(!maxHyp.containsKey(level)){
+                for (int hyp : originSet.getProps()) {
+                    if (isMaximalHyp(hyp, attitudeID, level)) {
+                        if (!maxHyp.containsKey(level)) {
                             addNewLevel(level, maxHyp);
                         }
                         maxHyp.get(level)[attitudeID].getFirst().add(hyp);
                     }
                 }
-                for(int hyp : gradedSet.getProps()){
-                    if(isMaximalHyp(hyp, attitudeID, level)){
-                        if(!maxHyp.containsKey(level)){
+                for (int hyp : gradedSet.getProps()) {
+                    if (isMaximalHyp(hyp, attitudeID, level)) {
+                        if (!maxHyp.containsKey(level)) {
                             addNewLevel(level, maxHyp);
                         }
                         maxHyp.get(level)[attitudeID].getSecond().add(hyp);
@@ -229,74 +237,87 @@ public class Context {
         }
         return maxHyp;
     }
-    public void addNewLevel(int level, HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>[]> maxHyps){
+
+    public void addNewLevel(int level, HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>[]> maxHyps) {
         Pair<PropositionNodeSet, PropositionNodeSet>[] hyps = new Pair[ContextController.getAttitudes().size()];
         for (int i = 0; i < ContextController.getAttitudes().size(); i++) {
             hyps[i] = (new Pair<>(new PropositionNodeSet(), new PropositionNodeSet()));
         }
         maxHyps.put(level, hyps);
-        
+
     }
-    public boolean isMaximalHyp(int nodeID, int attitude, int level){
+
+    public boolean isMaximalHyp(int nodeID, int attitude, int level) {
         boolean isMaxHyp = false;
-        PropositionNode node =(PropositionNode) Network.getNodeById(nodeID); 
-        ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> supports = node.getSupport().getAssumptionBasedSupport().get(level).get(attitude);
-        for(Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support : supports){
+        PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
+        ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> supports = node
+                .getSupport().getAssumptionBasedSupport().get(level).get(attitude);
+        for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support : supports) {
             HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> supportNodesInAttitudes = support.getFirst();
-            boolean isValidSupport = true; 
-            for(int supportingAttitude : supportNodesInAttitudes.keySet()){
+            boolean isValidSupport = true;
+            for (int supportingAttitude : supportNodesInAttitudes.keySet()) {
                 PropositionNodeSet originSet = supportNodesInAttitudes.get(supportingAttitude).getFirst();
                 PropositionNodeSet gradedSet = supportNodesInAttitudes.get(supportingAttitude).getSecond();
-                if(this.isInvalidSupport(level, supportingAttitude,  originSet) || this.isInvalidSupport(level, supportingAttitude,  gradedSet)){   
+                if (this.isInvalidSupport(level, supportingAttitude, originSet)
+                        || this.isInvalidSupport(level, supportingAttitude, gradedSet)) {
                     isValidSupport = false;
                     break;
                 }
             }
-            if(isValidSupport){
+            if (isValidSupport) {
                 boolean isHypSupport = isHypSupport(attitude, nodeID, support);
-                if(isHypSupport)
+                if (isHypSupport)
                     isMaxHyp = true;
-                if(!isHypSupport)
+                if (!isHypSupport)
                     return false;
             }
         }
-        return isMaxHyp;  
+        return isMaxHyp;
     }
 
-    public  static boolean isHypSupport( int attitudeID, int nodeID, Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support){
-        if(support.getFirst().keySet().size() != 1 || !support.getSecond().isEmpty())
+    public static boolean isHypSupport(int attitudeID, int nodeID,
+            Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support) {
+        if (support.getFirst().keySet().size() != 1 || !support.getSecond().isEmpty())
             return false;
         Pair<PropositionNodeSet, PropositionNodeSet> supportingNodes = support.getFirst().get(attitudeID);
-        if(supportingNodes != null){
-            if(supportingNodes.getFirst().size() == 1 && supportingNodes.getSecond().isEmpty() && supportingNodes.getFirst().contains(nodeID))
+        if (supportingNodes != null) {
+            if (supportingNodes.getFirst().size() == 1 && supportingNodes.getSecond().isEmpty()
+                    && supportingNodes.getFirst().contains(nodeID))
                 return true;
         }
         return false;
-    } 
-   public boolean isOriginHypNode(int attitude, int nodeID){
+    }
+
+    public boolean isOriginHypNode(int attitude, int nodeID) {
         PropositionNodeSet originSet = hypotheses.get(0)[attitude].getFirst();
-        if(originSet.contains(nodeID)){
+        if (originSet.contains(nodeID)) {
             return true;
         }
         return false;
 
-   }
-   public boolean isGradedHypNode(int level, int attitude, int nodeID){
-    List<Integer> levels = hypotheses.keySet().stream()
-    .filter(key -> key <= level)
-    .collect(Collectors.toList());
-    for(int key : levels){
-        PropositionNodeSet gradedSet = hypotheses.get(key)[attitude].getSecond();
-        if(gradedSet.contains(nodeID)){
-            return true;
-        }
     }
-    return false;
-   }
-  public PropositionNodeSet getGradedHypotheses(int level, int attitudeID){
-    return hypotheses.get(level)[attitudeID].getSecond();
-  }
-  public PropositionNodeSet getOriginHypotheses(int attitudeID){
-    return hypotheses.get(0)[attitudeID].getFirst();
-  }
+
+    public boolean isGradedHypNode(int level, int attitude, int nodeID) {
+        List<Integer> levels = hypotheses.keySet().stream()
+                .filter(key -> key <= level)
+                .collect(Collectors.toList());
+        for (int key : levels) {
+            PropositionNodeSet gradedSet = hypotheses.get(key)[attitude].getSecond();
+            if (gradedSet.contains(nodeID)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public PropositionNodeSet getGradedHypotheses(int level, int attitudeID) {
+        return hypotheses.get(level)[attitudeID].getSecond();
+    }
+
+    public PropositionNodeSet getOriginHypotheses(int attitudeID) {
+        return hypotheses.get(0)[attitudeID].getFirst();
+    }
+    public int getMaxLevel(){
+        return Collections.max(hypotheses.keySet());
+    }
 }
