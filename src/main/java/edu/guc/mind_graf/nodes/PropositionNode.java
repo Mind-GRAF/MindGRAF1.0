@@ -1476,5 +1476,20 @@ public class PropositionNode extends Node {
         }
 
         return propNodeSet.getValues().stream().map(node -> (PropositionNode) node).filter(node -> c.isHypothesis(level + 1, attitudeId, node)).findFirst().orElse(null);
+
+    }
+    public  boolean isHypInAnyContext(String contextName, int attitude){
+        HashMap<String, Context> contexts = ContextController.getContextSet().getSet();
+        int nodeID = getId();
+        for(Context otherContext: contexts.values()){
+            if(!otherContext.getName().equals(contextName)){
+               boolean isOriginHyp = otherContext.isOriginHypNode(attitude, nodeID);
+               boolean isGradedHyp = otherContext.isGradedHypNode(otherContext.getMaxLevel(), attitude, nodeID);
+                if( isOriginHyp|| isGradedHyp){
+                    return true;
+                }
+            }  
+        }
+        return false;
     }
 }
