@@ -317,7 +317,14 @@ public class Context {
     public PropositionNodeSet getOriginHypotheses(int attitudeID) {
         return hypotheses.get(0)[attitudeID].getFirst();
     }
-    public int getMaxLevel(){
+
+    public int getMaxLevel() {
         return Collections.max(hypotheses.keySet());
+    }
+
+    public boolean isHyp(int nodeID, int attitude) {
+        boolean isOriginHyp = isOriginHypNode(attitude, nodeID);
+        boolean isGradedHyp = isGradedHypNode(getMaxLevel(), attitude, nodeID);
+        return isOriginHyp || isGradedHyp;
     }
 }
