@@ -236,14 +236,12 @@ public class Context {
         List<Integer> levels = hypotheses.keySet().stream()
                 .filter(key -> key <= level)
                 .collect(Collectors.toList());
-        HashSet<Integer> gradedSet = new HashSet<>();
+        PropositionNodeSet gradedSet = new PropositionNodeSet();
         for (int key : levels) {
-            int[] gradedNodes = hypotheses.get(key)[attitudeID].getSecond().getProps();
-            for (int nodeID : gradedNodes) {
-                gradedSet.add(nodeID);
-            }
+            PropositionNodeSet gradedNodes = hypotheses.get(key)[attitudeID].getSecond();
+            gradedSet.union(gradedNodes);
         }
-        return new PropositionNodeSet(gradedSet);
+        return gradedSet;
     }
 
     public PropositionNodeSet getOriginHypotheses(int attitudeID) {
