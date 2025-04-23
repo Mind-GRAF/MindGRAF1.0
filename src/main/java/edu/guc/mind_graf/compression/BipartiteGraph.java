@@ -25,11 +25,12 @@ public class BipartiteGraph {
         this.sizeV2 = sizeV2;
         this.adj = adj;
         this.adjRev = adjRev;
-        for (int i = sizeV1; i < sizeV1 + sizeV2; i++) {
-            if (indeg(i) == 0 || outdeg(i) == 0) {
-                removeNode(i);
-            }
-        }
+        this.removed  = new boolean [sizeV1 + sizeV2];
+        // for (int i = sizeV1; i < sizeV1 + sizeV2; i++) {
+        //     if (indeg(i) == 0 || outdeg(i) == 0) {
+        //         removeNode(i);
+        //     }
+        // }
     }
 
     public BipartiteGraph(int sizeV1, int sizeV2, double edgeDensity) {

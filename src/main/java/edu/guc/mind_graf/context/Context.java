@@ -209,6 +209,33 @@ public class Context {
         }
         clonedContextsCount = 0;
     }
+    @Override
+public String toString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append("Context Name: ").append(name).append("\n");
+
+    for (Map.Entry<Integer, Pair<PropositionNodeSet, PropositionNodeSet>[]> entry : hypotheses.entrySet()) {
+        int level = entry.getKey();
+        sb.append("  Level ").append(level).append(":\n");
+
+        Pair<PropositionNodeSet, PropositionNodeSet>[] attitudes = entry.getValue();
+        for (int attitudeId = 0; attitudeId < attitudes.length; attitudeId++) {
+            PropositionNodeSet originSet = attitudes[attitudeId].getFirst();
+            PropositionNodeSet gradedSet = attitudes[attitudeId].getSecond();
+
+            sb.append("    Attitude ").append(attitudeId).append(":\n");
+            sb.append("      Origin Hypotheses: ")
+              .append(originSet.getNodes().stream().map(Node::getId).collect(Collectors.toList()))
+              .append("\n");
+            sb.append("      Graded Hypotheses: ")
+              .append(gradedSet.getNodes().stream().map(Node::getId).collect(Collectors.toList()))
+              .append("\n");
+        }
+    }
+
+    return sb.toString();
+}
+
 
     public boolean isOriginHypNode(int attitude, int nodeID) {
         PropositionNodeSet originSet = hypotheses.get(0)[attitude].getFirst();
