@@ -520,6 +520,42 @@ public class PropositionNode extends Node {
 
     }
 
+    public ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> getDerivingSupport(
+            String contextName, int attitude, int level) {
+        ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> supportsInContext = new ArrayList<>();
+        Context context = ContextController.getContext(contextName);
+        if (!context.getLevels().contains(level)) {
+            return supportsInContext;
+        }
+        if (!this.support.getAssumptionBasedSupport().containsKey(level)) {
+            return supportsInContext;
+        }
+        if (!this.support.getAssumptionBasedSupport().get(level).containsKey(attitude)) {
+            return supportsInContext;
+        }
+        boolean isValidSupport = true;
+        Support supportClone = this.support.clone();
+        for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> currSupport : supportClone
+                .getAssumptionBasedSupport().get(level).get(attitude)) {
+            for (Integer key : currSupport.getFirst().keySet()) {
+                if (currSupport.getFirst().get(key).getFirst()
+                        .isSubset(context.getOriginHypotheses(key))
+                        && currSupport.getFirst().get(key).getSecond()
+                                .isSubset(context.getGradedHypotheses(level, attitude))) {
+
+                    isValidSupport = true;
+                } else {
+                    isValidSupport = false;
+                    break;
+                }
+            }
+            if (isValidSupport) {
+                supportsInContext.add(currSupport);
+            }
+        }
+        return supportsInContext;
+    }
+
     /***
      * Makes this node a hypothesis in the specified attitude in the desired context
      *
