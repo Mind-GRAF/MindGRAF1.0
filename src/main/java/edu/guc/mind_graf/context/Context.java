@@ -12,7 +12,6 @@ import edu.guc.mind_graf.set.Set;
 import edu.guc.mind_graf.support.Pair;
 
 import java.util.*;
-import java.util.stream.IntStream;
 
 public class Context {
 
@@ -138,7 +137,7 @@ public class Context {
     }
 
     public void automaticallyRemoveInferredNodeFromContext(int level, int attitudeId, PropositionNode node) {
-        for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> assumptionSupport : node.getSupport().getAssumptionSupport().get(level).get(attitudeId)) {
+        for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> assumptionSupport : node.getSupport().getAssumptionBasedSupport().get(level).get(attitudeId)) {
             for (Map.Entry<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> support : assumptionSupport.getFirst().entrySet()) {
                 if (this.isInvalidSupport(level, attitudeId, support.getValue().getSecond())) {
                     continue;
@@ -151,7 +150,7 @@ public class Context {
     public void manuallyRemoveInferredNodeFromContext(int level, int attitudeId, PropositionNode node) {
         System.out.println("in manuallyRemoveInferredNodeFromContext");
         Revision.print("Starting removal of node: " + node.printShortData() + " from attitude: " + ContextController.getAttitudeName(attitudeId) + " from Context: " + this.getName());
-        for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> assumptionSupport : node.getSupport().getAssumptionSupport().get(level).get(attitudeId)) {
+        for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> assumptionSupport : node.getSupport().getAssumptionBasedSupport().get(level).get(attitudeId)) {
             for (Map.Entry<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> support : assumptionSupport.getFirst().entrySet()) {
                 if (this.isInvalidSupport(level, attitudeId, support.getValue().getFirst())) {
                     continue;

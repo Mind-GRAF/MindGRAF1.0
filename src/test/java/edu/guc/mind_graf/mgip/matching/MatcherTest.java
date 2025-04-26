@@ -11,7 +11,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import edu.guc.mind_graf.cables.DownCable;
-import edu.guc.mind_graf.cables.UpCable;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.caseFrames.Adjustability;
 import edu.guc.mind_graf.components.Substitutions;
@@ -596,7 +595,7 @@ public class MatcherTest {
                 assertEquals(M0, m.getNode());
                 assertEquals(matchType, m.getMatchType());
                 if (m.getSwitchSubs().get(var).equals(phy)) {
-                    assertTrue(((Support) m.getSupport()).getJustificationSupport().get(level).get(attitude).getFirst()
+                    assertTrue(((Support) m.getSupport()).getJustificationBasedSupport().get(level).get(attitude).getFirst()
                             .getFirst().get(attitude).getFirst().contains(M0));
                 }
             }

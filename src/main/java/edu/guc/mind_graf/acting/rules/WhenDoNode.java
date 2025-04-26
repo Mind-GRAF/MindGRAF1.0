@@ -207,7 +207,7 @@ public class WhenDoNode extends RuleNode {
             if (report.getSupport() != null) {
                 for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> currSupport : report
                         .getSupport()
-                        .getJustificationSupport().get(Network.currentLevel).get(currentAttitudeId)) {
+                        .getJustificationBasedSupport().get(Network.currentLevel).get(currentAttitudeId)) {
                     HashMap<Integer, PropositionNodeSet> hash = new HashMap<>();
                     for (Integer innerAttitude : currSupport.getFirst().keySet()) {
                         PropositionNodeSet currNodeSet = currSupport.getFirst().get(currentAttitudeId).getFirst();
