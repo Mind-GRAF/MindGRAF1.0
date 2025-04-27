@@ -32,7 +32,18 @@ public class CHB {
     }
 
 
-
+    public static boolean isHypothesisSupport(int attitudeID, int nodeID,
+            Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support) {
+        if (support.getFirst().size() != 1 || !support.getSecond().isEmpty())
+            return false;
+        Pair<PropositionNodeSet, PropositionNodeSet> supportingNodes = support.getFirst().get(attitudeID);
+        if (supportingNodes != null) {
+            if (supportingNodes.getFirst().size() == 1 && supportingNodes.getSecond().isEmpty()
+                    && supportingNodes.getFirst().contains(nodeID))
+                return true;
+        }
+        return false;
+    }
 
    
     public static void main( String [] args)throws NoSuchTypeException{

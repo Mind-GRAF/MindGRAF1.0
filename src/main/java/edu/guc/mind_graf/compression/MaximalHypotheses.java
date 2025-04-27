@@ -54,7 +54,7 @@ public class MaximalHypotheses {
         ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> validSupports = node
                 .getDerivingSupport(context, attitude, 0);
         for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support : validSupports) {
-            boolean isHypSupport = isHypothesisSupport(attitude, nodeID, support);
+            boolean isHypSupport = CHB.isHypothesisSupport(attitude, nodeID, support);
             if (isHypSupport)
                 isMaxHyp = true;
             else {
@@ -65,18 +65,7 @@ public class MaximalHypotheses {
         return isMaxHyp;
     }
 
-    public static boolean isHypothesisSupport(int attitudeID, int nodeID,
-            Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support) {
-        if (support.getFirst().size() != 1 || !support.getSecond().isEmpty())
-            return false;
-        Pair<PropositionNodeSet, PropositionNodeSet> supportingNodes = support.getFirst().get(attitudeID);
-        if (supportingNodes != null) {
-            if (supportingNodes.getFirst().size() == 1 && supportingNodes.getSecond().isEmpty()
-                    && supportingNodes.getFirst().contains(nodeID))
-                return true;
-        }
-        return false;
-    }
+   
     public Pair<PropositionNodeSet, PropositionNodeSet>[] getMaximalHypotheses() {
         return maximalHypotheses;
     }
