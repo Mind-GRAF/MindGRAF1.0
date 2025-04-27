@@ -111,7 +111,7 @@ public class PropositionNode extends Node {
      * @return a copy of support
      */
     public Support getSupport() {
-        return support;
+        return support.clone();
     }
 
     /**
@@ -566,7 +566,7 @@ public class PropositionNode extends Node {
     public void setHyp(String desiredContextName, int attitude) {
         Context desiredContext = ContextController.getContext(desiredContextName);
         desiredContext.addHypothesisToContext(Network.currentLevel, attitude, this);
-        this.support.setHyp(attitude);
+        //this.support.setHyp(attitude);
     }
 
     public void setHyp(int attitude) {
