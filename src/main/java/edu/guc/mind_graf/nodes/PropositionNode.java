@@ -111,7 +111,7 @@ public class PropositionNode extends Node {
      * @return a copy of support
      */
     public Support getSupport() {
-        return support.clone();
+        return support;
     }
 
     /**
