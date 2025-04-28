@@ -21,7 +21,9 @@ public class NodeSet implements Iterable<Node> {
     public NodeSet(Node... nodes) {
         this.nodes = new HashMap<String, Node>();
         for (Node n : nodes)
-            this.nodes.put(n.getName(), n);
+            if (n != null && n.getName() != null) {
+                this.nodes.put(n.getName(), n);
+            }
     }
 
     public NodeSet(HashMap<String, Node> list, Node... nodes) {

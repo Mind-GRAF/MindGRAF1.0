@@ -17,7 +17,9 @@ public class DownCableSet implements Iterable<DownCable>{
 		super();
 		HashMap<String, DownCable> cablesTemp = new HashMap<String, DownCable>();
 		for (DownCable cable : cables) {
-			cablesTemp.put(cable.getRelation().getName(), cable);
+			if (cable != null && cable.getRelation() != null) {
+				cablesTemp.put(cable.getRelation().getName(), cable);
+			}
 
 		}
 

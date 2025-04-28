@@ -28,24 +28,20 @@ import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.nodes.MGIfNode;
 import edu.guc.mind_graf.nodes.MGIterateNode;
 import edu.guc.mind_graf.nodes.MGSequenceNode;
+import edu.guc.mind_graf.set.NodeSet;
 
 public class Network {
-	private static HashMap<Integer, Node> nodes;
-	private static HashMap<String, HashMap<String, Node>> molecularNodes;
-	private static HashMap<String, Node> baseNodes;
-	private static HashMap<String, Relation> relations;
-	private static HashMap<Integer, Node> propositionNodes;
-	public static HashMap<String, String> quantifiers = new HashMap<String, String>();
-	public static HashMap<String, CustomClass> userDefinedClasses = new HashMap<String, CustomClass>();
+	private static HashMap<Integer, Node> nodes =new HashMap<>();
+	private static HashMap<String, HashMap<String, Node>> molecularNodes=new HashMap<>();
+	private static HashMap<String, Node> baseNodes=new HashMap<>();
+	private static HashMap<String, Relation> relations= new HashMap<>();
+	private static HashMap<Integer, Node> propositionNodes=new HashMap<>();
+	public static HashMap<String, String> quantifiers=new HashMap<>();
+	public static HashMap<String, CustomClass> userDefinedClasses=new HashMap<>();
 	public static int MolecularCount;
 	public static int currentLevel;
 
 	public Network() {
-		nodes = new HashMap<Integer, Node>();
-		molecularNodes = new HashMap<String, HashMap<String, Node>>();
-		baseNodes = new HashMap<String, Node>();
-		propositionNodes = new HashMap<Integer, Node>();
-		relations = new HashMap<String, Relation>();
 		quantifiers.put("forall", "forall");
 		addBasicRelations();
 		currentLevel = 0;
@@ -525,90 +521,90 @@ public class Network {
 	}
 
 	public static void main(String[] args) throws Exception {
-		Network Net = new Network();
-		// Node Z = createvariableNode("Z", "propositionnode");
-		// Node Y = createvariableNode("Y", "propositionnode");
-		// Node X = createvariableNode("X", "propositionnode");
-		// Node Base = createNode("base", "propositionnode");
-		// quantifiers.put("forall","forall");
-		//
-		// Relation relation = createRelation ("forall", "",
-		// Adjustability.EXPAND, 2);
-		// Relation relation2 = createRelation("b", "", Adjustability.EXPAND,
-		// 2);
-		//
-		// NodeSet nodeSetX = new NodeSet();
-		// NodeSet nodeSetZ = new NodeSet();
-		// NodeSet nodeSetXZ = new NodeSet();
-		// NodeSet nodeSetY = new NodeSet();
-		//
-		// nodeSetZ.add(Z);
-		// nodeSetX.add(X);
-		// nodeSetXZ.add(X);
-		// nodeSetXZ.add(Z);
-		// nodeSetY.add(Y);
-		//
-		// // M0
-		// DownCable d2 = new DownCable(relation2, nodeSetXZ);
-		// HashMap<String, DownCable> Cables = new HashMap<>();
-		// Cables.put(d2.getRelation().getName(), d2);
-		// DownCableSet downCableSet = new DownCableSet(Cables);
-		// Node M0 = createNode("propositionnode", downCableSet);
-		//
-		// //M1
-		// NodeSet nodeSetM0 = new NodeSet();
-		// nodeSetM0.add(M0);
-		// DownCable d = new DownCable(relation, nodeSetZ);
-		// DownCable d3 = new DownCable(relation2,nodeSetM0);
-		// HashMap<String, DownCable> Cables2 = new HashMap<>();
-		// Cables2.put(d3.getRelation().getName(), d3);
-		// Cables2.put(d.getRelation().getName(), d);
-		// DownCableSet downCableSet2 = new DownCableSet(Cables2);
-		// Node M1 = createNode("propositionnode", downCableSet2);
-		//
-		// NodeSet nodeSetM1 = new NodeSet();
-		// nodeSetM1.add(M1);
-		//
-		// //M2
-		// DownCable dM2 = new DownCable(relation2, nodeSetY.union(nodeSetM1));
-		// HashMap<String, DownCable> CablesM2 = new HashMap<>();
-		// CablesM2.put(dM2.getRelation().getName(), dM2);
-		// DownCableSet downCableSetM2 = new DownCableSet(CablesM2);
-		// Node M2 = createNode("propositionnode", downCableSetM2);
-		//
-		// //M3
-		// DownCable dM3 = new DownCable(relation2,
-		// nodeSetX.union(nodeSetZ.union(nodeSetY)));
-		//
-		// HashMap<String, DownCable> CablesM3 = new HashMap<>();
-		// CablesM3.put(dM3.getRelation().getName(), dM3);
-		//
-		// DownCableSet downCableSetM3 = new DownCableSet(CablesM3);
-		// Node M3 = createNode("propositionnode", downCableSetM3);
-		//
-		// //M4
-		// NodeSet nodeSetM3 = new NodeSet();
-		// nodeSetM3.add(M3);
-		// NodeSet nodeSetM2 = new NodeSet();
-		// nodeSetM3.add(M2);
-		//
-		// NodeSet nodeSetM23 = new NodeSet();
-		// nodeSetM23.add(M2);
-		// nodeSetM23.add(M3);
-		//
-		// DownCable dM4 = new DownCable(relation, nodeSetX);
-		// DownCable dM4_2 = new DownCable(relation2,nodeSetM23);
-		// // DownCable dM4_3 = new DownCable(relation2,nodeSetM3);
-		//
-		// HashMap<String, DownCable> CablesM4 = new HashMap<>();
-		// CablesM4.put(dM4.getRelation().getName(), dM4);
-		// CablesM4.put(dM4_2.getRelation().getName()+1, dM4_2);
-		//
-		// DownCableSet downCableSetM4 = new DownCableSet(CablesM4);
-		// Node M4 = createNode("propositionnode", downCableSetM4);
-		//
-		// System.out.println("-----------------------------------------------------");
-		// System.out.println("free vars" + M4.getFreeVariables());
+//		Network Net = new Network();
+//		 Node Z = createVariableNode("Z", "propositionnode");
+//		 Node Y = createVariableNode("Y", "propositionnode");
+//		 Node X = createVariableNode("X", "propositionnode");
+//		 Node Base = createNode("base", "propositionnode");
+//		 quantifiers.put("forall","forall");
+//
+//		 Relation relation = createRelation ("forall", "",
+//		 Adjustability.EXPAND, 2);
+//		 Relation relation2 = createRelation("b", "", Adjustability.EXPAND,
+//		 2);
+//
+//		 NodeSet nodeSetX = new NodeSet();
+//		 NodeSet nodeSetZ = new NodeSet();
+//		 NodeSet nodeSetXZ = new NodeSet();
+//		 NodeSet nodeSetY = new NodeSet();
+//
+//		 nodeSetZ.add(Z);
+//		 nodeSetX.add(X);
+//		 nodeSetXZ.add(X);
+//		 nodeSetXZ.add(Z);
+//		 nodeSetY.add(Y);
+//
+//		 // M0
+//		 DownCable d2 = new DownCable(relation2, nodeSetXZ);
+//		 HashMap<String, DownCable> Cables = new HashMap<>();
+//		 Cables.put(d2.getRelation().getName(), d2);
+//		 DownCableSet downCableSet = new DownCableSet(Cables);
+//		 Node M0 = createNode("propositionnode", downCableSet);
+//
+//		 //M1
+//		 NodeSet nodeSetM0 = new NodeSet();
+//		 nodeSetM0.add(M0);
+//		 DownCable d = new DownCable(relation, nodeSetZ);
+//		 DownCable d3 = new DownCable(relation2,nodeSetM0);
+//		 HashMap<String, DownCable> Cables2 = new HashMap<>();
+//		 Cables2.put(d3.getRelation().getName(), d3);
+//		 Cables2.put(d.getRelation().getName(), d);
+//		 DownCableSet downCableSet2 = new DownCableSet(Cables2);
+//		 Node M1 = createNode("propositionnode", downCableSet2);
+//
+//		 NodeSet nodeSetM1 = new NodeSet();
+//		 nodeSetM1.add(M1);
+//
+//		 //M2
+//		 DownCable dM2 = new DownCable(relation2, nodeSetY.union(nodeSetM1));
+//		 HashMap<String, DownCable> CablesM2 = new HashMap<>();
+//		 CablesM2.put(dM2.getRelation().getName(), dM2);
+//		 DownCableSet downCableSetM2 = new DownCableSet(CablesM2);
+//		 Node M2 = createNode("propositionnode", downCableSetM2);
+//
+//		 //M3
+//		 DownCable dM3 = new DownCable(relation2,
+//		 nodeSetX.union(nodeSetZ.union(nodeSetY)));
+//
+//		 HashMap<String, DownCable> CablesM3 = new HashMap<>();
+//		 CablesM3.put(dM3.getRelation().getName(), dM3);
+//
+//		 DownCableSet downCableSetM3 = new DownCableSet(CablesM3);
+//		 Node M3 = createNode("propositionnode", downCableSetM3);
+//
+//		 //M4
+//		 NodeSet nodeSetM3 = new NodeSet();
+//		 nodeSetM3.add(M3);
+//		 NodeSet nodeSetM2 = new NodeSet();
+//		 nodeSetM3.add(M2);
+//
+//		 NodeSet nodeSetM23 = new NodeSet();
+//		 nodeSetM23.add(M2);
+//		 nodeSetM23.add(M3);
+//
+//		 DownCable dM4 = new DownCable(relation, nodeSetX);
+//		 DownCable dM4_2 = new DownCable(relation2,nodeSetM23);
+//		 // DownCable dM4_3 = new DownCable(relation2,nodeSetM3);
+//
+//		 HashMap<String, DownCable> CablesM4 = new HashMap<>();
+//		 CablesM4.put(dM4.getRelation().getName(), dM4);
+//		 CablesM4.put(dM4_2.getRelation().getName()+1, dM4_2);
+//
+//		 DownCableSet downCableSetM4 = new DownCableSet(CablesM4);
+//		 Node M4 = createNode("propositionnode", downCableSetM4);
+//
+//		 System.out.println("-----------------------------------------------------");
+//		 System.out.println("free vars" + M4.getFreeVariables());
 		//
 		//
 		// Substitution s = new Substitution(Base, Z);
@@ -622,80 +618,80 @@ public class Network {
 
 		// ======================================================================================================================
 
-		// Node X = createvariableNode("X", "propositionnode");
-		// Node Y = createvariableNode("Y", "propositionnode");
-		// Node Base = createNode("base", "propositionnode", false);
-		// Node Bob = createNode("bob", "propositionnode", false);
-		//
-		// quantifiers.put("forall","forall");
-		//
-		// Relation Qrelation = createRelation ("forall", "",
-		// Adjustability.EXPAND, 2);
-		// Relation relation = createRelation("relation", "",
-		// Adjustability.EXPAND, 2);
-		//
-		// NodeSet nodeSetX = new NodeSet();
-		// NodeSet nodeSetY = new NodeSet();
-		//
-		// nodeSetX.add(X);;
-		// nodeSetY.add(Y);
-		//
-		// // M0
-		// DownCable d2 = new DownCable(relation, nodeSetX.union(nodeSetY));
-		// HashMap<String, DownCable> Cables = new HashMap<>();
-		// Cables.put(d2.getRelation().getName(), d2);
-		// DownCableSet downCableSet = new DownCableSet(Cables);
-		// Node M0 = createNode("propositionnode", downCableSet);
-		//
-		// //M1
-		// NodeSet nodeSetM0 = new NodeSet();
-		// nodeSetM0.add(M0);
-		// DownCable d = new DownCable(relation, nodeSetM0.union(nodeSetY));
-		// HashMap<String, DownCable> Cables2 = new HashMap<>();
-		// Cables2.put(d.getRelation().getName(), d);
-		// DownCableSet downCableSet2 = new DownCableSet(Cables2);
-		// Node M1 = createNode("propositionnode", downCableSet2);
-		//
-		// NodeSet nodeSetM1 = new NodeSet();
-		// nodeSetM1.add(M1);
-		//
-		// //M2
-		// NodeSet nodeSetBob = new NodeSet(); nodeSetBob.add(Bob);
-		// DownCable dM2 = new DownCable(relation, nodeSetY.union(nodeSetBob));
-		// HashMap<String, DownCable> CablesM2 = new HashMap<>();
-		// CablesM2.put(dM2.getRelation().getName(), dM2);
-		// DownCableSet downCableSetM2 = new DownCableSet(CablesM2);
-		// Node M2 = createNode("propositionnode", downCableSetM2);
-		//
-		// //M3
-		// NodeSet NodeSetM2 = new NodeSet(); NodeSetM2.add(M2);
-		// DownCable dM3 = new DownCable(Qrelation, (nodeSetY));
-		// DownCable dM3_2 = new DownCable(relation,
-		// (nodeSetM1.union(NodeSetM2)));
-		//
-		// HashMap<String, DownCable> CablesM3 = new HashMap<>();
-		// CablesM3.put(dM3.getRelation().getName(), dM3);
-		// CablesM3.put(dM3_2.getRelation().getName(), dM3_2);
-		//
-		// DownCableSet downCableSetM3 = new DownCableSet(CablesM3);
-		// Node M3 = createNode("propositionnode", downCableSetM3);
-		//
-		// //M4
-		// NodeSet nodeSetM3 = new NodeSet();
-		// nodeSetM3.add(M3);
-		//
-		// NodeSet nodeSetM03 = new NodeSet();
-		// nodeSetM03.add(M0);
-		// nodeSetM03.add(M3);
-		//
-		// DownCable dM4_2 = new DownCable(relation,nodeSetM03);
-		// // DownCable dM4_3 = new DownCable(relation2,nodeSetM3);
-		//
-		// HashMap<String, DownCable> CablesM4 = new HashMap<>();
-		// CablesM4.put(dM4_2.getRelation().getName()+1, dM4_2);
-		//
-		// DownCableSet downCableSetM4 = new DownCableSet(CablesM4);
-		// Node M4 = createNode("propositionnode", downCableSetM4);
+		 Node X = createVariableNode("X", "propositionnode");
+		 Node Y = createVariableNode("Y", "propositionnode");
+		 Node Base = createNode("base", "propositionnode");
+		 Node Bob = createNode("bob", "propositionnode");
+
+		 quantifiers.put("forall","forall");
+
+		 Relation Qrelation = createRelation ("forall", "",
+		 Adjustability.EXPAND, 2);
+		 Relation relation = createRelation("relation", "",
+		 Adjustability.EXPAND, 2);
+
+		 NodeSet nodeSetX = new NodeSet();
+		 NodeSet nodeSetY = new NodeSet();
+
+		 nodeSetX.add(X);;
+		 nodeSetY.add(Y);
+
+		 // M0
+		 DownCable d2 = new DownCable(relation, nodeSetX.union(nodeSetY));
+		 HashMap<String, DownCable> Cables = new HashMap<>();
+		 Cables.put(d2.getRelation().getName(), d2);
+		 DownCableSet downCableSet = new DownCableSet(Cables);
+		 Node M0 = createNode("propositionnode", downCableSet);
+
+		 //M1
+		 NodeSet nodeSetM0 = new NodeSet();
+		 nodeSetM0.add(M0);
+		 DownCable d = new DownCable(relation, nodeSetM0.union(nodeSetY));
+		 HashMap<String, DownCable> Cables2 = new HashMap<>();
+		 Cables2.put(d.getRelation().getName(), d);
+		 DownCableSet downCableSet2 = new DownCableSet(Cables2);
+		 Node M1 = createNode("propositionnode", downCableSet2);
+
+		 NodeSet nodeSetM1 = new NodeSet();
+		 nodeSetM1.add(M1);
+
+		 //M2
+		 NodeSet nodeSetBob = new NodeSet(); nodeSetBob.add(Bob);
+		 DownCable dM2 = new DownCable(relation, nodeSetY.union(nodeSetBob));
+		 HashMap<String, DownCable> CablesM2 = new HashMap<>();
+		 CablesM2.put(dM2.getRelation().getName(), dM2);
+		 DownCableSet downCableSetM2 = new DownCableSet(CablesM2);
+		 Node M2 = createNode("propositionnode", downCableSetM2);
+
+		 //M3
+		 NodeSet NodeSetM2 = new NodeSet(); NodeSetM2.add(M2);
+		 DownCable dM3 = new DownCable(Qrelation, (nodeSetY));
+		 DownCable dM3_2 = new DownCable(relation,
+		 (nodeSetM1.union(NodeSetM2)));
+
+		 HashMap<String, DownCable> CablesM3 = new HashMap<>();
+		 CablesM3.put(dM3.getRelation().getName(), dM3);
+		 CablesM3.put(dM3_2.getRelation().getName(), dM3_2);
+
+		 DownCableSet downCableSetM3 = new DownCableSet(CablesM3);
+		 Node M3 = createNode("propositionnode", downCableSetM3);
+
+		 //M4
+		 NodeSet nodeSetM3 = new NodeSet();
+		 nodeSetM3.add(M3);
+
+		 NodeSet nodeSetM03 = new NodeSet();
+		 nodeSetM03.add(M0);
+		 nodeSetM03.add(M3);
+
+		 DownCable dM4_2 = new DownCable(relation,nodeSetM03);
+		 // DownCable dM4_3 = new DownCable(relation2,nodeSetM3);
+
+		 HashMap<String, DownCable> CablesM4 = new HashMap<>();
+		 CablesM4.put(dM4_2.getRelation().getName()+1, dM4_2);
+
+		 DownCableSet downCableSetM4 = new DownCableSet(CablesM4);
+		 Node M4 = createNode("propositionnode", downCableSetM4);
 		//
 		// System.out.println("-----------------------------------------------------");
 		// System.out.println("free vars" + M4.getFreeVariables());

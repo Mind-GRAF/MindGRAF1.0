@@ -39,10 +39,26 @@ public abstract class RuleInfoHandler {
 
     public static PropositionNodeSet getVariableAntecedents(NodeSet allAntecedents) {
         PropositionNodeSet antecedents = new PropositionNodeSet();
-        for(Node n : allAntecedents){   // only want the antecedents with free variables, other antecedents will be handled by the constant RI
-            if(n.isOpen())
+        System.out.println("Total antecedents to check: " + allAntecedents.size());
+
+        for(Node n : allAntecedents.getValues()) {
+            // Print info about the node
+            System.out.println("Checking node: " + n.getName());
+
+            // Fetch free variables explicitly
+            NodeSet freeVars = n.fetchFreeVariables();
+            System.out.println("Free variables size: " + (freeVars != null ? freeVars.size() : "null"));
+            System.out.println("Is node open: " + n.isOpen());
+
+            if(n.isOpen()) {
+                System.out.println("Adding node to result: " + n.getName());
                 antecedents.add(n);
+            } else {
+                System.out.println("Node not added");
+            }
         }
+
+        System.out.println("Final result size: " + antecedents.size());
         return antecedents;
     }
 

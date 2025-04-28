@@ -40,7 +40,7 @@ public class MyClassCreator {
                 + "super(" + constructorArg + ");}"
                 + "  public void " + methodName + "() { " + methodCode + "} }";
         Class<?> myClass = MyClassCreator.createClass(className, classCode, className, superClassName);
-        Object a1 = myClass.newInstance();
+        Object a1 = myClass;
         Method m1 = null;
         try {
             m1 = a1.getClass().getMethod(methodName);
