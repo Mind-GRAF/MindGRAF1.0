@@ -62,11 +62,18 @@ public class GraphBuilder {
     public HashSet<Integer>[] createAdjList(HashMap<Integer, HashSet<Integer>> hypAdjList,
             HashMap<Integer, HashSet<Integer>> supportAdjList) {
         HashSet<Integer>[] adj = new HashSet[sizeV1 + sizeV2];
-        for (int nodeId : hypAdjList.keySet()) {
-            adj[nodeId] = new HashSet<>(hypAdjList.get(nodeId));
+        for (int i = 0; i < sizeV1; i++) {
+            if (hypAdjList.get(i) != null) {
+                adj[i] = new HashSet<>();
+                for (Integer value : hypAdjList.get(i)) {
+                    adj[i].add(value + sizeV1);
+                }
+            } else {
+                adj[i] = new HashSet<>();
+            }
         }
-        for (int supportId : supportAdjList.keySet()) {
-            adj[supportId + sizeV1] = new HashSet<>(supportAdjList.get(supportId));
+        for (int i = 0; i < sizeV2; i++) {
+            adj[i + sizeV1] = supportAdjList.get(i) != null ? new HashSet<>(supportAdjList.get(i)) : new HashSet<>();
         }
         return adj;
     }
@@ -164,10 +171,87 @@ public class GraphBuilder {
         StringBuilder sb = new StringBuilder();
         sb.append("Support Nodes Mapping:\n");
         for (Map.Entry<Integer, SupportNode> entry : supportNodes.entrySet()) {
-            sb.append("  ID ").append(entry.getKey()).append(" -> ").append(entry.getValue()).append("\n");
+            sb.append("  ID ").append(entry.getKey() + sizeV1).append(" -> ").append(entry.getValue()).append("\n");
         }
         System.out.println(sb.toString());
 
     }
 
+    public static void main(String[] args) throws NoSuchTypeException {
+
+        Set<String, Integer> attitudeNames = new Set<>();
+        attitudeNames.add("a1", 0);
+        attitudeNames.add("a2", 1);
+        attitudeNames.add("a3", 2);
+
+        ArrayList<ArrayList<Integer>> consistentAttitudes = new ArrayList<>();
+        consistentAttitudes.add(new ArrayList<>(Arrays.asList(0, 1))); // a1 and a2
+        consistentAttitudes.add(new ArrayList<>(Arrays.asList(1, 2))); // a2 and a3
+
+        Network n = NetworkController.setUp(attitudeNames, consistentAttitudes, false, false, false, 1);
+
+        ContextController.createNewContext("guc");
+        ContextController.setCurrContext("guc");
+        Context contextToBeTested = ContextController.getContext("guc");
+
+        PropositionNode node1 = (PropositionNode) Network.createNode("1", "propositionnode");
+        PropositionNode node2 = (PropositionNode) Network.createNode("2", "propositionnode");
+        PropositionNode node3 = (PropositionNode) Network.createNode("3", "propositionnode");
+        PropositionNode node4 = (PropositionNode) Network.createNode("4", "propositionnode");
+        PropositionNode node5 = (PropositionNode) Network.createNode("5", "propositionnode");
+
+        contextToBeTested.addHypothesisToContext(0, 0, node1);
+        contextToBeTested.addHypothesisToContext(0, 1, node1);
+        contextToBeTested.addHypothesisToContext(0, 2, node1);
+        contextToBeTested.addHypothesisToContext(0, 0, node2);
+        contextToBeTested.addHypothesisToContext(0, 1, node3);
+        contextToBeTested.addHypothesisToContext(0, 2, node4);
+        contextToBeTested.addHypothesisToContext(0, 0, node5);
+        System.out.print(ContextController.getContext("guc").toString());
+
+        PropositionNodeSet ps_1_2 = new PropositionNodeSet(1, 2);
+        PropositionNodeSet ps_1_3 = new PropositionNodeSet(1, 3);
+        PropositionNodeSet ps_1_2_5 = new PropositionNodeSet(1, 2, 5);
+        PropositionNodeSet ps_1_4 = new PropositionNodeSet(1, 4);
+        PropositionNodeSet ps_1_5 = new PropositionNodeSet(1, 5);
+        PropositionNodeSet ps_3 = new PropositionNodeSet(3);
+        PropositionNodeSet ps_4 = new PropositionNodeSet(4);
+
+        ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> supports = new ArrayList<>();
+        HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> support;
+
+        support = new HashMap<>();
+        support.put(0, new Pair<>(ps_1_2, new PropositionNodeSet()));
+        supports.add(new Pair<>(support, new PropositionNodeSet()));
+        node3.addJustificationBasedSupports(1, Network.currentLevel, new ArrayList<>(supports));
+        supports.clear();
+
+        support = new HashMap<>();
+        support.put(0, new Pair<>(ps_1_5, new PropositionNodeSet()));
+        support.put(1, new Pair<>(ps_3, new PropositionNodeSet()));
+        supports.add(new Pair<>(new HashMap<>(support), new PropositionNodeSet(12)));
+
+        support.clear();
+        support.put(1, new Pair<>(ps_3, new PropositionNodeSet()));
+        supports.add(new Pair<>(new HashMap<>(support), new PropositionNodeSet(12)));
+        node4.addJustificationBasedSupports(2, Network.currentLevel, new ArrayList<>(supports));
+
+        supports.clear();
+        support = new HashMap<>();
+        support.put(2, new Pair<>(ps_1_4, new PropositionNodeSet()));
+        supports.add(new Pair<>(support, new PropositionNodeSet(10)));
+        node2.addJustificationBasedSupports(0, Network.currentLevel, new ArrayList<>(supports));
+
+        System.out.println(node1.getSupport() + "node1 assumptionBasedSupport");
+        System.out.println(node2.getSupport() + "node2 assumptionBasedSupport");
+        System.out.println(node3.getSupport() + "node3 assumptionBasedSupport");
+        System.out.println(node4.getSupport() + "node4 assumptionBasedSupport");
+        System.out.println(node5.getSupport() + "node5 assumptionBasedSupport");
+
+        GraphBuilder builder = new GraphBuilder("guc");
+        BipartiteGraph graph = builder.createBaseSupportGraph();
+        builder.printHypothesesNodes();
+        builder.printSupportNodes();
+        System.out.println(graph);
+    }
 }
