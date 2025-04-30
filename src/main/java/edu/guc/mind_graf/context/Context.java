@@ -209,33 +209,33 @@ public class Context {
         }
         clonedContextsCount = 0;
     }
+
     @Override
-public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("Context Name: ").append(name).append("\n");
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Context Name: ").append(name).append("\n");
 
-    for (Map.Entry<Integer, Pair<PropositionNodeSet, PropositionNodeSet>[]> entry : hypotheses.entrySet()) {
-        int level = entry.getKey();
-        sb.append("  Level ").append(level).append(":\n");
+        for (Map.Entry<Integer, Pair<PropositionNodeSet, PropositionNodeSet>[]> entry : hypotheses.entrySet()) {
+            int level = entry.getKey();
+            sb.append("  Level ").append(level).append(":\n");
 
-        Pair<PropositionNodeSet, PropositionNodeSet>[] attitudes = entry.getValue();
-        for (int attitudeId = 0; attitudeId < attitudes.length; attitudeId++) {
-            PropositionNodeSet originSet = attitudes[attitudeId].getFirst();
-            PropositionNodeSet gradedSet = attitudes[attitudeId].getSecond();
+            Pair<PropositionNodeSet, PropositionNodeSet>[] attitudes = entry.getValue();
+            for (int attitudeId = 0; attitudeId < attitudes.length; attitudeId++) {
+                PropositionNodeSet originSet = attitudes[attitudeId].getFirst();
+                PropositionNodeSet gradedSet = attitudes[attitudeId].getSecond();
 
-            sb.append("    Attitude ").append(attitudeId).append(":\n");
-            sb.append("      Origin Hypotheses: ")
-              .append(originSet.getNodes().stream().map(Node::getId).collect(Collectors.toList()))
-              .append("\n");
-            sb.append("      Graded Hypotheses: ")
-              .append(gradedSet.getNodes().stream().map(Node::getId).collect(Collectors.toList()))
-              .append("\n");
+                sb.append("    Attitude ").append(attitudeId).append(":\n");
+                sb.append("      Origin Hypotheses: ")
+                        .append(originSet.getNodes().stream().map(Node::getId).collect(Collectors.toList()))
+                        .append("\n");
+                sb.append("      Graded Hypotheses: ")
+                        .append(gradedSet.getNodes().stream().map(Node::getId).collect(Collectors.toList()))
+                        .append("\n");
+            }
         }
+
+        return sb.toString();
     }
-
-    return sb.toString();
-}
-
 
     public boolean isOriginHypNode(int attitude, int nodeID) {
         PropositionNodeSet originSet = hypotheses.get(0)[attitude].getFirst();
@@ -243,45 +243,23 @@ public String toString() {
             return true;
         }
         return false;
-
     }
 
     public boolean isGradedHypNode(int level, int attitude, int nodeID) {
-        List<Integer> levels = hypotheses.keySet().stream()
-                .filter(key -> key <= level)
-                .collect(Collectors.toList());
-        for (int key : levels) {
-            PropositionNodeSet gradedSet = hypotheses.get(key)[attitude].getSecond();
-            if (gradedSet.contains(nodeID)) {
-                return true;
-            }
-        }
-        return false;
+        return hypotheses.get(level)[attitude].getSecond().contains(nodeID);
     }
 
     public PropositionNodeSet getGradedHypotheses(int level, int attitudeID) {
-        List<Integer> levels = hypotheses.keySet().stream()
-                .filter(key -> key <= level)
-                .collect(Collectors.toList());
-        PropositionNodeSet gradedSet = new PropositionNodeSet();
-        for (int key : levels) {
-            PropositionNodeSet gradedNodes = hypotheses.get(key)[attitudeID].getSecond();
-            gradedSet.union(gradedNodes);
-        }
-        return gradedSet;
+        return hypotheses.get(level)[attitudeID].getSecond();
     }
 
     public PropositionNodeSet getOriginHypotheses(int attitudeID) {
         return hypotheses.get(0)[attitudeID].getFirst();
     }
 
-    public int getMaxLevel() {
-        return Collections.max(hypotheses.keySet());
-    }
-
-    public boolean isHyp(int nodeID, int attitude) {
+    public boolean isHyp(int nodeID, int attitude, int level) {
         boolean isOriginHyp = isOriginHypNode(attitude, nodeID);
-        boolean isGradedHyp = isGradedHypNode(getMaxLevel(), attitude, nodeID);
+        boolean isGradedHyp = isGradedHypNode(level, attitude, nodeID);
         return isOriginHyp || isGradedHyp;
     }
 }

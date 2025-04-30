@@ -1538,12 +1538,12 @@ public class PropositionNode extends Node {
 
     }
 
-    public boolean isHypInAnyContext(String contextName, int attitude) {
+    public boolean isHypInAnyContext(String contextName, int attitude, int level) {
         HashMap<String, Context> contexts = ContextController.getContextSet().getSet();
         int nodeID = getId();
         for (Context otherContext : contexts.values()) {
             if (!otherContext.getName().equals(contextName)) {
-                if (otherContext.isHyp(nodeID, attitude)) {
+                if (otherContext.isHyp(nodeID, attitude, level)) {
                     return true;
                 }
             }
