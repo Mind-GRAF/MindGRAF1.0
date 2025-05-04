@@ -4,12 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map.Entry;
 
 import edu.guc.mind_graf.nodes.PropositionNode;
-import edu.guc.mind_graf.nodes.Node;
-import edu.guc.mind_graf.set.ContextSet;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.Set;
 import edu.guc.mind_graf.support.Pair;
@@ -63,6 +59,7 @@ public class Trim {
   }
 
   public boolean hasDependents(int nodeID, int supportingAttitudeID) {
+    System.out.println("does node "+ nodeID + "have dependents in attitude" + supportingAttitudeID);
     PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
     PropositionNodeSet AssumptionSupportDependents = node.getAssumptionSupportDependents();
     Collection<Integer> attitudes = ContextController.getAttitudes().getSet().values();
@@ -70,6 +67,7 @@ public class Trim {
       for (int supportedAttitude : attitudes) {
         boolean isDependent = isDependent(dependentNodeID, supportedAttitude, nodeID, supportingAttitudeID);
         if (isDependent) {
+          System.out.println("yess node "+ nodeID + "have dependents in attitude" + supportingAttitudeID + "--> node"+ dependentNodeID + "attitude"+ supportedAttitude );
           return true;
         }
       }
@@ -87,6 +85,7 @@ public class Trim {
     }
     ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> supports = dependentNode
         .getDerivingSupport(context, supportedAttitudeID, 0);
+        System.out.println("deriving supports of node"+ supportedNodeID +" in attitude "+ supportedAttitudeID + "   "+supports );
     for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support : supports) {
       if (support.getFirst().get(supportingAttitudeID) == null) {
         continue;
@@ -103,7 +102,7 @@ public class Trim {
     PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
     removeHypFromContext(nodeID, attitudeID);
     Network.RemoveNode(node);
-    System.out.println("node removed " + nodeID);
+    System.out.println("node removed from network " + nodeID);
   }
 
   public void removeHypFromContext(int nodeID, int attitudeID) {
@@ -281,13 +280,6 @@ public class Trim {
 
     ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> supports = new ArrayList<>();
     HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> support;
-
-    support = new HashMap<>();
-    support.put(0, new Pair<>(ps_1_2, new PropositionNodeSet()));
-    supports.add(new Pair<>(support, new PropositionNodeSet()));
-    node3.addJustificationBasedSupports(1, Network.currentLevel, new ArrayList<>(supports));
-    supports.clear();
-
     support = new HashMap<>();
     support.put(0, new Pair<>(ps_1_5, new PropositionNodeSet()));
     support.put(1, new Pair<>(ps_3, new PropositionNodeSet()));
@@ -297,6 +289,13 @@ public class Trim {
     support.put(1, new Pair<>(ps_3, new PropositionNodeSet()));
     supports.add(new Pair<>(new HashMap<>(support), new PropositionNodeSet(12)));
     node4.addJustificationBasedSupports(2, Network.currentLevel, new ArrayList<>(supports));
+    support = new HashMap<>();
+    support.put(0, new Pair<>(ps_1_2, new PropositionNodeSet()));
+    supports.add(new Pair<>(support, new PropositionNodeSet()));
+    node3.addJustificationBasedSupports(1, Network.currentLevel, new ArrayList<>(supports));
+    supports.clear();
+
+   
 
     supports.clear();
     support = new HashMap<>();
@@ -304,15 +303,25 @@ public class Trim {
     supports.add(new Pair<>(support, new PropositionNodeSet(10)));
     node2.addJustificationBasedSupports(0, Network.currentLevel, new ArrayList<>(supports));
    
-    System.out.println(node1.getSupport() + "node1 assumptionBasedSupport");
-    System.out.println(node2.getSupport() + "node2 assumptionBasedSupport");
-    System.out.println(node3.getSupport() + "node3 assumptionBasedSupport");
-    System.out.println(node4.getSupport() + "node4 assumptionBasedSupport");
-    System.out.println(node5.getSupport() + "node5 assumptionBasedSupport");
-
+    System.out.println(node1.getAssumptionSupportDependents() + "node1 assumptionBasedSupport");
+    System.out.println(node2.getAssumptionSupportDependents() + "node2 assumptionBasedSupport");
+    System.out.println(node3.getAssumptionSupportDependents() + "node3 assumptionBasedSupport");
+    System.out.println(node4.getAssumptionSupportDependents() + "node4 assumptionBasedSupport");
+    System.out.println(node5.getAssumptionSupportDependents() + "node5 assumptionBasedSupport");
+    //node3.removeNodeFromOtherNodesSupport();
+    // System.out.println(node1.getSupport() + "node1 assumptionBasedSupport");
+    // System.out.println(node2.getSupport() + "node2 assumptionBasedSupport");
+    // System.out.println(node3.getSupport() + "node3 assumptionBasedSupport");
+    // System.out.println(node4.getSupport() + "node4 assumptionBasedSupport");
+    // System.out.println(node5.getSupport() + "node5 assumptionBasedSupport");
     Trim trim = new Trim("guc");
     trim.contextTrim();
     System.out.print(ContextController.getContext("guc").toString());
+    // System.out.println(node1.getAssumptionSupportDependents() + "node1 assumptionBasedSupport");
+    // System.out.println(node2.getAssumptionSupportDependents() + "node2 assumptionBasedSupport");
+    // System.out.println(node3.getAssumptionSupportDependents() + "node3 assumptionBasedSupport");
+    // System.out.println(node4.getAssumptionSupportDependents() + "node4 assumptionBasedSupport");
+    // System.out.println(node5.getAssumptionSupportDependents() + "node5 assumptionBasedSupport");
 
   }
 

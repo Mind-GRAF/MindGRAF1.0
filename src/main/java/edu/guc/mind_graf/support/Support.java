@@ -7,9 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
-import edu.guc.mind_graf.compression.CHB;
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.PropositionNode;
@@ -158,6 +156,7 @@ public class Support implements Cloneable {
 	 */
 	public void addJustificationSupportForAttitude(int attitudeID, int level,
 			ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> justificationSupport) {
+		System.out.println("passed support " + justificationSupport);
 		// Clean empty hashmaps and proposition sets and check if justification support
 		// to be added is empty and clean duplicates
 		ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> justificationTempSupports = new ArrayList<>();
@@ -455,12 +454,24 @@ public class Support implements Cloneable {
 					result.get(level).remove(i);
 					i--;
 				} else {
+					for (int attitude : result.get(level).get(i).getFirst().keySet())
+						for (int currProp : result.get(level).get(i).getFirst().get(attitude).getFirst().getProps()) {
+							PropositionNode depNode = (PropositionNode) networkPropositions
+									.get(currProp);
+							if (nodeID != currProp && nodeID >= 1) {
+								depNode.addNodeToAssumptionSupportDependents(nodeID);
+								System.out.println("node " + nodeID + " added to " + currProp
+										+ depNode.getAssumptionSupportDependents());
+							}
+						}
 					result.get(level).get(i).getSecond().putAll(bridgeRules.getValues());
 				}
+
 			}
 			if (result.get(level).isEmpty()) {
 				result.remove(level);
 			}
+
 		}
 
 		for (int i = k + 1; i < propsIDs.length; i++) {
@@ -535,12 +546,13 @@ public class Support implements Cloneable {
 
 										newPropSet2.putAll(oldPair.getSecond().getValues());
 										newPropSet2.putAll(currPair.getSecond().getValues());
-
 										for (int currProp : newPropSet1.getValues()) {
 											PropositionNode depNode = (PropositionNode) networkPropositions
 													.get(currProp);
 											if (nodeID != currProp && nodeID >= 1) {
 												depNode.addNodeToAssumptionSupportDependents(nodeID);
+												System.out.println("node " + nodeID + " added to " + currProp
+														+ depNode.getAssumptionSupportDependents());
 											}
 										}
 
@@ -552,6 +564,8 @@ public class Support implements Cloneable {
 													.get(currProp);
 											if (nodeID != currProp && nodeID >= 1) {
 												depNode.addNodeToAssumptionSupportDependents(nodeID);
+												System.out.println("node " + nodeID + "added to " + currProp
+														+ depNode.getAssumptionSupportDependents());
 											}
 										}
 										newSupport.getFirst().put(currAttitude,

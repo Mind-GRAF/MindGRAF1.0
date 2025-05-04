@@ -1,7 +1,6 @@
 package edu.guc.mind_graf.compression;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Objects;
 
 public class SupportNode {

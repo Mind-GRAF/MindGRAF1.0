@@ -45,9 +45,6 @@ public class PropositionNode extends Node {
         support = new Support(this.getId());
         justificationSupportDependents = new PropositionNodeSet();
         assumptionSupportDependents = new PropositionNodeSet();
-        support = new Support(this.getId());
-        justificationSupportDependents = new PropositionNodeSet();
-        assumptionSupportDependents = new PropositionNodeSet();
         grades = new HashMap<>();
     }
 
@@ -583,13 +580,15 @@ public class PropositionNode extends Node {
             if (networkPropositions.containsKey(assumptionDependents[i])) {
                 PropositionNode dependent = (PropositionNode) networkPropositions.get(assumptionDependents[i]);
                 dependent.support.removeNodeFromAssumptions(this.getId());
+                assumptionSupportDependents.remove(assumptionDependents[i]);
             }
         }
         int[] justificationDependents = this.getJustificationSupportDependents().getProps();
         for (int i = 0; i < justificationDependents.length; i++) {
-            if (networkPropositions.containsKey(assumptionDependents[i])) {
+            if (networkPropositions.containsKey(justificationDependents[i])) {
                 PropositionNode dependent = (PropositionNode) networkPropositions.get(justificationDependents[i]);
                 dependent.support.removeNodeFromJustifications(this.getId());
+                justificationSupportDependents.remove(justificationDependents[i]);
             }
         }
     }
