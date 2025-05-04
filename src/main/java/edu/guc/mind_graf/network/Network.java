@@ -430,6 +430,9 @@ public class Network {
 			}
 		} else if (node.isBase())
 			baseNodes.remove(node.getName());
+		if(propositionNodes.get(node.getId()) != null){
+			propositionNodes.remove(node.getId());
+		}
 	}
 
 	public static HashMap<String, Relation> getRelations() {
