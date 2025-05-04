@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import edu.guc.mind_graf.compression.CHB;
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.PropositionNode;
@@ -1217,6 +1218,50 @@ public class Support implements Cloneable {
 	@Override
 	public int hashCode() {
 		return Objects.hash(nodeID, justificationBasedSupport, assumptionBasedSupport, isHyp);
+	}
+
+	public static boolean isHypothesisSupport(int attitudeID, int nodeID,
+			Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support) {
+		if (support.getFirst().size() != 1 || !support.getSecond().isEmpty())
+			return false;
+		Pair<PropositionNodeSet, PropositionNodeSet> supportingNodes = support.getFirst().get(attitudeID);
+		if (supportingNodes != null) {
+			if (supportingNodes.getFirst().size() == 1 && supportingNodes.getSecond().isEmpty()
+					&& supportingNodes.getFirst().contains(nodeID))
+				return true;
+		}
+		return false;
+	}
+
+	public void removeHyp(int level, int attitudeID) {
+		if (isHyp.get(level) != null) {
+			isHyp.get(level).remove(attitudeID);
+			if (isHyp.get(level).isEmpty()) {
+				isHyp.remove(level);
+			}
+		}
+		HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>>> levelSupports = assumptionBasedSupport
+				.get(level);
+		if (levelSupports != null) {
+			ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> supports = levelSupports
+					.get(attitudeID);
+			if (supports != null) {
+				Iterator<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> iterator = supports
+						.iterator();
+				while (iterator.hasNext()) {
+					if (isHypothesisSupport(attitudeID, getNodeID(), iterator.next())) {
+						iterator.remove();
+						break;
+					}
+				}
+				if (assumptionBasedSupport.get(level).get(attitudeID).isEmpty()) {
+					assumptionBasedSupport.get(level).remove(attitudeID);
+					if (assumptionBasedSupport.get(level).isEmpty()) {
+						assumptionBasedSupport.remove(level);
+					}
+				}
+			}
+		}
 	}
 
 	/*
