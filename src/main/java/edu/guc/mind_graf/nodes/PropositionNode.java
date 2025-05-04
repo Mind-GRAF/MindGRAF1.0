@@ -566,7 +566,7 @@ public class PropositionNode extends Node {
     public void setHyp(String desiredContextName, int attitude) {
         Context desiredContext = ContextController.getContext(desiredContextName);
         desiredContext.addHypothesisToContext(Network.currentLevel, attitude, this);
-        //this.support.setHyp(attitude);
+        // this.support.setHyp(attitude);
     }
 
     public void setHyp(int attitude) {
@@ -1549,5 +1549,32 @@ public class PropositionNode extends Node {
             }
         }
         return false;
+    }
+
+    public boolean isHypInAnyContextAtAnyAttitude(String contextName, int level) {
+        Collection<Integer> attitudes = ContextController.getAttitudes().getSet().values();
+        for (int attitudeID : attitudes) {
+            if (isHypInAnyContext(contextName, attitudeID, level)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isHypAtOtherAttitudes(String contextName, int desiredAttitude, int level) {
+        Collection<Integer> attitudes = ContextController.getAttitudes().getSet().values();
+        Context context = ContextController.getContext(contextName);
+        for (int attitudeID : attitudes) {
+            if (attitudeID != desiredAttitude) {
+                if(context.isHyp(getId(), attitudeID, level)){
+                    return true;
+                }
+            }
+        }
+        return false;
+
+    }
+    public void removeHypSupport(int level, int attitudeID){
+        support.removeHyp(level, attitudeID);
     }
 }
