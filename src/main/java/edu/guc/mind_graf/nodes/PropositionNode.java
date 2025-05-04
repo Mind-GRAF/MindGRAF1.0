@@ -538,7 +538,7 @@ public class PropositionNode extends Node {
                 if (currSupport.getFirst().get(key).getFirst()
                         .isSubset(context.getOriginHypotheses(key))
                         && currSupport.getFirst().get(key).getSecond()
-                                .isSubset(context.getGradedHypotheses(level, attitude))) {
+                                .isSubset(context.getGradedHypotheses(level, key))) {
 
                     isValidSupport = true;
                 } else {
@@ -1565,7 +1565,7 @@ public class PropositionNode extends Node {
         Context context = ContextController.getContext(contextName);
         for (int attitudeID : attitudes) {
             if (attitudeID != desiredAttitude) {
-                if(context.isHyp(getId(), attitudeID, level)){
+                if (context.isHyp(getId(), attitudeID, level)) {
                     return true;
                 }
             }
@@ -1573,7 +1573,68 @@ public class PropositionNode extends Node {
         return false;
 
     }
-    public void removeHypSupport(int level, int attitudeID){
+
+    public void removeHypSupport(int level, int attitudeID) {
         support.removeHyp(level, attitudeID);
     }
+
+    public boolean isValidAssumptionBasedSupport(String contextName, int level,
+            Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support) {
+        Context context = ContextController.getContext(contextName);
+        for (Integer key : support.getFirst().keySet()) {
+            if (!(support.getFirst().get(key).getFirst()
+                    .isSubset(context.getOriginHypotheses(key))
+                    && support.getFirst().get(key).getSecond()
+                            .isSubset(context.getGradedHypotheses(level, key)))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void removeNodesFromAssumptionbasedSupportDependents(Set<Integer> supportingNodes) {
+        for (int nodeID : supportingNodes) {
+            PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
+            node.assumptionSupportDependents.remove(nodeID);
+
+        }
+    }
+
+    public void computeSupportingNodes(String contextName, int level,
+            ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> supports) {
+        HashSet<Integer> supportingNodes = new HashSet<>();
+        HashSet<Integer> supportingNodesInOtherContexts = new HashSet<>();
+        for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support : supports) {
+            HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> supportMap = support.getFirst();
+            if (isValidAssumptionBasedSupport(contextName, level, support)) {
+                for (int attitudeID : supportMap.keySet()) {
+                    for (int nodeID : supportMap.get(attitudeID).getFirst().getProps()) {
+                        supportingNodes.add(nodeID);
+                    }
+                }
+            } else {
+                for (int attitudeID : supportMap.keySet()) {
+                    for (int nodeID : supportMap.get(attitudeID).getFirst().getProps()) {
+                        supportingNodesInOtherContexts.add(nodeID);
+                    }
+                }
+            }
+        }
+        supportingNodes.removeAll(supportingNodesInOtherContexts);
+        removeNodesFromAssumptionbasedSupportDependents(supportingNodes);
+    }
+
+    public void removeNodeFromOthersAssumptionDependents(String contextName, int supportedAttitude, int level) {
+        HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>>> levelSupports = support
+                .getAssumptionBasedSupport().get(level);
+        if (levelSupports != null) {
+            ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> supports = levelSupports
+                    .get(supportedAttitude);
+            if (supports != null) {
+                computeSupportingNodes(contextName, level, supports);
+            }
+        }
+
+    }
+
 }
