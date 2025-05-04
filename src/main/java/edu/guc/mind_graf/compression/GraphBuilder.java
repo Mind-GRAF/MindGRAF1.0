@@ -17,6 +17,7 @@ import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.Set;
 import edu.guc.mind_graf.support.Pair;
+import edu.guc.mind_graf.support.Support;
 
 public class GraphBuilder {
     String context;
@@ -137,7 +138,7 @@ public class GraphBuilder {
 
     public void createSupport(int nodeID, int attitudeID,
             Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support) {
-        if (CHB.isHypothesisSupport(attitudeID, nodeID, support)) {
+        if (Support.isHypothesisSupport(attitudeID, nodeID, support)) {
             return;
         }
         ArrayList<HypNode> hypNodes = new ArrayList<>();

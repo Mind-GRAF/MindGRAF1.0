@@ -13,6 +13,7 @@ import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.Set;
 import edu.guc.mind_graf.support.Pair;
+import edu.guc.mind_graf.support.Support;
 
 public class MaximalHypotheses {
     String context;
@@ -51,7 +52,7 @@ public class MaximalHypotheses {
         ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> validSupports = node
                 .getDerivingSupport(context, attitude, 0);
         for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support : validSupports) {
-            boolean isHypSupport = CHB.isHypothesisSupport(attitude, nodeID, support);
+            boolean isHypSupport = Support.isHypothesisSupport(attitude, nodeID, support);
             if (isHypSupport)
                 isMaxHyp = true;
             else {
