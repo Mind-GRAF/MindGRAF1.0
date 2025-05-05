@@ -73,7 +73,6 @@ public class Channel {
             channelType = ChannelType.RuleCons;
         else if (this instanceof IntroductionChannel)
             channelType = ChannelType.Introduction;
-        else
         else if(this instanceof MatchChannel)
             channelType = ChannelType.Matched;
         else if(this instanceof ActChannel)

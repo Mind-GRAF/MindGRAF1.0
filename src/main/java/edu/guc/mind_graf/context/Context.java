@@ -32,6 +32,10 @@ public class Context {
         this.hypotheses.put(0, hyps);
     }
 
+    public String getContextName() {
+        return this.name;
+    }
+
     public Integer getPropositionAttitude(Integer nodeId) {
         PropositionNode p = (PropositionNode) Network.getNodeById(nodeId);
         for (int i = 0; i < this.hypotheses.get(0).length; i++) {
@@ -212,4 +216,27 @@ public class Context {
     public HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>[]> getHypotheses() {
         return hypotheses;
     }
+
+    // Add this method to the `Context` class in `src/main/java/edu/guc/mind_graf/context/Context.java`
+    // Add this method to the `Context` class in `src/main/java/edu/guc/mind_graf/context/Context.java`
+    public boolean isSubset(Context otherContext) {
+        // Check if all proposition nodes in this context are contained in the other context
+        return otherContext.getPropositionNodes().containsAll((Collection<PropositionNode>) this.getPropositionNodes());
+    }
+
+    // Add this method to the `Context` class in `src/main/java/edu/guc/mind_graf/context/Context.java`
+    public java.util.Set<PropositionNode> getPropositionNodes() {
+    java.util.Set<PropositionNode> propositionNodes = new java.util.HashSet<>();
+    for (Pair<PropositionNodeSet, PropositionNodeSet>[] pairs : hypotheses.values()) {
+        for (Pair<PropositionNodeSet, PropositionNodeSet> pair : pairs) {
+            pair.getFirst().getNodes().stream()
+                .filter(node -> node instanceof PropositionNode)
+                .forEach(node -> propositionNodes.add((PropositionNode) node));
+            pair.getSecond().getNodes().stream()
+                .filter(node -> node instanceof PropositionNode)
+                .forEach(node -> propositionNodes.add((PropositionNode) node));
+        }
+    }
+    return propositionNodes;
+}
 }

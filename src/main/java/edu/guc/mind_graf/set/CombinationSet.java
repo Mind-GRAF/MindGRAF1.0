@@ -1,11 +1,11 @@
-package set;
+package edu.guc.mind_graf.set;
+
+import edu.guc.mind_graf.exceptions.NoSuchTypeException;
+import edu.guc.mind_graf.network.Network;
+import edu.guc.mind_graf.nodes.Node;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import exceptions.NoSuchTypeException;
-import network.Network;
-import nodes.Node;
 
 public class CombinationSet {
 

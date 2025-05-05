@@ -1,6 +1,7 @@
-package set;
+package edu.guc.mind_graf.set;
 
-import mgip.requests.IntroductionChannel;
+
+import edu.guc.mind_graf.mgip.requests.IntroductionChannel;
 
 public class IntroductionRequestsSet {
 

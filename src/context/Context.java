@@ -59,4 +59,15 @@ public class Context {
         return true;
     }
 
+    public java.util.Set<PropositionNode> getPropositionNodes() {
+        java.util.Set<PropositionNode> propositionNodes = new java.util.HashSet<>();
+        for (Pair<PropositionNodeSet, PropositionNodeSet>[] pairs : hypotheses.values()) {
+            for (Pair<PropositionNodeSet, PropositionNodeSet> pair : pairs) {
+                propositionNodes.addAll((Collection<? extends PropositionNode>) pair.getFirst().getNodes());
+                propositionNodes.addAll((Collection<? extends PropositionNode>) pair.getSecond().getNodes());
+            }
+        }
+        return propositionNodes;
+    }
+
 }

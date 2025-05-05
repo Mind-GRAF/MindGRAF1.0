@@ -8,6 +8,7 @@ import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.PropositionNode;
+import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.support.Pair;
 import edu.guc.mind_graf.support.Support;
@@ -206,5 +207,9 @@ public class Report {
         res.setContextName(this.contextName);
         return res;
     }
-
+    // Add this method to the `Report` class in `src/main/java/edu/guc/mind_graf/mgip/reports/Report.java`
+    public Context getContext(String contextName) {
+        // Assuming the `ContextController` class has a method to fetch Context by name
+        return ContextController.getContext(contextName);
+    }
 }

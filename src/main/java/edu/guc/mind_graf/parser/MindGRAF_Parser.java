@@ -93,7 +93,7 @@ public class MindGRAF_Parser implements MindGRAF_ParserConstants {
         private static HashMap<String, DownCable> allDCB = new HashMap<String, DownCable>();
 
       //case frames
-       private static HashMap<String, ArrayList<String>> caseFrames = new HashMap<String, ArrayList<String>>();
+       public static HashMap<String, ArrayList<String>> caseFrames = new HashMap<String, ArrayList<String>>();
 
       // semantic type
       private static ArrayList<CustomMethod> customMethods = new ArrayList<CustomMethod>();

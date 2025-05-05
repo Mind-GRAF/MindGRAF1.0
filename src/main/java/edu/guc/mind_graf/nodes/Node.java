@@ -3,6 +3,7 @@ package edu.guc.mind_graf.nodes;
 import java.util.*;
 import java.util.Map.Entry;
 
+import edu.guc.mind_graf.caseFrames.Adjustability;
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.relations.Relation;
 import edu.guc.mind_graf.set.NodeSet;
@@ -25,7 +26,7 @@ import edu.guc.mind_graf.mgip.requests.MatchChannel;
 import edu.guc.mind_graf.mgip.requests.Request;
 import edu.guc.mind_graf.mgip.requests.RuleToConsequentChannel;
 import edu.guc.mind_graf.mgip.requests.WhenToRuleChannel;
-import caseFrames.Adjustability;
+
 
 public abstract class Node {
 
@@ -229,16 +230,6 @@ public abstract class Node {
 		DownCable arg = new DownCable(Network.getRelations().get("arg"), negatedSet);
 		DownCableSet negationDownCableSet = new DownCableSet(min, max, arg);
 		return Network.createNode("rulenode", negationDownCableSet);
-	}
-
-	public Node createNegation(Node negated) throws NoSuchTypeException {
-		NodeSet zeroNode = new NodeSet(Network.getBaseNodes().get("0"));
-		DownCable min = new DownCable(Network.getRelations().get("min"), zeroNode);
-		DownCable max = new DownCable(Network.getRelations().get("max"), zeroNode);
-		NodeSet negatedSet = new NodeSet(negated);
-		DownCable arg = new DownCable(Network.getRelations().get("arg"), negatedSet);
-		DownCableSet negationDownCableSet = new DownCableSet(min, max, arg);
-		return Network.createNode("andor", negationDownCableSet);
 	}
 
 	public boolean isFree(Node Node) {

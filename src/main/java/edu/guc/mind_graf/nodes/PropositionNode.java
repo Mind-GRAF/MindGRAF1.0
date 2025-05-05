@@ -29,6 +29,8 @@ import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.support.Pair;
 import edu.guc.mind_graf.support.Support;
 
+import static edu.guc.mind_graf.mgip.reports.ReportType.Introduction;
+
 public class PropositionNode extends Node {
     protected ChannelSet outgoingChannels;
     protected ChannelSet forwardChannels;
@@ -968,7 +970,7 @@ public class PropositionNode extends Node {
             boolean flag;
             boolean channelCheck = report.getReportType() == ReportType.Matched
                     || report.getReportType() == ReportType.RuleCons
-                    || report.getReportType() == ReportType.Introduction;// Need to check
+                    || report.getReportType() == Introduction;// Need to check
             if (channelCheck) {
                 flag = knownInstances.addKnownInstance(report);
                 System.out.println(

@@ -1,8 +1,10 @@
-package set;
+package edu.guc.mind_graf.set;
 
 import java.util.HashSet;
 import java.util.Set;
-import mgip.Report;
+
+import edu.guc.mind_graf.mgip.reports.Report;
+
 
 public class ReportSet {
     private Set<Report> reportSet;
