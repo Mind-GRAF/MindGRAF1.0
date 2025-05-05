@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.nodes.Node;
@@ -458,10 +459,10 @@ public class Support implements Cloneable {
 						for (int currProp : result.get(level).get(i).getFirst().get(attitude).getFirst().getProps()) {
 							PropositionNode depNode = (PropositionNode) networkPropositions
 									.get(currProp);
-							if (!(nodeID == currProp && attitude ==supportedAttitude)) {
+							if (!(nodeID == currProp && attitude == supportedAttitude)) {
 								depNode.addNodeToAssumptionSupportDependents(nodeID);
 								// System.out.println("node " + nodeID + " added to " + currProp
-								// 		+ depNode.getAssumptionSupportDependents());
+								// + depNode.getAssumptionSupportDependents());
 							}
 						}
 					result.get(level).get(i).getSecond().putAll(bridgeRules.getValues());
@@ -549,10 +550,10 @@ public class Support implements Cloneable {
 										for (int currProp : newPropSet1.getValues()) {
 											PropositionNode depNode = (PropositionNode) networkPropositions
 													.get(currProp);
-											if (!(nodeID == currProp && currAttitude ==supportedAttitude)) {
+											if (!(nodeID == currProp && currAttitude == supportedAttitude)) {
 												depNode.addNodeToAssumptionSupportDependents(nodeID);
 												// System.out.println("node " + nodeID + " added to " + currProp
-												// 		+ depNode.getAssumptionSupportDependents());
+												// + depNode.getAssumptionSupportDependents());
 											}
 										}
 
@@ -562,10 +563,10 @@ public class Support implements Cloneable {
 												.getProps()) {
 											PropositionNode depNode = (PropositionNode) networkPropositions
 													.get(currProp);
-											if (!(nodeID == currProp && currAttitude ==supportedAttitude)) {
+											if (!(nodeID == currProp && currAttitude == supportedAttitude)) {
 												depNode.addNodeToAssumptionSupportDependents(nodeID);
 												// System.out.println("node " + nodeID + "added to " + currProp
-												// 		+ depNode.getAssumptionSupportDependents());
+												// + depNode.getAssumptionSupportDependents());
 											}
 										}
 										newSupport.getFirst().put(currAttitude,
@@ -1035,6 +1036,79 @@ public class Support implements Cloneable {
 					assumptionBasedSupport.remove(level);
 				}
 			}
+		}
+	}
+
+	public void removeNodeFromAssumptions(String context, int id, int attitude) {
+		PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
+		Set<Integer> supportedLevels = assumptionBasedSupport.keySet();
+		for (int level : supportedLevels) {
+			Set<Integer> supportedAttitudes = assumptionBasedSupport.get(level).keySet();
+			for (int supportedAttitude : supportedAttitudes) {
+				ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> supports = assumptionBasedSupport
+						.get(level).get(supportedAttitude);
+				for (int i = 0; i < supports.size(); i++) {
+					Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support = supports
+							.get(i);
+					if (node.isValidAssumptionBasedSupport(context, level, support)) {
+						if (containsDesiredNode(support, attitude, id)) {
+							supports.remove(i);
+							i--;
+						}
+					}
+				}
+				if (supports.isEmpty()) {
+					assumptionBasedSupport.get(level).remove(supportedAttitude);
+				}
+			}
+			if (assumptionBasedSupport.get(level).isEmpty()) {
+				assumptionBasedSupport.remove(level);
+			}
+
+		}
+	}
+
+	public boolean containsDesiredNode(
+			Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support,
+			int attitude, int id) {
+		HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> supportingNodes = support.getFirst();
+		Pair<PropositionNodeSet, PropositionNodeSet> supportingNodesAtDesiredAttitude = supportingNodes.get(attitude);
+		if (supportingNodesAtDesiredAttitude != null) {
+			if (supportingNodesAtDesiredAttitude.getFirst() != null) {
+				if (supportingNodesAtDesiredAttitude.getFirst().contains(id)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	public void removeNodeFromJustifications(String context, int id, int attitude) {
+		PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
+		Set<Integer> supportedLevels = justificationBasedSupport.keySet();
+		for (int level : supportedLevels) {
+			Set<Integer> supportedAttitudes = justificationBasedSupport.get(level).keySet();
+			for (int supportedAttitude : supportedAttitudes) {
+				ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> supports = justificationBasedSupport
+						.get(level).get(supportedAttitude);
+				for (int i = 0; i < supports.size(); i++) {
+					Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support = supports
+							.get(i);
+					if (node.isValidJustificationBasedSupport(context, level, support)) {
+						if (containsDesiredNode(support, attitude, id)) {
+							supports.remove(i);
+							i--;
+						}
+					}
+				}
+				if (supports.isEmpty()) {
+					justificationBasedSupport.get(level).remove(supportedAttitude);
+				}
+			}
+			if (justificationBasedSupport.get(level).isEmpty()) {
+				justificationBasedSupport.remove(level);
+			}
+
 		}
 	}
 

@@ -593,6 +593,26 @@ public class PropositionNode extends Node {
         }
     }
 
+    public void removeNodeFromOtherSupportsInContext(String context, int attitude) {
+        HashMap<Integer, Node> networkPropositions = Network.getPropositionNodes();
+        int[] assumptionDependents = this.getAssumptionSupportDependents().getProps();
+        for (int i = 0; i < assumptionDependents.length; i++) {
+            if (networkPropositions.containsKey(assumptionDependents[i])) {
+                PropositionNode dependent = (PropositionNode) networkPropositions.get(assumptionDependents[i]);
+                dependent.support.removeNodeFromAssumptions(context, this.getId(), attitude);
+                assumptionSupportDependents.remove(assumptionDependents[i]);
+            }
+        }
+        int[] justificationDependents = this.getJustificationSupportDependents().getProps();
+        for (int i = 0; i < justificationDependents.length; i++) {
+            if (networkPropositions.containsKey(justificationDependents[i])) {
+                PropositionNode dependent = (PropositionNode) networkPropositions.get(justificationDependents[i]);
+                dependent.support.removeNodeFromJustifications(context, this.getId(), attitude);
+                justificationSupportDependents.remove(justificationDependents[i]);
+            }
+        }
+    }
+
     public void ForgetNodeFromOtherNodesSupport() {
         HashMap<Integer, Node> networkPropositions = Network.getPropositionNodes();
         int[] assumptionDependents = this.getAssumptionSupportDependents().getProps();
@@ -1592,6 +1612,18 @@ public class PropositionNode extends Node {
         return true;
     }
 
+    public boolean isValidJustificationBasedSupport(String contextName, int level,
+            Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support) {
+        Context context = ContextController.getContext(contextName);
+        for (int attitudeId : support.getFirst().keySet()) {
+            if (context.isInvalidSupport(level, attitudeId, support.getFirst().get(attitudeId).getFirst())
+                    || context.isInvalidSupport(level, attitudeId, support.getFirst().get(attitudeId).getSecond())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public void removeNodesFromAssumptionbasedSupportDependents(Set<Integer> supportingNodes) {
         for (int nodeID : supportingNodes) {
             PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
@@ -1623,7 +1655,8 @@ public class PropositionNode extends Node {
             }
         }
         // System.out.println("supportingNodes " + supportingNodes);
-        // System.out.println("supprting nodes in other Contexts " + supportingNodesInOtherContexts);
+        // System.out.println("supprting nodes in other Contexts " +
+        // supportingNodesInOtherContexts);
         supportingNodes.removeAll(supportingNodesInOtherContexts);
         removeNodesFromAssumptionbasedSupportDependents(supportingNodes);
     }
