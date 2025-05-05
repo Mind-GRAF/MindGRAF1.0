@@ -18,6 +18,12 @@ public class NodeSet implements Iterable<Node> {
         this.nodes = nodes;
     }
 
+    public NodeSet(NodeSet nodeSet) {
+        this.nodes = new HashMap<String, Node>();
+        for (Node n : nodeSet.getValues())
+            this.nodes.put(n.getName(), n);
+    }
+
     public NodeSet(Node... nodes) {
         this.nodes = new HashMap<String, Node>();
         for (Node n : nodes)
@@ -62,6 +68,15 @@ public class NodeSet implements Iterable<Node> {
             return result;
         else
             return this;
+    }
+
+    public boolean isSubset(NodeSet otherSet) {
+        for (Node entry : this.nodes.values()) {
+            if (!otherSet.contains(entry)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public void putAll(HashMap<String, Node> Set) {
@@ -126,8 +141,8 @@ public class NodeSet implements Iterable<Node> {
         return this.nodes.size() == 0;
     }
 
-    public Node get(String name) {
-        return nodes.get(name);
+    public Node get(int index) {
+        return nodes.get(index);
     }
 
     public boolean contains(Object s) {
@@ -151,6 +166,12 @@ public class NodeSet implements Iterable<Node> {
                 return false;
         }
         return true;
+    }
+
+    public void addAll(NodeSet nodeSet) {
+        if (!isFinal)
+            for (Node n : nodeSet.getValues())
+                this.add(n);
     }
 
     @Override

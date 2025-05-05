@@ -47,6 +47,7 @@ public class Channel {
             Substitutions newReportSubs = report.getSubstitutions().switchReport(getSwitcherSubstitutions());
             if (report.getSubstitutions().size() == 0)
                 report.setSubstitutions(getSwitcherSubstitutions());
+
             else if (getSwitcherSubstitutions().size() == 0)
                 report.setSubstitutions(report.getSubstitutions());
             else
@@ -70,15 +71,18 @@ public class Channel {
             channelType = ChannelType.AntRule;
         else if (this instanceof RuleToConsequentChannel)
             channelType = ChannelType.RuleCons;
+        else if (this instanceof IntroductionChannel)
+            channelType = ChannelType.Introduction;
+        else
         else if(this instanceof MatchChannel)
             channelType = ChannelType.Matched;
         else if(this instanceof ActChannel)
             channelType = ChannelType.Act;
         else if(this instanceof IfToRuleChannel)
         channelType=ChannelType.IfRule;
-        else 
+        else
         channelType=ChannelType.WhenRule;
-        
+
         return channelType;
     }
 

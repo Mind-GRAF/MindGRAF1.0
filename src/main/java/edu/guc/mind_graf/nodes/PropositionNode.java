@@ -342,6 +342,12 @@ public class PropositionNode extends Node {
                         requesterNode);
                 break;
 
+            case Introduction:
+                newChannel = new IntroductionChannel(switchSubstitutions,
+                        filterSubstitutions, contextName,
+                        attitudeId,
+                        requesterNode);
+                break;
             default:
                 newChannel = new ActChannel(switchSubstitutions,
                         filterSubstitutions, contextName,
@@ -961,7 +967,8 @@ public class PropositionNode extends Node {
         if (this.isOpen()) {
             boolean flag;
             boolean channelCheck = report.getReportType() == ReportType.Matched
-                    || report.getReportType() == ReportType.RuleCons;
+                    || report.getReportType() == ReportType.RuleCons
+                    || report.getReportType() == ReportType.Introduction;// Need to check
             if (channelCheck) {
                 flag = knownInstances.addKnownInstance(report);
                 System.out.println(

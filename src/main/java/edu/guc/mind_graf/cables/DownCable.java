@@ -14,4 +14,8 @@ public class DownCable extends Cable {
 		return "downCable : {" + "relation: " + this.getRelation() + ", NodeSet :" + this.getNodeSet() + "}";
 	}
 
+	public void replaceNodeSet(NodeSet nodeSet) {
+		this.setNodeSet(nodeSet);
+	}
+
 }
