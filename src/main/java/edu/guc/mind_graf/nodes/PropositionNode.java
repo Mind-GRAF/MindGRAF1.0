@@ -599,16 +599,26 @@ public class PropositionNode extends Node {
         for (int i = 0; i < assumptionDependents.length; i++) {
             if (networkPropositions.containsKey(assumptionDependents[i])) {
                 PropositionNode dependent = (PropositionNode) networkPropositions.get(assumptionDependents[i]);
-                dependent.support.removeNodeFromAssumptions(context, this.getId(), attitude);
-                assumptionSupportDependents.remove(assumptionDependents[i]);
+                HashSet<Integer> nodesToBeRemoved = dependent.support.removeNodeFromAssumptions(context, this.getId(),
+                        attitude);
+                System.out.println("nodes to be removed from the dependents" + nodesToBeRemoved);
+                for (int nodeID : nodesToBeRemoved) {
+                    PropositionNode node = (PropositionNode) networkPropositions.get(nodeID);
+                    node.assumptionSupportDependents.remove(assumptionDependents[i]);
+                }
+
             }
         }
         int[] justificationDependents = this.getJustificationSupportDependents().getProps();
         for (int i = 0; i < justificationDependents.length; i++) {
             if (networkPropositions.containsKey(justificationDependents[i])) {
                 PropositionNode dependent = (PropositionNode) networkPropositions.get(justificationDependents[i]);
-                dependent.support.removeNodeFromJustifications(context, this.getId(), attitude);
-                justificationSupportDependents.remove(justificationDependents[i]);
+                HashSet<Integer> nodesToBeRemoved = dependent.support.removeNodeFromJustifications(context,
+                        this.getId(), attitude);
+                for (int nodeID : nodesToBeRemoved) {
+                    PropositionNode node = (PropositionNode) networkPropositions.get(nodeID);
+                    node.justificationSupportDependents.remove(justificationDependents[i]);
+                }
             }
         }
     }
@@ -1654,9 +1664,9 @@ public class PropositionNode extends Node {
                 }
             }
         }
-        // System.out.println("supportingNodes " + supportingNodes);
-        // System.out.println("supprting nodes in other Contexts " +
-        // supportingNodesInOtherContexts);
+        System.out.println("supportingNodes " + supportingNodes);
+        System.out.println("supprting nodes in other Contexts " +
+                supportingNodesInOtherContexts);
         supportingNodes.removeAll(supportingNodesInOtherContexts);
         removeNodesFromAssumptionbasedSupportDependents(supportingNodes);
     }

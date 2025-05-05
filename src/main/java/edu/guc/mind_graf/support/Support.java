@@ -1039,8 +1039,10 @@ public class Support implements Cloneable {
 		}
 	}
 
-	public void removeNodeFromAssumptions(String context, int id, int attitude) {
+	public HashSet<Integer> removeNodeFromAssumptions(String context, int id, int attitude) {
 		PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
+		HashSet<Integer> supportingNodes = new HashSet<>();
+		HashSet<Integer> supportingNodesInOtherContexts = new HashSet<>();
 		Set<Integer> supportedLevels = assumptionBasedSupport.keySet();
 		for (int level : supportedLevels) {
 			Set<Integer> supportedAttitudes = assumptionBasedSupport.get(level).keySet();
@@ -1050,11 +1052,18 @@ public class Support implements Cloneable {
 				for (int i = 0; i < supports.size(); i++) {
 					Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support = supports
 							.get(i);
-					if (node.isValidAssumptionBasedSupport(context, level, support)) {
-						if (containsDesiredNode(support, attitude, id)) {
-							supports.remove(i);
-							i--;
+					if (node.isValidAssumptionBasedSupport(context, level, support)
+							&& support.getFirst().get(attitude) != null
+							&& support.getFirst().get(attitude).getFirst().contains(id)) {
+						supportingNodes.addAll(removeSupportFromAttitude(i, supports));
+						i--;
+					} else {
+						for (int attitudeID : support.getFirst().keySet()) {
+							for (int nodeID : support.getFirst().get(attitudeID).getFirst().getProps()) {
+								supportingNodesInOtherContexts.add(nodeID);
+							}
 						}
+
 					}
 				}
 				if (supports.isEmpty()) {
@@ -1064,26 +1073,14 @@ public class Support implements Cloneable {
 			if (assumptionBasedSupport.get(level).isEmpty()) {
 				assumptionBasedSupport.remove(level);
 			}
-
 		}
+		supportingNodes.removeAll(supportingNodesInOtherContexts);
+		return supportingNodes;
 	}
 
-	public boolean containsDesiredNode(
-			Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support,
-			int attitude, int id) {
-		HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> supportingNodes = support.getFirst();
-		Pair<PropositionNodeSet, PropositionNodeSet> supportingNodesAtDesiredAttitude = supportingNodes.get(attitude);
-		if (supportingNodesAtDesiredAttitude != null) {
-			if (supportingNodesAtDesiredAttitude.getFirst() != null) {
-				if (supportingNodesAtDesiredAttitude.getFirst().contains(id)) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	public void removeNodeFromJustifications(String context, int id, int attitude) {
+	public HashSet<Integer> removeNodeFromJustifications(String context, int id, int attitude) {
+		HashSet<Integer> supportingNodes = new HashSet<>();
+		HashSet<Integer> supportingNodesInOtherContexts = new HashSet<>();
 		PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
 		Set<Integer> supportedLevels = justificationBasedSupport.keySet();
 		for (int level : supportedLevels) {
@@ -1094,10 +1091,17 @@ public class Support implements Cloneable {
 				for (int i = 0; i < supports.size(); i++) {
 					Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support = supports
 							.get(i);
-					if (node.isValidJustificationBasedSupport(context, level, support)) {
-						if (containsDesiredNode(support, attitude, id)) {
-							supports.remove(i);
-							i--;
+					if (node.isValidJustificationBasedSupport(context, level, support)
+							&& support.getFirst().get(attitude) != null
+							&& (support.getFirst().get(attitude).getFirst().contains(id)
+									|| support.getFirst().get(attitude).getSecond().contains(id))) {
+						supportingNodes.addAll(removeSupportFromAttitude(i, supports));
+						i--;
+					} else {
+						for (int attitudeID : support.getFirst().keySet()) {
+							for (int nodeID : support.getFirst().get(attitudeID).getFirst().getProps()) {
+								supportingNodesInOtherContexts.add(nodeID);
+							}
 						}
 					}
 				}
@@ -1110,6 +1114,20 @@ public class Support implements Cloneable {
 			}
 
 		}
+		supportingNodes.removeAll(supportingNodesInOtherContexts);
+		return supportingNodes;
+	}
+
+	public HashSet<Integer> removeSupportFromAttitude(int index,
+			ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> supports) {
+		HashSet<Integer> supportingNodes = new HashSet<>();
+		for (int attitudeID : supports.get(index).getFirst().keySet()) {
+			for (int nodeID : supports.get(index).getFirst().get(attitudeID).getFirst().getProps()) {
+				supportingNodes.add(nodeID);
+			}
+		}
+		supports.remove(index);
+		return supportingNodes;
 	}
 
 	private void removeNodeFromSupportHelper(int id,

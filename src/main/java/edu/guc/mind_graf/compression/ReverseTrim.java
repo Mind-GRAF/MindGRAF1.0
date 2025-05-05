@@ -44,7 +44,7 @@ public class ReverseTrim {
         PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
         removeMaxHypFromContext(nodeID, attitudeID);
         Network.RemoveNode(node);
-        System.out.println("node removed from network " + nodeID);
+        System.out.println("node removed from network " + nodeID +"  " + attitudeID);
     }
 
     public void removeMaxHypFromContext(int nodeID, int attitudeID) {
@@ -78,7 +78,9 @@ public class ReverseTrim {
                     && !node.isHypAtOtherAttitudes(context, attitudeID, 0)) {
                 // remove from the network
                 // remove from all supports
-                node.removeNodeFromOtherNodesSupport();
+               node.removeNodeFromOthersAssumptionDependents(context, attitudeID, 0);
+               System.out.println(node.getAssumptionSupportDependents() + "  dependents");
+               node.removeNodeFromOtherSupportsInContext(context, attitudeID);
                 try {
                     nodeRemoved = true;
                     removeMaxHypFromNetwork(nodeID, attitudeID);
@@ -87,11 +89,12 @@ public class ReverseTrim {
                   } catch (CannotRemoveNodeException e) {
                     e.printStackTrace();
                   }
-
+                  System.out.println(node.getAssumptionSupportDependents() + " after removal dependents");
             } else {
                 nodeRemoved = true;
-                removeMaxHypFromContext(nodeID,attitudeID);
                 node.removeNodeFromOtherSupportsInContext(context, attitudeID);
+                node.removeNodeFromOthersAssumptionDependents(context, attitudeID, 0);
+                removeMaxHypFromContext(nodeID,attitudeID);
                 // remove from the context only
                  // go to the dependents and remove any support that contains this node in the
             // attitude
@@ -128,9 +131,9 @@ public class ReverseTrim {
         contextToBeTested.addHypothesisToContext(0, 1, node1);
         contextToBeTested.addHypothesisToContext(0, 2, node1);
         contextToBeTested.addHypothesisToContext(0, 0, node2);
-        contextToBeTested.addHypothesisToContext(0, 1, node3);
-        contextToBeTested.addHypothesisToContext(0, 2, node4);
-        contextToBeTested.addHypothesisToContext(0, 0, node5);
+        // contextToBeTested.addHypothesisToContext(0, 1, node3);
+        // contextToBeTested.addHypothesisToContext(0, 2, node4);
+        // contextToBeTested.addHypothesisToContext(0, 0, node5);
         System.out.print(ContextController.getContext("guc").toString());
 
         PropositionNodeSet ps_1_2 = new PropositionNodeSet(1, 2);
@@ -144,75 +147,75 @@ public class ReverseTrim {
         ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> supports = new ArrayList<>();
         HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> support;
         // ex1
-        // support = new HashMap<>();
-        // support.put(0, new Pair<>( new PropositionNodeSet(2), new
-        // PropositionNodeSet()));
-        // supports.add(new Pair<>(support, new PropositionNodeSet()));
-        // node1.addJustificationBasedSupports(0, Network.currentLevel, new
-        // ArrayList<>(supports));
-        // supports.clear();
-        // support = new HashMap<>();
-        // support.put(0, new Pair<>( new PropositionNodeSet(1), new
-        // PropositionNodeSet()));
-        // supports.add(new Pair<>(support, new PropositionNodeSet()));
-        // node1.addJustificationBasedSupports(1, Network.currentLevel, new
-        // ArrayList<>(supports));
-        // supports.clear();
-        // support = new HashMap<>();
-        // support.put(1, new Pair<>( new PropositionNodeSet(1), new
-        // PropositionNodeSet()));
-        // supports.add(new Pair<>(support, new PropositionNodeSet()));
-        // node1.addJustificationBasedSupports(2, Network.currentLevel, new
-        // ArrayList<>(supports));
-        // supports.clear();
-        // support = new HashMap<>();
-        // support.put(2, new Pair<>( new PropositionNodeSet(1), new
-        // PropositionNodeSet()));
-        // supports.add(new Pair<>(support, new PropositionNodeSet()));
-        // node1.addJustificationBasedSupports(0, Network.currentLevel, new
-        // ArrayList<>(supports));
+        support = new HashMap<>();
+        support.put(0, new Pair<>( new PropositionNodeSet(2), new
+        PropositionNodeSet()));
+        supports.add(new Pair<>(support, new PropositionNodeSet()));
+        node1.addJustificationBasedSupports(0, Network.currentLevel, new
+        ArrayList<>(supports));
+        supports.clear();
+        support = new HashMap<>();
+        support.put(0, new Pair<>( new PropositionNodeSet(1), new
+        PropositionNodeSet()));
+        supports.add(new Pair<>(support, new PropositionNodeSet()));
+        node1.addJustificationBasedSupports(1, Network.currentLevel, new
+        ArrayList<>(supports));
+        supports.clear();
+        support = new HashMap<>();
+        support.put(1, new Pair<>( new PropositionNodeSet(1), new
+        PropositionNodeSet()));
+        supports.add(new Pair<>(support, new PropositionNodeSet()));
+        node1.addJustificationBasedSupports(2, Network.currentLevel, new
+        ArrayList<>(supports));
+        supports.clear();
+        support = new HashMap<>();
+        support.put(2, new Pair<>( new PropositionNodeSet(1), new
+        PropositionNodeSet()));
+        supports.add(new Pair<>(support, new PropositionNodeSet()));
+        node1.addJustificationBasedSupports(0, Network.currentLevel, new
+        ArrayList<>(supports));
 
         // ex2
-        support = new HashMap<>();
-        support.put(0, new Pair<>(ps_1_5, new PropositionNodeSet()));
-        support.put(1, new Pair<>(ps_3, new PropositionNodeSet()));
-        supports.add(new Pair<>(new HashMap<>(support), new PropositionNodeSet(12)));
+        // support = new HashMap<>();
+        // support.put(0, new Pair<>(ps_1_5, new PropositionNodeSet()));
+        // support.put(1, new Pair<>(ps_3, new PropositionNodeSet()));
+        // supports.add(new Pair<>(new HashMap<>(support), new PropositionNodeSet(12)));
 
-        support.clear();
-        support.put(1, new Pair<>(ps_3, new PropositionNodeSet()));
-        supports.add(new Pair<>(new HashMap<>(support), new PropositionNodeSet(12)));
-        node4.addJustificationBasedSupports(2, Network.currentLevel, new ArrayList<>(supports));
-        support = new HashMap<>();
-        support.put(0, new Pair<>(ps_1_2, new PropositionNodeSet()));
-        supports.add(new Pair<>(support, new PropositionNodeSet()));
-        node3.addJustificationBasedSupports(1, Network.currentLevel, new ArrayList<>(supports));
-        supports.clear();
+        // support.clear();
+        // support.put(1, new Pair<>(ps_3, new PropositionNodeSet()));
+        // supports.add(new Pair<>(new HashMap<>(support), new PropositionNodeSet(12)));
+        // node4.addJustificationBasedSupports(2, Network.currentLevel, new ArrayList<>(supports));
+        // support = new HashMap<>();
+        // support.put(0, new Pair<>(ps_1_2, new PropositionNodeSet()));
+        // supports.add(new Pair<>(support, new PropositionNodeSet()));
+        // node3.addJustificationBasedSupports(1, Network.currentLevel, new ArrayList<>(supports));
+        // supports.clear();
 
-        supports.clear();
-        support = new HashMap<>();
-        support.put(2, new Pair<>(ps_1_4, new PropositionNodeSet()));
-        supports.add(new Pair<>(support, new PropositionNodeSet(10)));
-        node2.addJustificationBasedSupports(0, Network.currentLevel, new ArrayList<>(supports));
+        // supports.clear();
+        // support = new HashMap<>();
+        // support.put(2, new Pair<>(ps_1_4, new PropositionNodeSet()));
+        // supports.add(new Pair<>(support, new PropositionNodeSet(10)));
+        // node2.addJustificationBasedSupports(0, Network.currentLevel, new ArrayList<>(supports));
 
         System.out.println(node1.getAssumptionSupportDependents() + "node1 assumptionBasedSupport");
         System.out.println(node2.getAssumptionSupportDependents() + "node2 assumptionBasedSupport");
-        System.out.println(node3.getAssumptionSupportDependents() + "node3 assumptionBasedSupport");
-        System.out.println(node4.getAssumptionSupportDependents() + "node4 assumptionBasedSupport");
-        System.out.println(node5.getAssumptionSupportDependents() + "node5 assumptionBasedSupport");
+        // System.out.println(node3.getAssumptionSupportDependents() + "node3 assumptionBasedSupport");
+        // System.out.println(node4.getAssumptionSupportDependents() + "node4 assumptionBasedSupport");
+        // System.out.println(node5.getAssumptionSupportDependents() + "node5 assumptionBasedSupport");
       //  node3.removeNodeFromOtherNodesSupport();
         System.out.println(node1.getSupport() + "node1 assumptionBasedSupport");
         System.out.println(node2.getSupport() + "node2 assumptionBasedSupport");
-        System.out.println(node3.getSupport() + "node3 assumptionBasedSupport");
-        System.out.println(node4.getSupport() + "node4 assumptionBasedSupport");
-        System.out.println(node5.getSupport() + "node5 assumptionBasedSupport");
+        // System.out.println(node3.getSupport() + "node3 assumptionBasedSupport");
+        // System.out.println(node4.getSupport() + "node4 assumptionBasedSupport");
+        // System.out.println(node5.getSupport() + "node5 assumptionBasedSupport");
         ReverseTrim rTrim = new ReverseTrim("guc");
         rTrim.reverseTrim();
         System.out.print(ContextController.getContext("guc").toString());
         System.out.println(node1.getAssumptionSupportDependents() + "node1 assumptionBasedSupport");
         System.out.println(node2.getAssumptionSupportDependents() + "node2 assumptionBasedSupport");
-        System.out.println(node3.getAssumptionSupportDependents() + "node3 assumptionBasedSupport");
-        System.out.println(node4.getAssumptionSupportDependents() + "node4 assumptionBasedSupport");
-        System.out.println(node5.getAssumptionSupportDependents() + "node5 assumptionBasedSupport");
+        // System.out.println(node3.getAssumptionSupportDependents() + "node3 assumptionBasedSupport");
+        // System.out.println(node4.getAssumptionSupportDependents() + "node4 assumptionBasedSupport");
+        // System.out.println(node5.getAssumptionSupportDependents() + "node5 assumptionBasedSupport");
 
     }
 
