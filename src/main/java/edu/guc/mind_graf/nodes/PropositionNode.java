@@ -1595,31 +1595,35 @@ public class PropositionNode extends Node {
     public void removeNodesFromAssumptionbasedSupportDependents(Set<Integer> supportingNodes) {
         for (int nodeID : supportingNodes) {
             PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
-            node.assumptionSupportDependents.remove(nodeID);
+            node.assumptionSupportDependents.remove(getId());
 
         }
     }
 
-    public void computeSupportingNodes(String contextName, int level,
+    public void computeSupportingNodes(String contextName, int level, int supportedAttitude,
             ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> supports) {
         HashSet<Integer> supportingNodes = new HashSet<>();
         HashSet<Integer> supportingNodesInOtherContexts = new HashSet<>();
         for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support : supports) {
             HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> supportMap = support.getFirst();
-            if (isValidAssumptionBasedSupport(contextName, level, support)) {
-                for (int attitudeID : supportMap.keySet()) {
-                    for (int nodeID : supportMap.get(attitudeID).getFirst().getProps()) {
-                        supportingNodes.add(nodeID);
+            if (!Support.isHypothesisSupport(supportedAttitude, getId(), support)) {
+                if (isValidAssumptionBasedSupport(contextName, level, support)) {
+                    for (int attitudeID : supportMap.keySet()) {
+                        for (int nodeID : supportMap.get(attitudeID).getFirst().getProps()) {
+                            supportingNodes.add(nodeID);
+                        }
                     }
-                }
-            } else {
-                for (int attitudeID : supportMap.keySet()) {
-                    for (int nodeID : supportMap.get(attitudeID).getFirst().getProps()) {
-                        supportingNodesInOtherContexts.add(nodeID);
+                } else {
+                    for (int attitudeID : supportMap.keySet()) {
+                        for (int nodeID : supportMap.get(attitudeID).getFirst().getProps()) {
+                            supportingNodesInOtherContexts.add(nodeID);
+                        }
                     }
                 }
             }
         }
+        // System.out.println("supportingNodes " + supportingNodes);
+        // System.out.println("supprting nodes in other Contexts " + supportingNodesInOtherContexts);
         supportingNodes.removeAll(supportingNodesInOtherContexts);
         removeNodesFromAssumptionbasedSupportDependents(supportingNodes);
     }
@@ -1631,7 +1635,7 @@ public class PropositionNode extends Node {
             ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> supports = levelSupports
                     .get(supportedAttitude);
             if (supports != null) {
-                computeSupportingNodes(contextName, level, supports);
+                computeSupportingNodes(contextName, level, supportedAttitude, supports);
             }
         }
 
