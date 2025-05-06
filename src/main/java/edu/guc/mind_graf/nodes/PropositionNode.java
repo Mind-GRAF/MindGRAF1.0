@@ -496,7 +496,7 @@ public class PropositionNode extends Node {
             return true;
         }
 
-        if (!desiredContext.getLevels().contains(level)) {
+        if(!desiredContext.getLevels().contains(level)){
             return false;
         }
 
@@ -525,8 +525,6 @@ public class PropositionNode extends Node {
         return false;
 
     }
-
-
     /***
      * Makes this node a hypothesis in the specified attitude in the desired context
      *

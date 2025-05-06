@@ -60,7 +60,7 @@ class PropositionNodeTest {
         consistent.add(new ArrayList<>(List.of(1)));
         consistent.add(new ArrayList<>(List.of(2)));
 
-        n = NetworkController.setUp(attitudeNames, consistent, false, false, false, 3);
+        Network n = NetworkController.setUp(attitudeNames, consistent, false, false, false, 3);
         ContextController.createNewContext("Context1");
         ContextController.setCurrContext("Context1");
 
@@ -145,7 +145,186 @@ class PropositionNodeTest {
         node8.addJustificationBasedSupports(1,Network.currentLevel, new ArrayList<>(supports));
 
     }
+    private void createNodes() {
+        try {
+            node1 = (PropositionNode) Network.createNode("1", "propositionnode");
+            node2 = (PropositionNode) Network.createNode("2", "propositionnode");
+            node3 = (PropositionNode) Network.createNode("3", "propositionnode");
+            node4 = (PropositionNode) Network.createNode("4", "propositionnode");
+            node5 = (PropositionNode) Network.createNode("5", "propositionnode");
+            node6 = (PropositionNode) Network.createNode("6", "propositionnode");
+            node7 = (PropositionNode) Network.createNode("7", "propositionnode");
+            node8 = (PropositionNode) Network.createNode("8", "propositionnode");
+        } catch (NoSuchTypeException e) {
+            throw new RuntimeException(e);
+        }
 
+        // Set hypotheses at level 1
+        Network.currentLevel = 1;
+        node1.setHyp(0);
+        node1.setHyp(1);
+        node1.setHyp(2);
+        node2.setHyp(0);
+        node3.setHyp(1);
+        node4.setHyp(2);
+        node5.setHyp(0);
+
+        // Set hypotheses at level 0
+        Network.currentLevel = 0;
+        node1.setHyp(0);
+        node1.setHyp(1);
+        node1.setHyp(2);
+        node2.setHyp(0);
+        node3.setHyp(1);
+        node4.setHyp(2);
+        node5.setHyp(0);
+
+        // Create justification support structures
+        HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> support = new HashMap<>();
+        support.put(0, new Pair<>(new PropositionNodeSet(1, 2), new PropositionNodeSet()));
+        ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> supports = new ArrayList<>();
+        supports.add(new Pair<>(new HashMap<>(support), new PropositionNodeSet()));
+        support.clear();
+        support.put(1, new Pair<>(new PropositionNodeSet(1, 3), new PropositionNodeSet()));
+        support.put(2, new Pair<>(new PropositionNodeSet(4), new PropositionNodeSet()));
+        supports.add(new Pair<>(new HashMap<>(support), new PropositionNodeSet()));
+        node6.addJustificationBasedSupports(0, Network.currentLevel, new ArrayList<>(supports));
+
+        // Create direct assumption support for node6 at attitude 0
+        HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> innerMap = new HashMap<>();
+        innerMap.put(0, new Pair<>(new PropositionNodeSet(1, 2), new PropositionNodeSet()));
+
+        // Create assumption support structure for node6
+        Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> supportPair =
+                new Pair<>(innerMap, new PropositionNodeSet());
+        ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> supportList =
+                new ArrayList<>();
+        supportList.add(supportPair);
+
+        // Initialize the assumption support structure for node6
+        HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>>>> assumptionSupport =
+                node6.getSupport().getAssumptionBasedSupport();
+
+        // Initialize the level map if it doesn't exist
+        if (!assumptionSupport.containsKey(Network.currentLevel)) {
+            assumptionSupport.put(Network.currentLevel, new HashMap<>());
+        }
+
+        // Set the attitude support
+        assumptionSupport.get(Network.currentLevel).put(0, supportList);
+
+        // Setup for node7 - directly add to both networks
+        supports.clear();
+        support.clear();
+        support.put(2, new Pair<>(new PropositionNodeSet(1, 4), new PropositionNodeSet()));
+        supports.add(new Pair<>(new HashMap<>(support), new PropositionNodeSet()));
+        node6.addJustificationBasedSupports(1, Network.currentLevel, new ArrayList<>(supports));
+
+        // Create assumption support for node7
+        innerMap = new HashMap<>();
+        innerMap.put(0, new Pair<>(new PropositionNodeSet(1, 2, 5), new PropositionNodeSet()));
+        innerMap.put(1, new Pair<>(new PropositionNodeSet(1, 3), new PropositionNodeSet()));
+
+        supportPair = new Pair<>(innerMap, new PropositionNodeSet());
+        supportList = new ArrayList<>();
+        supportList.add(supportPair);
+
+        // Initialize the assumption support structure for node7
+        assumptionSupport = node7.getSupport().getAssumptionBasedSupport();
+
+        // Initialize the level map if it doesn't exist
+        if (!assumptionSupport.containsKey(Network.currentLevel)) {
+            assumptionSupport.put(Network.currentLevel, new HashMap<>());
+        }
+
+        // Set the attitude support
+        assumptionSupport.get(Network.currentLevel).put(0, supportList);
+
+        // Create assumption support for node7 at attitude 2
+        innerMap = new HashMap<>();
+        innerMap.put(0, new Pair<>(new PropositionNodeSet(1, 5), new PropositionNodeSet()));
+        innerMap.put(1, new Pair<>(new PropositionNodeSet(3), new PropositionNodeSet()));
+
+        supportPair = new Pair<>(innerMap, new PropositionNodeSet());
+        supportList = new ArrayList<>();
+        supportList.add(supportPair);
+
+        // Set the attitude support for attitude 2
+        assumptionSupport.get(Network.currentLevel).put(2, supportList);
+
+        // Create assumption support for node8
+        innerMap = new HashMap<>();
+        innerMap.put(0, new Pair<>(new PropositionNodeSet(6, 7), new PropositionNodeSet()));
+        innerMap.put(1, new Pair<>(new PropositionNodeSet(6), new PropositionNodeSet()));
+
+        supportPair = new Pair<>(innerMap, new PropositionNodeSet());
+        supportList = new ArrayList<>();
+        supportList.add(supportPair);
+
+        // Initialize the assumption support structure for node8
+        assumptionSupport = node8.getSupport().getAssumptionBasedSupport();
+
+        // Initialize the level map if it doesn't exist
+        if (!assumptionSupport.containsKey(Network.currentLevel)) {
+            assumptionSupport.put(Network.currentLevel, new HashMap<>());
+        }
+
+        // Set the attitude support
+        assumptionSupport.get(Network.currentLevel).put(0, supportList);
+
+        // Create assumption support for node8 at attitude 1
+        innerMap = new HashMap<>();
+        innerMap.put(0, new Pair<>(new PropositionNodeSet(6), new PropositionNodeSet()));
+        innerMap.put(2, new Pair<>(new PropositionNodeSet(7), new PropositionNodeSet()));
+
+        supportPair = new Pair<>(innerMap, new PropositionNodeSet());
+        supportList = new ArrayList<>();
+        supportList.add(supportPair);
+
+        // Set the attitude support for attitude 1
+        assumptionSupport.get(Network.currentLevel).put(1, supportList);
+
+        // Continue with the regular justification-based support setup
+        supports.clear();
+        support.clear();
+        support.put(0, new Pair<>(new PropositionNodeSet(1, 2, 5), new PropositionNodeSet()));
+        support.put(1, new Pair<>(new PropositionNodeSet(1, 3), new PropositionNodeSet()));
+        supports.add(new Pair<>(new HashMap<>(support), new PropositionNodeSet()));
+        support.clear();
+        support.put(2, new Pair<>(new PropositionNodeSet(4), new PropositionNodeSet()));
+        supports.add(new Pair<>(new HashMap<>(support), new PropositionNodeSet()));
+        node7.addJustificationBasedSupports(0, Network.currentLevel, new ArrayList<>(supports));
+
+        supports.clear();
+        support.clear();
+        support.put(0, new Pair<>(new PropositionNodeSet(1, 5), new PropositionNodeSet()));
+        support.put(1, new Pair<>(new PropositionNodeSet(3), new PropositionNodeSet()));
+        supports.add(new Pair<>(new HashMap<>(support), new PropositionNodeSet()));
+        support.clear();
+        support.put(1, new Pair<>(new PropositionNodeSet(3), new PropositionNodeSet()));
+        supports.add(new Pair<>(new HashMap<>(support), new PropositionNodeSet()));
+        node7.addJustificationBasedSupports(2, Network.currentLevel, new ArrayList<>(supports));
+
+        supports.clear();
+        support.clear();
+        support.put(0, new Pair<>(new PropositionNodeSet(6, 7), new PropositionNodeSet()));
+        support.put(1, new Pair<>(new PropositionNodeSet(6), new PropositionNodeSet()));
+        supports.add(new Pair<>(new HashMap<>(support), new PropositionNodeSet()));
+        support.clear();
+        support.put(2, new Pair<>(new PropositionNodeSet(7), new PropositionNodeSet()));
+        supports.add(new Pair<>(new HashMap<>(support), new PropositionNodeSet()));
+        node8.addJustificationBasedSupports(0, Network.currentLevel, new ArrayList<>(supports));
+
+        supports.clear();
+        support.clear();
+        support.put(0, new Pair<>(new PropositionNodeSet(6), new PropositionNodeSet()));
+        support.put(2, new Pair<>(new PropositionNodeSet(7), new PropositionNodeSet()));
+        supports.add(new Pair<>(new HashMap<>(support), new PropositionNodeSet()));
+        support.clear();
+        support.put(0, new Pair<>(new PropositionNodeSet(6), new PropositionNodeSet()));
+        supports.add(new Pair<>(new HashMap<>(support), new PropositionNodeSet()));
+        node8.addJustificationBasedSupports(1, Network.currentLevel, new ArrayList<>(supports));
+    }
     @Test
     void testSupportedWithNoHypotheses() {
         createNodes();
@@ -158,19 +337,21 @@ class PropositionNodeTest {
     }
 
 
+
     @Test
     void testSupported() {
         createNodes();
 
         Network.currentLevel = 0;
-        node1.setHyp("Context1", 0);
-        node1.setHyp("Context1", 1);
+        node1.setHyp("Context1",0);
+        node1.setHyp("Context1",1);
 
-        node2.setHyp("Context1", 0);
+        node2.setHyp("Context1",0);
 
-        node3.setHyp("Context1", 1);
+        node3.setHyp("Context1",1);
 
-        node4.setHyp("Context1", 2);
+        node4.setHyp("Context1",2);
+
 
         assertTrue(node6.supported("Context1", 0, Network.currentLevel));
         assertFalse(node6.supported("Context1", 1, Network.currentLevel));
@@ -183,7 +364,6 @@ class PropositionNodeTest {
         assertFalse(node8.supported("Context1", 2, Network.currentLevel));
 
     }
-
 
     //------------------------ Graded Proposition Tests ------------------------//
     PropositionNode createGradedNode() throws NoSuchTypeException {

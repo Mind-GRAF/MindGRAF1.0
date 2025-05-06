@@ -70,7 +70,7 @@ public class Revision {
     }
 
     public static void addNodesToCache(Context c, int level, int attitudeId, PropositionNode node) {
-        for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> assumptionSupport : node.getSupport().getAssumptionSupport().get(level).get(attitudeId)) {
+        for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> assumptionSupport : node.getSupport().getAssumptionBasedSupport().get(level).get(attitudeId)) {
             for (Map.Entry<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> support : assumptionSupport.getFirst().entrySet()) {
                 if (c.isInvalidSupport(level, attitudeId, support.getValue().getFirst())) {
                     continue;
