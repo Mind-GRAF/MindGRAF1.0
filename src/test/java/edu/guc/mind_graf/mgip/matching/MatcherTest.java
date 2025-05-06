@@ -596,7 +596,7 @@ public class MatcherTest {
                 assertEquals(M0, m.getNode());
                 assertEquals(matchType, m.getMatchType());
                 if (m.getSwitchSubs().get(var).equals(phy)) {
-                    assertTrue(((Support) m.getSupport()).getJustificationSupport().get(level).get(attitude).get(0)
+                    assertTrue(((Support) m.getSupport()).getJustificationBasedSupport().get(level).get(attitude).getFirst()
                             .getFirst().get(attitude).getFirst().contains(M0));
                 }
             }
