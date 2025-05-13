@@ -536,7 +536,7 @@ public class PropositionNode extends Node {
                 .getAssumptionBasedSupport().get(level).get(attitude)) {
             for (Integer key : currSupport.getFirst().keySet()) {
                 if (currSupport.getFirst().get(key).getFirst()
-                        .isSubset(context.getOriginHypotheses(key))
+                        .isSubset(context.getOriginHypotheses(0, key))
                         && currSupport.getFirst().get(key).getSecond()
                                 .isSubset(context.getGradedHypotheses(level, key))) {
 
@@ -579,42 +579,19 @@ public class PropositionNode extends Node {
         for (int i = 0; i < assumptionDependents.length; i++) {
             if (networkPropositions.containsKey(assumptionDependents[i])) {
                 PropositionNode dependent = (PropositionNode) networkPropositions.get(assumptionDependents[i]);
-                dependent.support.removeNodeFromAssumptions(this.getId());
-                assumptionSupportDependents.remove(assumptionDependents[i]);
-            }
-        }
-        int[] justificationDependents = this.getJustificationSupportDependents().getProps();
-        for (int i = 0; i < justificationDependents.length; i++) {
-            if (networkPropositions.containsKey(justificationDependents[i])) {
-                PropositionNode dependent = (PropositionNode) networkPropositions.get(justificationDependents[i]);
-                dependent.support.removeNodeFromJustifications(this.getId());
-                justificationSupportDependents.remove(justificationDependents[i]);
-            }
-        }
-    }
-
-    public void removeNodeFromOtherSupportsInContext(String context, int attitude) {
-        HashMap<Integer, Node> networkPropositions = Network.getPropositionNodes();
-        int[] assumptionDependents = this.getAssumptionSupportDependents().getProps();
-        for (int i = 0; i < assumptionDependents.length; i++) {
-            if (networkPropositions.containsKey(assumptionDependents[i])) {
-                PropositionNode dependent = (PropositionNode) networkPropositions.get(assumptionDependents[i]);
-                HashSet<Integer> nodesToBeRemoved = dependent.support.removeNodeFromAssumptions(context, this.getId(),
-                        attitude);
+                HashSet<Integer> nodesToBeRemoved = dependent.support.removeNodeFromAssumptions(this.getId());
                 System.out.println("nodes to be removed from the dependents" + nodesToBeRemoved);
                 for (int nodeID : nodesToBeRemoved) {
                     PropositionNode node = (PropositionNode) networkPropositions.get(nodeID);
                     node.assumptionSupportDependents.remove(assumptionDependents[i]);
                 }
-
             }
         }
         int[] justificationDependents = this.getJustificationSupportDependents().getProps();
         for (int i = 0; i < justificationDependents.length; i++) {
             if (networkPropositions.containsKey(justificationDependents[i])) {
                 PropositionNode dependent = (PropositionNode) networkPropositions.get(justificationDependents[i]);
-                HashSet<Integer> nodesToBeRemoved = dependent.support.removeNodeFromJustifications(context,
-                        this.getId(), attitude);
+                HashSet<Integer> nodesToBeRemoved = dependent.support.removeNodeFromJustifications(this.getId());
                 for (int nodeID : nodesToBeRemoved) {
                     PropositionNode node = (PropositionNode) networkPropositions.get(nodeID);
                     node.justificationSupportDependents.remove(justificationDependents[i]);
@@ -622,6 +599,42 @@ public class PropositionNode extends Node {
             }
         }
     }
+
+    // public void removeNodeFromOtherSupports(int attitude) {
+    // HashMap<Integer, Node> networkPropositions = Network.getPropositionNodes();
+    // int[] assumptionDependents =
+    // this.getAssumptionSupportDependents().getProps();
+    // for (int i = 0; i < assumptionDependents.length; i++) {
+    // if (networkPropositions.containsKey(assumptionDependents[i])) {
+    // PropositionNode dependent = (PropositionNode)
+    // networkPropositions.get(assumptionDependents[i]);
+    // HashSet<Integer> nodesToBeRemoved =
+    // dependent.support.removeNodeFromAssumptions(this.getId(), attitude);
+    // System.out.println("nodes to be removed from the dependents" +
+    // nodesToBeRemoved);
+    // for (int nodeID : nodesToBeRemoved) {
+    // PropositionNode node = (PropositionNode) networkPropositions.get(nodeID);
+    // node.assumptionSupportDependents.remove(assumptionDependents[i]);
+    // }
+    // }
+    // }
+    // int[] justificationDependents =
+    // this.getJustificationSupportDependents().getProps();
+    // for (int i = 0; i < justificationDependents.length; i++) {
+    // if (networkPropositions.containsKey(justificationDependents[i])) {
+    // PropositionNode dependent = (PropositionNode)
+    // networkPropositions.get(justificationDependents[i]);
+    // HashSet<Integer> nodesToBeRemoved =
+    // dependent.support.removeNodeFromJustifications(
+    // this.getId(), attitude);
+    // for (int nodeID : nodesToBeRemoved) {
+    // PropositionNode node = (PropositionNode) networkPropositions.get(nodeID);
+    // node.justificationSupportDependents.remove(justificationDependents[i]);
+    // }
+
+    // }
+    // }
+    // }
 
     public void ForgetNodeFromOtherNodesSupport() {
         HashMap<Integer, Node> networkPropositions = Network.getPropositionNodes();
@@ -1567,7 +1580,15 @@ public class PropositionNode extends Node {
 
     }
 
-    public boolean isHypInAnyContext(String contextName, int attitude, int level) {
+    public boolean isOriginHypInAnyContext() {
+        return support.getIsHyp().get(0) != null && !support.getIsHyp().get(0).isEmpty();
+    }
+
+    public boolean isOriginHypInAnyContext(int attitude) {
+        return support.getIsHyp().get(0) != null && !support.getIsHyp().get(0).contains(attitude);
+    }
+
+    public boolean isHypInOtherContexts(String contextName, int attitude, int level) {
         HashMap<String, Context> contexts = ContextController.getContextSet().getSet();
         int nodeID = getId();
         for (Context otherContext : contexts.values()) {
@@ -1580,10 +1601,10 @@ public class PropositionNode extends Node {
         return false;
     }
 
-    public boolean isHypInAnyContextAtAnyAttitude(String contextName, int level) {
+    public boolean isHypInOtherContextsAtAnyAttitude(String contextName, int level) {
         Collection<Integer> attitudes = ContextController.getAttitudes().getSet().values();
         for (int attitudeID : attitudes) {
-            if (isHypInAnyContext(contextName, attitudeID, level)) {
+            if (isHypInOtherContexts(contextName, attitudeID, level)) {
                 return true;
             }
         }
@@ -1613,7 +1634,7 @@ public class PropositionNode extends Node {
         Context context = ContextController.getContext(contextName);
         for (Integer key : support.getFirst().keySet()) {
             if (!(support.getFirst().get(key).getFirst()
-                    .isSubset(context.getOriginHypotheses(key))
+                    .isSubset(context.getOriginHypotheses(0, key))
                     && support.getFirst().get(key).getSecond()
                             .isSubset(context.getGradedHypotheses(level, key)))) {
                 return false;
@@ -1634,54 +1655,72 @@ public class PropositionNode extends Node {
         return true;
     }
 
-    public void removeNodesFromAssumptionbasedSupportDependents(Set<Integer> supportingNodes) {
-        for (int nodeID : supportingNodes) {
+    private void removeNodesFromAssumptionbasedSupportDependents(PropositionNodeSet supportingNodes) {
+        for (int nodeID : supportingNodes.getProps()) {
             PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
             node.assumptionSupportDependents.remove(getId());
 
         }
     }
 
-    public void computeSupportingNodes(String contextName, int level, int supportedAttitude,
-            ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> supports) {
-        HashSet<Integer> supportingNodes = new HashSet<>();
-        HashSet<Integer> supportingNodesInOtherContexts = new HashSet<>();
-        for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support : supports) {
-            HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> supportMap = support.getFirst();
-            if (!Support.isHypothesisSupport(supportedAttitude, getId(), support)) {
-                if (isValidAssumptionBasedSupport(contextName, level, support)) {
-                    for (int attitudeID : supportMap.keySet()) {
-                        for (int nodeID : supportMap.get(attitudeID).getFirst().getProps()) {
-                            supportingNodes.add(nodeID);
-                        }
-                    }
-                } else {
-                    for (int attitudeID : supportMap.keySet()) {
-                        for (int nodeID : supportMap.get(attitudeID).getFirst().getProps()) {
-                            supportingNodesInOtherContexts.add(nodeID);
+    private void removeNodesJustificationbasedSupportDependents(PropositionNodeSet supportingNodes) {
+        for (int nodeID : supportingNodes.getProps()) {
+            PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
+            node.justificationSupportDependents.remove(getId());
+
+        }
+    }
+
+    public void removeFromOthersAssumptiondependents() {
+        HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>>>> assumptionBasedSupport = support
+                .getAssumptionBasedSupport();
+        PropositionNodeSet supportingNodes = new PropositionNodeSet();
+        for (int supportedLevel : assumptionBasedSupport.keySet()) {
+            HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>>> levelSupports = assumptionBasedSupport
+                    .get(supportedLevel);
+            for (int supportedAttitude : levelSupports.keySet()) {
+                ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> attitudeSupports = levelSupports
+                        .get(supportedAttitude);
+                for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support : attitudeSupports) {
+                    if (!Support.isDefaultHypSupport(supportedAttitude, getId(), support)) {
+                        for (int supportingAttitude : support.getFirst().keySet()) {
+                            supportingNodes.union(support.getFirst().get(supportingAttitude).getFirst());
                         }
                     }
                 }
             }
         }
-        System.out.println("supportingNodes " + supportingNodes);
-        System.out.println("supprting nodes in other Contexts " +
-                supportingNodesInOtherContexts);
-        supportingNodes.removeAll(supportingNodesInOtherContexts);
         removeNodesFromAssumptionbasedSupportDependents(supportingNodes);
     }
 
-    public void removeNodeFromOthersAssumptionDependents(String contextName, int supportedAttitude, int level) {
-        HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>>> levelSupports = support
-                .getAssumptionBasedSupport().get(level);
-        if (levelSupports != null) {
-            ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> supports = levelSupports
-                    .get(supportedAttitude);
-            if (supports != null) {
-                computeSupportingNodes(contextName, level, supportedAttitude, supports);
+    public void removeFromOthersJustificationdependents() {
+        HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>>>> justificationBasedSupport = support
+                .getJustificationBasedSupport();
+        PropositionNodeSet supportingNodes = new PropositionNodeSet();
+        for (int supportedLevel : justificationBasedSupport.keySet()) {
+            HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>>> levelSupports = justificationBasedSupport
+                    .get(supportedLevel);
+            for (int supportedAttitude : levelSupports.keySet()) {
+                ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> attitudeSupports = levelSupports
+                        .get(supportedAttitude);
+                for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support : attitudeSupports) {
+                    if (!Support.isDefaultHypSupport(supportedAttitude, getId(), support)) {
+                        for (int supportingAttitude : support.getFirst().keySet()) {
+                            supportingNodes.union(support.getFirst().get(supportingAttitude).getFirst());
+                        }
+                    }
+                }
             }
         }
 
+        removeNodesJustificationbasedSupportDependents(supportingNodes);
+    }
+
+    public void removeFromOthersdependents() {
+        // remove from others assumption based support dependents
+        removeFromOthersAssumptiondependents();
+        // remove from others justification based support dependents
+        removeFromOthersJustificationdependents();
     }
 
 }

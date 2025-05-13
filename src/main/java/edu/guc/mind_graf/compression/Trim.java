@@ -31,7 +31,7 @@ public class Trim {
     Context currentContext = ContextController.getContext(context);
     Collection<Integer> attitudes = ContextController.getAttitudes().getSet().values();
     for (int attitudeID : attitudes) {
-      PropositionNodeSet originSet = currentContext.getOriginHypotheses(attitudeID);
+      PropositionNodeSet originSet = currentContext.getOriginHypotheses(0, attitudeID);
       boolean nodeRemoved = processAttitudeHypsSet(originSet, attitudeID);
       if (nodeRemoved) {
         contextTrim();
@@ -46,7 +46,7 @@ public class Trim {
       boolean hasDependents = hasDependents(nodeID, attitudeID);
       PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
       if (!hasDependents) {
-        if (!node.isHypInAnyContextAtAnyAttitude(context, 0) && !node.isHypAtOtherAttitudes(context, attitudeID, 0)) {
+        if (!node.isHypInOtherContextsAtAnyAttitude(context, 0) && !node.isHypAtOtherAttitudes(context, attitudeID, 0)) {
           try {
             nodeRemoved = true;
             removeHypFromNetwork(nodeID, attitudeID);
@@ -89,7 +89,7 @@ public class Trim {
       int supportingAttitudeID) {
     Context currentContext = ContextController.getContext(context);
     PropositionNode dependentNode = (PropositionNode) Network.getNodeById(supportedNodeID);
-    PropositionNodeSet originSet = currentContext.getOriginHypotheses(supportedAttitudeID);
+    PropositionNodeSet originSet = currentContext.getOriginHypotheses(0, supportedAttitudeID);
     if (!originSet.contains(supportedNodeID)) {
       return false;
     }
@@ -120,9 +120,9 @@ public class Trim {
   public void removeHypFromContext(int nodeID, int attitudeID) {
     PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
     Context currentContext = ContextController.getContext(context);
-    node.removeNodeFromOthersAssumptionDependents(context, attitudeID, 0);
+   //node.removeNodeFromOthersAssumptionDependents(context, attitudeID, 0);
     currentContext.removeHypothesisFromContext(0, attitudeID, node);
-    if (!node.isHypInAnyContext(context, attitudeID, 0)) {
+    if (!node.isHypInOtherContexts(context, attitudeID, 0)) {
       node.removeHypSupport(0, attitudeID);
     }
     System.out.println("node removed " + nodeID);

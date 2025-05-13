@@ -84,6 +84,12 @@ public class Context {
             pairArr[attitudeId].getFirst().remove(node);
         }
     }
+    public void removeGradedHypothesisFromContext(int level, int attitudeId, PropositionNode node) {
+        Pair<PropositionNodeSet, PropositionNodeSet>[] pairArr = this.hypotheses.get(level);
+        if (pairArr != null) {
+            pairArr[attitudeId].getSecond().remove(node);
+        }
+    }
 
     public boolean isHypothesis(int level, int attitudeId, PropositionNode node) {
         Pair<PropositionNodeSet, PropositionNodeSet>[] pairArr = this.hypotheses.get(level);
@@ -211,7 +217,7 @@ public class Context {
     }
 
     @Override
-    public String toString() {
+    public String toString() { 
         StringBuilder sb = new StringBuilder();
         sb.append("Context Name: ").append(name).append("\n");
 
@@ -253,8 +259,8 @@ public class Context {
         return hypotheses.get(level)[attitudeID].getSecond();
     }
 
-    public PropositionNodeSet getOriginHypotheses(int attitudeID) {
-        return hypotheses.get(0)[attitudeID].getFirst();
+    public PropositionNodeSet getOriginHypotheses(int level, int attitudeID) {
+        return hypotheses.get(level)[attitudeID].getFirst();
     }
 
     public boolean isHyp(int nodeID, int attitude, int level) {

@@ -32,7 +32,7 @@ public class MaximalHypotheses {
         int attitudesSize = ContextController.getAttitudes().getSet().size();
         Context currentContext = ContextController.getContext(context);
         for (int attitudeID = 0; attitudeID < attitudesSize; attitudeID++) {
-            PropositionNodeSet originSet = currentContext.getOriginHypotheses(attitudeID);
+            PropositionNodeSet originSet = currentContext.getOriginHypotheses(0,attitudeID);
             processHypsSet(originSet, attitudeID);
         }
 
@@ -52,7 +52,7 @@ public class MaximalHypotheses {
         ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> validSupports = node
                 .getDerivingSupport(context, attitude, 0);
         for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support : validSupports) {
-            boolean isHypSupport = Support.isHypothesisSupport(attitude, nodeID, support);
+            boolean isHypSupport = Support.isDefaultHypSupport(attitude, nodeID, support);
             if (isHypSupport)
                 isMaxHyp = true;
             else {

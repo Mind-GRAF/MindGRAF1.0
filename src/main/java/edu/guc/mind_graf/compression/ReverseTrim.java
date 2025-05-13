@@ -51,7 +51,7 @@ public class ReverseTrim {
         PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
         Context currentContext = ContextController.getContext(context);
         currentContext.removeHypothesisFromContext(0, attitudeID, node);
-        if (!node.isHypInAnyContext(context, attitudeID, 0)) {
+        if (!node.isHypInOtherContexts(context, attitudeID, 0)) {
             node.removeHypSupport(0, attitudeID);
         }
         System.out.println("node removed " + nodeID);
@@ -74,13 +74,13 @@ public class ReverseTrim {
         boolean nodeRemoved = false;
         for (int nodeID : MaxHyps.getProps()) {
             PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
-            if (!node.isHypInAnyContextAtAnyAttitude(context, 0)
+            if (!node.isHypInOtherContextsAtAnyAttitude(context, 0)
                     && !node.isHypAtOtherAttitudes(context, attitudeID, 0)) {
                 // remove from the network
                 // remove from all supports
-               node.removeNodeFromOthersAssumptionDependents(context, attitudeID, 0);
+              // node.removeNodeFromOthersAssumptionDependents(context, attitudeID, 0);
                System.out.println(node.getAssumptionSupportDependents() + "  dependents");
-               node.removeNodeFromOtherSupportsInContext(context, attitudeID);
+              // node.removeNodeFromOtherSupportsInContext(context, attitudeID);
                 try {
                     nodeRemoved = true;
                     removeMaxHypFromNetwork(nodeID, attitudeID);
@@ -92,8 +92,8 @@ public class ReverseTrim {
                   System.out.println(node.getAssumptionSupportDependents() + " after removal dependents");
             } else {
                 nodeRemoved = true;
-                node.removeNodeFromOtherSupportsInContext(context, attitudeID);
-                node.removeNodeFromOthersAssumptionDependents(context, attitudeID, 0);
+               // node.removeNodeFromOtherSupports(attitudeID);
+               // node.removeNodeFromOthersAssumptionDependents(context, attitudeID, 0);
                 removeMaxHypFromContext(nodeID,attitudeID);
                 // remove from the context only
                  // go to the dependents and remove any support that contains this node in the
