@@ -567,6 +567,7 @@ public class PropositionNode extends Node {
     }
 
     public void setHyp(int attitude) {
+        // System.out.println("add node " +getId() + " in "+ attitude);
         this.support.setHyp(attitude);
     }
 
@@ -580,7 +581,7 @@ public class PropositionNode extends Node {
             if (networkPropositions.containsKey(assumptionDependents[i])) {
                 PropositionNode dependent = (PropositionNode) networkPropositions.get(assumptionDependents[i]);
                 HashSet<Integer> nodesToBeRemoved = dependent.support.removeNodeFromAssumptions(this.getId());
-                System.out.println("nodes to be removed from the dependents" + nodesToBeRemoved);
+                // System.out.println("nodes to be removed from the dependents" + nodesToBeRemoved);
                 for (int nodeID : nodesToBeRemoved) {
                     PropositionNode node = (PropositionNode) networkPropositions.get(nodeID);
                     node.assumptionSupportDependents.remove(assumptionDependents[i]);
@@ -1674,6 +1675,7 @@ public class PropositionNode extends Node {
     public void removeFromOthersAssumptiondependents() {
         HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>>>> assumptionBasedSupport = support
                 .getAssumptionBasedSupport();
+                // System.out.println("assump "+assumptionBasedSupport);
         PropositionNodeSet supportingNodes = new PropositionNodeSet();
         for (int supportedLevel : assumptionBasedSupport.keySet()) {
             HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>>> levelSupports = assumptionBasedSupport
@@ -1684,18 +1686,21 @@ public class PropositionNode extends Node {
                 for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support : attitudeSupports) {
                     if (!Support.isDefaultHypSupport(supportedAttitude, getId(), support)) {
                         for (int supportingAttitude : support.getFirst().keySet()) {
-                            supportingNodes.union(support.getFirst().get(supportingAttitude).getFirst());
+                            support.getFirst().get(supportingAttitude).getFirst().addAllTo(supportingNodes);
                         }
                     }
                 }
             }
         }
+        // System.out.println("nodes to be remove"+supportingNodes+ "supports"+ getId());
         removeNodesFromAssumptionbasedSupportDependents(supportingNodes);
     }
 
     public void removeFromOthersJustificationdependents() {
+        
         HashMap<Integer, HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>>>> justificationBasedSupport = support
                 .getJustificationBasedSupport();
+                // System.out.println("just "+justificationBasedSupport);
         PropositionNodeSet supportingNodes = new PropositionNodeSet();
         for (int supportedLevel : justificationBasedSupport.keySet()) {
             HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>>> levelSupports = justificationBasedSupport
@@ -1706,7 +1711,7 @@ public class PropositionNode extends Node {
                 for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support : attitudeSupports) {
                     if (!Support.isDefaultHypSupport(supportedAttitude, getId(), support)) {
                         for (int supportingAttitude : support.getFirst().keySet()) {
-                            supportingNodes.union(support.getFirst().get(supportingAttitude).getFirst());
+                            support.getFirst().get(supportingAttitude).getFirst().addAllTo(supportingNodes);
                         }
                     }
                 }

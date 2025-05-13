@@ -3,6 +3,7 @@ package edu.guc.mind_graf.network;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import edu.guc.mind_graf.mgip.rules.*;
 import edu.guc.mind_graf.relations.Relation;
@@ -14,6 +15,7 @@ import edu.guc.mind_graf.caseFrames.Adjustability;
 import edu.guc.mind_graf.components.CustomClass;
 import edu.guc.mind_graf.components.CustomConstructor;
 import edu.guc.mind_graf.components.CustomMethod;
+import edu.guc.mind_graf.compression.HypNode;
 import edu.guc.mind_graf.exceptions.CannotRemoveNodeException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.exceptions.NodeNotInNetworkException;
@@ -509,6 +511,14 @@ public class Network {
 		}
 		System.out.println(result);
 	}
+	 public static void printPropositionNodes() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Proposition Nodes Mapping:\n");
+        for (Map.Entry<Integer, Node> entry : Network.propositionNodes.entrySet()) {
+            sb.append("  ID ").append(entry.getKey()).append(" -> ").append(entry.getValue()).append("\n");
+        }
+        System.out.println(sb.toString());
+    }
 
 	public static void main(String[] args) throws Exception {
 		Network Net = new Network();

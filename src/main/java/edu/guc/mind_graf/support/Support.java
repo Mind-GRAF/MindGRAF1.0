@@ -891,7 +891,7 @@ public class Support implements Cloneable {
 		int level = Network.currentLevel;
 		if (isHyp.containsKey(level)) {
 			if (isHyp.get(level).contains(attitudeID)) {
-
+				// System.out.println("add node " + nodeID + " at "+ attitudeID+ "already exist ");
 				return;
 			}
 		}
@@ -918,9 +918,13 @@ public class Support implements Cloneable {
 		// Add the attitude to the isHyp
 		if (isHyp.containsKey(level)) {
 			isHyp.get(level).add(attitudeID);
+			// System.out.println("add node " + nodeID + " at "+ attitudeID+" done if ");
 		} else {
-			isHyp.put(level, new HashSet<>(attitudeID));
+			isHyp.put(level, new HashSet<>());
+			isHyp.get(level).add(attitudeID);
+			// System.out.println("add node " + nodeID + " at "+ attitudeID+"done else");
 		}
+		// System.out.println("is hyp after update" + isHyp);
 	}
 
 	/**

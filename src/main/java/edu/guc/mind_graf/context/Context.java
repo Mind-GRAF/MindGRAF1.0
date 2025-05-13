@@ -63,6 +63,7 @@ public class Context {
     }
 
     public void addHypothesisToContext(int level, int attitudeId, PropositionNode node) {
+        // System.out.println("add node " + node + " in " + attitudeId + " in level " + level);
         if (this.hypotheses.get(level) == null) {
             Pair<PropositionNodeSet, PropositionNodeSet>[] hyps = new Pair[this.hypotheses.get(0).length];
             for (int i = 0; i < this.hypotheses.get(0).length; i++) {
@@ -83,12 +84,25 @@ public class Context {
         if (pairArr != null) {
             pairArr[attitudeId].getFirst().remove(node);
         }
+        for (int i = 0; i < this.hypotheses.get(0).length; i++) {
+            if (!pairArr[i].getFirst().isEmpty() || !pairArr[i].getSecond().isEmpty()) {
+                return;
+            }
+        }
+        this.hypotheses.remove(level);
     }
+
     public void removeGradedHypothesisFromContext(int level, int attitudeId, PropositionNode node) {
         Pair<PropositionNodeSet, PropositionNodeSet>[] pairArr = this.hypotheses.get(level);
         if (pairArr != null) {
             pairArr[attitudeId].getSecond().remove(node);
         }
+        for (int i = 0; i < this.hypotheses.get(0).length; i++) {
+            if (!pairArr[i].getFirst().isEmpty() || !pairArr[i].getSecond().isEmpty()) {
+                return;
+            }
+        }
+        this.hypotheses.remove(level);
     }
 
     public boolean isHypothesis(int level, int attitudeId, PropositionNode node) {
@@ -217,7 +231,7 @@ public class Context {
     }
 
     @Override
-    public String toString() { 
+    public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Context Name: ").append(name).append("\n");
 
@@ -252,15 +266,21 @@ public class Context {
     }
 
     public boolean isGradedHypNode(int level, int attitude, int nodeID) {
+        if (hypotheses.get(level) == null)
+            return false;
         return hypotheses.get(level)[attitude].getSecond().contains(nodeID);
     }
 
     public PropositionNodeSet getGradedHypotheses(int level, int attitudeID) {
-        return hypotheses.get(level)[attitudeID].getSecond();
+        if (hypotheses.get(level) != null)
+            return hypotheses.get(level)[attitudeID].getSecond();
+        return null;
     }
 
     public PropositionNodeSet getOriginHypotheses(int level, int attitudeID) {
-        return hypotheses.get(level)[attitudeID].getFirst();
+        if (hypotheses.get(level) != null)
+            return hypotheses.get(level)[attitudeID].getFirst();
+        return null;
     }
 
     public boolean isHyp(int nodeID, int attitude, int level) {
