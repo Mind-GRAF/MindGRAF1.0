@@ -20,8 +20,8 @@ public class CHBPlusWithFourApprox {
                 max.add(i);
             }
         }
-        // Trim.trim(g);
-        // Trim.reverseTrim(g);
+        Trim.trim(g);
+        Trim.reverseTrim(g);
         HashSet<Integer> result = FourAlgorithm.findFVS(new Graph(g));
         return red(g, result, max);
     }
@@ -101,24 +101,6 @@ public class CHBPlusWithFourApprox {
     }
 
     public static void main(String[] args) {
-        BipartiteGraph g = new BipartiteGraph(5, 5);
-        g.addEdge(0, 5);
-        g.addEdge(0, 7);
-        g.addEdge(0, 9);
-        g.addEdge(1, 5);
-        g.addEdge(1, 8);
-        g.addEdge(1, 6);
-        g.addEdge(2, 7);
-        g.addEdge(2, 8);
-        g.addEdge(3, 6);
-        g.addEdge(4, 7);
-        g.addEdge(4, 9);
-        g.addEdge(5, 2);
-        g.addEdge(6, 4);
-        g.addEdge(7, 1);
-        g.addEdge(8, 4);
-        g.addEdge(9, 3);
-        HashSet<Integer> x = CHBPlus(g);
-        System.out.println(x);
+       
     }
 }

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.set.PropositionNodeSet;
@@ -26,107 +28,138 @@ public class Trim {
   public void setContext(String context) {
     this.context = context;
   }
-
-  public void contextTrim() {
-    Context currentContext = ContextController.getContext(context);
-    Collection<Integer> attitudes = ContextController.getAttitudes().getSet().values();
-    for (int attitudeID : attitudes) {
-      PropositionNodeSet originSet = currentContext.getOriginHypotheses(0, attitudeID);
-      boolean nodeRemoved = processAttitudeHypsSet(originSet, attitudeID);
-      if (nodeRemoved) {
-        contextTrim();
-      }
+      public static boolean nodeIsBad(BipartiteGraph g, int u) {
+        return g.outdeg(u) == 0;
     }
 
-  }
-
-  public boolean processAttitudeHypsSet(PropositionNodeSet hypotheses, int attitudeID) {
-    boolean nodeRemoved = false;
-    for (int nodeID : hypotheses.getProps()) {
-      boolean hasDependents = hasDependents(nodeID, attitudeID);
-      PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
-      if (!hasDependents) {
-        if (!node.isHypInOtherContextsAtAnyAttitude(context, 0) && !node.isHypAtOtherAttitudes(context, attitudeID, 0)) {
-          try {
-            nodeRemoved = true;
-            removeHypFromNetwork(nodeID, attitudeID);
-          } catch (NodeNotInNetworkException e) {
-            e.printStackTrace();
-          } catch (CannotRemoveNodeException e) {
-            e.printStackTrace();
-          }
-        } else {
-          // remove only from this context
-          nodeRemoved = true;
-          removeHypFromContext(nodeID, attitudeID);
+    public static void trim(BipartiteGraph g) {
+        Queue<Integer> bad = new LinkedList<>();
+        for (int i = 0; i < g.sizeV1 + g.sizeV2; i++) {
+            if (!g.removed[i] && nodeIsBad(g, i)) {
+                bad.add(i);
+                g.removed[i] = true;
+            }
         }
-      }
-    }
-    return nodeRemoved;
-  }
-
-  public boolean hasDependents(int nodeID, int supportingAttitudeID) {
-    // System.out.println("does node " + nodeID + "have dependents in attitude" +
-    // supportingAttitudeID);
-    PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
-    PropositionNodeSet AssumptionSupportDependents = node.getAssumptionSupportDependents();
-    Collection<Integer> attitudes = ContextController.getAttitudes().getSet().values();
-    for (int dependentNodeID : AssumptionSupportDependents.getProps()) {
-      for (int supportedAttitude : attitudes) {
-        boolean isDependent = isDependent(dependentNodeID, supportedAttitude, nodeID, supportingAttitudeID);
-        if (isDependent) {
-          // System.out.println("yess node " + nodeID + "have dependents in attitude" +
-          // supportingAttitudeID + "--> node"
-          // + dependentNodeID + "attitude" + supportedAttitude);
-          return true;
+        while (!bad.isEmpty()) {
+            int u = bad.poll();
+            for (int v : g.adjRev[u]) { // v -> u
+                g.adj[v].remove(u);
+                if (!g.removed[v] && nodeIsBad(g, v)) {
+                    bad.add(v);
+                    g.removed[v] = true;
+                }
+            }
+            g.adj[u].clear();
+            g.adjRev[u].clear();
         }
-      }
     }
-    return false;
-  }
 
-  public boolean isDependent(int supportedNodeID, int supportedAttitudeID, int supportingNodeID,
-      int supportingAttitudeID) {
-    Context currentContext = ContextController.getContext(context);
-    PropositionNode dependentNode = (PropositionNode) Network.getNodeById(supportedNodeID);
-    PropositionNodeSet originSet = currentContext.getOriginHypotheses(0, supportedAttitudeID);
-    if (!originSet.contains(supportedNodeID)) {
-      return false;
+    public static void reverseTrim(BipartiteGraph g) {
+        g.reverseGraph();
+        trim(g);
+        g.reverseGraph();
     }
-    ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> supports = dependentNode
-        .getDerivingSupport(context, supportedAttitudeID, 0);
-    // System.out.println(
-    // "deriving supports of node" + supportedNodeID + " in attitude " +
-    // supportedAttitudeID + " " + supports);
-    for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support : supports) {
-      if (support.getFirst().get(supportingAttitudeID) == null) {
-        continue;
-      }
-      if (support.getFirst().get(supportingAttitudeID).getFirst().contains(supportingNodeID)) {
-        return true;
-      }
-    }
-    return false;
-  }
 
-  public void removeHypFromNetwork(int nodeID, int attitudeID)
-      throws NodeNotInNetworkException, CannotRemoveNodeException {
-    PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
-    removeHypFromContext(nodeID, attitudeID);
-    Network.RemoveNode(node);
-    System.out.println("node removed from network " + nodeID);
-  }
+  // public void contextTrim() {
+  //   Context currentContext = ContextController.getContext(context);
+  //   Collection<Integer> attitudes = ContextController.getAttitudes().getSet().values();
+  //   for (int attitudeID : attitudes) {
+  //     PropositionNodeSet originSet = currentContext.getOriginHypotheses(0, attitudeID);
+  //     boolean nodeRemoved = processAttitudeHypsSet(originSet, attitudeID);
+  //     if (nodeRemoved) {
+  //       contextTrim();
+  //     }
+  //   }
 
-  public void removeHypFromContext(int nodeID, int attitudeID) {
-    PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
-    Context currentContext = ContextController.getContext(context);
-   //node.removeNodeFromOthersAssumptionDependents(context, attitudeID, 0);
-    currentContext.removeHypothesisFromContext(0, attitudeID, node);
-    if (!node.isHypInOtherContexts(context, attitudeID, 0)) {
-      node.removeHypSupport(0, attitudeID);
-    }
-    System.out.println("node removed " + nodeID);
-  }
+  // }
+
+  // public boolean processAttitudeHypsSet(PropositionNodeSet hypotheses, int attitudeID) {
+  //   boolean nodeRemoved = false;
+  //   for (int nodeID : hypotheses.getProps()) {
+  //     boolean hasDependents = hasDependents(nodeID, attitudeID);
+  //     PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
+  //     if (!hasDependents) {
+  //       if (!node.isHypInOtherContextsAtAnyAttitude(context, 0) && !node.isHypAtOtherAttitudes(context, attitudeID, 0)) {
+  //         try {
+  //           nodeRemoved = true;
+  //           removeHypFromNetwork(nodeID, attitudeID);
+  //         } catch (NodeNotInNetworkException e) {
+  //           e.printStackTrace();
+  //         } catch (CannotRemoveNodeException e) {
+  //           e.printStackTrace();
+  //         }
+  //       } else {
+  //         // remove only from this context
+  //         nodeRemoved = true;
+  //         removeHypFromContext(nodeID, attitudeID);
+  //       }
+  //     }
+  //   }
+  //   return nodeRemoved;
+  // }
+
+  // public boolean hasDependents(int nodeID, int supportingAttitudeID) {
+  //   // System.out.println("does node " + nodeID + "have dependents in attitude" +
+  //   // supportingAttitudeID);
+  //   PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
+  //   PropositionNodeSet AssumptionSupportDependents = node.getAssumptionSupportDependents();
+  //   Collection<Integer> attitudes = ContextController.getAttitudes().getSet().values();
+  //   for (int dependentNodeID : AssumptionSupportDependents.getProps()) {
+  //     for (int supportedAttitude : attitudes) {
+  //       boolean isDependent = isDependent(dependentNodeID, supportedAttitude, nodeID, supportingAttitudeID);
+  //       if (isDependent) {
+  //         // System.out.println("yess node " + nodeID + "have dependents in attitude" +
+  //         // supportingAttitudeID + "--> node"
+  //         // + dependentNodeID + "attitude" + supportedAttitude);
+  //         return true;
+  //       }
+  //     }
+  //   }
+  //   return false;
+  // }
+
+  // public boolean isDependent(int supportedNodeID, int supportedAttitudeID, int supportingNodeID,
+  //     int supportingAttitudeID) {
+  //   Context currentContext = ContextController.getContext(context);
+  //   PropositionNode dependentNode = (PropositionNode) Network.getNodeById(supportedNodeID);
+  //   PropositionNodeSet originSet = currentContext.getOriginHypotheses(0, supportedAttitudeID);
+  //   if (!originSet.contains(supportedNodeID)) {
+  //     return false;
+  //   }
+  //   ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> supports = dependentNode
+  //       .getDerivingSupport(context, supportedAttitudeID, 0);
+  //   // System.out.println(
+  //   // "deriving supports of node" + supportedNodeID + " in attitude " +
+  //   // supportedAttitudeID + " " + supports);
+  //   for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support : supports) {
+  //     if (support.getFirst().get(supportingAttitudeID) == null) {
+  //       continue;
+  //     }
+  //     if (support.getFirst().get(supportingAttitudeID).getFirst().contains(supportingNodeID)) {
+  //       return true;
+  //     }
+  //   }
+  //   return false;
+  // }
+
+  // public void removeHypFromNetwork(int nodeID, int attitudeID)
+  //     throws NodeNotInNetworkException, CannotRemoveNodeException {
+  //   PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
+  //   removeHypFromContext(nodeID, attitudeID);
+  //   Network.RemoveNode(node);
+  //   System.out.println("node removed from network " + nodeID);
+  // }
+
+  // public void removeHypFromContext(int nodeID, int attitudeID) {
+  //   PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
+  //   Context currentContext = ContextController.getContext(context);
+  //  //node.removeNodeFromOthersAssumptionDependents(context, attitudeID, 0);
+  //   currentContext.removeHypothesisFromContext(0, attitudeID, node);
+  //   if (!node.isHypInOtherContexts(context, attitudeID, 0)) {
+  //     node.removeHypSupport(0, attitudeID);
+  //   }
+  //   System.out.println("node removed " + nodeID);
+  // }
 
   // public void contextTrim() {
   // ContextSet contextSet = ContextController.getContextSet();
@@ -355,8 +388,8 @@ public class Trim {
     System.out.println(node3.getSupport() + "node3 assumptionBasedSupport");
     System.out.println(node4.getSupport() + "node4 assumptionBasedSupport");
     System.out.println(node5.getSupport() + "node5 assumptionBasedSupport");
-    Trim trim = new Trim("guc");
-    trim.contextTrim();
+    // Trim trim = new Trim("guc");
+    // trim.contextTrim();
     System.out.print(ContextController.getContext("guc").toString());
     System.out.println(node1.getAssumptionSupportDependents() + "node1 assumptionBasedSupport");
     System.out.println(node2.getAssumptionSupportDependents() + "node2 assumptionBasedSupport");

@@ -44,7 +44,7 @@ public class GraphBuilder {
         supportNodesRev = new HashMap<>();
     }
 
-    public BipartiteGraph createBaseSupportGraph() {
+    public BipartiteGraph buildBaseSupportGraph() {
         Context currentContext = ContextController.getContext(context);
         Collection<Integer> attitudes = ContextController.getAttitudes().getSet().values();
         for (int attitudeID : attitudes) {
