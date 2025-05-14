@@ -14,12 +14,7 @@ public class CHBPlusWithFourApprox {
     }
 
     public static HashSet<Integer> CHBPlus(BipartiteGraph g) {
-        HashSet<Integer> max = new HashSet<>();
-        for (int i = 0; i < g.sizeV1; i++) {
-            if (!g.removed[i] && g.indeg(i) == 0) {
-                max.add(i);
-            }
-        }
+        HashSet<Integer> max = MaximalHypotheses.computeMaximalHypotheses(g);
         Trim.trim(g);
         Trim.reverseTrim(g);
         HashSet<Integer> result = FourAlgorithm.findFVS(new Graph(g));

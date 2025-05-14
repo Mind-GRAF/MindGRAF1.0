@@ -3,6 +3,7 @@ package edu.guc.mind_graf.compression;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import edu.guc.mind_graf.context.Context;
 import edu.guc.mind_graf.context.ContextController;
@@ -16,83 +17,93 @@ import edu.guc.mind_graf.support.Pair;
 import edu.guc.mind_graf.support.Support;
 
 public class MaximalHypotheses {
-    String context;
-    PropositionNodeSet[] maximalHypotheses;
-
-    public MaximalHypotheses(String context) {
-        this.context = context;
-        int attitudesSize = ContextController.getAttitudes().getSet().size();
-        maximalHypotheses = new PropositionNodeSet[attitudesSize];
-        for (int i = 0; i < attitudesSize; i++) {
-            maximalHypotheses[i] = new PropositionNodeSet();
-        }
-    }
-
-    public void computeMaximalHypotheses() {
-        int attitudesSize = ContextController.getAttitudes().getSet().size();
-        Context currentContext = ContextController.getContext(context);
-        for (int attitudeID = 0; attitudeID < attitudesSize; attitudeID++) {
-            PropositionNodeSet originSet = currentContext.getOriginHypotheses(0,attitudeID);
-            processHypsSet(originSet, attitudeID);
-        }
-
-    }
-
-    public void processHypsSet(PropositionNodeSet hypotheses, int attitudeID) {
-        for (int hyp : hypotheses.getProps()) {
-            if (isMaximalHyp(hyp, attitudeID)) {
-                maximalHypotheses[attitudeID].add(hyp);
+    
+    public static HashSet<Integer> computeMaximalHypotheses(BipartiteGraph g){
+          HashSet<Integer> max = new HashSet<>();
+        for (int i = 0; i < g.sizeV1; i++) {
+            if (!g.removed[i] && g.indeg(i) == 0) {
+                max.add(i);
             }
         }
+        return max;
     }
+//     String context;
+//     PropositionNodeSet[] maximalHypotheses;
 
-    public boolean isMaximalHyp(int nodeID, int attitude) {
-        boolean isMaxHyp = false;
-        PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
-        ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> validSupports = node
-                .getDerivingSupport(context, attitude, 0);
-        for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support : validSupports) {
-            boolean isHypSupport = Support.isDefaultHypSupport(attitude, nodeID, support);
-            if (isHypSupport)
-                isMaxHyp = true;
-            else {
-                return false;
-            }
-        }
+//     public MaximalHypotheses(String context) {
+//         this.context = context;
+//         int attitudesSize = ContextController.getAttitudes().getSet().size();
+//         maximalHypotheses = new PropositionNodeSet[attitudesSize];
+//         for (int i = 0; i < attitudesSize; i++) {
+//             maximalHypotheses[i] = new PropositionNodeSet();
+//         }
+//     }
 
-        return isMaxHyp;
-    }
+//     public void computeMaximalHypotheses() {
+//         int attitudesSize = ContextController.getAttitudes().getSet().size();
+//         Context currentContext = ContextController.getContext(context);
+//         for (int attitudeID = 0; attitudeID < attitudesSize; attitudeID++) {
+//             PropositionNodeSet originSet = currentContext.getOriginHypotheses(0,attitudeID);
+//             processHypsSet(originSet, attitudeID);
+//         }
 
-    public PropositionNodeSet[] getMaximalHypotheses() {
-        return maximalHypotheses;
-    }
+//     }
 
-    @Override
-public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("MaximalHypotheses {\n");
-    sb.append("  context: '").append(context).append("',\n");
-    sb.append("  maximalHypothesesByAttitude:\n");
+//     public void processHypsSet(PropositionNodeSet hypotheses, int attitudeID) {
+//         for (int hyp : hypotheses.getProps()) {
+//             if (isMaximalHyp(hyp, attitudeID)) {
+//                 maximalHypotheses[attitudeID].add(hyp);
+//             }
+//         }
+//     }
 
-    if (maximalHypotheses != null) {
-        for (int attitudeID = 0; attitudeID < maximalHypotheses.length; attitudeID++) {
-            sb.append("    Attitude ").append(attitudeID).append(": ");
+//     public boolean isMaximalHyp(int nodeID, int attitude) {
+//         boolean isMaxHyp = false;
+//         PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
+//         ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>> validSupports = node
+//                 .getDerivingSupport(context, attitude, 0);
+//         for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> support : validSupports) {
+//             boolean isHypSupport = Support.isDefaultHypSupport(attitude, nodeID, support);
+//             if (isHypSupport)
+//                 isMaxHyp = true;
+//             else {
+//                 return false;
+//             }
+//         }
 
-            PropositionNodeSet set = maximalHypotheses[attitudeID];
-            if (set != null) {
-                String indentedSet = set.toString().indent(6).trim(); // Java 12+
-                sb.append(indentedSet).append("\n");
-            } else {
-                sb.append("null\n");
-            }
-        }
-    } else {
-        sb.append("    null\n");
-    }
+//         return isMaxHyp;
+//     }
 
-    sb.append("}");
-    return sb.toString();
-}
+//     public PropositionNodeSet[] getMaximalHypotheses() {
+//         return maximalHypotheses;
+//     }
+
+//     @Override
+// public String toString() {
+//     StringBuilder sb = new StringBuilder();
+//     sb.append("MaximalHypotheses {\n");
+//     sb.append("  context: '").append(context).append("',\n");
+//     sb.append("  maximalHypothesesByAttitude:\n");
+
+//     if (maximalHypotheses != null) {
+//         for (int attitudeID = 0; attitudeID < maximalHypotheses.length; attitudeID++) {
+//             sb.append("    Attitude ").append(attitudeID).append(": ");
+
+//             PropositionNodeSet set = maximalHypotheses[attitudeID];
+//             if (set != null) {
+//                 String indentedSet = set.toString().indent(6).trim(); // Java 12+
+//                 sb.append(indentedSet).append("\n");
+//             } else {
+//                 sb.append("null\n");
+//             }
+//         }
+//     } else {
+//         sb.append("    null\n");
+//     }
+
+//     sb.append("}");
+//     return sb.toString();
+// }
 
     
 
@@ -166,9 +177,9 @@ public String toString() {
         System.out.println(node4.getSupport() + "node4 assumptionBasedSupport");
         System.out.println(node5.getSupport() + "node5 assumptionBasedSupport");
 
-        MaximalHypotheses maxHyps = new MaximalHypotheses("guc");
-        maxHyps.computeMaximalHypotheses();
-        System.out.println(maxHyps);
+        // MaximalHypotheses maxHyps = new MaximalHypotheses("guc");
+        // maxHyps.computeMaximalHypotheses();
+        // System.out.println(maxHyps);
 
     }
 

@@ -19,91 +19,91 @@ import edu.guc.mind_graf.support.Pair;
 
 public class ReverseTrim {
 
-    String context;
+    // String context;
 
-    public ReverseTrim(String context) {
-        this.context = context;
-    }
+    // public ReverseTrim(String context) {
+    //     this.context = context;
+    // }
 
-    public void reverseTrim() {
-        // get maxHyps
-        // remove from this context
-        // for all dependents remove it from the support ?
-        MaximalHypotheses maxHyps = new MaximalHypotheses(context);
-        maxHyps.computeMaximalHypotheses();
-        PropositionNodeSet[] contextMaxHyps = maxHyps.getMaximalHypotheses();
-        boolean nodeRemoved = removeMaxHyps(contextMaxHyps);
-        if (nodeRemoved) {
-            reverseTrim();
-        }
+    // public void reverseTrim() {
+    //     // get maxHyps
+    //     // remove from this context
+    //     // for all dependents remove it from the support ?
+    //     MaximalHypotheses maxHyps = new MaximalHypotheses(context);
+    //     maxHyps.computeMaximalHypotheses();
+    //     PropositionNodeSet[] contextMaxHyps = maxHyps.getMaximalHypotheses();
+    //     boolean nodeRemoved = removeMaxHyps(contextMaxHyps);
+    //     if (nodeRemoved) {
+    //         reverseTrim();
+    //     }
 
-    }
+    // }
 
-    public void removeMaxHypFromNetwork(int nodeID, int attitudeID)
-            throws NodeNotInNetworkException, CannotRemoveNodeException {
-        PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
-        removeMaxHypFromContext(nodeID, attitudeID);
-        Network.RemoveNode(node);
-        System.out.println("node removed from network " + nodeID +"  " + attitudeID);
-    }
+    // public void removeMaxHypFromNetwork(int nodeID, int attitudeID)
+    //         throws NodeNotInNetworkException, CannotRemoveNodeException {
+    //     PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
+    //     removeMaxHypFromContext(nodeID, attitudeID);
+    //     Network.RemoveNode(node);
+    //     System.out.println("node removed from network " + nodeID +"  " + attitudeID);
+    // }
 
-    public void removeMaxHypFromContext(int nodeID, int attitudeID) {
-        PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
-        Context currentContext = ContextController.getContext(context);
-        currentContext.removeHypothesisFromContext(0, attitudeID, node);
-        if (!node.isHypInOtherContexts(context, attitudeID, 0)) {
-            node.removeHypSupport(0, attitudeID);
-        }
-        System.out.println("node removed " + nodeID);
-    }
+    // public void removeMaxHypFromContext(int nodeID, int attitudeID) {
+    //     PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
+    //     Context currentContext = ContextController.getContext(context);
+    //     currentContext.removeHypothesisFromContext(0, attitudeID, node);
+    //     if (!node.isHypInOtherContexts(context, attitudeID, 0)) {
+    //         node.removeHypSupport(0, attitudeID);
+    //     }
+    //     System.out.println("node removed " + nodeID);
+    // }
 
-    public boolean removeMaxHyps(PropositionNodeSet[] maxHyps) {
-        boolean anyNodeRemoved = false;
-        for (int attitudeID = 0; attitudeID < maxHyps.length; attitudeID++) {
-            PropositionNodeSet originHyps = maxHyps[attitudeID];
-            boolean nodeRemoved = processMaxHypsAtAttitude(originHyps, attitudeID);
-            if (nodeRemoved) {
-                anyNodeRemoved = true;
-            }
-        }
-        return anyNodeRemoved;
+    // public boolean removeMaxHyps(PropositionNodeSet[] maxHyps) {
+    //     boolean anyNodeRemoved = false;
+    //     for (int attitudeID = 0; attitudeID < maxHyps.length; attitudeID++) {
+    //         PropositionNodeSet originHyps = maxHyps[attitudeID];
+    //         boolean nodeRemoved = processMaxHypsAtAttitude(originHyps, attitudeID);
+    //         if (nodeRemoved) {
+    //             anyNodeRemoved = true;
+    //         }
+    //     }
+    //     return anyNodeRemoved;
 
-    }
+    // }
 
-    public boolean processMaxHypsAtAttitude(PropositionNodeSet MaxHyps, int attitudeID) {
-        boolean nodeRemoved = false;
-        for (int nodeID : MaxHyps.getProps()) {
-            PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
-            if (!node.isHypInOtherContextsAtAnyAttitude(context, 0)
-                    && !node.isHypAtOtherAttitudes(context, attitudeID, 0)) {
-                // remove from the network
-                // remove from all supports
-              // node.removeNodeFromOthersAssumptionDependents(context, attitudeID, 0);
-               System.out.println(node.getAssumptionSupportDependents() + "  dependents");
-              // node.removeNodeFromOtherSupportsInContext(context, attitudeID);
-                try {
-                    nodeRemoved = true;
-                    removeMaxHypFromNetwork(nodeID, attitudeID);
-                  } catch (NodeNotInNetworkException e) {
-                    e.printStackTrace();
-                  } catch (CannotRemoveNodeException e) {
-                    e.printStackTrace();
-                  }
-                  System.out.println(node.getAssumptionSupportDependents() + " after removal dependents");
-            } else {
-                nodeRemoved = true;
-               // node.removeNodeFromOtherSupports(attitudeID);
-               // node.removeNodeFromOthersAssumptionDependents(context, attitudeID, 0);
-                removeMaxHypFromContext(nodeID,attitudeID);
-                // remove from the context only
-                 // go to the dependents and remove any support that contains this node in the
-            // attitude
-            }
+    // public boolean processMaxHypsAtAttitude(PropositionNodeSet MaxHyps, int attitudeID) {
+    //     boolean nodeRemoved = false;
+    //     for (int nodeID : MaxHyps.getProps()) {
+    //         PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
+    //         if (!node.isHypInOtherContextsAtAnyAttitude(context, 0)
+    //                 && !node.isHypAtOtherAttitudes(context, attitudeID, 0)) {
+    //             // remove from the network
+    //             // remove from all supports
+    //           // node.removeNodeFromOthersAssumptionDependents(context, attitudeID, 0);
+    //            System.out.println(node.getAssumptionSupportDependents() + "  dependents");
+    //           // node.removeNodeFromOtherSupportsInContext(context, attitudeID);
+    //             try {
+    //                 nodeRemoved = true;
+    //                 removeMaxHypFromNetwork(nodeID, attitudeID);
+    //               } catch (NodeNotInNetworkException e) {
+    //                 e.printStackTrace();
+    //               } catch (CannotRemoveNodeException e) {
+    //                 e.printStackTrace();
+    //               }
+    //               System.out.println(node.getAssumptionSupportDependents() + " after removal dependents");
+    //         } else {
+    //             nodeRemoved = true;
+    //            // node.removeNodeFromOtherSupports(attitudeID);
+    //            // node.removeNodeFromOthersAssumptionDependents(context, attitudeID, 0);
+    //             removeMaxHypFromContext(nodeID,attitudeID);
+    //             // remove from the context only
+    //              // go to the dependents and remove any support that contains this node in the
+    //         // attitude
+    //         }
            
-        }
+    //     }
 
-        return nodeRemoved;
-    }
+    //     return nodeRemoved;
+    // }
 
     public static void main(String[] args) throws NoSuchTypeException {
         Set<String, Integer> attitudeNames = new Set<>();
@@ -208,8 +208,8 @@ public class ReverseTrim {
         // System.out.println(node3.getSupport() + "node3 assumptionBasedSupport");
         // System.out.println(node4.getSupport() + "node4 assumptionBasedSupport");
         // System.out.println(node5.getSupport() + "node5 assumptionBasedSupport");
-        ReverseTrim rTrim = new ReverseTrim("guc");
-        rTrim.reverseTrim();
+        // ReverseTrim rTrim = new ReverseTrim("guc");
+        // rTrim.reverseTrim();
         System.out.print(ContextController.getContext("guc").toString());
         System.out.println(node1.getAssumptionSupportDependents() + "node1 assumptionBasedSupport");
         System.out.println(node2.getAssumptionSupportDependents() + "node2 assumptionBasedSupport");

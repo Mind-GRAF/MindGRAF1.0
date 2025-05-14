@@ -13,23 +13,25 @@ public class BipartiteGraph {
         adjRev[v].add(u);
     }
 
-    public BipartiteGraph(int sizeV1, int sizeV2, boolean[] removed, HashSet<Integer>[] adj, HashSet<Integer>[] adjRev) {
+    public BipartiteGraph(int sizeV1, int sizeV2, boolean[] removed, HashSet<Integer>[] adj,
+            HashSet<Integer>[] adjRev) {
         this.sizeV1 = sizeV1;
         this.sizeV2 = sizeV2;
         this.removed = removed;
         this.adj = adj;
         this.adjRev = adjRev;
     }
+
     public BipartiteGraph(int sizeV1, int sizeV2, HashSet<Integer>[] adj, HashSet<Integer>[] adjRev) {
         this.sizeV1 = sizeV1;
         this.sizeV2 = sizeV2;
         this.adj = adj;
         this.adjRev = adjRev;
-        this.removed  = new boolean [sizeV1 + sizeV2];
+        this.removed = new boolean[sizeV1 + sizeV2];
         // for (int i = sizeV1; i < sizeV1 + sizeV2; i++) {
-        //     if (indeg(i) == 0 || outdeg(i) == 0) {
-        //         removeNode(i);
-        //     }
+        // if (indeg(i) == 0 || outdeg(i) == 0) {
+        // removeNode(i);
+        // }
         // }
     }
 
@@ -63,6 +65,22 @@ public class BipartiteGraph {
             adj[i] = new HashSet<>();
             adjRev[i] = new HashSet<>();
         }
+    }
+
+    public int getSizeV1() {
+        return sizeV1;
+    }
+
+    public int getSizeV2() {
+        return sizeV2;
+    }
+
+    public HashSet<Integer>[] getAdjList() {
+        return adj;
+    }
+
+    public HashSet<Integer>[] getAdjRevList() {
+        return adjRev;
     }
 
     public int indeg(int u) { // deg-
@@ -127,11 +145,11 @@ public class BipartiteGraph {
         g.addEdge(5, 3);
         g.addEdge(7, 3);
         g.removed[6] = true;
-        //        System.out.println(ChordlessCycles.chordlessCycles(g.copy()));
+        // System.out.println(ChordlessCycles.chordlessCycles(g.copy()));
         // System.out.println(new Graph(g.copy()));
         // System.out.println(FourAlgorithm.findFVS(new Graph(g.copy())));
-//        System.out.println(FourAlgorithm.SubGraph23(new Graph(g.copy())));
-//        System.out.println(Checker.checker(CHBWithFourAprox.CHB(g.copy()), g));
-//        System.out.println(CHBWithFourAprox.CHB(g.copy()));
+        // System.out.println(FourAlgorithm.SubGraph23(new Graph(g.copy())));
+        // System.out.println(Checker.checker(CHBWithFourAprox.CHB(g.copy()), g));
+        // System.out.println(CHBWithFourAprox.CHB(g.copy()));
     }
 }
