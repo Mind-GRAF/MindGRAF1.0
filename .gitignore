@@ -92,3 +92,7 @@ fabric.properties
 /.vscode/
 target/classes/edu/guc/mind_graf/network/Network.class
 
+/web-interface/node_modules/
+/web-interface/dist/
+
+
