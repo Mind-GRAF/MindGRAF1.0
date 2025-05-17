@@ -89,6 +89,6 @@ fabric.properties
 
 /target/
 /bin/
-.vscode/launch.json
+/.vscode/
 target/classes/edu/guc/mind_graf/network/Network.class
 
