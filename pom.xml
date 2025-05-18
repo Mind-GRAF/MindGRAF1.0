@@ -9,8 +9,8 @@
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencyManagement>
@@ -45,7 +45,6 @@
                         </goals>
                         <configuration>
                             <executable>mvn</executable>
-                            <mainClass>edu.guc.mind_graf.network.Network</mainClass>
                             <environmentVariables>
                                 <LANG>en_US</LANG>
                             </environmentVariables>
@@ -58,7 +57,6 @@
                         </goals>
                         <configuration>
                             <executable>mvn</executable>
-                            <mainClass>edu.guc.mind_graf.view.NetworkUI</mainClass>
                             <environmentVariables>
                                 <LANG>en_US</LANG>
                             </environmentVariables>

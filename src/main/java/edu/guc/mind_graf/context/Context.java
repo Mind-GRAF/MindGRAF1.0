@@ -70,7 +70,7 @@ public class Context {
             this.hypotheses.put(level, hyps);
         }
         this.hypotheses.get(level)[attitudeId].getFirst().add(node);
-        node.getSupport().setHyp(attitudeId);
+        node.setHyp(attitudeId);
 
     }
 
