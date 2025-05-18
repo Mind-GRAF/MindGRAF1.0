@@ -1,14 +1,28 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "type": "java",
-            "name": "Current File",
-            "request": "launch",
-            "mainClass": "${file}"
-        }
-    ]
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "CLI",
+      "request": "launch",
+      "mainClass": "edu.guc.mind_graf.parser.CLI",
+      "projectName": "mindGRAF"
+    },
+    {
+      "type": "java",
+      "name": "ApiServer",
+      "request": "launch",
+      "mainClass": "edu.guc.mind_graf.api.ApiServer",
+      "projectName": "mindGRAF"
+    },
+    {
+      "type": "java",
+      "name": "Current File",
+      "request": "launch",
+      "mainClass": "${file}"
+    }
+  ]
 }

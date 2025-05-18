@@ -53,6 +53,12 @@ public class CLI {
         }
     }
 
+    public static void runCommand(String input) throws Exception {
+        StringReader reader = new StringReader(input);
+        MindGRAF_Parser parser = new MindGRAF_Parser(reader); 
+        parser.Command(); 
+    }
+
     public static void main(String[] args) {
 
         while (loop) {

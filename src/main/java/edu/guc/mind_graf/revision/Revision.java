@@ -95,7 +95,7 @@ public class Revision {
     public static void manualContradictionHandling(Context c, int level, int attitudeNumber, ArrayList<Contradiction> contradictions) {
         print("Contradiction Detected");
         print("Select How to handle this contradiction");
-        print("\t1. Remove node:" + contradictions.getFirst().toString());
+        print("\t1. Remove node:" + contradictions.get(0).toString());
         print("\t2. Remove contradicting nodes");
         print(contradictions.toString());
         int decision = readInt();
@@ -104,7 +104,7 @@ public class Revision {
     }
 
     public static void automaticContradictionHandling(Context c, int level, int attitudeNumber, ArrayList<Contradiction> contradictions) {
-        boolean nodeIsHyp = c.isOriginHypothesis(attitudeNumber, level, contradictions.getFirst().getNode());
+        boolean nodeIsHyp = c.isOriginHypothesis(attitudeNumber, level, contradictions.get(0).getNode());
         boolean contradictingIsHyp = containsOriginHyp(c, level, contradictions);
 
         if (nodeIsHyp && contradictingIsHyp) {
@@ -118,7 +118,7 @@ public class Revision {
             handleDecision(c, level, attitudeNumber, contradictions, true, false);
         } else {
             //Actual Automatic handling
-            int gradeOfNode = contradictions.getFirst().getNode().getGradeOfNode(c, level, attitudeNumber);
+            int gradeOfNode = contradictions.get(0).getNode().getGradeOfNode(c, level, attitudeNumber);
             int gradeOfContradictions = contradictions.stream().mapToInt(cont -> getGradeOfNodes(cont, c, level)).reduce(ContextController.getMergeFunction()).orElse(0);
 
             handleDecision(c, level, attitudeNumber, contradictions, gradeOfNode <= gradeOfContradictions, false);
@@ -136,7 +136,7 @@ public class Revision {
 
     public static void handleDecision(Context c, int level, int attitudeNumber, ArrayList<Contradiction> contradictions, boolean removeNode, boolean manual) {
         if (removeNode) {
-            c.completelyRemoveNodeFromContext(level, attitudeNumber, contradictions.getFirst().getNode(), manual);
+            c.completelyRemoveNodeFromContext(level, attitudeNumber, contradictions.get(0).getNode(), manual);
         } else {
             for (Contradiction cont : contradictions) {
                 for (Map.Entry<Integer, PropositionNode> entry : cont.getContradictions().getSet().entrySet()) {

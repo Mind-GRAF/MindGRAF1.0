@@ -406,7 +406,7 @@ public class ActNode extends Node {
 
                 NodeSet plans = processReportsInAct();
                 if (plans == null) {
-                    String action = this.getDownCableSet().get("action").getNodeSet().getNames().getFirst();
+                    String action = this.getDownCableSet().get("action").getNodeSet().getNames().get(0);
                     NodeSet objects = this.getDownCableSet().get("obj").getNodeSet();
                     throw new NoPlansExistForTheActException("Failed to execute the act of doing " + action
                             + " action on" + objects.toString() + " objects because no plans are found for it");
