@@ -1,5 +1,6 @@
 package edu.guc.mind_graf.context;
 
+import edu.guc.mind_graf.compression.KZeroCompression;
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.set.ContextSet;
@@ -7,6 +8,7 @@ import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.Set;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.IntBinaryOperator;
@@ -120,6 +122,13 @@ public class ContextController {
 
     public static boolean isCacheEnabled() {
         return cacheEnabled;
+    }
+    public static void compress(){
+       Collection<Context> contexts = contextSet.getSet().values();
+       for(Context context : contexts){
+        context.compress();
+       }
+       KZeroCompression.kZeroCompress();
     }
     
 

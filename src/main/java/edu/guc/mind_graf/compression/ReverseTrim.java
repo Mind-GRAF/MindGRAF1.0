@@ -18,7 +18,11 @@ import edu.guc.mind_graf.set.Set;
 import edu.guc.mind_graf.support.Pair;
 
 public class ReverseTrim {
-
+  public static void reverseTrim(BipartiteGraph g) {
+    g.reverseGraph();
+    Trim.trim(g);
+    g.reverseGraph();
+}
     // String context;
 
     // public ReverseTrim(String context) {

@@ -54,11 +54,7 @@ public class Trim {
         }
     }
 
-    public static void reverseTrim(BipartiteGraph g) {
-        g.reverseGraph();
-        trim(g);
-        g.reverseGraph();
-    }
+   
 
   // public void contextTrim() {
   //   Context currentContext = ContextController.getContext(context);

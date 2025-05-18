@@ -20,13 +20,14 @@ import edu.guc.mind_graf.support.Pair;
 
 public class KZeroCompression {
 
-    public void kZeroCompress() {
+    public static void kZeroCompress() {
         HashMap<Integer, Node> propositionNodes = Network.getPropositionNodes();
         removeLowerLevelsHypsFromContexts();
         PropositionNodeSet nodesToBeRemoved = new PropositionNodeSet();
         for (int nodeID : propositionNodes.keySet()) {
             PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
-            // System.out.println("node is hyp list" + nodeID + "  " + node.getSupport().getIsHyp());
+            // System.out.println("node is hyp list" + nodeID + " " +
+            // node.getSupport().getIsHyp());
             if (!node.isOriginHypInAnyContext()) {
                 node.removeNodeFromOtherNodesSupport();
                 node.removeFromOthersdependents();
@@ -37,7 +38,7 @@ public class KZeroCompression {
         removeNodesFromNetwork(nodesToBeRemoved);
     }
 
-    public void removeLowerLevelsHypsFromContexts() {
+    public static void removeLowerLevelsHypsFromContexts() {
         HashMap<String, Context> contexts = ContextController.getContextSet().getSet();
         for (String context : contexts.keySet()) {
             Context currentContext = ContextController.getContext(context);
@@ -52,7 +53,7 @@ public class KZeroCompression {
         }
     }
 
-    public void removeNodes(String contextName, int attitude, int level, PropositionNodeSet nodeSet, boolean isGraded) {
+    public static void removeNodes(String contextName, int attitude, int level, PropositionNodeSet nodeSet, boolean isGraded) {
         Context context = ContextController.getContext(contextName);
         // System.out.println("inputs to removeNodes" + nodeSet +" contextName "+
         // contextName + " level "+ level + " is graded "+ isGraded);
@@ -60,19 +61,16 @@ public class KZeroCompression {
             PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
             if (isGraded) {
                 context.removeGradedHypothesisFromContext(level, attitude, node);
-                if (!node.isHypInOtherContexts(contextName, attitude, level)) {
-                    node.removeHypSupport(level, attitude);
-                }
             } else {
                 context.removeHypothesisFromContext(level, attitude, node);
-                if (!node.isHypInOtherContexts(contextName, attitude, level)) {
-                    node.removeHypSupport(level, attitude);
-                }
+            }
+            if (!node.isHypInOtherContexts(contextName, attitude, level)) {
+                node.removeHypSupport(level, attitude);
             }
         }
     }
 
-    public void removeGradedHypsAtLevel(String contextName, int level) {
+    public static void removeGradedHypsAtLevel(String contextName, int level) {
         Context context = ContextController.getContext(contextName);
         Collection<Integer> attitudes = ContextController.getAttitudes().getSet().values();
         for (int attitudeID : attitudes) {
@@ -82,7 +80,7 @@ public class KZeroCompression {
         }
     }
 
-    public void removeOriginHypsAtLevel(String contextName, int level) {
+    public static void removeOriginHypsAtLevel(String contextName, int level) {
         Context context = ContextController.getContext(contextName);
         Collection<Integer> attitudes = ContextController.getAttitudes().getSet().values();
         for (int attitudeID : attitudes) {
@@ -92,7 +90,7 @@ public class KZeroCompression {
         }
     }
 
-    public void removeNodesFromNetwork(PropositionNodeSet nodes) {
+    public static void removeNodesFromNetwork(PropositionNodeSet nodes) {
         for (int nodeID : nodes.getProps()) {
             PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
             try {

@@ -2,6 +2,9 @@ package edu.guc.mind_graf.context;
 
 import java.util.*;
 
+import edu.guc.mind_graf.compression.BaseSupportGraph;
+import edu.guc.mind_graf.compression.CHBPlusWithFourApprox;
+import edu.guc.mind_graf.compression.HypNode;
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.PropositionNode;
@@ -63,7 +66,8 @@ public class Context {
     }
 
     public void addHypothesisToContext(int level, int attitudeId, PropositionNode node) {
-        // System.out.println("add node " + node + " in " + attitudeId + " in level " + level);
+        // System.out.println("add node " + node + " in " + attitudeId + " in level " +
+        // level);
         if (this.hypotheses.get(level) == null) {
             Pair<PropositionNodeSet, PropositionNodeSet>[] hyps = new Pair[this.hypotheses.get(0).length];
             for (int i = 0; i < this.hypotheses.get(0).length; i++) {
@@ -287,5 +291,26 @@ public class Context {
         boolean isOriginHyp = isOriginHypNode(attitude, nodeID);
         boolean isGradedHyp = isGradedHypNode(level, attitude, nodeID);
         return isOriginHyp || isGradedHyp;
+    }
+
+    public void compress() {
+        BaseSupportGraph g = new BaseSupportGraph(name);
+        HashSet<Integer> survivingNodes = CHBPlusWithFourApprox.CHBPlus(g.getGraph());
+        HashMap<HypNode, Integer> nodesMapping = g.getNodesMap();
+        Collection<Integer> attitudes = ContextController.getAttitudes().getSet().values();
+        for (int attitude : attitudes) {
+            PropositionNodeSet originSet = getOriginHypotheses(0, attitude);
+            for (int node : originSet.getProps()) {
+                int graphNodeID = nodesMapping.get(new HypNode(node, attitude));
+                if (!survivingNodes.contains(graphNodeID)) {
+                    PropositionNode nodeToBeRemoved = (PropositionNode) Network.getNodeById(node);
+                    removeHypothesisFromContext(0, attitude, nodeToBeRemoved);
+                    if (!nodeToBeRemoved.isHypInOtherContexts(name, attitude, 0)) {
+                        nodeToBeRemoved.removeHypSupport(0, attitude);
+                    }
+                }
+
+            }
+        }
     }
 }
