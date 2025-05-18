@@ -313,8 +313,16 @@ public class Support implements Cloneable {
 			for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> supportAttitudes : Supports) {
 				for (Integer attitude : supportAttitudes.getFirst().keySet()) {
 					PropositionNodeSet supportProps1 = supportAttitudes.getFirst().get(attitude).getFirst();
+					PropositionNodeSet supportProps2 = supportAttitudes.getFirst().get(attitude).getSecond();
 					int[] propsIDs1 = supportProps1.getProps();
+					int[] propsIDs2 = supportProps2.getProps();
 					for (int id : propsIDs1) {
+						if (Objects.equals(attitude, supportedAttitude) && id == nodeID) {
+							return true;
+						}
+						dependents.add(id);
+					}
+					for (int id : propsIDs2) {
 						if (Objects.equals(attitude, supportedAttitude) && id == nodeID) {
 							return true;
 						}
@@ -455,7 +463,7 @@ public class Support implements Cloneable {
 					result.get(level).remove(i);
 					i--;
 				} else {
-					for (int attitude : result.get(level).get(i).getFirst().keySet())
+					for (int attitude : result.get(level).get(i).getFirst().keySet()){
 						for (int currProp : result.get(level).get(i).getFirst().get(attitude).getFirst().getProps()) {
 							PropositionNode depNode = (PropositionNode) networkPropositions
 									.get(currProp);
@@ -465,6 +473,16 @@ public class Support implements Cloneable {
 								// + depNode.getAssumptionSupportDependents());
 							}
 						}
+						for (int currProp : result.get(level).get(i).getFirst().get(attitude).getSecond().getProps()) {
+							PropositionNode depNode = (PropositionNode) networkPropositions
+									.get(currProp);
+							if (!(nodeID == currProp && attitude == supportedAttitude)) {
+								depNode.addNodeToAssumptionSupportDependents(nodeID);
+								// System.out.println("node " + nodeID + " added to " + currProp
+								// + depNode.getAssumptionSupportDependents());
+							}
+						}
+					}
 					result.get(level).get(i).getSecond().putAll(bridgeRules.getValues());
 				}
 
@@ -556,10 +574,29 @@ public class Support implements Cloneable {
 												// + depNode.getAssumptionSupportDependents());
 											}
 										}
+										for (int currProp : newPropSet2.getValues()) {
+											PropositionNode depNode = (PropositionNode) networkPropositions
+													.get(currProp);
+											if (!(nodeID == currProp && currAttitude == supportedAttitude)) {
+												depNode.addNodeToAssumptionSupportDependents(nodeID);
+												// System.out.println("node " + nodeID + " added to " + currProp
+												// + depNode.getAssumptionSupportDependents());
+											}
+										}
 
 										newSupport.getFirst().put(currAttitude, new Pair<>(newPropSet1, newPropSet2));
 									} else {
 										for (int currProp : currSupport.getFirst().get(currAttitude).getFirst()
+												.getProps()) {
+											PropositionNode depNode = (PropositionNode) networkPropositions
+													.get(currProp);
+											if (!(nodeID == currProp && currAttitude == supportedAttitude)) {
+												depNode.addNodeToAssumptionSupportDependents(nodeID);
+												// System.out.println("node " + nodeID + "added to " + currProp
+												// + depNode.getAssumptionSupportDependents());
+											}
+										}
+										for (int currProp : currSupport.getFirst().get(currAttitude).getSecond()
 												.getProps()) {
 											PropositionNode depNode = (PropositionNode) networkPropositions
 													.get(currProp);
