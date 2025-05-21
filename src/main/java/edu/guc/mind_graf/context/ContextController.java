@@ -22,6 +22,7 @@ public class ContextController {
         ContextController.attitudes = attitudeNames;
         ContextController.consistentAttitudes = consistentAttitudes;
         ContextController.automaticHandlingEnabled = automaticHandlingEnabled;
+        ContextController.cacheEnabled = cacheEnabled;  // FIXED: This line was missing!
         ContextController.mergeFunctionNumber = mergeFunctionNumber;
         contextSet = new ContextSet();
     }
@@ -60,9 +61,11 @@ public class ContextController {
     }
 
     public static String getCurrContextName() {
+        if (currContext == null) {
+            throw new NullPointerException("Current context is not set");
+        }
         return currContext.getName();
     }
-
     public static ContextSet getContextSet() {
         return contextSet;
     }
