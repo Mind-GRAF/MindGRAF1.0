@@ -2,7 +2,6 @@ package edu.guc.mind_graf.compression;
 
 import java.util.HashMap;
 
-import edu.guc.mind_graf.nodes.PropositionNode;
 
 public class BaseSupportGraph {
     private String context;
