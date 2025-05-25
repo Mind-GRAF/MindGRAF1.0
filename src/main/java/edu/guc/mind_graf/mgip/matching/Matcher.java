@@ -81,7 +81,7 @@ public class Matcher {
             for (Node molecular : molecularSet.values()) {
                 if (molecular.equals(queryNode))
                     continue;
-                Match match = new Match(new Substitutions(), new Substitutions(), molecular, -1, new NodeSet());
+                Match match = new Match(new Substitutions(), new Substitutions(), molecular, 0, new NodeSet());
                 matchList.add(match);
                 unify(queryNode, molecular, match, ctx, attitude, 0);
             }
@@ -96,9 +96,6 @@ public class Matcher {
                 HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> map = new HashMap<>();
                 map.put(attitude, pair);
                 match.setSupport(new Support(-2, attitude, Network.currentLevel, map, new PropositionNodeSet()));
-            }
-            if (match.getMatchType() == -1) {
-                match.setMatchType(0);
             }
         }
         return matchList;
@@ -140,8 +137,23 @@ public class Matcher {
                     }
                 }
                 nullCables = false;
-                List<List<Node>> nodePermutations = getAllPermutations(cable.getNodeSet().getValues());
-                for (List<Node> nodePermutation : nodePermutations) {
+
+                boolean isNodeCableLarger = isNodeCableLarger(queryNode, node, (String) downRelation);
+
+                List<List<Node>> permutatedCable = null;
+                List<Node> nonPermutatedCable = null;
+
+                if (isNodeCableLarger) {
+                    permutatedCable = getAllPermutations(cable.getNodeSet().getValues());
+                    nonPermutatedCable = new ArrayList<>(
+                            queryNode.getDownCableSet().get((String) downRelation).getNodeSet().getValues());
+                } else {
+                    permutatedCable = getAllPermutations(
+                            queryNode.getDownCableSet().get((String) downRelation).getNodeSet().getValues());
+                    nonPermutatedCable = new ArrayList<>(cable.getNodeSet().getValues());
+                }
+
+                for (List<Node> permutation : permutatedCable) {
                     cable = queryNode.getDownCableSet().get((String) downRelation);
                     if (cable == null) {
                         if (checkCable(queryNode, node, Network.getRelations().get(downRelation), match, false)) {
@@ -151,14 +163,19 @@ public class Matcher {
                             return false;
                         }
                     }
-                    List<List<Node>> queryNodePermutations = getAllPermutations(
-                            cable.getNodeSet().getValues());
-                    for (List<Node> queryNodePermutation : queryNodePermutations) {
-                        for (Match molecularMatch : molecularMatchList) {
-                            Match tempMatch = molecularMatch.clone();
+                    for (Match molecularMatch : molecularMatchList) {
+                        Match tempMatch = molecularMatch.clone();
+                        if (isNodeCableLarger) {
                             if (unifyMolecular(
-                                    queryNodePermutation,
-                                    nodePermutation,
+                                    nonPermutatedCable,
+                                    permutation,
+                                    Network.getRelations().get(downRelation),
+                                    tempMatch, ctx, attitude, scope) != null)
+                                tempMatchList.add(tempMatch);
+                        } else {
+                            if (unifyMolecular(
+                                    permutation,
+                                    nonPermutatedCable,
                                     Network.getRelations().get(downRelation),
                                     tempMatch, ctx, attitude, scope) != null)
                                 tempMatchList.add(tempMatch);
@@ -397,6 +414,17 @@ public class Matcher {
             matchList.addAll(molecularMatchList);
         }
         matchList.remove(match);
+    }
+
+    // Helper method for checking if a cable is larger in a node than in queryNode
+    private static boolean isNodeCableLarger(Node queryNode, Node node, String relationName) {
+        Cable queryCable = queryNode.getDownCableSet().get(relationName);
+        Cable nodeCable = node.getDownCableSet().get(relationName);
+        if (queryCable == null)
+            return true;
+        if (nodeCable == null)
+            return false;
+        return queryCable.getNodeSet().size() < nodeCable.getNodeSet().size();
     }
 
     // Helper method for changing the bindings in the substitutions to perform

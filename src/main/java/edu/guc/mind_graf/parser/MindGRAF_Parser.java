@@ -150,30 +150,36 @@ public static void ResetGrading(){
     levelsCount= 0;
 }
 
-  public static void printHyps(Pair<PropositionNodeSet, PropositionNodeSet>[] hyps) {
-    for (Pair<PropositionNodeSet, PropositionNodeSet> pair : hyps) {
-      Collection<Node> firstSet = pair.getFirst().getNodes();
-      Collection<Node> secondSet = pair.getSecond().getNodes();
-      CLI.print("--> Ungraded:");
-      CLI.print("");
-      for (Node n : firstSet)
-       { CLI.print(n.toString());
-        CLI.print("");}
-      CLI.print("");
-      CLI.print("--> Graded:");
-      for (Node n : secondSet)
-        {CLI.print(n.toString());
-        CLI.print("");
-}
+  public static void printHyps(String CName, Integer attNum) {
+    Collection<Pair<PropositionNodeSet, PropositionNodeSet>[]> hypos = controller
+        .getContext(CName).getHypotheses().values();
+
+    for (Pair<PropositionNodeSet, PropositionNodeSet>[] pairArray : hypos) {
+      for (int i = 0; i < pairArray.length; i++) {
+        if (i == attNum) {
+          Collection<Node> firstSet = pairArray[i].getFirst().getNodes();
+          Collection<Node> secondSet = pairArray[i].getSecond().getNodes();
+
+          for (Node n : firstSet) {
+            CLI.print("");
+            CLI.print(n.toString());
+          }
+
+          for (Node n : secondSet) {
+            CLI.print("");
+            CLI.print(n.toString());
+          }
+        }
+      }
     }
   }
 
   public static void GetAllHypsInContextAttitude(String CName, String attitude, boolean c, boolean a) {
     Pair<PropositionNodeSet, PropositionNodeSet>[] hyps;
-    if(attitude!=null)
-    attitude = attitude.trim();
-    if(CName!=null)
-    CName = CName.trim();
+    if (attitude != null)
+      attitude = attitude.trim();
+    if (CName != null)
+      CName = CName.trim();
     try {
       if (c && a) {
         if (!controller.getContextSet().getSet().containsKey(CName)) {
@@ -187,11 +193,11 @@ public static void ResetGrading(){
           return;
         }
         Integer attNum = controller.getAttitudeNumber(attitude);
-        hyps = controller.getContext(CName).getHypotheses().get(attNum);
+        // hyps = controller.getContext(CName).getHypotheses().get(attNum);
         CLI.print("");
         CLI.print("Hypotheses in Context " + CName + " Attitude " + attitude + ":");
         CLI.print("");
-        printHyps(hyps);
+        printHyps(CName, attNum);
         return;
       }
       if (c) {
@@ -200,11 +206,11 @@ public static void ResetGrading(){
           CLI.print("No such Context.");
           return;
         }
-        hyps = controller.getContext(CName).getHypotheses()
-            .get(defaultAttitude);
+        // hyps = controller.getContext(CName).getHypotheses()
+        // .get(defaultAttitude);
         CLI.print("");
         CLI.print("Hypotheses in Context " + CName + " Attitude " + controller.getAttitudeName(defaultAttitude) + ":");
-        printHyps(hyps);
+        printHyps(CName, defaultAttitude);
         CLI.print("");
         return;
       }
@@ -215,15 +221,15 @@ public static void ResetGrading(){
           return;
         }
         try {
-          hyps = controller.getContext(controller.getCurrContextName()).getHypotheses()
-              .get(controller.getAttitudeNumber(attitude));
+          Integer attNum = controller.getAttitudeNumber(attitude);
           CLI.print("");
           CLI.print("Hypotheses in Context " + controller.getCurrContextName() + " Attitude " + attitude + ":");
           CLI.print("");
-          printHyps(hyps);
-
+          printHyps(controller.getCurrContextName(), attNum);
+          return;
         } catch (NullPointerException e) {
           CLI.print("Set Current Context First.");
+          e.printStackTrace();
           return;
         }
       }
@@ -232,7 +238,7 @@ public static void ResetGrading(){
         CLI.print("Hypotheses in Context " + controller.getCurrContextName() + " Attitude "
             + controller.getAttitudeName(defaultAttitude) + ":");
         CLI.print("");
-        printHyps(hyps);
+        printHyps(controller.getCurrContextName(), defaultAttitude);
 
       } catch (NullPointerException e) {
         CLI.print("");
@@ -2008,9 +2014,9 @@ if (mode == 3) {
       if(leafNodes.size()!=frame.size()-1)
         {if (true) throw new ParseException("No Such Case Frame");}
       Relation firstRel = null;
-      CLI.print(frame.get(0));
+      //CLI.print(frame.get(0));
       if (!frame.get(0).trim().equals("null")) {
-        CLI.print("here");
+        //CLI.print("here");
         firstRel = network.createRelation(frame.get(0), "propositionnode", Adjustability.EXPAND, 2);
         DownCable dcb = null;
         try {
@@ -2536,15 +2542,15 @@ CLI.print("");
         for (Pair<PropositionNodeSet, PropositionNodeSet> pair : pairArray) {
           Collection<Node> firstSet = pair.getFirst().getNodes();
           Collection<Node> secondSet = pair.getSecond().getNodes();
-          CLI.print("--> Ungraded:");
-          CLI.print("");
+          //CLI.print("--> Ungraded:");
+          //CLI.print("");
           for (Node n : firstSet)
            { CLI.print("");
             CLI.print(n.toString());}
 
-          CLI.print("");
-          CLI.print("--> Graded:");
-          CLI.print("");
+          //CLI.print("");
+         // CLI.print("--> Graded:");
+          //CLI.print("");
           for (Node n : secondSet)
            { CLI.print("");
             CLI.print(n.toString());}
@@ -3450,7 +3456,7 @@ methodCodeBuilder.append(character);
       character = charInMethodCode();
 methodCodeBuilder.append(character);
     }
-CLI.print(methodCodeBuilder.toString().trim());
+//CLI.print(methodCodeBuilder.toString().trim());
     {if ("" != null) return methodCodeBuilder.toString().trim();}
     throw new Error("Missing return statement in function");
 }
@@ -3476,7 +3482,7 @@ CLI.print(methodCodeBuilder.toString().trim());
     filePath = methodCode();
 methodName = methodName.trim();
     returnType = returnType.trim();
-    CLI.print(filePath);
+    //CLI.print(filePath);
     if (args.size() != params.size())
       {if (true) throw new ParseException("Numbers of Arguments and Parameters are Unequal.");}
 
@@ -3486,7 +3492,7 @@ methodName = methodName.trim();
 
     try {
       for (int i = 0; i < params.size(); i++){
-        CLI.print(params.get(i));
+        //CLI.print(params.get(i));
         methodParams.add(Class.forName(params.get(i)));}
       customMethod = new CustomMethod(methodName, methodCode,
           Class.forName(returnType), methodParams,
