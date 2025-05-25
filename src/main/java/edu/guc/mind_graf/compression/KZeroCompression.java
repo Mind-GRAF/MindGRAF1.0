@@ -10,6 +10,7 @@ import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.exceptions.CannotRemoveNodeException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.exceptions.NodeNotInNetworkException;
+import edu.guc.mind_graf.mgip.rules.BridgeRule;
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.network.NetworkController;
 import edu.guc.mind_graf.nodes.Node;
@@ -93,6 +94,8 @@ public class KZeroCompression {
     public static void removeNodesFromNetwork(PropositionNodeSet nodes) {
         for (int nodeID : nodes.getProps()) {
             PropositionNode node = (PropositionNode) Network.getNodeById(nodeID);
+            if(node instanceof BridgeRule)
+                continue;
             try {
                 Network.RemoveNode(node);
                 // System.out.println("node to be removed " + nodeID);
@@ -361,8 +364,8 @@ public class KZeroCompression {
         // System.out.println("node 8 is hyp list "+ node8.getSupport().getIsHyp());
         // System.out.println("node 9 is hyp list "+ node9.getSupport().getIsHyp());
         // System.out.println("node 10 is hyp list "+ node10.getSupport().getIsHyp());
-        KZeroCompression kzero = new KZeroCompression();
-        kzero.kZeroCompress();
+
+        kZeroCompress();
         System.out.print(ContextController.getContext("context1").toString());
         System.out.print(ContextController.getContext("context2").toString());
         System.out.print(ContextController.getContext("context3").toString());

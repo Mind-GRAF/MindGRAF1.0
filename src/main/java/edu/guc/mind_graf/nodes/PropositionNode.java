@@ -601,41 +601,6 @@ public class PropositionNode extends Node {
         }
     }
 
-    // public void removeNodeFromOtherSupports(int attitude) {
-    // HashMap<Integer, Node> networkPropositions = Network.getPropositionNodes();
-    // int[] assumptionDependents =
-    // this.getAssumptionSupportDependents().getProps();
-    // for (int i = 0; i < assumptionDependents.length; i++) {
-    // if (networkPropositions.containsKey(assumptionDependents[i])) {
-    // PropositionNode dependent = (PropositionNode)
-    // networkPropositions.get(assumptionDependents[i]);
-    // HashSet<Integer> nodesToBeRemoved =
-    // dependent.support.removeNodeFromAssumptions(this.getId(), attitude);
-    // System.out.println("nodes to be removed from the dependents" +
-    // nodesToBeRemoved);
-    // for (int nodeID : nodesToBeRemoved) {
-    // PropositionNode node = (PropositionNode) networkPropositions.get(nodeID);
-    // node.assumptionSupportDependents.remove(assumptionDependents[i]);
-    // }
-    // }
-    // }
-    // int[] justificationDependents =
-    // this.getJustificationSupportDependents().getProps();
-    // for (int i = 0; i < justificationDependents.length; i++) {
-    // if (networkPropositions.containsKey(justificationDependents[i])) {
-    // PropositionNode dependent = (PropositionNode)
-    // networkPropositions.get(justificationDependents[i]);
-    // HashSet<Integer> nodesToBeRemoved =
-    // dependent.support.removeNodeFromJustifications(
-    // this.getId(), attitude);
-    // for (int nodeID : nodesToBeRemoved) {
-    // PropositionNode node = (PropositionNode) networkPropositions.get(nodeID);
-    // node.justificationSupportDependents.remove(justificationDependents[i]);
-    // }
-
-    // }
-    // }
-    // }
 
     public void ForgetNodeFromOtherNodesSupport() {
         HashMap<Integer, Node> networkPropositions = Network.getPropositionNodes();
