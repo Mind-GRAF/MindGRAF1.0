@@ -1,13 +1,12 @@
 import { apiClient } from "./client";
 
-export async function runCommand(commandText) {
+export async function runCommand(cmdText) {
   try {
-    const response = await apiClient.post("/runCommand", commandText);
-    return response.data; // The response text from backend
-  } catch (error) {
-    if (error.response) {
-      return `Error: ${error.response.data}`;
-    }
-    return `Unexpected Error: ${error.message}`;
+    const res = await apiClient.post("/runCommand", cmdText, {
+      headers: { "Content-Type": "text/plain" },
+    });
+    return res.data; // plain text from backend
+  } catch (err) {
+    return err.response ? `Error: ${err.response.data}` : err.message;
   }
 }

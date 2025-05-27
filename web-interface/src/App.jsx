@@ -1,21 +1,19 @@
-import TopBar from "./components/TopBar";
-import Sidebar from "./components/Sidebar";
-import GraphCanvas from "./components/GraphCanvas";
-import CommandConsole from "./components/CommandConsole";
+// src/App.jsx
+import React from "react";
+import { AppStateProvider } from "./context/AppStateContext";
+import { ModeProvider } from "./context/ModeContext";
+import SetupFlow from "./components/SetupFlow";
+import MainApp from "./components/MainApp";
 
 export default function App() {
   return (
-    <div className="flex flex-col h-screen w-screen">
-      <TopBar />
-      <div className="flex flex-1">
-        <div className="flex flex-col flex-1">
-          <GraphCanvas />
-          <div className="h-[200px] overflow-y-auto border-t bg-gray-50">
-            <CommandConsole />
-          </div>
+    <AppStateProvider>
+      <ModeProvider>
+        <div className="min-h-screen bg-slate-100">
+          <SetupFlow />
+          <MainApp />
         </div>
-        <Sidebar />
-      </div>
-    </div>
+      </ModeProvider>
+    </AppStateProvider>
   );
 }
