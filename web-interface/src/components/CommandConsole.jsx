@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useAppState } from "../context/AppStateContext";
-import { runCommand } from "../api/runCommand";
+import { runCommand, syncSetupWithBackend } from "../api/runCommand";
 import {
   Terminal,
   Send,
@@ -27,6 +27,7 @@ function CommandConsole() {
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [lastExecutionTime, setLastExecutionTime] = useState(null);
   const [executionStatus, setExecutionStatus] = useState(null);
+  const [backendSynced, setBackendSynced] = useState(false);
 
   const textareaRef = useRef(null);
   const responseRef = useRef(null);
@@ -37,10 +38,231 @@ function CommandConsole() {
     }
   }, [response]);
 
-  // Parse backend responses and update AppState accordingly
+  // Enhanced backend synchronization on mount
+  useEffect(() => {
+    const initializeBackend = async () => {
+      if (state.isSetupComplete && !backendSynced) {
+        try {
+          console.log("[Console] Initializing backend with current state");
+          console.log(
+            `[Console] Syncing attitudes: ${state.attitudes.join(", ")}`
+          );
+
+          // First, set all attitudes in backend
+          const attitudeList = state.attitudes.join(",");
+          await runCommand(`set-attitudes ${attitudeList}`);
+
+          // Then set current attitude
+          await runCommand(`set-attitude ${state.currentAttitude}`);
+          await syncSetupWithBackend({
+            attitudes: state.attitudes,
+            contexts: state.contexts,
+            currentContext: state.currentContext,
+            currentAttitude: state.currentAttitude,
+            consistentAttitudes: state.consistentAttitudes,
+            conjunctionAttitudes: state.conjunctionAttitudes,
+            consequenceAttitudes: state.consequenceAttitudes,
+            telescopableAttitudes: state.telescopableAttitudes,
+            uvbrEnabled: state.uvbrEnabled,
+          });
+          setBackendSynced(true);
+          setResponse("Backend synchronized successfully with current setup.");
+          console.log("[Console] Backend sync completed");
+        } catch (error) {
+          console.error("[Console] Backend sync failed:", error);
+          setResponse(`Backend sync failed: ${error.message}`);
+        }
+      }
+    };
+
+    initializeBackend();
+  }, [state.isSetupComplete, backendSynced]);
+
+  useEffect(() => {
+    const handleCLIProposition = (event) => {
+      console.log("CLI proposition event received:", event.detail);
+      // This will be handled by GraphCanvas
+    };
+
+    window.addEventListener("addPropositionFromCLI", handleCLIProposition);
+    return () =>
+      window.removeEventListener("addPropositionFromCLI", handleCLIProposition);
+  }, []);
+
+  // Enhanced command parsing and execution from Backend
   const parseAndUpdateState = (cmd, result) => {
     try {
       const lowerCmd = cmd.toLowerCase().trim();
+      const lowerResult = result.toLowerCase();
+
+      console.log(`[Console] Parsing command: ${cmd}`);
+      console.log(`[Console] Result: ${result}`);
+
+      // Enhanced proposition parsing for CLI
+      if (lowerCmd.includes("add-to-context")) {
+        // Handle "No Such Case Frame" error by auto-creating frame and retrying
+        // Handle "No Such Case Frame" error by auto-creating frame and retrying
+        if (
+          lowerResult.includes("no such case frame") ||
+          lowerResult.includes("case frame")
+        ) {
+          // Extract proposition pattern for frame creation
+          const propMatch = cmd.match(/([A-Za-z_][A-Za-z0-9_]*)\s*\([^)]*\)/i);
+          if (propMatch) {
+            const predicate = propMatch[1];
+            const fullMatch = propMatch[0];
+            const argsMatch = fullMatch.match(/\(([^)]+)\)/);
+
+            if (argsMatch) {
+              const args = argsMatch[1].split(",").map((arg) => arg.trim());
+              const frameDefinition = `define-frame ${predicate}(null, ${args
+                .map((_, i) => `arg${i + 1}`)
+                .join(", ")})`;
+
+              setResponse(
+                (prev) =>
+                  prev +
+                  `\n\n🔄 AUTO-FIXING: No case frame found for "${predicate}". Creating frame automatically...\n\nExecuting: ${frameDefinition}`
+              );
+
+              // Auto-execute frame definition (non-async approach)
+              runCommand(frameDefinition)
+                .then((frameResult) => {
+                  console.log(
+                    `[Console] Auto-created frame result: ${frameResult}`
+                  );
+
+                  setResponse(
+                    (prev) =>
+                      prev +
+                      `\nFrame creation result: ${frameResult}\n\n🔄 Now retrying original command...`
+                  );
+
+                  // Retry the original command
+                  // First ensure attitudes are synced, then retry the original command
+                  return runCommand(`get-attitudes`).then((attitudeCheck) => {
+                    console.log(
+                      `[Console] Current backend attitudes: ${attitudeCheck}`
+                    );
+
+                    // If attitudes aren't synced, sync them first
+                    if (!attitudeCheck.includes("belief")) {
+                      console.log(`[Console] Syncing attitudes with backend`);
+                      const attitudeList = state.attitudes.join(",");
+                      return runCommand(`set-attitudes ${attitudeList}`)
+                        .then(() =>
+                          runCommand(`set-attitude ${state.currentAttitude}`)
+                        )
+                        .then(() => runCommand(command));
+                    } else {
+                      return runCommand(command);
+                    }
+                  });
+                })
+                .then((retryResult) => {
+                  console.log(`[Console] Retry result: ${retryResult}`);
+
+                  setResponse(
+                    (prev) => prev + `\nRetry result: ${retryResult}`
+                  );
+
+                  // If the retry succeeded, parse it for visual updates
+                  if (!retryResult.toLowerCase().includes("error")) {
+                    parseAndUpdateState(command, retryResult);
+                  }
+                })
+                .catch((error) => {
+                  console.error(`[Console] Auto-frame creation failed:`, error);
+                  setResponse(
+                    (prev) =>
+                      prev +
+                      `\n❌ Auto-frame creation failed: ${error.message}\n\nPlease try manually: ${frameDefinition}`
+                  );
+                });
+            }
+          }
+          return;
+        }
+
+        // Handle successful proposition creation
+        if (
+          !lowerResult.includes("error") &&
+          (lowerResult.includes("added") ||
+            lowerResult.includes("hypothesis") ||
+            result.trim() === "Done.")
+        ) {
+          const propMatch = cmd.match(
+            /add-to-context.*?([A-Za-z_][A-Za-z0-9_]*)\s*\([^)]*\)/i
+          );
+          if (propMatch) {
+            const fullProp =
+              propMatch[1] +
+              propMatch[0].substring(propMatch[1].length).match(/\([^)]*\)/)[0];
+
+            // Extract context and attitude
+            const contextMatch = cmd.match(/c\{([^}]+)\}/i);
+            const attitudeMatch = cmd.match(/a\{([^}]+)\}/i);
+
+            const context = contextMatch
+              ? contextMatch[1]
+              : state.currentContext;
+            const attitude = attitudeMatch
+              ? attitudeMatch[1]
+              : state.currentAttitude;
+
+            // Validate attitude exists
+            if (!state.attitudes.includes(attitude)) {
+              setResponse(
+                (prev) =>
+                  prev +
+                  `\n\nWARNING: Attitude '${attitude}' not found. Available attitudes: ${state.attitudes.join(
+                    ", "
+                  )}`
+              );
+              return;
+            }
+
+            // Create visual node
+            const nodeId = `cli-prop-${Date.now()}`;
+            const newNode = {
+              id: nodeId,
+              label: fullProp,
+              type: "PropositionNode",
+              context: context,
+              attitudesByContext: {
+                [context]: [attitude],
+              },
+              attitude: attitude,
+              position: {
+                x: 200 + Math.random() * 300,
+                y: 200 + Math.random() * 300,
+              },
+            };
+
+            dispatch({ type: "ADD_NODE", payload: newNode });
+
+            // Trigger graph canvas to add the visual node
+            window.dispatchEvent(
+              new CustomEvent("addPropositionFromCLI", {
+                detail: newNode,
+              })
+            );
+
+            console.log(
+              `[Console] Created visual node for proposition: ${fullProp}`
+            );
+          }
+        }
+      }
+
+      // Handle frame definition
+      if (lowerCmd.includes("define-frame") && !lowerResult.includes("error")) {
+        setResponse(
+          (prev) =>
+            prev +
+            `\n\nFrame defined successfully! You can now add propositions using this frame.`
+        );
+      }
 
       // Context creation commands
       if (
@@ -52,20 +274,8 @@ function CommandConsole() {
           const contextName = contextMatch[1].trim();
           if (!state.contexts.includes(contextName)) {
             dispatch({ type: "ADD_CONTEXT", payload: contextName });
+            console.log(`[Console] Added context: ${contextName}`);
           }
-        }
-      }
-      // Enhanced parsing for more commands
-      if (
-        lowerCmd.includes("add-to-context") &&
-        !result.toLowerCase().includes("error")
-      ) {
-        // Extract proposition and create visual node
-        const propMatch = cmd.match(/add-to-context.*?([A-Za-z]+\([^)]*\))/i);
-        if (propMatch) {
-          const proposition = propMatch[1];
-          // Create a visual representation
-          // This would need to integrate with your graph canvas
         }
       }
 
@@ -78,6 +288,7 @@ function CommandConsole() {
         if (contextMatch) {
           const contextName = contextMatch[1].trim();
           dispatch({ type: "SET_CURRENT_CONTEXT", payload: contextName });
+          console.log(`[Console] Set current context to: ${contextName}`);
         }
       }
 
@@ -91,6 +302,15 @@ function CommandConsole() {
           const attitudeName = attitudeMatch[1].trim();
           if (state.attitudes.includes(attitudeName)) {
             dispatch({ type: "SET_CURRENT_ATTITUDE", payload: attitudeName });
+            console.log(`[Console] Set current attitude to: ${attitudeName}`);
+          } else {
+            setResponse(
+              (prev) =>
+                prev +
+                `\n\nWARNING: Attitude '${attitudeName}' not found. Available attitudes: ${state.attitudes.join(
+                  ", "
+                )}`
+            );
           }
         }
       }
@@ -104,25 +324,7 @@ function CommandConsole() {
         if (modeMatch) {
           const mode = parseInt(modeMatch[1]);
           dispatch({ type: "SET_CURRENT_MODE", payload: mode });
-        }
-      }
-
-      // Add-to-context commands (could create new nodes)
-      if (
-        lowerCmd.includes("add-to-context") &&
-        !result.toLowerCase().includes("error")
-      ) {
-        const addMatch = cmd.match(
-          /add-to-context\s+c\{([^}]+)\}\s+a\{([^}]+)\}\s+(.+)/i
-        );
-        if (addMatch) {
-          const [, contextName, attitudeName, proposition] = addMatch;
-          // You could parse the proposition and create a node representation
-          // For now, we'll just update the last activity timestamp
-          dispatch({
-            type: "SAVE_DRAWING_DATA",
-            payload: state.drawingData, // Trigger a save timestamp update
-          });
+          console.log(`[Console] Set mode to: ${mode}`);
         }
       }
     } catch (error) {
@@ -143,6 +345,7 @@ function CommandConsole() {
     setHistoryIndex(-1);
 
     try {
+      console.log(`[Console] Executing command: ${command}`);
       const result = await runCommand(command);
       const executionTime = Date.now() - startTime;
 
@@ -154,8 +357,12 @@ function CommandConsole() {
       parseAndUpdateState(command, result);
 
       setCommand("");
+      console.log(
+        `[Console] Command executed successfully in ${executionTime}ms`
+      );
     } catch (error) {
       const executionTime = Date.now() - startTime;
+      console.error(`[Console] Command execution failed:`, error);
       setResponse(`Error: ${error.message || "Command execution failed"}`);
       setLastExecutionTime(executionTime);
       setExecutionStatus("error");
@@ -206,6 +413,7 @@ function CommandConsole() {
       "set-attitude",
       "define-context",
       "define-relation",
+      "define-frame",
       "add-to-context",
       "remove-from-context",
       "set-mode-1",
@@ -257,6 +465,11 @@ function CommandConsole() {
 
   const getQuickTemplates = () => [
     {
+      label: "Define Frame",
+      cmd: "define-frame predicate(null, arg1, arg2) ",
+      icon: Settings,
+    },
+    {
       label: "Add Proposition",
       cmd: `add-to-context c{${state.currentContext}} a{${state.currentAttitude}} `,
       icon: Plus,
@@ -267,14 +480,9 @@ function CommandConsole() {
       icon: Layers,
     },
     {
-      label: "Query State",
-      cmd: "get-curr-context",
-      icon: Eye,
-    },
-    {
-      label: "View Data",
-      cmd: "get-contexts",
-      icon: Database,
+      label: "Switch Mode",
+      cmd: "set-mode-1",
+      icon: Settings,
     },
   ];
 
@@ -316,6 +524,16 @@ function CommandConsole() {
                   Mode:{" "}
                   <span className="text-purple-400 font-medium">
                     {state.currentMode}
+                  </span>
+                </div>
+                <div>
+                  Backend:{" "}
+                  <span
+                    className={`font-medium ${
+                      backendSynced ? "text-green-400" : "text-yellow-400"
+                    }`}
+                  >
+                    {backendSynced ? "Synced" : "Syncing..."}
                   </span>
                 </div>
               </div>
@@ -517,6 +735,7 @@ function CommandConsole() {
               <span>
                 Setup: {state.isSetupComplete ? "Complete" : "Pending"}
               </span>
+              <span>Backend: {backendSynced ? "Synced" : "Syncing"}</span>
               {state.lastSaved && (
                 <span>
                   Saved: {new Date(state.lastSaved).toLocaleTimeString()}

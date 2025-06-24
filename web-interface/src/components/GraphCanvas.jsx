@@ -36,16 +36,22 @@ export default function GraphCanvas() {
   const [isAnimating, setIsAnimating] = useState(false);
   const [showNodeDetails, setShowNodeDetails] = useState(true);
   const [autoSave, setAutoSave] = useState(true);
+  const [nodeAttitudesByContext, setNodeAttitudesByContext] = useState({});
 
   // State for node editing
   const [editingNode, setEditingNode] = useState(null);
   const [nodeLabel, setNodeLabel] = useState("");
   const [nodeContext, setNodeContext] = useState("");
   const [nodeAttitude, setNodeAttitude] = useState("");
-
-  // State for edge editing
+  const [importInputRef] = useState(useRef());
   const [selectedEdgeId, setSelectedEdgeId] = useState(null);
   const [edgeLabel, setEdgeLabel] = useState("");
+  const [tooltip, setTooltip] = useState({
+    show: false,
+    x: 0,
+    y: 0,
+    content: "",
+  });
 
   // Enhanced Cytoscape styles with modern aesthetic
   const cytoscapeStyles = [
@@ -122,7 +128,7 @@ export default function GraphCanvas() {
       style: {
         "background-color": "#ef4444",
         "background-image": "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
-        shape: "diamond",
+        shape: "ellipse",
         "border-color": "#b91c1c",
         width: "75px",
         height: "75px",
@@ -133,48 +139,13 @@ export default function GraphCanvas() {
       style: {
         "background-color": "#06b6d4",
         "background-image": "linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)",
-        shape: "hexagon",
+        shape: "ellipse",
         "border-color": "#0e7490",
         width: "75px",
         height: "75px",
       },
     },
-    // Attitude-based border styles
-    {
-      selector: 'node[attitude="belief"]',
-      style: {
-        "border-color": "#3b82f6",
-        "border-width": 4,
-      },
-    },
-    {
-      selector: 'node[attitude="desire"]',
-      style: {
-        "border-color": "#10b981",
-        "border-width": 4,
-      },
-    },
-    {
-      selector: 'node[attitude="intention"]',
-      style: {
-        "border-color": "#8b5cf6",
-        "border-width": 4,
-      },
-    },
-    {
-      selector: 'node[attitude="fear"]',
-      style: {
-        "border-color": "#ef4444",
-        "border-width": 4,
-      },
-    },
-    {
-      selector: 'node[attitude="obligation"]',
-      style: {
-        "border-color": "#f59e0b",
-        "border-width": 4,
-      },
-    },
+
     // Enhanced edge styles
     {
       selector: "edge",
@@ -243,6 +214,21 @@ export default function GraphCanvas() {
       selector: ".dimmed",
       style: {
         opacity: 0.3,
+      },
+    },
+    {
+      selector: ".path-highlighted",
+      style: {
+        "border-width": 6,
+        "border-color": "#f97316",
+        "border-style": "solid",
+        "shadow-blur": 30,
+        "shadow-color": "#f97316",
+        "shadow-opacity": 0.8,
+        "line-color": "#f97316",
+        "target-arrow-color": "#f97316",
+        "source-arrow-color": "#f97316",
+        transform: "scale(1.2)",
       },
     },
   ];
@@ -354,6 +340,85 @@ export default function GraphCanvas() {
     }
   };
 
+  // FIXED: Context switching with proper node context updates
+  useEffect(() => {
+    if (!cyRef.current) return;
+
+    console.log(`[GraphCanvas] Context changed to: ${state.currentContext}`);
+
+    cyRef.current.nodes().forEach((node) => {
+      const nodeData = node.data();
+      const nodeType = nodeData.type;
+      const nodeContext = nodeData.context;
+
+      // Remove previous classes
+      node.removeClass("dimmed highlighted");
+
+      // Only filter PropositionNodes by context
+      if (["PropositionNode", "ActNode", "RuleNode"].includes(nodeType)) {
+        if (nodeContext === state.currentContext) {
+          node.style("opacity", 1);
+          console.log(
+            `[GraphCanvas] Node ${nodeData.id} visible in context ${state.currentContext}`
+          );
+        } else {
+          node.addClass("dimmed");
+          node.style("opacity", 0.3);
+          console.log(
+            `[GraphCanvas] Node ${nodeData.id} dimmed (different context: ${nodeContext})`
+          );
+        }
+      } else {
+        // Non-proposition nodes remain visible but update their context reference
+        node.data("context", state.currentContext);
+        console.log(
+          `[GraphCanvas] Updated ${nodeType} context to: ${state.currentContext}`
+        );
+      }
+    });
+
+    // Force a re-render
+    cyRef.current.forceRender();
+  }, [state.currentContext]);
+
+  // FIXED: Attitude highlighting with proper attitude checking
+  useEffect(() => {
+    if (!cyRef.current) return;
+
+    console.log(
+      `[GraphCanvas] Highlighting attitude: ${state.highlightedAttitude}`
+    );
+
+    cyRef.current.nodes().forEach((node) => {
+      const nodeData = node.data();
+      const nodeType = nodeData.type;
+      const nodeContext = nodeData.context;
+
+      // Remove previous highlights
+      node.removeClass("highlighted");
+
+      // Only highlight PropositionNodes in current context with the specified attitude
+      if (
+        ["PropositionNode", "ActNode", "RuleNode"].includes(nodeType) &&
+        nodeContext === state.currentContext &&
+        state.highlightedAttitude
+      ) {
+        const nodeAttitudesByContext = nodeData.attitudesByContext || {};
+        const contextAttitudes = nodeAttitudesByContext[nodeContext] || [];
+
+        if (contextAttitudes.includes(state.highlightedAttitude)) {
+          node.addClass("highlighted");
+          console.log(
+            `[GraphCanvas] Highlighted node ${nodeData.id} with attitude ${state.highlightedAttitude}`
+          );
+        }
+      }
+    });
+
+    // Force a re-render
+    cyRef.current.forceRender();
+  }, [state.highlightedAttitude, state.currentContext]);
+
   // Set up event handlers
   useEffect(() => {
     if (!cyRef.current) return;
@@ -401,20 +466,50 @@ export default function GraphCanvas() {
         setEditingNode(nodeId);
         setNodeLabel(nodeData.label || "");
         setNodeContext(nodeData.context || state.currentContext);
-        setNodeAttitude(nodeData.attitude || state.currentAttitude);
+        setNodeAttitudesByContext(nodeData.attitudesByContext || {});
       }
+      evt.originalEvent.stopPropagation();
+    };
+
+    const edgeClickHandler = function (evt) {
+      const edgeId = this.id();
+      cyRef.current.elements().removeClass("selected");
+      this.addClass("selected");
+      setSelectedEdgeId(edgeId);
+      setEdgeLabel(this.data("label") || "");
       evt.originalEvent.stopPropagation();
     };
 
     const nodeMouseOverHandler = function (evt) {
       const nodeId = this.id();
+      const nodeData = this.data();
+
       setHoveredNode(nodeId);
       this.addClass("hovered");
+
+      let tooltipContent = `${nodeData.type}\nContext: ${nodeData.context}`;
+
+      if (nodeData.type === "PropositionNode" && nodeData.attitudesByContext) {
+        const contextAttitudes =
+          nodeData.attitudesByContext[nodeData.context] || [];
+        if (contextAttitudes.length > 0) {
+          tooltipContent += `\nAttitudes: ${contextAttitudes.join(", ")}`;
+        }
+      }
+
+      const renderedPosition = this.renderedPosition();
+      setTooltip({
+        show: true,
+        x: renderedPosition.x + 50,
+        y: renderedPosition.y - 30,
+        content: tooltipContent,
+      });
     };
 
     const nodeMouseOutHandler = function (evt) {
       setHoveredNode(null);
       this.removeClass("hovered");
+      setTooltip({ show: false, x: 0, y: 0, content: "" });
     };
 
     const backgroundClickHandler = function (evt) {
@@ -426,6 +521,7 @@ export default function GraphCanvas() {
     };
 
     cyRef.current.on("tap", "node", nodeClickHandler);
+    cyRef.current.on("tap", "edge", edgeClickHandler);
     cyRef.current.on("mouseover", "node", nodeMouseOverHandler);
     cyRef.current.on("mouseout", "node", nodeMouseOutHandler);
     cyRef.current.on("tap", backgroundClickHandler);
@@ -433,6 +529,7 @@ export default function GraphCanvas() {
     return () => {
       if (cyRef.current) {
         cyRef.current.removeListener("tap", "node", nodeClickHandler);
+        cyRef.current.removeListener("tap", "edge", edgeClickHandler);
         cyRef.current.removeListener("mouseover", "node", nodeMouseOverHandler);
         cyRef.current.removeListener("mouseout", "node", nodeMouseOutHandler);
         cyRef.current.removeListener("tap", backgroundClickHandler);
@@ -446,6 +543,202 @@ export default function GraphCanvas() {
     state.currentAttitude,
   ]);
 
+  // Handle path highlighting from sidebar
+  useEffect(() => {
+    const handlePathHighlight = (event) => {
+      if (!cyRef.current) return;
+
+      const { pathType, context, name } = event.detail;
+      console.log(
+        `[GraphCanvas] Highlighting path: ${pathType} in context: ${context}`
+      );
+
+      // Clear previous highlights
+      cyRef.current.elements().removeClass("path-highlighted");
+
+      // Path highlighting logic based on path type
+      switch (pathType) {
+        case "agent-loves-object":
+          highlightLovePath();
+          break;
+        case "believer-believes-proposition":
+          highlightBeliefPath();
+          break;
+        case "agent-performs-action":
+          highlightActionPath();
+          break;
+        case "cause-effect-result":
+          highlightCausePath();
+          break;
+        default:
+          console.warn(`[GraphCanvas] Unknown path type: ${pathType}`);
+      }
+    };
+
+    // Path highlighting functions
+    const highlightLovePath = () => {
+      cyRef.current.nodes().forEach((node) => {
+        const nodeData = node.data();
+        const nodeType = nodeData.type;
+        const nodeLabel = nodeData.label ? nodeData.label.toLowerCase() : "";
+
+        // Highlight love-related nodes and connections
+        if (
+          nodeType === "IndividualNode" ||
+          (nodeType === "PropositionNode" && nodeLabel.includes("love"))
+        ) {
+          node.addClass("path-highlighted");
+        }
+      });
+
+      // Highlight edges labeled "loves"
+      cyRef.current.edges().forEach((edge) => {
+        const edgeLabel = edge.data("label")
+          ? edge.data("label").toLowerCase()
+          : "";
+        if (edgeLabel.includes("love")) {
+          edge.addClass("path-highlighted");
+        }
+      });
+    };
+
+    const highlightBeliefPath = () => {
+      cyRef.current.nodes().forEach((node) => {
+        const nodeData = node.data();
+        const nodeType = nodeData.type;
+        const nodeContext = nodeData.context;
+        const nodeAttitudes = nodeData.attitudesByContext || {};
+        const contextAttitudes = nodeAttitudes[nodeContext] || [];
+
+        // Highlight nodes with belief attitude
+        if (contextAttitudes.includes("belief")) {
+          node.addClass("path-highlighted");
+        }
+      });
+    };
+
+    const highlightActionPath = () => {
+      cyRef.current.nodes().forEach((node) => {
+        const nodeData = node.data();
+        const nodeType = nodeData.type;
+
+        // Highlight ActNodes and related IndividualNodes
+        if (nodeType === "ActNode" || nodeType === "IndividualNode") {
+          node.addClass("path-highlighted");
+        }
+      });
+
+      // Highlight action-related edges
+      cyRef.current.edges().forEach((edge) => {
+        const edgeLabel = edge.data("label")
+          ? edge.data("label").toLowerCase()
+          : "";
+        if (
+          edgeLabel.includes("agent") ||
+          edgeLabel.includes("action") ||
+          edgeLabel.includes("performs")
+        ) {
+          edge.addClass("path-highlighted");
+        }
+      });
+    };
+
+    const highlightCausePath = () => {
+      cyRef.current.nodes().forEach((node) => {
+        const nodeData = node.data();
+        const nodeLabel = nodeData.label ? nodeData.label.toLowerCase() : "";
+
+        // Highlight cause-effect related nodes
+        if (
+          nodeLabel.includes("cause") ||
+          nodeLabel.includes("effect") ||
+          nodeLabel.includes("result")
+        ) {
+          node.addClass("path-highlighted");
+        }
+      });
+
+      // Highlight cause-effect edges
+      cyRef.current.edges().forEach((edge) => {
+        const edgeLabel = edge.data("label")
+          ? edge.data("label").toLowerCase()
+          : "";
+        if (edgeLabel.includes("cause") || edgeLabel.includes("effect")) {
+          edge.addClass("path-highlighted");
+        }
+      });
+    };
+
+    window.addEventListener("highlightPath", handlePathHighlight);
+    return () =>
+      window.removeEventListener("highlightPath", handlePathHighlight);
+  }, []);
+  // FIXED: Handle CLI propositions with proper context and attitude assignment
+
+  useEffect(() => {
+    const handleCLIProposition = (event) => {
+      if (!cyRef.current) return;
+
+      const nodeData = event.detail;
+      console.log(`[GraphCanvas] Adding CLI node to canvas:`, nodeData);
+
+      // Ensure the node has the current context and attitude
+      const enhancedNodeData = {
+        ...nodeData,
+        context: nodeData.context || state.currentContext,
+        attitudesByContext: nodeData.attitudesByContext || {
+          [nodeData.context || state.currentContext]: [
+            nodeData.attitude || state.currentAttitude,
+          ],
+        },
+      };
+
+      // Add node to Cytoscape
+      cyRef.current.add({
+        group: "nodes",
+        data: {
+          id: enhancedNodeData.id,
+          label: enhancedNodeData.label,
+          type: enhancedNodeData.type,
+          context: enhancedNodeData.context,
+          attitudesByContext: enhancedNodeData.attitudesByContext,
+          attitude: enhancedNodeData.attitude,
+        },
+        position: enhancedNodeData.position,
+      });
+
+      setNodeCount((prev) => prev + 1);
+
+      // Animate the new node
+      const newNodeEl = cyRef.current.getElementById(enhancedNodeData.id);
+      if (newNodeEl.length > 0) {
+        newNodeEl.style("opacity", 0);
+        newNodeEl.animate({
+          style: { opacity: 1 },
+          duration: 500,
+          easing: "ease-out",
+        });
+
+        // Apply context filtering immediately
+        const nodeContext = enhancedNodeData.context;
+        if (nodeContext === state.currentContext) {
+          newNodeEl.style("opacity", 1);
+        } else {
+          newNodeEl.addClass("dimmed");
+          newNodeEl.style("opacity", 0.3);
+        }
+      }
+
+      console.log(
+        `[GraphCanvas] Successfully added CLI node: ${enhancedNodeData.label}`
+      );
+    };
+
+    window.addEventListener("addPropositionFromCLI", handleCLIProposition);
+    return () =>
+      window.removeEventListener("addPropositionFromCLI", handleCLIProposition);
+  }, [state.currentContext, state.currentAttitude]);
+
   const handleDrop = (e) => {
     e.preventDefault();
     const nodeType = e.dataTransfer.getData("text/plain");
@@ -458,26 +751,32 @@ export default function GraphCanvas() {
     const nodeId = `${nodeType.toLowerCase()}-${Date.now()}`;
     const nodeLabel = `${nodeType}\n${nodeCount + 1}`;
 
-    // Create node in Cytoscape
-    cyRef.current.add({
-      group: "nodes",
-      data: {
-        id: nodeId,
-        label: nodeLabel,
-        type: nodeType,
-        context: state.currentContext,
-        attitude: state.currentAttitude,
-      },
-      position: { x, y },
-    });
-
-    // Add to AppState
-    const newNode = {
+    // Create node data with proper context and attitude assignment
+    const nodeData = {
       id: nodeId,
       label: nodeLabel,
       type: nodeType,
       context: state.currentContext,
       attitude: state.currentAttitude,
+    };
+
+    // Add attitude data only for PropositionNodes
+    if (["PropositionNode", "ActNode", "RuleNode"].includes(nodeType)) {
+      nodeData.attitudesByContext = {
+        [state.currentContext]: [state.currentAttitude],
+      };
+    }
+
+    // Create node in Cytoscape
+    cyRef.current.add({
+      group: "nodes",
+      data: nodeData,
+      position: { x, y },
+    });
+
+    // Add to AppState
+    const newNode = {
+      ...nodeData,
       position: { x, y },
     };
     dispatch({ type: "ADD_NODE", payload: newNode });
@@ -493,41 +792,79 @@ export default function GraphCanvas() {
       easing: "ease-out",
     });
 
-    // Send to backend if needed
-    try {
-      const proposition = `${nodeType}(${nodeId})`;
-      runCommand(
-        `add-to-context c{${state.currentContext}} a{${state.currentAttitude}} ${proposition}`
-      );
-    } catch (error) {
-      console.error("Error adding to backend:", error);
+    // Send to backend if it's a PropositionNode
+    if (["PropositionNode", "ActNode", "RuleNode"].includes(nodeType)) {
+      try {
+        const proposition = `${nodeType}(${nodeId})`;
+        runCommand(
+          `add-to-context c{${state.currentContext}} a{${state.currentAttitude}} ${proposition}`
+        );
+        console.log(
+          `[GraphCanvas] Sent proposition to backend: ${proposition}`
+        );
+      } catch (error) {
+        console.error("Error adding to backend:", error);
+      }
     }
   };
 
+  // FIXED: Update node details with proper context and attitude handling
   const updateNodeDetails = () => {
     if (!editingNode || !cyRef.current) return;
 
     const node = cyRef.current.getElementById(editingNode);
     if (!node) return;
 
+    const nodeType = node.data("type");
+
     // Update node data
-    node.data({
+    const updatedData = {
       ...node.data(),
       label: nodeLabel,
       context: nodeContext,
-      attitude: nodeAttitude,
-    });
+    };
+
+    // Add attitude data only for PropositionNodes
+    if (["PropositionNode", "ActNode", "RuleNode"].includes(nodeType)) {
+      updatedData.attitudesByContext = nodeAttitudesByContext;
+      const contextAttitudes = nodeAttitudesByContext[nodeContext] || [];
+      updatedData.attitude =
+        contextAttitudes.length > 0
+          ? contextAttitudes[0]
+          : state.currentAttitude;
+    }
+
+    node.data(updatedData);
 
     // Update in AppState
     const updatedNode = {
       id: editingNode,
       label: nodeLabel,
       context: nodeContext,
-      attitude: nodeAttitude,
+      ...(nodeType === "PropositionNode"
+        ? {
+            attitudesByContext: nodeAttitudesByContext,
+            attitude: updatedData.attitude,
+          }
+        : {}),
     };
     dispatch({ type: "UPDATE_NODE", payload: updatedNode });
 
+    // Apply context filtering to the updated node
+    if (nodeType === "PropositionNode") {
+      if (nodeContext === state.currentContext) {
+        node.removeClass("dimmed");
+        node.style("opacity", 1);
+      } else {
+        node.addClass("dimmed");
+        node.style("opacity", 0.3);
+      }
+    }
+
     setEditingNode(null);
+    console.log(
+      `[GraphCanvas] Updated node: ${nodeLabel} in context: ${nodeContext}`
+    );
   };
 
   const deleteSelectedNode = () => {
@@ -540,6 +877,32 @@ export default function GraphCanvas() {
       setNodeCount((prev) => prev - 1);
       setSelectedNodeId(null);
       setEditingNode(null);
+    }
+  };
+
+  const updateEdgeDetails = () => {
+    if (!selectedEdgeId || !cyRef.current) return;
+
+    const edge = cyRef.current.getElementById(selectedEdgeId);
+    if (!edge) return;
+
+    edge.data({ ...edge.data(), label: edgeLabel });
+    dispatch({
+      type: "UPDATE_EDGE",
+      payload: { id: selectedEdgeId, label: edgeLabel },
+    });
+    setSelectedEdgeId(null);
+  };
+
+  const deleteSelectedEdge = () => {
+    if (!selectedEdgeId || !cyRef.current) return;
+
+    const edge = cyRef.current.getElementById(selectedEdgeId);
+    if (edge) {
+      edge.remove();
+      dispatch({ type: "REMOVE_EDGE", payload: selectedEdgeId });
+      setEdgeCount((prev) => prev - 1);
+      setSelectedEdgeId(null);
     }
   };
 
@@ -572,42 +935,6 @@ export default function GraphCanvas() {
     }
   };
 
-  const toggleAnimation = () => {
-    setIsAnimating(!isAnimating);
-    if (!isAnimating) {
-      cyRef.current
-        .nodes()
-        .animate({
-          style: { opacity: 0.7 },
-          duration: 1000,
-          easing: "ease-in-out",
-        })
-        .animate({
-          style: { opacity: 1 },
-          duration: 1000,
-          easing: "ease-in-out",
-        });
-    }
-  };
-
-  const filterByCurrentContext = () => {
-    if (!cyRef.current) return;
-
-    cyRef.current.nodes().forEach((node) => {
-      const nodeContext = node.data("context");
-      if (nodeContext === state.currentContext) {
-        node.removeClass("dimmed");
-      } else {
-        node.addClass("dimmed");
-      }
-    });
-  };
-
-  const clearFilters = () => {
-    if (!cyRef.current) return;
-    cyRef.current.nodes().removeClass("dimmed");
-  };
-
   const exportGraph = () => {
     const graphData = {
       nodes: cyRef.current.nodes().map((node) => ({
@@ -635,6 +962,65 @@ export default function GraphCanvas() {
     a.download = `mindgraf-graph-${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const importGraph = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const graphData = JSON.parse(e.target.result);
+
+        // Clear current graph
+        cyRef.current.elements().remove();
+
+        // Load nodes
+        if (graphData.nodes) {
+          graphData.nodes.forEach((nodeData) => {
+            cyRef.current.add({
+              group: "nodes",
+              data: nodeData.data,
+              position: nodeData.position,
+            });
+          });
+          setNodeCount(graphData.nodes.length);
+        }
+
+        // Load edges
+        if (graphData.edges) {
+          graphData.edges.forEach((edgeData) => {
+            cyRef.current.add({
+              group: "edges",
+              data: edgeData.data,
+            });
+          });
+          setEdgeCount(graphData.edges.length);
+        }
+
+        // Update contexts and attitudes if available
+        if (graphData.metadata) {
+          const { contexts, attitudes } = graphData.metadata;
+          if (contexts) {
+            contexts.forEach((ctx) => {
+              if (!state.contexts.includes(ctx)) {
+                dispatch({ type: "ADD_CONTEXT", payload: ctx });
+              }
+            });
+          }
+        }
+
+        console.log("Graph imported successfully");
+      } catch (error) {
+        console.error("Error importing graph:", error);
+        alert("Error importing graph. Please check the file format.");
+      }
+    };
+    reader.readAsText(file);
+
+    // Reset input
+    event.target.value = "";
   };
 
   return (
@@ -665,27 +1051,28 @@ export default function GraphCanvas() {
               <Save className="w-4 h-4" />
               <span>Save</span>
             </button>
+            <input
+              ref={importInputRef}
+              type="file"
+              accept=".json"
+              onChange={importGraph}
+              className="hidden"
+            />
+            <button
+              onClick={() => importInputRef.current?.click()}
+              className="flex items-center space-x-2 bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all shadow-sm"
+            >
+              <Upload className="w-4 h-4" />
+              <span>Import</span>
+            </button>
             <button
               onClick={exportGraph}
-              className="flex items-center space-x-2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all shadow-sm"
+              className="flex items-center space-x-2 bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all shadow-sm"
             >
               <Download className="w-4 h-4" />
               <span>Export</span>
             </button>
-            <button
-              onClick={filterByCurrentContext}
-              className="flex items-center space-x-2 bg-purple-500 hover:bg-purple-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all shadow-sm"
-            >
-              <Eye className="w-4 h-4" />
-              <span>Filter</span>
-            </button>
-            <button
-              onClick={clearFilters}
-              className="flex items-center space-x-2 bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all shadow-sm"
-            >
-              <EyeOff className="w-4 h-4" />
-              <span>Clear</span>
-            </button>
+
             <button
               onClick={toggleEdgeMode}
               className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all shadow-sm ${
@@ -756,39 +1143,75 @@ export default function GraphCanvas() {
               />
             </div>
 
+            {/* Context field - editable for PropositionNodes, read-only for others */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
                 Context
               </label>
-              <select
-                value={nodeContext}
-                onChange={(e) => setNodeContext(e.target.value)}
-                className="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                {state.contexts.map((context) => (
-                  <option key={context} value={context}>
-                    {context}
-                  </option>
-                ))}
-              </select>
+              {cyRef.current?.getElementById(editingNode)?.data("type") ===
+              "PropositionNode" ? (
+                <select
+                  value={nodeContext}
+                  onChange={(e) => setNodeContext(e.target.value)}
+                  className="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  {state.contexts.map((context) => (
+                    <option key={context} value={context}>
+                      {context}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  type="text"
+                  value={nodeContext}
+                  readOnly
+                  className="w-full p-2 border border-slate-300 rounded-lg text-sm bg-gray-100 cursor-not-allowed"
+                />
+              )}
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Attitude
-              </label>
-              <select
-                value={nodeAttitude}
-                onChange={(e) => setNodeAttitude(e.target.value)}
-                className="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                {state.attitudes.map((attitude) => (
-                  <option key={attitude} value={attitude}>
-                    {attitude}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {/* Only show attitudes for PropositionNodes */}
+            {["PropositionNode", "ActNode", "RuleNode"].includes(
+              cyRef.current?.getElementById(editingNode)?.data("type")
+            ) && (
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Attitudes in {nodeContext}
+                </label>
+                <div className="space-y-2 max-h-32 overflow-y-auto">
+                  {state.attitudes.map((attitude) => {
+                    const currentAttitudes =
+                      nodeAttitudesByContext[nodeContext] || [];
+                    return (
+                      <label
+                        key={attitude}
+                        className="flex items-center space-x-2"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={currentAttitudes.includes(attitude)}
+                          onChange={(e) => {
+                            const newAttitudes = e.target.checked
+                              ? [...currentAttitudes, attitude]
+                              : currentAttitudes.filter((a) => a !== attitude);
+
+                            setNodeAttitudesByContext({
+                              ...nodeAttitudesByContext,
+                              [nodeContext]: newAttitudes,
+                            });
+                          }}
+                          className="rounded border-slate-300"
+                        />
+                        <span className="text-sm text-slate-700">
+                          {attitude.charAt(0).toUpperCase() + attitude.slice(1)}
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             <div className="flex space-x-2">
               <button
@@ -807,6 +1230,7 @@ export default function GraphCanvas() {
           </div>
         </div>
       )}
+
       {/* Edge Editing Panel */}
       {selectedEdgeId && (
         <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-md border border-slate-200 rounded-xl shadow-xl p-4 z-20 w-80">
@@ -868,9 +1292,19 @@ export default function GraphCanvas() {
               </span>
             </div>
           </div>
-          <div className="flex items-center space-x-4 text-xs text-slate-600">
-            <span>Context: {state.currentContext}</span>
-            <span>Attitude: {state.currentAttitude}</span>
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+              <span className="font-medium text-slate-700">
+                Context: {state.currentContext}
+              </span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+              <span className="font-medium text-slate-700">
+                Attitude: {state.currentAttitude}
+              </span>
+            </div>
           </div>
           <div className="flex items-center space-x-2">
             <input
@@ -897,6 +1331,42 @@ export default function GraphCanvas() {
           </span>
         )}
       </div>
+
+      {/* Enhanced Tooltip */}
+      {tooltip.show && (
+        <div
+          className="absolute z-30 pointer-events-none"
+          style={{
+            left: tooltip.x,
+            top: tooltip.y,
+            transform: "translate(-50%, -100%)",
+          }}
+        >
+          <div className="bg-gradient-to-r from-slate-800 to-slate-900 text-white rounded-xl shadow-2xl border border-slate-600 p-4 max-w-xs">
+            <div className="flex items-center space-x-2 mb-2">
+              <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
+              <span className="font-semibold text-sm">
+                {tooltip.content.split("\n")[0]}
+              </span>
+            </div>
+            <div className="space-y-1 text-xs text-slate-300">
+              <div className="flex justify-between">
+                <span className="text-blue-400 font-medium">
+                  {tooltip.content.split("\n")[1]?.replace("Context: ", "")}
+                </span>
+              </div>
+              {tooltip.content.split("\n")[2] && (
+                <div className="flex justify-between">
+                  <span className="text-green-400 font-medium">
+                    {tooltip.content.split("\n")[2]?.replace("Attitudes: ", "")}
+                  </span>
+                </div>
+              )}
+            </div>
+            <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

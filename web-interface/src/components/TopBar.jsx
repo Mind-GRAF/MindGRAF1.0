@@ -4,7 +4,6 @@ import { useAppState } from "../context/AppStateContext";
 import {
   Brain,
   Terminal,
-  Search,
   Route,
   Sparkles,
   Settings,
@@ -17,7 +16,6 @@ export default function TopBar() {
 
   const modes = [
     { key: "draw", label: "DRAW", icon: Brain },
-    { key: "search", label: "SEARCH", icon: Search },
     { key: "trace", label: "TRACE", icon: Route },
     { key: "cli", label: "CLI", icon: Terminal },
   ];

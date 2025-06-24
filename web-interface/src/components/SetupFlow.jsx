@@ -1,11 +1,19 @@
 // src/components/SetupFlow.jsx
 import React, { useState } from "react";
 import { useAppState } from "../context/AppStateContext";
-import { Settings, ArrowRight, Check, Brain, Sparkles } from "lucide-react";
+import {
+  Settings,
+  ArrowRight,
+  Check,
+  Brain,
+  Sparkles,
+  AlertTriangle,
+} from "lucide-react";
 
 export default function SetupFlow() {
   const { state, dispatch } = useAppState();
   const [input, setInput] = useState("");
+  const [validationError, setValidationError] = useState("");
 
   const steps = [
     {
@@ -45,8 +53,77 @@ export default function SetupFlow() {
   );
   const currentStep = steps[currentStepIndex];
 
+  // Validation function for attitudes based on initially defined attitudes
+  const validateAttitudes = (inputText, stepType) => {
+    if (state.setupStep === "attitudes") {
+      // First step - no validation needed
+      return { isValid: true, error: "" };
+    }
+
+    const definedAttitudes = state.attitudes || ["belief"];
+
+    if (stepType === "consistent") {
+      // Parse consistent attitudes (e.g., "{love, desire} {intention, fear}")
+      const consistentSets = inputText.match(/\{[^}]+\}/g) || [];
+      for (const set of consistentSets) {
+        const attitudes = set
+          .slice(1, -1)
+          .split(",")
+          .map((s) => s.trim())
+          .filter((s) => s);
+
+        const invalidAttitudes = attitudes.filter(
+          (att) => !definedAttitudes.includes(att)
+        );
+
+        if (invalidAttitudes.length > 0) {
+          return {
+            isValid: false,
+            error: `Invalid attitudes: ${invalidAttitudes.join(
+              ", "
+            )}. Available attitudes: ${definedAttitudes.join(", ")}`,
+          };
+        }
+      }
+    } else if (stepType === "list") {
+      // For conjunction, consequence, telescopable (comma-separated lists)
+      const attitudes = inputText
+        .split(",")
+        .map((s) => s.trim())
+        .filter((s) => s);
+
+      const invalidAttitudes = attitudes.filter(
+        (att) => !definedAttitudes.includes(att)
+      );
+
+      if (invalidAttitudes.length > 0) {
+        return {
+          isValid: false,
+          error: `Invalid attitudes: ${invalidAttitudes.join(
+            ", "
+          )}. Available attitudes: ${definedAttitudes.join(", ")}`,
+        };
+      }
+    }
+
+    return { isValid: true, error: "" };
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    setValidationError("");
+
+    // Validate input for attitude-related steps
+    if (state.setupStep !== "attitudes" && state.setupStep !== "uvbr") {
+      const validationType =
+        state.setupStep === "consistent" ? "consistent" : "list";
+      const validation = validateAttitudes(input, validationType);
+
+      if (!validation.isValid) {
+        setValidationError(validation.error);
+        return;
+      }
+    }
 
     switch (state.setupStep) {
       case "attitudes":
@@ -128,12 +205,21 @@ export default function SetupFlow() {
   };
 
   const skipStep = () => {
+    setValidationError("");
     const nextStepIndex = currentStepIndex + 1;
     if (nextStepIndex < steps.length) {
       dispatch({ type: "SET_SETUP_STEP", payload: steps[nextStepIndex].key });
     } else {
       dispatch({ type: "COMPLETE_SETUP" });
     }
+    setInput("");
+  };
+
+  // Helper function to get available attitudes for display
+  const getAvailableAttitudes = () => {
+    return state.attitudes && state.attitudes.length > 1
+      ? state.attitudes.join(", ")
+      : "belief (default)";
   };
 
   if (state.isSetupComplete) {
@@ -197,6 +283,31 @@ export default function SetupFlow() {
           </div>
         </div>
 
+        {/* Available Attitudes Display */}
+        {state.setupStep !== "attitudes" && state.attitudes.length > 1 && (
+          <div className="mb-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
+            <div className="flex items-center space-x-2 mb-2">
+              <Settings className="w-4 h-4 text-blue-600" />
+              <span className="text-sm font-medium text-blue-800">
+                Available Attitudes
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {state.attitudes.map((attitude) => (
+                <span
+                  key={attitude}
+                  className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-xs font-medium"
+                >
+                  {attitude}
+                </span>
+              ))}
+            </div>
+            <p className="text-xs text-blue-600 mt-2">
+              Only use these attitudes in the following steps
+            </p>
+          </div>
+        )}
+
         {/* Input Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
@@ -206,13 +317,32 @@ export default function SetupFlow() {
             <input
               type="text"
               value={input}
-              onChange={(e) => setInput(e.target.value)}
-              className="w-full p-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-              placeholder={getInputPlaceholder(state.setupStep)}
+              onChange={(e) => {
+                setInput(e.target.value);
+                setValidationError(""); // Clear error when user types
+              }}
+              className={`w-full p-4 border rounded-xl focus:ring-2 focus:border-transparent transition-all ${
+                validationError
+                  ? "border-red-300 focus:ring-red-500"
+                  : "border-slate-300 focus:ring-blue-500"
+              }`}
+              placeholder={getInputPlaceholder(
+                state.setupStep,
+                state.attitudes
+              )}
               autoFocus
             />
+
+            {/* Validation Error */}
+            {validationError && (
+              <div className="flex items-center space-x-2 mt-2 text-red-600 text-sm">
+                <AlertTriangle className="w-4 h-4" />
+                <span>{validationError}</span>
+              </div>
+            )}
+
             <p className="text-xs text-slate-500 mt-2">
-              {getInputHint(state.setupStep)}
+              {getInputHint(state.setupStep, state.attitudes)}
             </p>
           </div>
 
@@ -226,7 +356,8 @@ export default function SetupFlow() {
             </button>
             <button
               type="submit"
-              className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2 shadow-lg"
+              disabled={validationError}
+              className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-slate-400 disabled:to-slate-500 disabled:cursor-not-allowed text-white px-6 py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2 shadow-lg"
             >
               Continue
               <ArrowRight className="w-4 h-4" />
@@ -242,7 +373,25 @@ export default function SetupFlow() {
           </div>
           {state.attitudes.length > 1 && (
             <div className="text-sm text-slate-600 mt-1">
-              <strong>Attitudes defined:</strong> {state.attitudes.join(", ")}
+              <strong>Attitudes defined:</strong> {getAvailableAttitudes()}
+            </div>
+          )}
+          {state.consistentAttitudes.length > 0 && (
+            <div className="text-sm text-slate-600 mt-1">
+              <strong>Consistent sets:</strong>{" "}
+              {state.consistentAttitudes.length}
+            </div>
+          )}
+          {state.conjunctionAttitudes.length > 0 && (
+            <div className="text-sm text-slate-600 mt-1">
+              <strong>Conjunction attitudes:</strong>{" "}
+              {state.conjunctionAttitudes.join(", ")}
+            </div>
+          )}
+          {state.consequenceAttitudes.length > 0 && (
+            <div className="text-sm text-slate-600 mt-1">
+              <strong>Consequence attitudes:</strong>{" "}
+              {state.consequenceAttitudes.join(", ")}
             </div>
           )}
         </div>
@@ -270,18 +419,33 @@ function getInputLabel(step) {
   }
 }
 
-function getInputPlaceholder(step) {
+function getInputPlaceholder(step, attitudes = []) {
+  const availableAttitudes =
+    attitudes.length > 1
+      ? attitudes.filter((a) => a !== "belief").join(", ")
+      : "desire, intention, fear, obligation";
+
   switch (step) {
     case "attitudes":
       return 'desire, intention, fear, obligation (or just "N")';
     case "consistent":
-      return "{belief,desire} {intention,fear}";
+      return attitudes.length > 1
+        ? `{${attitudes[0]},${attitudes[1] || "desire"}} {${
+            attitudes[2] || "intention"
+          },${attitudes[3] || "fear"}}`
+        : "{belief,desire} {intention,fear}";
     case "conjunction":
-      return "belief, intention";
+      return attitudes.length > 1
+        ? attitudes.slice(0, 2).join(", ")
+        : "belief, intention";
     case "consequence":
-      return "belief, desire";
+      return attitudes.length > 1
+        ? attitudes.slice(0, 2).join(", ")
+        : "belief, desire";
     case "telescopable":
-      return "belief, intention";
+      return attitudes.length > 1
+        ? attitudes.slice(0, 2).join(", ")
+        : "belief, intention";
     case "uvbr":
       return "on/off or yes/no";
     default:
@@ -289,18 +453,26 @@ function getInputPlaceholder(step) {
   }
 }
 
-function getInputHint(step) {
+function getInputHint(step, attitudes = []) {
   switch (step) {
     case "attitudes":
       return 'Define the mental attitudes your artificial mind will use. "belief" is always included. Enter "N" to use defaults.';
     case "consistent":
-      return "Use curly braces {} to group attitudes that should be consistent with each other.";
+      return `Use curly braces {} to group attitudes that should be consistent with each other. Only use these attitudes: ${attitudes.join(
+        ", "
+      )}`;
     case "conjunction":
-      return "Attitudes that should be closed under conjunction (AND operations).";
+      return `Attitudes that should be closed under conjunction (AND operations). Only use: ${attitudes.join(
+        ", "
+      )}`;
     case "consequence":
-      return "Attitudes that should be closed under consequence (IF-THEN operations).";
+      return `Attitudes that should be closed under consequence (IF-THEN operations). Only use: ${attitudes.join(
+        ", "
+      )}`;
     case "telescopable":
-      return "Attitudes that support telescoping operations.";
+      return `Attitudes that support telescoping operations. Only use: ${attitudes.join(
+        ", "
+      )}`;
     case "uvbr":
       return "Unique Variable Binding Rule - prevents variable naming conflicts.";
     default:

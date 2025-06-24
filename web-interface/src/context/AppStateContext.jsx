@@ -1,6 +1,6 @@
 // src/context/AppStateContext.jsx
 import React, { createContext, useContext, useReducer, useEffect } from "react";
-
+import { runCommand } from "../api/runCommand";
 const AppStateContext = createContext();
 
 const initialState = {
@@ -35,6 +35,8 @@ const initialState = {
 
   // Session info
   lastSaved: null,
+  // Highlighted state
+  highlightedAttitude: null,
 };
 
 function appStateReducer(state, action) {
@@ -113,9 +115,20 @@ function appStateReducer(state, action) {
 
     // Context and attitude actions
     case "ADD_CONTEXT":
-      if (state.contexts.includes(action.payload)) {
-        return state; // Don't add duplicates
+      // If we only have "default" and we're adding a real context, replace it
+      if (state.contexts.length === 1 && state.contexts[0] === "default") {
+        return {
+          ...state,
+          contexts: [action.payload],
+          currentContext: action.payload, // Auto-switch to the new context
+        };
       }
+
+      // Otherwise, add normally (no duplicates)
+      if (state.contexts.includes(action.payload)) {
+        return state;
+      }
+
       return {
         ...state,
         contexts: [...state.contexts, action.payload],
@@ -137,6 +150,12 @@ function appStateReducer(state, action) {
       return {
         ...state,
         currentMode: action.payload,
+      };
+
+    case "SET_HIGHLIGHTED_ATTITUDE":
+      return {
+        ...state,
+        highlightedAttitude: action.payload,
       };
 
     // Node actions
@@ -209,6 +228,44 @@ function appStateReducer(state, action) {
       return {
         ...state,
         edges: remainingEdges,
+      };
+
+    case "UPDATE_ALL_NODES_CONTEXT":
+      const updatedNodes = {};
+      Object.keys(state.nodes).forEach((nodeId) => {
+        updatedNodes[nodeId] = {
+          ...state.nodes[nodeId],
+          context: action.payload,
+          updatedAt: new Date().toISOString(),
+        };
+      });
+      return {
+        ...state,
+        nodes: updatedNodes,
+      };
+
+    case "UPDATE_NODE_ATTITUDES_FOR_CONTEXT":
+      const { nodeId, context, attitudes } = action.payload;
+      const node = state.nodes[nodeId];
+      if (!node || node.type !== "PropositionNode") return state;
+
+      return {
+        ...state,
+        nodes: {
+          ...state.nodes,
+          [nodeId]: {
+            ...node,
+            // Store attitudes per context: { contextName: [attitudes] }
+            attitudesByContext: {
+              ...node.attitudesByContext,
+              [context]: attitudes,
+            },
+            // Current attitude is based on current context
+            attitude:
+              attitudes.length > 0 ? attitudes[0] : state.currentAttitude,
+            updatedAt: new Date().toISOString(),
+          },
+        },
       };
 
     // Relation actions
@@ -288,6 +345,21 @@ export function AppStateProvider({ children }) {
       localStorage.removeItem("mindgraf-state");
     }
   }, []);
+
+  useEffect(() => {
+    // Validate setup completion by checking backend sync
+    if (state.isSetupComplete) {
+      runCommand("get-attitudes")
+        .then((result) => {
+          // Verify backend has the same attitudes
+          console.log("Backend attitudes:", result);
+        })
+        .catch(console.error);
+
+      // Set to mode 3 as expected
+      runCommand("set-mode-3").catch(console.error);
+    }
+  }, [state.isSetupComplete]);
 
   // Helper function to get nodes by context and attitude
   const getNodesByContextAndAttitude = (

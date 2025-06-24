@@ -6,6 +6,13 @@
   "configurations": [
     {
       "type": "java",
+      "name": "NetworkUI",
+      "request": "launch",
+      "mainClass": "edu.guc.mind_graf.view.NetworkUI",
+      "projectName": "mindGRAF"
+    },
+    {
+      "type": "java",
       "name": "CLI",
       "request": "launch",
       "mainClass": "edu.guc.mind_graf.parser.CLI",
