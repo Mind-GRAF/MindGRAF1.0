@@ -6,6 +6,20 @@
     "configurations": [
         {
             "type": "java",
+            "name": "MindGRAF_Server",
+            "request": "launch",
+            "mainClass": "edu.guc.mind_graf.parser.MindGRAF_Server",
+            "projectName": "mindGRAF"
+        },
+        {
+            "type": "java",
+            "name": "CLI",
+            "request": "launch",
+            "mainClass": "edu.guc.mind_graf.parser.CLI",
+            "projectName": "mindGRAF"
+        },
+        {
+            "type": "java",
             "name": "Current File",
             "request": "launch",
             "mainClass": "${file}"
