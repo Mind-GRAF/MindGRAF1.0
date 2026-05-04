@@ -29,9 +29,12 @@ public class Scheduler {
         actQueue = new Stack<ActNode>();
         highActQueue = new Stack<ActNode>();
         
-        forwardAssertedNodes = new Hashtable<Report, PropositionNode>();
-        backwardAssertedReplyNodes = new Hashtable<Report, PropositionNode>();
-
+        if (forwardAssertedNodes == null) {
+            forwardAssertedNodes = new Hashtable<Report, PropositionNode>();
+        }
+        if (backwardAssertedReplyNodes == null) {
+            backwardAssertedReplyNodes = new Hashtable<Report, PropositionNode>();
+        }
     }
 
     public static void printLowQueue() {

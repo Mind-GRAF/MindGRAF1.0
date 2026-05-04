@@ -455,27 +455,30 @@ public static void ResetGrading(){
 
 
   public Node compareMolecularNode(DownCableSet dcs) {
-    Node returnNode = null;
     for (Node nn : network.getNodes().values()) {
       DownCableSet downc = nn.getDownCableSet();
       if (downc != null) {
         String key = downc.getMolecularSetKey();
         if (key.equals(dcs.getMolecularSetKey())) {
-          returnNode = nn;
+          boolean match = true;
           Collection<DownCable> dcCollection = downc.getValues();
           for (DownCable d : dcCollection) {
             String relName = d.getRelation().getName();
             ArrayList<String> firstNs = d.getNodeSet().getNames();
             ArrayList<String> ns = dcs.get(relName).getNodeSet().getNames();
-            if (!firstNs.equals(ns))
-              return null;
+            // Ensure sizes match and all elements are contained
+            if (firstNs.size() != ns.size() || !firstNs.containsAll(ns)) {
+              match = false;
+              break;
+            }
           }
-          break;
+          if (match) {
+            return nn;
+          }
         }
       }
     }
-    return returnNode;
-
+    return null;
   }
     public static void fInference(PropositionNode propNode, boolean c, boolean a, String CName, String attitude) {
       CLI.print("");
@@ -2611,18 +2614,85 @@ void Ask() throws ParseException :
    node = Expression()
  {  CLI.print("");
     PropositionNode propNode = (PropositionNode) node;
-    bInference(propNode, c, a, CName, attitude);
-    CLI.print("");
-    CLI.print("Printing Positive Instances of Node with ID " + propNode.getId()+"...");
-    CLI.print("");
-    Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> positiveInstances = propNode
-        .getKnownInstances().positiveKInstances;
-    for (Hashtable<Substitutions, KnownInstance> value : positiveInstances.values()) {
-      for (KnownInstance KI : value.values()) {
-        CLI.print("--> "+KI.toString());
-      }
+
+    // Resolve the exact context and attitude that will be used for the query
+    String resolvedContext;
+    int resolvedAttitudeID;
+    if (c && a) {
+      resolvedContext = CName.trim();
+      resolvedAttitudeID = controller.getAttitudeNumber(attitude.trim());
+    } else if (c) {
+      resolvedContext = CName.trim();
+      resolvedAttitudeID = defaultAttitude;
+    } else if (a) {
+      resolvedContext = controller.getCurrContextName();
+      resolvedAttitudeID = controller.getAttitudeNumber(attitude.trim());
+    } else {
+      resolvedContext = controller.getCurrContextName();
+      resolvedAttitudeID = defaultAttitude;
     }
-        ResetGrading();
+
+    // Run backward inference — may derive new support via rules
+    bInference(propNode, c, a, CName, attitude);
+
+    // Definitive context-aware check.
+    // supported() walks both context.isHypothesis() and the node's assumptionSupport.
+    // After removeHypFromAssumptions() is called by removeHypothesisFromContext(),
+    // this will correctly return false for nodes removed from the context.
+    boolean result = propNode.supported(resolvedContext, resolvedAttitudeID, levelsCount);
+
+    if (!result) {
+        // Check forward asserted nodes (derived facts)
+        java.util.Hashtable<edu.guc.mind_graf.mgip.reports.Report, PropositionNode> fAsserts = edu.guc.mind_graf.mgip.Scheduler.getForwardAssertedNodes();
+        if (fAsserts != null) {
+            for (java.util.Map.Entry<edu.guc.mind_graf.mgip.reports.Report, PropositionNode> entry : fAsserts.entrySet()) {
+                edu.guc.mind_graf.mgip.reports.Report report = entry.getKey();
+                PropositionNode originNode = entry.getValue();
+                if (report.getContextName().equals(resolvedContext) && report.getAttitude() == resolvedAttitudeID) {
+                    try {
+                        Node inferredNode = originNode.applySubstitution(report.getSubstitutions());
+                        if (inferredNode != null && inferredNode.getId() == propNode.getId()) {
+                            result = true;
+                            break;
+                        }
+                    } catch (Exception e) {}
+                }
+            }
+        }
+    }
+
+    if (!result) {
+        // Check backward asserted reply nodes
+        java.util.Hashtable<edu.guc.mind_graf.mgip.reports.Report, PropositionNode> bAsserts = edu.guc.mind_graf.mgip.Scheduler.getBackwardAssertedReplyNodes();
+        if (bAsserts != null) {
+            for (java.util.Map.Entry<edu.guc.mind_graf.mgip.reports.Report, PropositionNode> entry : bAsserts.entrySet()) {
+                edu.guc.mind_graf.mgip.reports.Report report = entry.getKey();
+                PropositionNode originNode = entry.getValue();
+                if (report.getContextName().equals(resolvedContext) && report.getAttitude() == resolvedAttitudeID) {
+                    try {
+                        Node inferredNode = originNode.applySubstitution(report.getSubstitutions());
+                        if (inferredNode != null && inferredNode.getId() == propNode.getId()) {
+                            result = true;
+                            break;
+                        }
+                    } catch (Exception e) {}
+                }
+            }
+        }
+    }
+
+    CLI.print("");
+    if (result) {
+      CLI.print("ASK_IF_TRUE_RESULT: true");
+      CLI.print("Node " + propNode.getId() + " is supported in context '" + resolvedContext + "'.");
+    } else {
+      // Signal False via ParseException so that MindGRAF_Server can return a 400
+      // with a "false" body — the normal success path always returns 200 "true".
+      throw new ParseException("ASK_IF_TRUE_RESULT: false - Node "
+          + propNode.getId() + " is NOT supported in context '" + resolvedContext + "'.");
+    }
+
+    ResetGrading();
  }
 } 
 

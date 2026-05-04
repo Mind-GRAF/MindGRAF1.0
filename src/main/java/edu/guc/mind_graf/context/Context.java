@@ -80,7 +80,9 @@ public class Context {
         if (pairArr != null) {
             pairArr[attitudeId].getFirst().remove(node);
         }
-        //TODO:wael remove from support
+        // Remove the node's self-referencing hypothesis entry from its own Support,
+        // so that supported() no longer sees this node as a hypothesis for this context.
+        node.getSupport().removeHypFromAssumptions(level, attitudeId, node.getId());
     }
 
     public boolean isHypothesis(int level, int attitudeId, PropositionNode node) {

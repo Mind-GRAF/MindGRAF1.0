@@ -335,6 +335,11 @@ public abstract class Node {
 
 			}
 
+			if (this.isBase()) {
+				pathTrace.removeLast();
+				return this;
+			}
+
 			if (builtNodes.containsKey(this.getName() + "temp")) {
 				pathTrace.removeLast();
 				return builtNodes.get(this.getName() + "temp");

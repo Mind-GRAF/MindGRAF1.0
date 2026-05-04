@@ -102,6 +102,32 @@ public class Network {
 				|| ((molecularNodes.containsKey(downCablesKey) && !molecularNodes
 						.get(downCablesKey).containsKey(molecularKey)))) {
 
+			// Enforce Uniqueness Principle: Check existing closed molecular nodes BEFORE instantiating
+			String newNodeKey = downCableSet.getMolecularNodeKeyWithoutVars();
+			for (HashMap<String, Node> molecularSet : molecularNodes.values()) {
+				for (Node molecular : molecularSet.values()) {
+					if (molecular.getMolecularType() == MolecularType.CLOSED) {
+						String MolecularKey = molecular.getDownCableSet().getMolecularNodeKeyWithoutVars();
+						if (MolecularKey.equals(newNodeKey)) {
+							// Verify the new CableSet has no free variables
+							boolean hasFreeVars = false;
+							for (DownCable c : downCableSet.getValues()) {
+								for (Node n : c.getNodeSet().getValues()) {
+									if (n.isVariable() || !n.getFreeVariables().isEmpty()) {
+										hasFreeVars = true;
+										break;
+									}
+								}
+								if (hasFreeVars) break;
+							}
+							if (!hasFreeVars) {
+								return molecular;
+							}
+						}
+					}
+				}
+			}
+
 			switch (SemanticType.toLowerCase()) {
 				case "propositionnode":
 					node = new PropositionNode(downCableSet);
@@ -211,22 +237,6 @@ public class Network {
 			}
 
 			node.fetchFreeVariables();
-			if (node.getMolecularType() == MolecularType.CLOSED) {
-
-				for (HashMap<String, Node> molecularSet : molecularNodes
-						.values()) {
-
-					for (Node molecular : molecularSet.values()) {
-						String MolecularKey = molecular.getDownCableSet()
-								.getMolecularNodeKeyWithoutVars();
-						String newNodeKey = downCableSet
-								.getMolecularNodeKeyWithoutVars();
-						if (MolecularKey.equals(newNodeKey)) {
-							return molecular;
-						}
-					}
-				}
-			}
 			nodes.put(node.getId(), node);
 			if (molecularNodes.containsKey(downCablesKey)) {
 				molecularNodes.get(downCablesKey).put(
@@ -247,6 +257,9 @@ public class Network {
 	// second constructor for base nodes
 	public static Node createNode(String name, String SemanticType)
 			throws NoSuchTypeException {
+		if (baseNodes.containsKey(name)) {
+			return baseNodes.get(name);
+		}
 		Node node;
 		switch (SemanticType.toLowerCase()) {
 			case "propositionnode":

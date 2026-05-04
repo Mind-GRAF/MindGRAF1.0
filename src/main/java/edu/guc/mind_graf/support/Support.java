@@ -830,6 +830,56 @@ public class Support implements Cloneable{
 	}
 
 	/**
+	 * Reverses setHyp() for a specific level and attitude.
+	 * Removes the self-referencing entry from assumptionSupport and clears the isHyp flag,
+	 * so that this node is no longer considered a hypothesis in that level+attitude.
+	 *
+	 * @param level      the level from which to remove hypothesis status
+	 * @param attitudeID the attitude from which to remove hypothesis status
+	 * @param nodeId     the ID of this node (to locate the self-ref entry)
+	 */
+	public void removeHypFromAssumptions(int level, int attitudeID, int nodeId) {
+		// Clear the isHyp flag for this level+attitude
+		if (isHyp.containsKey(level)) {
+			isHyp.get(level).remove(attitudeID);
+			if (isHyp.get(level).isEmpty()) {
+				isHyp.remove(level);
+			}
+		}
+
+		// Remove the self-referencing entry from assumptionSupport.
+		// setHyp() inserts: assumptionSupport[level][attitudeID] = [{ attitudeID -> ({nodeId}, {}) }, {}]
+		// We remove any entry in that list whose first map contains this nodeId as a hypothesis.
+		if (!assumptionSupport.containsKey(level)) return;
+		HashMap<Integer, ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>>>
+				levelMap = assumptionSupport.get(level);
+		if (!levelMap.containsKey(attitudeID)) return;
+
+		ArrayList<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>>
+				supports = levelMap.get(attitudeID);
+		Iterator<Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet>>
+				it = supports.iterator();
+		while (it.hasNext()) {
+			Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> entry = it.next();
+			// A self-hypothesis entry has exactly one inner key (attitudeID) pointing to a
+			// PropositionNodeSet whose only member is nodeId itself.
+			HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> innerMap = entry.getFirst();
+			if (innerMap.containsKey(attitudeID)) {
+				PropositionNodeSet originSet = innerMap.get(attitudeID).getFirst();
+				if (originSet.contains(nodeId) && originSet.getProps().length == 1) {
+					it.remove();
+				}
+			}
+		}
+		if (supports.isEmpty()) {
+			levelMap.remove(attitudeID);
+		}
+		if (levelMap.isEmpty()) {
+			assumptionSupport.remove(level);
+		}
+	}
+
+	/**
 	 * Checks if this support has any children in the specified attitude
 	 * @param attitudeID attitude to check in
 	 */

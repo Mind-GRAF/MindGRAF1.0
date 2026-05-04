@@ -601,7 +601,7 @@ public class PropositionNode extends Node {
                 forwardChannels.addChannel(newChannel);
 
             }
-            sendReport(toBeSent, newChannel);
+            sendReport(newReport, newChannel);
         }
     }
 
@@ -621,7 +621,7 @@ public class PropositionNode extends Node {
                 forwardChannels.addChannel(newChannel);
 
             }
-            sendReport(toBeSent, newChannel);
+            sendReport(newReport, newChannel);
         }
     }
 
@@ -1282,8 +1282,10 @@ public class PropositionNode extends Node {
 
                         Scheduler.addNodeAssertionThroughFReport(reportToBeBroadcasted, supportNode);
 
-                    } else if (this.equals(Scheduler.getOriginOfBackInf())
-                            && reportToBeBroadcasted.getInferenceType() == InferenceType.BACKWARD) {
+                    } else if (reportToBeBroadcasted.getInferenceType() == InferenceType.BACKWARD
+                            && Scheduler.getOriginOfBackInf() != null
+                            && (this.equals(Scheduler.getOriginOfBackInf())
+                                || supportNode.getId() == Scheduler.getOriginOfBackInf().getId())) {
                         System.out.println(
                                 "A reply has been succefully added to the set of backward asserted reply nodes");
 

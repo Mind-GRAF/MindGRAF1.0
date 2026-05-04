@@ -10,6 +10,9 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@langchain/core": "^1.1.39",
+    "@langchain/google-genai": "^2.1.26",
+    "@langchain/langgraph": "^1.2.8",
     "next": "16.2.2",
     "react": "19.2.4",
     "react-dom": "19.2.4"

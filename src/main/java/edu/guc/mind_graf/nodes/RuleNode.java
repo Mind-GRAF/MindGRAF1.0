@@ -306,11 +306,9 @@ public abstract class RuleNode extends PropositionNode {
     protected void processSingleRequests(Request currentRequest) throws DirectCycleException, NoSuchTypeException {
         System.out.println(this.getName() + " Processing Requests as a Rule node");
         Channel currentChannel = currentRequest.getChannel();
-        if (currentChannel instanceof AntecedentToRuleChannel || currentChannel instanceof MatchChannel
-         || currentChannel instanceof IfToRuleChannel || currentChannel instanceof Channel)
+        if (!(currentChannel instanceof edu.guc.mind_graf.mgip.requests.RuleToConsequentChannel)) {
             super.processSingleRequests(currentRequest);
-
-        else {
+        } else {
             String currentContext = currentChannel.getContextName();
             int currentAttitude = currentChannel.getAttitudeID();
             Substitutions filterRuleSubs = currentChannel.getFilterSubstitutions();
@@ -357,7 +355,14 @@ public abstract class RuleNode extends PropositionNode {
                         }
 
                     }
-                    super.processSingleRequests(currentRequest);
+                    // If the rule is supported in this context, request its antecedents
+                    // even when there are no known instances yet — this enables backward
+                    // chaining through open/quantified rules.
+                    if (this.supported(currentContext, currentAttitude, 0)) {
+                        requestAntecedentsNotAlreadyWorkingOn(currentRequest);
+                    } else {
+                        super.processSingleRequests(currentRequest);
+                    }
 
                 
             }
@@ -411,10 +416,7 @@ public abstract class RuleNode extends PropositionNode {
                             this.setForwardReport(true);
                             requestAntecedentsNotAlreadyWorkingOn(tempRequest);
                         }
-                        // applyRuleHandler(currentReport, this);
-                        // i removed the apply rule handler here because i call it only when the
-                        // antecedents report back replying to my request thus whenever its a backward
-                        // inference
+                        applyRuleHandler(currentReport);
                     } else {
                         super.processSingleRequests(tempRequest);
                     }
@@ -449,10 +451,7 @@ public abstract class RuleNode extends PropositionNode {
 
                         }
                     }
-                    // applyRuleHandler(currentReport, this);
-                    // i removed the apply rule handler here because i call it only when the
-                    // antecedents report back replying to my request thus whenever its a backward
-                    // inference
+                    applyRuleHandler(currentReport);
                     if (!this.isForwardReport()) {
                         this.setForwardReport(true);
                         super.processSingleRequests(tempRequest);

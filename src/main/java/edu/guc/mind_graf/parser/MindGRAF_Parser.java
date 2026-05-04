@@ -2931,18 +2931,45 @@ a = true ;
     node = Expression();
 CLI.print("");
     PropositionNode propNode = (PropositionNode) node;
-    bInference(propNode, c, a, CName, attitude);
-    CLI.print("");
-    CLI.print("Printing Positive Instances of Node with ID " + propNode.getId()+"...");
-    CLI.print("");
-    Hashtable<Integer, Hashtable<Substitutions, KnownInstance>> positiveInstances = propNode
-        .getKnownInstances().positiveKInstances;
-    for (Hashtable<Substitutions, KnownInstance> value : positiveInstances.values()) {
-      for (KnownInstance KI : value.values()) {
-        CLI.print("--> "+KI.toString());
-      }
+
+    // Resolve the exact context and attitude that will be used for the query
+    String resolvedContext;
+    int resolvedAttitudeID;
+    if (c && a) {
+      resolvedContext = CName.trim();
+      resolvedAttitudeID = controller.getAttitudeNumber(attitude.trim());
+    } else if (c) {
+      resolvedContext = CName.trim();
+      resolvedAttitudeID = defaultAttitude;
+    } else if (a) {
+      resolvedContext = controller.getCurrContextName();
+      resolvedAttitudeID = controller.getAttitudeNumber(attitude.trim());
+    } else {
+      resolvedContext = controller.getCurrContextName();
+      resolvedAttitudeID = defaultAttitude;
     }
-        ResetGrading();
+
+    // Run backward inference — may derive new support via rules
+    bInference(propNode, c, a, CName, attitude);
+
+    // Definitive context-aware check.
+    // supported() walks both context.isHypothesis() and the node's assumptionSupport.
+    // After removeHypFromAssumptions() is called by removeHypothesisFromContext(),
+    // this will correctly return false for nodes removed from the context.
+    boolean result = propNode.supported(resolvedContext, resolvedAttitudeID, levelsCount);
+
+    CLI.print("");
+    if (result) {
+      CLI.print("ASK_IF_TRUE_RESULT: true");
+      CLI.print("Node " + propNode.getId() + " is supported in context '" + resolvedContext + "'.");
+    } else {
+      // Signal False via ParseException so that MindGRAF_Server can return a 400
+      // with a "false" body — the normal success path always returns 200 "true".
+      throw new ParseException("ASK_IF_TRUE_RESULT: false - Node "
+          + propNode.getId() + " is NOT supported in context '" + resolvedContext + "'.");
+    }
+
+    ResetGrading();
 }
 
   final public void forwardInference() throws ParseException, ParseException {Node node = null;
