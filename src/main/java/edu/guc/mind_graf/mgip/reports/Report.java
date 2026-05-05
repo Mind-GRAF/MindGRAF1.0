@@ -47,6 +47,22 @@ public class Report {
         return report;
     }
 
+    //chain change
+//     public String stringifyReport() {
+//     String reportContextName = this.getContextName();
+//     int reportAttitudeId = this.getAttitude();
+
+//     Substitutions subs = this.getSubstitutions();
+//     if (subs == null) {
+//         subs = new Substitutions();
+//     }
+
+//     Node requesterNode = this.getRequesterNode();
+//     String report = "Context " + reportContextName + " and Attitude " + reportAttitudeId + " and substitutions "
+//             + subs.toString() +
+//             " to " + ((requesterNode != null) ? requesterNode.getName() : "null");
+//     return report;
+// }
     /***
      * this method checks if the nodes that helped in creating the report are
      * supported in the attitude in the context belonging to the report

@@ -84,7 +84,8 @@ public class Context {
     }
 
     public boolean isHypothesis(int level, int attitudeId, PropositionNode node) {
-        System.out.println("in isHypothesis");
+         // original output
+        // System.out.println("in isHypothesis");
         for(int i=0;i<=level;i++) {
             Pair<PropositionNodeSet, PropositionNodeSet>[] pairArr = this.hypotheses.get(i);
             if (pairArr != null) {

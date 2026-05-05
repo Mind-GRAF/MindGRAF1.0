@@ -304,7 +304,14 @@ public class PropositionNode extends Node {
         /* BEGIN - Helpful Prints */
         String reporterIdent = targetNode.getName();
         String requesterIdent = requesterNode.getName();
-        System.out.println("Trying to establish a channel from " + requesterIdent + " to " + reporterIdent);
+        // original output: 
+        // System.out.println("Trying to establish a channel from " + requesterIdent + " to " + reporterIdent);
+        System.out.println(
+            "\n[SEND REQUEST]"
+            + "\n  from/requester: " + requesterIdent
+            + "\n  to/reporter: " + reporterIdent
+            + "\n  requestedChannelType: " + type
+        );
         /* END - Helpful Prints */
         Substitutions switchSubstitutions = switchSubs == null ? new Substitutions()
                 : switchSubs;
@@ -361,8 +368,18 @@ public class PropositionNode extends Node {
         // }
         if (currentChannel == null) {
             /* BEGIN - Helpful Prints */
-            System.out.println("Channel of type " + newChannel.getChannelType()
-                    + " is successfully created and used for further operations");
+            // original output:
+            // System.out.println("Channel of type " + newChannel.getChannelType()
+            //         + " is successfully created and used for further operations");
+            System.out.println(
+                "\n[CHANNEL CREATED]"
+                + "\n  channelId: " + newChannel.getIdCount()
+                + "\n  channelType: " + newChannel.getChannelType()
+                + "\n  requester: " + requesterIdent
+                + "\n  reporter: " + reporterIdent
+                + "\n  filterSubs: " + newChannel.getFilterSubstitutions()
+                + "\n  switchSubs: " + newChannel.getSwitcherSubstitutions()
+            );
             /* END - Helpful Prints */
             Request newRequest = new Request(newChannel, targetNode);
             // if (type == ChannelType.Act) {
@@ -376,9 +393,20 @@ public class PropositionNode extends Node {
         }
 
         /* BEGIN - Helpful Prints */
+        // original output:
+        // System.out.println(
+        //         "Channel of type " + currentChannel.getChannelType()
+        //                 + " was already established and re-enqueued for further operations");
+
         System.out.println(
-                "Channel of type " + currentChannel.getChannelType()
-                        + " was already established and re-enqueued for further operations");
+            "\n[CHANNEL REUSED]"
+            + "\n  channelId: " + currentChannel.getIdCount()
+            + "\n  channelType: " + currentChannel.getChannelType()
+            + "\n  requester: " + requesterIdent
+            + "\n  reporter: " + reporterIdent
+            + "\n  filterSubs: " + currentChannel.getFilterSubstitutions()
+            + "\n  switchSubs: " + currentChannel.getSwitcherSubstitutions()
+        );
         /* END - Helpful Prints */
         return new Request(currentChannel, targetNode);
 
@@ -437,13 +465,32 @@ public class PropositionNode extends Node {
         if (currentChannel.getChannelType() == ChannelType.Matched) {
             report.getSupport().union(((MatchChannel) currentChannel).getSupport());
         }
-        System.out.println("Sending Report (" + report.stringifyReport() + ") through the channel ("
-                + currentChannel.getChannelType() + " of id " + currentChannel.getIdCount() + ")");
-        if (currentChannel.testReportToSend(report)) {
-            System.out.println("the report was succefully sent over channel ("
-                    + currentChannel.getChannelType() + " " + currentChannel.getIdCount() + ")");
-
-            return true;
+        // original output:
+        // System.out.println("Sending Report (" + report.stringifyReport() + ") through the channel ("
+        //         + currentChannel.getChannelType() + " of id " + currentChannel.getIdCount() + ")");
+        System.out.println(
+            "\n[SEND REPORT]"
+            + "\n  from/current: " + this.getName()
+            + "\n  to/requester: " + currentChannel.getRequesterNode().getName()
+            + "\n  channelId: " + currentChannel.getIdCount()
+            + "\n  channelType: " + currentChannel.getChannelType()
+            + "\n  reportType: " + report.getReportType()
+            + "\n  inference: " + report.getInferenceType()
+            + "\n  reportSubs: " + report.getSubstitutions()
+            + "\n  channelFilterSubs: " + currentChannel.getFilterSubstitutions()
+            + "\n  channelSwitchSubs: " + currentChannel.getSwitcherSubstitutions()
+        );
+                if (currentChannel.testReportToSend(report)) {
+                    // original output:
+            // System.out.println("the report was succefully sent over channel ("
+            //         + currentChannel.getChannelType() + " " + currentChannel.getIdCount() + ")");
+                    System.out.println(
+                            "\n[SEND REPORT RESULT]"
+                            + "\n  result: SENT"
+                            + "\n  channelId: " + currentChannel.getIdCount()
+                            + "\n  channelType: " + currentChannel.getChannelType()
+                  );
+                     return true;
 
         } else {
             System.out.println("the report has failed to be sent over channel ("
@@ -461,11 +508,42 @@ public class PropositionNode extends Node {
      * @param report
      * @return
      */
-    public void broadcastReport(Report report) {
-        for (Channel outChannel : outgoingChannels)
-            sendReport(report, outChannel);
 
+    //sub change
+    // public void broadcastReport(Report report) {
+    //     for (Channel outChannel : outgoingChannels)
+    //         sendReport(report, outChannel);
+
+    // }
+
+    public void broadcastReport(Report report) {
+    for (Channel outChannel : outgoingChannels) {
+
+        Report forwardedReport = new Report(
+                report.getSubstitutions(),
+                report.getSupport(),
+                report.getAttitude(),
+                report.isSign(),
+                report.getInferenceType(),
+                outChannel.getRequesterNode(),
+                this
+        );
+
+        forwardedReport.setContextName(report.getContextName());
+
+        if (outChannel.getChannelType() == ChannelType.AntRule) {
+            forwardedReport.setReportType(ReportType.AntRule);
+        } else if (outChannel.getChannelType() == ChannelType.RuleCons) {
+            forwardedReport.setReportType(ReportType.RuleCons);
+        } else if (outChannel.getChannelType() == ChannelType.Matched) {
+            forwardedReport.setReportType(ReportType.Matched);
+        } else {
+            forwardedReport.setReportType(report.getReportType());
+        }
+
+        sendReport(forwardedReport, outChannel);
     }
+}
 
     /***
      * The method is implemented in Context class.
@@ -585,6 +663,9 @@ public class PropositionNode extends Node {
      * @param toBeSent Substitutions to be passed
      * @return
      */
+
+
+    // chain
     protected void sendReportToNodeSet(NodeSet nodeset, Report toBeSent) {
         for (Node sentTo : nodeset) {
             Substitutions reportSubs = toBeSent.getSubstitutions();
@@ -722,8 +803,17 @@ public class PropositionNode extends Node {
             //Support support=currentMatch.getSupport();
             //pass support to establish channel
 
+            // adding for sub change 
+            Substitutions matchSwitchSubs = currentMatch.getSwitchSubs() == null
+                ? new Substitutions()
+                : currentMatch.getSwitchSubs();
+
+        Substitutions matchFilterSubs = currentMatch.getFilterSubs() == null
+                ? new Substitutions()
+                : currentMatch.getFilterSubs();
+
             Request newRequest = establishChannel(channelType, matchedNode,
-                    switchSubs, filterSubs, contextId,
+                    matchSwitchSubs, matchFilterSubs, contextId,
                     attitudeId, matchType, requesterNode, (Support) currentMatch.getSupport());
             Scheduler.addToLowQueue(newRequest);
         }
@@ -964,8 +1054,18 @@ public class PropositionNode extends Node {
                     || report.getReportType() == ReportType.RuleCons;
             if (channelCheck) {
                 flag = knownInstances.addKnownInstance(report);
-                System.out.println(
-                        "Report " + report.stringifyReport() + " was just added to " + this.getName() + "'s KIs");
+                // System.out.println(
+                //         "Report " + report.stringifyReport() + " was just added to " + this.getName() + "'s KIs");
+               System.out.println(
+                    "\n[KNOWN INSTANCE]"
+                    + "\n  node: " + this.getName()
+                    + "\n  action: store report as known instance"
+                    + "\n  reportType: " + report.getReportType()
+                    + "\n  inference: " + report.getInferenceType()
+                    + "\n  reporter: " + (report.getReporterNode() == null ? "null" : report.getReporterNode().getName())
+                    + "\n  substitutions: " + report.getSubstitutions()
+                    + "\n  sign: " + report.isSign()
+                );
                 if (flag == false) {
                     return report;
 
@@ -1129,30 +1229,53 @@ public class PropositionNode extends Node {
      * @throws DirectCycleException
      * @throws NoSuchTypeException
      */
-    protected void processSingleRequests(Request currentRequest) throws NoSuchTypeException, DirectCycleException {
-        System.out.println(this.getName() + " Processing Requests as a Proposition node");
 
+    // 1. if i immediately support the request, send a report back through the same channel
+    // 2. else create a report with each of my known instances (pos/neg) and send it back through the same channel if passes report sen successfully 
+    // 3. else send the request to the dominating rules 
+    // 4. else if bridge rule 
+    // 5. matching 
+    protected void processSingleRequests(Request currentRequest) throws NoSuchTypeException, DirectCycleException {
+        // System.out.println(this.getName() + " Processing Requests as a Proposition node");
+
+        System.out.println(
+            "\n[REQUEST][PropositionNode] " + this.getName()
+            + "\n  channelClass: " + currentRequest.getChannel().getClass().getSimpleName()
+            + "\n  channelType: " + currentRequest.getChannel().getChannelType()
+            + "\n  requester: " + currentRequest.getChannel().getRequesterNode().getName()
+            + "\n  context: " + currentRequest.getChannel().getContextName()
+            + "\n  attitude: " + currentRequest.getChannel().getAttitudeID()
+            + "\n  filterSubs: " + currentRequest.getChannel().getFilterSubstitutions()
+            + "\n  switchSubs: " + currentRequest.getChannel().getSwitcherSubstitutions()
+        );
         Channel currentChannel = currentRequest.getChannel();
         String currentContext = currentChannel.getContextName();
         int currentAttitude = currentChannel.getAttitudeID();
         Node requesterNode = currentChannel.getRequesterNode();
         Substitutions reportSubstitutions = new Substitutions();
 
+        // if this node is already supported C(john)
         if (this.supported(currentContext, currentAttitude, 0)) {
             System.out.println(this.getName() + " is supported");
+            // why is it valid 
             Support reportSupport = new Support(-1);
             reportSupport.addNode(currentAttitude, this);
+            // create a report 
+            // "true" // im supported
             Report NewReport = new Report(reportSubstitutions, reportSupport, currentAttitude, true,
                     InferenceType.BACKWARD, requesterNode, this);
             NewReport.setContextName(currentContext);
             NewReport.setReportType(currentChannel.getChannelType());
+            //sends the report back through the same channel 
             sendReport(NewReport, currentRequest.getChannel());
 
+            // node isnt directly supported C(x) but there is a known instance C(john) that supports it3
         } else {
             System.out.println(this.getName() + " is not supported");
             boolean sentSuccessfully = false;
 
             if (!(this instanceof RuleNode)) {
+                // if there is a pos known instance under this attitude 
 
                 Collection<KnownInstance> thePveKnownInstancesSet = knownInstances
                         .getPositiveCollectionbyAttribute(
@@ -1160,6 +1283,7 @@ public class PropositionNode extends Node {
                 if (thePveKnownInstancesSet == null) {
 
                 } else {
+                    // looping over the positive known instances 
 
                     for (KnownInstance currentPveKnownInstance : thePveKnownInstancesSet) {
 
@@ -1171,11 +1295,13 @@ public class PropositionNode extends Node {
 
                         currentPveReport.setReportType(currentChannel.getChannelType());
 
+                        // becomes true if the report was sent successfully 
                         sentSuccessfully |= sendReport(currentPveReport, currentRequest.getChannel());
 
                     }
                 }
 
+                // looping over negative cause c(john) may also be false
                 Collection<KnownInstance> theNveKnownInstancesSet = knownInstances
                         .getNegativeCollectionbyAttribute(currentChannel.getAttitudeID());
                 if (theNveKnownInstancesSet == null) {
@@ -1201,13 +1327,18 @@ public class PropositionNode extends Node {
             Substitutions switchSubs = currentChannel.getSwitcherSubstitutions();
             if (!sentSuccessfully || isOpenNodeNotBound(filterSubs)) {
 
+                // what rules can prove me 
                 NodeSet dominatingRules = getUpConsDomRuleNodeSet();
+                // to avoid asking the same rule again 
                 NodeSet remainingNodes = removeAlreadyEstablishedChannels(dominatingRules,
                         currentRequest, filterSubs);
+                // send the request to the remaining rules
+                // channel type im a cons and asking a rule node 
                 sendRequestsToNodeSet(remainingNodes, filterSubs, switchSubs, currentContext,
                         currentAttitude,
                         ChannelType.RuleCons, this);
 
+                        // if im an if rule node asking other if rules
                 NodeSet dominatingRules2 = getUpIfDomRuleNodeSet(currentAttitude);
                 if (dominatingRules2 != null) {
                     NodeSet remainingNodes2 = removeAlreadyEstablishedChannels(dominatingRules2,
@@ -1218,12 +1349,22 @@ public class PropositionNode extends Node {
 
                 }
 
+                // c(x) matches c(john) 
                 if (!(currentChannel instanceof MatchChannel)) {
                     List<Match> matchesList = new ArrayList<Match>();
+                    // list of matches with a node C(john) c(mary) c(susan)
                     matchesList = Matcher.match(this, ContextController.getContext(currentContext), currentAttitude);
+                   // remove the matches that i already have a channel with to avoid asking them again
                     List<Match> remainingMatches = removeAlreadyEstablishedChannels(matchesList,
                             currentRequest, filterSubs);
-                    System.out.println("remaiining Matches size:" + remainingMatches.size());
+                    // send the request to the remaining matches
+                    // original output:
+                    // System.out.println("remaining Matches size:" + remainingMatches.size());
+                    System.out.println(
+                        "\n[MATCH]"
+                        + "\n  pattern/current: " + this.getName()
+                        + "\n  remainingMatches: " + remainingMatches.size()
+                    );
                     sendRequestsToMatches(remainingMatches, filterSubs, switchSubs,
                             currentContext, currentAttitude,
                             ChannelType.Matched, this);
@@ -1258,34 +1399,81 @@ public class PropositionNode extends Node {
      * @throws DirectCycleException
      */
     protected void processSingleReports(Report currentReport) throws NoSuchTypeException, DirectCycleException {
-        System.out.println(this.getName() + " Processing Reports as a Proposition node");
+        // System.out.println(this.getName() + " Processing Reports as a Proposition node");
+ 
+        System.out.println(
+            "\n[REPORT][PropositionNode] " + this.getName()
+            + "\n  reportType: " + currentReport.getReportType()
+            + "\n  inference: " + currentReport.getInferenceType()
+            + "\n  requester: " + (currentReport.getRequesterNode() == null ? "null" : currentReport.getRequesterNode().getName())
+            + "\n  reporter: " + (currentReport.getReporterNode() == null ? "null" : currentReport.getReporterNode().getName())
+            + "\n  context: " + currentReport.getContextName()
+            + "\n  attitude: " + currentReport.getAttitude()
+            + "\n  reportSubs: " + currentReport.getSubstitutions()
+            + "\n  sign: " + currentReport.isSign()
+        );
+
+        // checks if the report came from forward inference
+        // means this report came because of a new fact asserted
+        // if false then this report is answering a query (backward)
         boolean forwardReportType = currentReport.getInferenceType() == InferenceType.FORWARD;
 
+        
         Report reportToBeBroadcasted = attemptAddingReportToKnownInstances(currentReport);
+       
+        // if not equal null then it was added successfully to the known instances and needs to be broadcasted to the other nodes in the network as new supports could be discovered
         if (reportToBeBroadcasted != null) {// it didn't get handled before but if null won't be handled and saved again
             // but will be broadcasted to the other nodes in the network as new suppors
             // could be discovered
 
+            // report came from a rule consequent, from rule to cons
             if (reportToBeBroadcasted.getReportType() == ReportType.RuleCons) {
+                
+                // from c(x) to c(john)
                 PropositionNode supportNode = (PropositionNode) applySubstitution(
                         reportToBeBroadcasted.getSubstitutions());
-                if (supportNode != null) {
+              
+                // if created successfully
+                 if (supportNode != null) {
+                    // adds the support a(x) b(x) and rule 
                     supportNode.addJustificationBasedSupport(reportToBeBroadcasted.getSupport());
+                   //not used?
                     PropositionNodeSet reportSupportPropSet = new PropositionNodeSet();
                     reportSupportPropSet.add(supportNode);
+                    
                     Support reportSupport = new Support(-1);
                     reportSupport.addNode(reportToBeBroadcasted.getAttitude(), supportNode);
                     reportToBeBroadcasted.setSupport(reportSupport);
+                    
+                    // if forward inference C(john) was newly inferred from forward chaining.
                     if (reportToBeBroadcasted.getInferenceType() == InferenceType.FORWARD) {
+                        // original output:
+                        // System.out.println(
+                        //         "A New Fact has been succefully added to the set of forward asserted nodes");
                         System.out.println(
-                                "A New Fact has been succefully added to the set of forward asserted nodes");
+                            "\n[FORWARD FACT]"
+                            + "\n  addedNode: " + supportNode.getName()
+                            + "\n  fromReportType: " + reportToBeBroadcasted.getReportType()
+                            + "\n  inference: " + reportToBeBroadcasted.getInferenceType()
+                            + "\n  substitutions: " + reportToBeBroadcasted.getSubstitutions()
+                        );
 
                         Scheduler.addNodeAssertionThroughFReport(reportToBeBroadcasted, supportNode);
 
+                    // if backward inference to the origin node 
                     } else if (this.equals(Scheduler.getOriginOfBackInf())
                             && reportToBeBroadcasted.getInferenceType() == InferenceType.BACKWARD) {
-                        System.out.println(
-                                "A reply has been succefully added to the set of backward asserted reply nodes");
+                        // System.out.println(
+                        //      "A reply has been succefully added to the set of backward asserted reply nodes");
+                            System.out.println(
+                                "\n[ANSWER]"
+                                + "\n  answerNode: " + supportNode.getName()
+                                + "\n  fromReportType: " + reportToBeBroadcasted.getReportType()
+                                + "\n  inference: " + reportToBeBroadcasted.getInferenceType()
+                                + "\n  substitutions: " + reportToBeBroadcasted.getSubstitutions()
+                                + "\n  context: " + reportToBeBroadcasted.getContextName()
+                                + "\n  attitude: " + reportToBeBroadcasted.getAttitude()
+                            );
 
                         Scheduler.addNodeAssertionThroughBReport(reportToBeBroadcasted, supportNode);
                     }
@@ -1294,26 +1482,40 @@ public class PropositionNode extends Node {
         }
 
         // TODO: GRADED PROPOSITIONS HANDLING REPORTS
+
+        // its a forward report and hasnt been discovered this path before 
         if (forwardReportType && !forwardDone) {
+
+            // dakhlna fel branch mark true 
             forwardDone = true;
+
+            // c(x) c(john), you dont wanna keep looping 
             if (reportToBeBroadcasted.getReportType() != ReportType.Matched) {
+               
+                // list of matches with a node, search the network for node that matches this node 
+                // if "this" is c(x) returns c(john) c(mary) c(susan)
+                // if "this" is c(john) returns c(x) 
                 List<Match> matchesReturned = new ArrayList<Match>();
-                // list of matches with a node
                 matchesReturned = Matcher.match(this, ContextController.getContext(currentReport.getContextName()), currentReport.getAttitude());
                 sendReportToMatches(matchesReturned, reportToBeBroadcasted);
             }
+
+            //finds rules where the cons becomes an antecedant and sends the report to them 
             NodeSet dominatingRules = getUpAntDomRuleNodeSet();
             sendReportToNodeSet(dominatingRules, reportToBeBroadcasted);
 
+            //for attitude, when condition 
             NodeSet dominatingWhenRules = getUpWhenDomRuleNodeSet(reportToBeBroadcasted.getAttitude());
             if (dominatingWhenRules != null) {
                 sendReportToWhenNodeSet(dominatingWhenRules, reportToBeBroadcasted);
             }
 
+        // forward inference but already created a channel between them before 
         } else if (forwardReportType && forwardDone) {
             for (Channel channel : forwardChannels) {
                 sendReport(reportToBeBroadcasted, channel);
             }
+        // if backward inference, because all we did for forward was already done in the processing of the request, we just need to send the report back through the same channel to the requester node
         } else
             broadcastReport(reportToBeBroadcasted);
 

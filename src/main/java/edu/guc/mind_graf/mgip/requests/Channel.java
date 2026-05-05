@@ -34,12 +34,29 @@ public class Channel {
      * @return boolean
      */
     public boolean testReportToSend(Report report) {
-        System.out.println("Testing report to be sent:");
+        // changed to 
+        // System.out.println("Testing report to be sent:");
+        System.out.println(
+            "\n[FILTER TEST]"
+            + "\n  channelType: " + this.getChannelType()
+            + "\n  reportSubs: " + report.getSubstitutions()
+            + "\n  filterSubs: " + this.getFilterSubstitutions()
+            + "\n  switchSubs: " + this.getSwitcherSubstitutions()
+        );
         boolean passTest = filterSubstitutions.filtertest(report.getSubstitutions());
         if (passTest) {
-            System.out.println("It passed the filter test");
+            // changed to
+            // System.out.println("It passed the filter test");
+            System.out.println(
+                "\n[FILTER RESULT]"
+                + "\n  result: PASSED"
+            );
         } else {
-            System.out.println("It failed the filter test");
+            System.out.println(
+                "\n[FILTER RESULT]"
+                + "\n  result: FAILED"
+            );
+            // System.out.println("It failed the filter test");
         }
 
         if (passTest && report.anySupportSupportedInAttitudeContext(contextName, attitudeID)) {
@@ -56,8 +73,18 @@ public class Channel {
             report.setAttitude(attitudeID);
             report.setContextName(contextName);
             Scheduler.addToHighQueue(report);
-            System.out.println("The report to " + report.getRequesterNode().getName()
-                    + " was just enqueued in the high priority queue to be processed");
+           // System.out.println("The report to " + report.getRequesterNode().getName()
+                  //  + " was just enqueued in the high priority queue to be processed");
+
+            System.out.println(
+                "\n[ENQUEUE][REPORT]"
+                + "\n  queue: HIGH"
+                + "\n  to/requester: " + (report.getRequesterNode() == null ? "null" : report.getRequesterNode().getName())
+                + "\n  reporter: " + (report.getReporterNode() == null ? "null" : report.getReporterNode().getName())
+                + "\n  reportType: " + report.getReportType()
+                + "\n  inference: " + report.getInferenceType()
+                + "\n  substitutions: " + report.getSubstitutions()
+            );
             return true;
         }
         return false;

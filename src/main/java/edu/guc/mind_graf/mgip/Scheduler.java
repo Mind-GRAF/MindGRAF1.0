@@ -51,15 +51,32 @@ public class Scheduler {
     // The main scheduling method of dequeuing of the queue which request/report
     // will be processed next
     public static String schedule() throws NoSuchTypeException, NoPlansExistForTheActException, DirectCycleException {
-        String sequence = "The sequence of the scheduler is ";
+       // String sequence = "The sequence of the scheduler is ";
+        String sequence = "";
         main: while (!highQueue.isEmpty() || !lowQueue.isEmpty() || !actQueue.isEmpty() || !highActQueue.isEmpty()) {
             while (!highQueue.isEmpty()) {
                 System.out.println(
                         "------------------------------------------------------------------------------------------------------------------------------------");
 
-                System.out.println("\n\u2202 Runner: In HighQueue");
+                // System.out.println("\n\u2202 Runner: In HighQueue");
                 Report toRunNext = highQueue.peek();
-                System.out.println("Processing report with " + toRunNext.stringifyReport() + ".");
+
+                // System.out.println("Processing report with " + toRunNext.stringifyReport() + ".");
+
+
+
+                System.out.println(
+                        "\n[SCHEDULER][REPORT]"
+                        + "\n  queue: HIGH"
+                        + "\n  to/requester: " + (toRunNext.getRequesterNode() == null ? "null" : toRunNext.getRequesterNode().getName())
+                        + "\n  reporter: " + (toRunNext.getReporterNode() == null ? "null" : toRunNext.getReporterNode().getName())
+                        + "\n  reportType: " + toRunNext.getReportType()
+                        + "\n  inference: " + toRunNext.getInferenceType()
+                        + "\n  context: " + toRunNext.getContextName()
+                        + "\n  attitude: " + toRunNext.getAttitude()
+                        + "\n  substitutions: " + toRunNext.getSubstitutions()
+                );
+
                 if (toRunNext.getRequesterNode() instanceof ActNode) {
                     ((ActNode) toRunNext.getRequesterNode()).addReport(highQueue.poll());
                     System.out.println("Report added successfully to act node "+toRunNext.getRequesterNode().getName()+"'s set of reports, and reporterNode is" + toRunNext.getReporterNode().getName());
@@ -73,11 +90,22 @@ public class Scheduler {
                 System.out.println(
                         "------------------------------------------------------------------------------------------------------------------------------------");
 
-                System.out.println("\n\u2202 Runner: In LowQueue");
+               // System.out.println("\n\u2202 Runner: In LowQueue");
                 Request toRunNext = lowQueue.peek();
-                System.out.println("Processing request with " + toRunNext.stringifyRequest() + ".");
+              //System.out.println("Processing request with " + toRunNext.stringifyRequest() + ".");
                 Node reporterNode = toRunNext.getReporterNode();
-                System.out.println("Reporter node is " + reporterNode.getName());
+                System.out.println(
+                        "\n[SCHEDULER][REQUEST]"
+                        + "\n  queue: LOW"
+                        + "\n  reporter/current: " + (reporterNode == null ? "null" : reporterNode.getName())
+                        + "\n  requester: " + (toRunNext.getChannel().getRequesterNode() == null ? "null" : toRunNext.getChannel().getRequesterNode().getName())
+                        + "\n  channelType: " + toRunNext.getChannel().getChannelType()
+                        + "\n  context: " + toRunNext.getChannel().getContextName()
+                        + "\n  attitude: " + toRunNext.getChannel().getAttitudeID()
+                        + "\n  filterSubs: " + toRunNext.getChannel().getFilterSubstitutions()
+                        + "\n  switchSubs: " + toRunNext.getChannel().getSwitcherSubstitutions()
+                );
+                //System.out.println("Reporter node is " + reporterNode.getName());
                 reporterNode.processRequests();
                 sequence += "L ";
                 if (!highQueue.isEmpty())
@@ -115,7 +143,7 @@ public class Scheduler {
         System.out.println(
                 "------------------------------------------------------------------------------------------------------------------------------------");
 
-        return sequence;
+        return "\n[SCHEDULER DONE]\n  sequence: " +sequence;
     }
 
     /***

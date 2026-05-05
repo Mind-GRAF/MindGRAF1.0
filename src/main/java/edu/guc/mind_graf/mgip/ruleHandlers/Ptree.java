@@ -31,50 +31,88 @@ public class Ptree extends RuleInfoHandler {
     public static Ptree constructPtree(PropositionNodeSet antecedents, int minPcount, int minNcount, int ptreeNodeMin){
         Ptree ptree = new Ptree(minPcount, minNcount);
         if(antecedents.size() == 0){
-            System.out.println("There are no open nodes so there is no need for a P-Tree.");
+           // System.out.println("There are no open nodes so there is no need for a P-Tree.");
+            System.out.println(
+                "\n[PTREE BUILD]"
+                + "\n  status: skipped"
+                + "\n  reason: no open antecedents"
+            );
             return ptree;
         }
-        System.out.println("Constructing the P-Tree");
-        System.out.println("The P-Tree has a minimum of " + minPcount + " positive RIs" + (minNcount < Integer.MAX_VALUE ? (" or " + minNcount + " negative RIs" ) : "")+ " needed for propagation to start.");
+        //System.out.println("Constructing the P-Tree");
+        //System.out.println("The P-Tree has a minimum of " + minPcount + " positive RIs" + (minNcount < Integer.MAX_VALUE ? (" or " + minNcount + " negative RIs" ) : "")+ " needed for propagation to start.");
+ 
+        System.out.println(
+            "\n[PTREE BUILD]"
+            + "\n  status: constructing"
+            + "\n  openAntecedents: " + antecedents.size()
+            + "\n  minPositiveReportsNeeded: " + minPcount
+            + (minNcount < Integer.MAX_VALUE ? "\n  minNegativeReports: " + minNcount : "")
+        );
+
         HashMap <Node, HashSet<PtreeNode>> vpList = ptree.processAntecedents(antecedents, ptreeNodeMin);
-        System.out.println("The variable-pattern list contructed is:");
-        for(Node n : vpList.keySet()){
-            System.out.println(n.getName() + " with " + vpList.get(n).size() + " corresponding P-tree nodes.");
+        // System.out.println("The variable-pattern list contructed is:");
+        // for(Node n : vpList.keySet()){
+        //     System.out.println(n.getName() + " with " + vpList.get(n).size() + " corresponding P-tree nodes.");
+        // }
+        System.out.println("[PTREE VARIABLE PATTERNS]");
+        for (Node n : vpList.keySet()) {
+            System.out.println(
+                "  variable: " + n.getName()
+                + " | ptreeNodes: " + vpList.get(n).size()
+            );
         }
         ArrayDeque <PtreeNode> pSequence = ptree.processVariables(vpList);
-        System.out.println("The pattern sequence contructed is:");
+        System.out.println("[PTREE PATTERN SEQUENCE]");
         for(PtreeNode p : pSequence){
-            System.out.println(p);
+            System.out.println("node:" +p);
         }
-        System.out.println("The P-Tree will be built using the pattern sequence.");
+       // System.out.println("The P-Tree will be built using the pattern sequence.");
         ptree.buildPtree(pSequence, ptreeNodeMin);
         return ptree;
     }
-
+    
+    // method loops over every open ant 
+    // and asks what variables does this ant contain and do i already have a leaf node for this var if not create one 
     private HashMap <Node, HashSet<PtreeNode>> processAntecedents(PropositionNodeSet antecedents, int ptreeNodeMin){
-        System.out.println("Processing the antecedents");
+        System.out.println("[PTREE ANTECEDENTS]");
         HashMap <Node, HashSet<PtreeNode>> vpList = new HashMap<>();
         for(PropositionNode ant : antecedents){
-            System.out.println("Processing " + ant);
-            System.out.println("Its free variables are: " + ant.getFreeVariables());
+           // System.out.println("Processing " + ant);
+           // System.out.println("Its free variables are: " + ant.getFreeVariables());
+           System.out.println(
+                "  antecedent: " + ant.getName()
+                + "\n    freeVars: " + ant.getFreeVariables()
+                + "\n    freeVarHash: " + ant.getFreeVariablesHash()
+            );
+          // prepares a count for this ant 
+          //x=john and true M[1,0]
             antecedentRIcount.put(ant.getId(), new int[]{0, 0});
+            // gets the variable inside the ant
             NodeSet vars = ant.getFreeVariables();
             // insert in varSetLeafMap
+            // all antecedents with the same variable set share the same hash.
             int hash = ant.getFreeVariablesHash();
+            // check if theres already a ptree leaf for this variable set "set"
             if(!varSetLeafMap.containsKey(hash)) {
-                System.out.println("No P-tree node exists for this variable set. A new P-tree node will be created.");
+               // System.out.println("No P-tree node exists for this variable set. A new P-tree node will be created.");
+                System.out.println("    action: create leaf node for variable set");
+                // stores rule info 
                 Singleton sIndex = new Singleton(ant.getFreeVariables());
                 varSetLeafMap.put(hash, new PtreeNode(null, null, sIndex, vars, null));
             }
             else{
-                System.out.println("A P-tree node already exists for this variable set. The node will be updated.");
+                System.out.println("    action: reuse existing leaf node for variable set");
+                //System.out.println("A P-tree node already exists for this variable set. The node will be updated.");
             }
             // insert in vpList
+            // for each variable in the antecedent, add the corresponding leaf node to the variable-pattern list corresponding to this variable
             for(Node n : vars){
                 HashSet<PtreeNode> ps = vpList.getOrDefault(n, new HashSet<>());
                 ps.add(varSetLeafMap.get(hash));
                 vpList.put(n, ps);
-                System.out.println("The P-tree node is added to the variable-pattern list corresponding to " + n.getName());
+                //System.out.println("The P-tree node is added to the variable-pattern list corresponding to " + n.getName());
+                System.out.println("    variablePattern: " + n.getName() + " -> leaf node");
             }
             // setting the min of each leaf
             if(ptreeNodeMin < 2)
@@ -85,18 +123,24 @@ public class Ptree extends RuleInfoHandler {
         return vpList;
     }
 
+    // making the variable pattern to pattern sequence 
+    //helps decide which nodes should be joined first 
     private ArrayDeque <PtreeNode> processVariables(HashMap <Node, HashSet<PtreeNode>> vpList){
-        System.out.println("Processing the variables");
+        System.out.println("[PTREE VARIABLES]");
         HashSet <PtreeNode> processed = new HashSet<>();
         ArrayDeque <PtreeNode> pSequence = new ArrayDeque<>(); // arraydeque cz that's the queue i could think of but any queue should work
         for(Node var : vpList.keySet()){ // process each variable
-            System.out.println("Processing " + var.getName());
+            System.out.println(" variable: " + var.getName());
             HashSet<PtreeNode> ps = vpList.get(var);
             for(PtreeNode p : ps){
                 if(!processed.contains(p)){
                     pSequence.addLast(p); // insert to end of deque
                     processed.add(p); // mark as processed
-                    System.out.println("The P-tree node " + p + " is added to the pSequence.");
+                    //System.out.println("The P-tree node " + p + " is added to the pSequence.");
+                    System.out.println(
+                        "    action: add leaf to pattern sequence"
+                        + "\n    node: " + p
+                    );
                 }
             }
         }
@@ -105,15 +149,20 @@ public class Ptree extends RuleInfoHandler {
 
     private void buildPtree(ArrayDeque <PtreeNode> pSequence, int ptreeNodeMin){
         PtreeNode firstMismatched = null;
-        System.out.println("Building the tree starts with a pattern sequence of " + pSequence.size() + " P-tree nodes");
+        //System.out.println("Building the tree starts with a pattern sequence of " + pSequence.size() + " P-tree nodes");
+        System.out.println(
+            "\n[PTREE STRUCTURE]"
+            + "\n  initialPatternNodes: " + pSequence.size()
+        );
         while(pSequence.size() > 1){ // would stop when only one node is left
             PtreeNode p1 = pSequence.pollFirst();
             PtreeNode p2 = pSequence.peekFirst();
-            System.out.println(p1 + " is polled");
-            System.out.println(p2 + " is peeked");
+            //System.out.println(p1 + " is polled");
+            //System.out.println(p2 + " is peeked");
             NodeSet intersection = p1.getVars().intersection(p2.getVars());
             if(intersection.isEmpty()){
-                System.out.println("The two nodes are disjoint and the polled node will be added to the end of the sequence.");
+                System.out.println("  action: nodes are disjoint");   
+               // System.out.println("The two nodes are disjoint and the polled node will be added to the end of the sequence.");
                 pSequence.addLast(p1);
                 if(firstMismatched == p1){ // if the first mismatched node is reached again, then the tree is complete, every node left in the pSequence is a disjoint tree
                     break;
@@ -123,15 +172,20 @@ public class Ptree extends RuleInfoHandler {
                 }
             }
             else {
-                System.out.println("The two nodes intersect at the variables: " + intersection);
+                System.out.println("  sharedvars: " + intersection);
+                //System.out.println("The two nodes intersect at the variables: " + intersection);
                 firstMismatched = null;
                 p2 = pSequence.pollFirst();
                 PtreeNode parent = matchSiblings(p1, p2, intersection, ptreeNodeMin);
                 pSequence.add(parent);
             }
-            System.out.println("The pattern sequence now has " + pSequence.size() + " P-tree " + (pSequence.size() == 1 ? "node." : "nodes."));
+            //System.out.println("The pattern sequence now has " + pSequence.size() + " P-tree " + (pSequence.size() == 1 ? "node." : "nodes."));
         }
-        System.out.println("The tree is constructed with " + pSequence.size() + (pSequence.size() == 1 ? " root." : " roots."));
+       // System.out.println("The tree is constructed with " + pSequence.size() + (pSequence.size() == 1 ? " root." : " roots."));
+       System.out.println(
+            "\n[PTREE BUILT]"
+            + "\n  roots: " + pSequence.size()
+        );
     }
 
     private PtreeNode matchSiblings(PtreeNode p1, PtreeNode p2, NodeSet intersection, int ptreeNodeMin){
@@ -162,8 +216,12 @@ public class Ptree extends RuleInfoHandler {
     @Override
     public RuleInfoSet insertVariableRI(RuleInfo ri) throws InvalidRuleInfoException, DirectCycleException {
         // when inserting a rule info into the tree, it should only have one flag node (that of the antecedent that caused it to be sent)
-        System.out.println("Inserting " + ri + " into the P-Tree");
-        if (ri.getFns().size() != 1){
+       // System.out.println("Inserting " + ri + " into the P-Tree");
+        System.out.println(
+            "\n[PTREE INSERT]"
+            + "\n  incomingRI: " + ri
+        );
+       if (ri.getFns().size() != 1){
             throw new InvalidRuleInfoException("RuleInfo should only have one flag node when being inserted in tree");
         }
         FlagNode fn = ri.getFns().getFlagNodes().iterator().next();
@@ -182,9 +240,17 @@ public class Ptree extends RuleInfoHandler {
                     negAntecedents++;
                 count[1]++;
             }
-            System.out.println("The antecedent " + n.getName() + " has " + count[0] + " positive and " + count[1] + " negative reports.");
-            System.out.println("So far the P-Tree has " + posAntecedents + " positively reporting antecedents and " + negAntecedents + " negatively reporting antecedents.");
-            int hash = n.getFreeVariablesHash();
+           // System.out.println("The antecedent " + n.getName() + " has " + count[0] + " positive and " + count[1] + " negative reports.");
+           // System.out.println("So far the P-Tree has " + posAntecedents + " positively reporting antecedents and " + negAntecedents + " negatively reporting antecedents.");
+           System.out.println(
+                "\n[PTREE ANTECEDENT COUNT]"
+                + "\n  antecedent: " + n.getName()
+                + "\n  positiveReportsForThisAntecedent: " + count[0]
+                + "\n  negativeReportsForThisAntecedent: " + count[1]
+                + "\n  positiveAntecedentsReportingSoFar: " + posAntecedents
+                + "\n  negativeAntecedentsReportingSoFar: " + negAntecedents
+            );
+           int hash = n.getFreeVariablesHash();
             RuleInfoSet mayInfer = varSetLeafMap.get(hash).insertIntoNode(ri, isPropagating);
             if(mayInfer != null && !mayInfer.isEmpty()){
                 return mayInfer;
@@ -204,19 +270,20 @@ public class Ptree extends RuleInfoHandler {
 
     private RuleInfoSet startPropagation() throws InvalidRuleInfoException, DirectCycleException {
         // propagating here is bsically a BFS traversal of the tree where both siblings must be visited in order for their RIs to be combined and there parent added to the queue
-        System.out.println("Starting propagation in the P-Tree");
+        //System.out.println("Starting propagation in the P-Tree");
+        System.out.println("\n[PTREE PROPAGATION]");
         HashSet <PtreeNode> visited = new HashSet<>();
         ArrayDeque <PtreeNode> queue = new ArrayDeque<>(varSetLeafMap.values());
         RuleInfoSet rootRuleInfos = new RuleInfoSet();
         while(!queue.isEmpty()){
             PtreeNode p = queue.pollFirst();
             if(!visited.contains(p)){
-                System.out.println("Visiting " + p);
+                System.out.println("visitingNode " + p);
                 visited.add(p);
                 RuleInfoSet ris = new RuleInfoSet();
                 ris = ris.union(p.getSIndex().getAllRuleInfos());
-                System.out.println("The RuleInfos in this P-Tree node are:");
-                System.out.println(ris);
+                System.out.println("The RuleInfos in this P-Tree node are:"+ris);
+                //System.out.println(ris);
                 PtreeNode parent = p.getParent();
                 if(parent != null && visited.contains(p.getSibling())){
                     System.out.println("Both siblings are visited and their RIs will be combined and added to the parent.");

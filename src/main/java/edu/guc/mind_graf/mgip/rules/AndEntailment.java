@@ -45,11 +45,19 @@ public class AndEntailment extends RuleNode {
     }
 
     public void applyRuleHandler(Report report) throws NoSuchTypeException {
-        System.out.println("applyRuleHandler called on the report: " + report.stringifyReport());
+        //System.out.println("applyRuleHandler called on the report: " + report.stringifyReport());
         if(report.isSign()){
             super.applyRuleHandler(report);
         } else{
-            System.out.println("The report is negative so it won't be sent to the rule handler.");
+            //System.out.println("The report is negative so it won't be sent to the rule handler.");
+            System.out.println(
+            "\n[RULE HANDLER SKIPPED] " + this.getName()
+            + "\n  reason: negative report"
+            + "\n  reportType: " + report.getReportType()
+            + "\n  inference: " + report.getInferenceType()
+            + "\n  reporter: " + (report.getReporterNode() == null ? "null" : report.getReporterNode().getName())
+            + "\n  reportSubs: " + report.getSubstitutions()
+        );
         }
     }
 

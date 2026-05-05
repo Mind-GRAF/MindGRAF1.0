@@ -40,6 +40,7 @@ import edu.guc.mind_graf.support.Support;
 
 public abstract class RuleNode extends PropositionNode {
 
+    // chain might
     private boolean forwardReport;
     protected RuleInfoHandler ruleInfoHandler;
     protected RuleInfoSet rootRuleInfos;
@@ -51,37 +52,106 @@ public abstract class RuleNode extends PropositionNode {
         rootRuleInfos = new RuleInfoSet();
     }
 
+    // 1. Wraps the report into a RuleInfo (scorecard)
+    // 2. Gives it to ruleInfoHandler → handler updates the score
+    // 3. If handler says "enough antecedents reported" → call mayInfer()
+
     public void applyRuleHandler(Report report) throws NoSuchTypeException {
-        System.out.println("applyRuleHandler called on the report: " + report.stringifyReport());
+        // original output:
+        //System.out.println("applyRuleHandler called on the report: " + report.stringifyReport());
+        // changed to:
+        System.out.println(
+            "\n[RULE HANDLER] " + this.getName()
+            + "\n  action: insert antecedent report into rule handler/P-Tree"
+            + "\n  reportType: " + report.getReportType()
+            + "\n  inference: " + report.getInferenceType()
+            + "\n  antecedent/reporter: " + (report.getReporterNode() == null ? "null" : report.getReporterNode().getName())
+            + "\n  reportSubs: " + report.getSubstitutions()
+        );
         try {
-            RuleInfoSet inserted = ruleInfoHandler.insertRI(RuleInfo.createRuleInfo(report));
+            // original output:
+            //RuleInfoSet inserted = ruleInfoHandler.insertRI(RuleInfo.createRuleInfo(report));
+            // changed to:
+            // After the fix, when A(X) receives the matched report from A(john), 
+            // A(X) creates a new forwarded report to the rule with itself as the reporter. 
+            // So the RuleInfo stores fns = {A(X)/true} together with the substitution {X = john}. 
+            RuleInfo ri = RuleInfo.createRuleInfo(report);
+
+                System.out.println(
+                    "\n[RULE INFO]"
+                    + "\n  rule: " + this.getName()
+                    + "\n  createdRI: " + ri
+                    + "\n  riSubs: " + ri.getSubs()
+                    + "\n  flagNodes: " + ri.getFns()
+                );
+            RuleInfoSet inserted = ruleInfoHandler.insertRI(ri);
+
+
             if (inserted != null && !inserted.isEmpty()) {
+                        System.out.println(
+                "\n[RULE INFO INSERTED]"
+                + "\n  rule: " + this.getName()
+                + "\n  insertedRootRIs: " + inserted
+                + "\n  nextAction: run mayInfer()"
+            );
                 rootRuleInfos.addRootRuleInfo(inserted);
                 RuleInfoSet[] mayInfer = mayInfer();
                 createInferenceReports(mayInfer);
             }
             else{
-                System.out.println("Nothing can be inferred yet");
+                // changed to 
+               // System.out.println("Nothing can be inferred yet");
+                        System.out.println(
+                "\n[RULE INFO WAITING]"
+                + "\n  rule: " + this.getName()
+                + "\n  reason: report inserted but not enough antecedents are satisfied yet"
+            );
             }
         } catch (InvalidRuleInfoException e) {
-            System.out.println("Inserting RI failed");
+            // System.out.println("Inserting RI failed");
+            System.out.println(
+            "[RULE INFO INSERT FAILED]"
+            + "\n  rule: " + this.getName()
+            + "\n  inputReporter: " + (report.getReporterNode() == null ? "null" : report.getReporterNode().getName())
+            + "\n  inputSubs: " + report.getSubstitutions()
+            + "\n  likelyReason: reporter node is not one of this rule's antecedents or substitutions are incompatible"
+        );
         } catch (DirectCycleException e) {
             System.out.println("Direct Cycle Exception");
         }
 
     }
 
+    // changes depeding on the rule type 
     public abstract RuleInfoSet[] mayInfer();
 
+
+    // on the mayinfer says fire 
+    // Builds a Report object with the conclusion
+    // Calls createSupport() to record WHY we concluded this
+    //Passes it to sendInferenceReports() to actually deliver it
+     
     public void createInferenceReports(RuleInfoSet[] inferrable) throws DirectCycleException, NoSuchTypeException {
         HashMap<RuleInfo, Report> reports = new HashMap<>();
         for (int i = 0; i < inferrable.length; i++) {
             for (RuleInfo ri : inferrable[i]) {
                 rootRuleInfos.removeRuleInfo(ri);
                 ri.removeNullSubs();
+                // new add change 
+                InferenceType producedInference = forwardReport ? InferenceType.FORWARD : InferenceType.BACKWARD;
+
+                System.out.println(
+                    "\n[RULE FIRE] " + this.getName()
+                    + "\n  meaning: rule has enough antecedent evidence to infer its consequent"
+                    + "\n  ri: " + ri
+                    + "\n  riSubs: " + ri.getSubs()
+                    + "\n  producedReportType: RuleCons"
+                    + "\n  producedInference: " + producedInference
+                    + "\n  sign: " + (i == 0)
+                );
                 Report newReport = new Report(ri.getSubs() == null ? new Substitutions() : ri.getSubs(), createSupport(ri),
                         ri.getAttitude(),
-                        (i == 0), (forwardReport ? InferenceType.FORWARD : InferenceType.BACKWARD), null, this);
+                        (i == 0),producedInference, null, this);
                 newReport.setContextName(ri.getContext());
                 newReport.setReportType(ReportType.RuleCons);
                 reports.put(ri, newReport);
@@ -90,15 +160,44 @@ public abstract class RuleNode extends PropositionNode {
         sendInferenceReports(reports);
     }
 
+
+    // adding the support and ifs for if the rule is closed or if the rule is open
     public Support createSupport(RuleInfo ri) throws NoSuchTypeException, DirectCycleException {
-        System.out.println("Creating the inference support");
+        // original output:
+        // System.out.println("Creating the inference support");
+        // changed to:
+        System.out.println(
+            "\n[SUPPORT] " + this.getName()
+            + "\n  meaning: build justification for inferred conclusion"
+            + "\n  riSubs: " + ri.getSubs()
+            + "\n  satisfiedAntecedents: " + ri.getFns()
+            + "\n  context: " + ri.getContext()
+            + "\n  attitude: " + ri.getAttitude()
+        );
+
         PropositionNodeSet supportPropSet = new PropositionNodeSet();
         for(FlagNode fn : ri.getFns()){
             Node n = fn.getNode();
+            //a(x)
             if(n.isOpen()){
-                supportPropSet.add(n.applySubstitution(n.onlyRelevantSubs(ri.getSubs())));
+                // chain change (runs without it)
+                // supportPropSet.add(n.applySubstitution(n.onlyRelevantSubs(ri.getSubs())));
+                // to 
+                Substitutions relevant = n.onlyRelevantSubs(ri.getSubs());
+               // No substitution exists, so just add A(x)
+                if(relevant == null || relevant.isEmpty())
+                      supportPropSet.add(n);
+                 else
+                     supportPropSet.add(n.applySubstitution(relevant));
+            //a(john)
             } else {
+                // change chain (changed back because otherwise it only adds the rule as the support)
                 supportPropSet.add(n);
+                //to 
+                //  if(ri.getSubs() == null || ri.getSubs().isEmpty())
+                //     supportPropSet.add(this);
+                //  else
+                //     supportPropSet.add(this.applySubstitution(ri.getSubs()));
             }
         }
         if(!this.isOpen()){
@@ -112,6 +211,7 @@ public abstract class RuleNode extends PropositionNode {
         return reportSup;
     }
 
+
     public void sendResponseToArgs(HashMap<RuleInfo, Report> reports, NodeSet arg) throws NoSuchTypeException {
         for (RuleInfo ri : reports.keySet()) {
             Report report = reports.get(ri);
@@ -119,17 +219,40 @@ public abstract class RuleNode extends PropositionNode {
             for (Node node : arg) {
                 if (!ri.getFns().containsNode(node)) {
                     filteredArgs.add(node);
-                    System.out.println("Inferred " + node.applySubstitution(report.getSubstitutions()));
+                    // original output:
+                    // System.out.println("Inferred " + node.applySubstitution(report.getSubstitutions()));
+                    // changed to:
+                   System.out.println(
+                        "\n[INFERRED ARGUMENT]"
+                        + "\n  rule: " + this.getName()
+                        + "\n  argumentPattern: " + node
+                        + "\n  substitutions: " + report.getSubstitutions()
+                        + "\n  inferredNode: " + node.applySubstitution(report.getSubstitutions())
+                        + "\n  reportType: " + report.getReportType()
+                        + "\n  inference: " + report.getInferenceType()
+                    );
                 }
             }
             this.sendReportToConsequents(filteredArgs, report);
         }
     }
 
+    
     public void sendInferenceToCq(HashMap<RuleInfo, Report> reports, NodeSet cq) throws NoSuchTypeException {
         for (Report report : reports.values()) {
             for(Node node : cq){
-                System.out.println("Inferred " + node.applySubstitution(report.getSubstitutions()));
+                // System.out.println("Inferred " + node.applySubstitution(report.getSubstitutions()));
+                System.out.println(
+                    "[INFERRED CONSEQUENT]"
+                    + "\n  rule: " + this.getName()
+                    + "\n  consequentPattern: " + node
+                    + "\n  substitutions: " + report.getSubstitutions()
+                    + "\n  inferredNode: " + node.applySubstitution(report.getSubstitutions())
+                    + "\n  reportType: " + report.getReportType()
+                    + "\n  inference: " + report.getInferenceType()
+                );
+                
+
             }
             this.sendReportToConsequents(cq, report);
         }
@@ -304,61 +427,120 @@ public abstract class RuleNode extends PropositionNode {
      * @throws DirectCycleException
      */
     protected void processSingleRequests(Request currentRequest) throws DirectCycleException, NoSuchTypeException {
-        System.out.println(this.getName() + " Processing Requests as a Rule node");
+        // original output:
+        // System.out.println(this.getName() + " Processing Requests as a Rule node");
+        // changed to:
+        System.out.println(
+            "\n[REQUEST][RuleNode] " + this.getName()
+            + "\n  channelClass: " + currentRequest.getChannel().getClass().getSimpleName()
+            + "\n  channelType: " + currentRequest.getChannel().getChannelType()
+            + "\n  context: " + currentRequest.getChannel().getContextName()
+            + "\n  attitude: " + currentRequest.getChannel().getAttitudeID()
+            + "\n  requester: " + currentRequest.getChannel().getRequesterNode().getName()
+            + "\n  filterSubs: " + currentRequest.getChannel().getFilterSubstitutions()
+            + "\n  switchSubs: " + currentRequest.getChannel().getSwitcherSubstitutions()
+        );
+        
+        // get the channel that brought the request
         Channel currentChannel = currentRequest.getChannel();
+
+        // chain change
+        //IF branch  = “treat the rule as a proposition”
+        //ELSE branch = “use the rule to prove something”
+
+        // AntecedentToRuleChannel: the ant is reporting, so dont act as an inference rule just yet 
+        // MatchChannel: this rule node matched another node , so dont act as an inference rule just yet
+        // IfToRuleChannel: the if is reporting, so dont act as an inference rule just yet
+        // so removed the current instance of channel because then the if will always be true
+        // and will always act as a normal prop node 
         if (currentChannel instanceof AntecedentToRuleChannel || currentChannel instanceof MatchChannel
-         || currentChannel instanceof IfToRuleChannel || currentChannel instanceof Channel)
+         || currentChannel instanceof IfToRuleChannel ) // || currentChannel instanceof Channel)
             super.processSingleRequests(currentRequest);
 
+
+        // RulecCons channel: the cons is asking can u prove me please act as an inference rule and check if u can infer the cons with the current support and the new report
         else {
             String currentContext = currentChannel.getContextName();
             int currentAttitude = currentChannel.getAttitudeID();
             Substitutions filterRuleSubs = currentChannel.getFilterSubstitutions();
             Substitutions switchRuleSubs = currentChannel.getSwitcherSubstitutions();
 
+            // if the rule has no free var "A(john) ∧ B(john) → C(john)"
             if (!this.isOpen()) {
+                // supported 
                 if (this.supported(currentContext, currentAttitude, 0)) {
                     System.out.println("I am supported");
-                    
+                        // thresh and andor different in the asking the ant 
                         boolean ruleType = this instanceof Thresh || this instanceof AndOr;
+                        // returs a(x), b(x)
                         NodeSet antArgCloseToMe = getDownAntArgNodeSet();
+                        // bardo so no redundant req
                         NodeSet antArgNodesToConsiderClose = removeAlreadyEstablishedChannels(antArgCloseToMe,
                                 currentRequest,
                                 filterRuleSubs, ruleType);
+
+                        // send req to ant CHANNEL TYPE ANT RULE
                         sendRequestsToNodeSet(antArgNodesToConsiderClose, filterRuleSubs, switchRuleSubs,
                                 currentContext,
                                 currentAttitude,
                                 ChannelType.AntRule, this);
                     
 
+                // not supported
                 } else
+                    // chain change (i changed it back)
+                       // used to want to treat the rule as a normal prop and prove it first the rule 
+                       // does a rule need to be proven ?
                     super.processSingleRequests(currentRequest);
 
+                    // even if the rule isnt supported ask its antecedents
+                   // requestAntecedentsNotAlreadyWorkingOn(currentRequest);
+
+            // rule has free variables "A(x) ∧ B(x) → C(x)"
             } else {
-                 
+                    // checks if the free var is not bounded , false then it is bounded 
                     boolean isNotBound = isOpenNodeNotBound(filterRuleSubs);
+                    //x john x mary fa the rule already has it 
                     Collection<KnownInstance> theKnownInstanceSet = knownInstances.mergeKInstancesBasedOnAtt(
                             currentChannel.getAttitudeID());
+                    // looping over each known instance 
                     for (KnownInstance currentKnownInstance : theKnownInstanceSet) {
+                        // gets its sub x john y mary 
                         Substitutions currentKISubs = currentKnownInstance.getSubstitutions();
+                       // only extracts the relevant subs for the rule from the report subs x john
                         Substitutions onlySubsBindFreeVar = onlyRelevantSubs(filterRuleSubs);
+                        // check the compatibility
                         boolean compatibilityCheck = onlySubsBindFreeVar
                                 .compatible(currentKISubs);
+                        // and matches the context and attitude 
                         boolean supportCheck = currentKnownInstance.anySupportSupportedInAttitudeContext(
                                 currentContext,
                                 currentAttitude);
+
+                        // matches and supported 
                         if (compatibilityCheck && supportCheck) {
+                            // query C(john)? go ask the ants with the current known instance x john
                             if (!isNotBound) {
                                 requestAntecedentsNotAlreadyWorkingOn(currentRequest);
                                 return;
+
+                            // query C?
+                            // then use what the current the known instance returned 
                             } else
                                 requestAntecedentsNotAlreadyWorkingOn(currentRequest, currentKnownInstance);
                             return;
                         }
 
                     }
-                    super.processSingleRequests(currentRequest);
-
+                    //chain change 
+                    // "I checked all known instances of the rule, but none of them was both compatible and supported."
+                   // super.processSingleRequests(currentRequest);
+                    //requestAntecedentsNotAlreadyWorkingOn(currentRequest);
+                   if (this.supported(currentContext, currentAttitude, 0)) {
+                        requestAntecedentsNotAlreadyWorkingOn(currentRequest);
+                   } else {
+                        super.processSingleRequests(currentRequest);
+                   }
                 
             }
 
@@ -388,56 +570,99 @@ public abstract class RuleNode extends PropositionNode {
      * @throws DirectCycleException
      */
     protected void processSingleReports(Report currentReport) throws NoSuchTypeException, DirectCycleException {
-        System.out.println(this.getName() + " Processing Reports as a Rule node");
+       // original output:
+       // System.out.println(this.getName() + " Processing Reports as a Rule node");
+       // changed to: 
+       System.out.println(
+            "\n[REPORT][RuleNode] " + this.getName()
+            + "\n  reportType: " + currentReport.getReportType()
+            + "\n  inference: " + currentReport.getInferenceType()
+            + "\n  context: " + currentReport.getContextName()
+            + "\n  attitude: " + currentReport.getAttitude()
+            + "\n  requester: " + (currentReport.getRequesterNode() == null ? "null" : currentReport.getRequesterNode().getName())
+            + "\n  reporter/antecedant: " + (currentReport.getReporterNode() == null ? "null" : currentReport.getReporterNode().getName())
+            + "\n  reportSubs: " + currentReport.getSubstitutions()
+            + "\n  sign: " + currentReport.isSign()
+        );
+       // extract the report info 
         String currentReportContextName = currentReport.getContextName();
         int currentReportAttitudeID = currentReport.getAttitude();
         Substitutions currentReportSubs = currentReport.getSubstitutions();
+       // forward or backward 
         boolean forwardReportType = currentReport.getInferenceType() == InferenceType.FORWARD;
-
+       // check if the rule itself is supported 
         boolean assertedInContext = supported(currentReportContextName, currentReportAttitudeID, 0);
+       // only revelant subs for the rule so if it uses x only care about x/
         Substitutions onlySubsBindFreeVar = onlyRelevantSubs(currentReportSubs);
-
+       // if the report came from an ant 
         if (currentReport.getReportType() == ReportType.AntRule) {
+            // making the report into a request for the rule to ask other ant with the same sub 
+            // a(john) so ask for other ants with john
             Channel tempChannel = new AntecedentToRuleChannel(null, currentReportSubs, currentReportContextName,
                     currentReportAttitudeID, currentReport.getRequesterNode());
             Request tempRequest = new Request(tempChannel, null);
             /** AntecedentToRule Channel */
+            // A(john) was newly asserted forward.
+            //Rule A(x) → C(x) receives A(john). 
+            // for the report itself 
             if (forwardReportType) {
-                /** Forward Inference */
+                // Forward chaining: rule has received a forward report from antecedent
+                // Check if rule can now fire with available support
+               //applyRuleHandler(currentReport);
+            
+            // if the report from ant to rule is backward 
+            // ant is answering back 
+            } else {
+                // Backward inference: rule received backward request from consequent
+                // Original backward-request logic preserved below
+                /** Forward Inference */ // wrong comment 
+                // rule closed A(john) ∧ B(john) → C(john)
                 if (!this.isOpen()) {
                     /** Close Type Implementation */
+                    // if rule is supported 
                     if (assertedInContext) {
+                        // A(john) answered. Now ask B(john), if B(john) was not already asked.
                         if (!this.isForwardReport()) {
                             this.setForwardReport(true);
                             requestAntecedentsNotAlreadyWorkingOn(tempRequest);
                         }
-                        // applyRuleHandler(currentReport, this);
-                        // i removed the apply rule handler here because i call it only when the
-                        // antecedents report back replying to my request thus whenever its a backward
-                        // inference
                     } else {
-                        super.processSingleRequests(tempRequest);
+                        //chain change (changed back because supported the rule in the test)
+                        //super.processSingleRequests(tempRequest);
+                        //applyRuleHandler(currentReport);
+                        if (this.supported(currentReportContextName, currentReportAttitudeID, 0)) {
+                               applyRuleHandler(currentReport);
+                        } else {
+                                super.processSingleRequests(tempRequest);
+                        }
                     }
+                // if the rule is open A(x) ∧ B(x) → C(x)
                 } else {
+                    // checks the known instances of the rule 
                     Collection<KnownInstance> theKnownInstanceSet = knownInstances.mergeKInstancesBasedOnAtt(
                             currentReportAttitudeID);
                     knownInstances.printKnownInstanceSet(theKnownInstanceSet);
+                    
                     Boolean notBound = isOpenNodeNotBound(currentReportSubs);
+                    //looping over the known instances of the rule 
                     for (KnownInstance currentKnownInstance : theKnownInstanceSet) {
                         Substitutions currentKISubs = currentKnownInstance.getSubstitutions();
+                       // comparing it with the report subs
                         boolean compatibilityCheck = currentKISubs
                                 .compatible(onlySubsBindFreeVar);
                         boolean supportCheck = currentKnownInstance.anySupportSupportedInAttitudeContext(
                                 currentReportContextName,
                                 currentReportAttitudeID);
                         if (compatibilityCheck && supportCheck) {
-
+                            // if the report doesnt have sub then ask for the ant with the subs of the known instances 
+                            
                             if (notBound) {
                                 if (!this.isForwardReport()) {
                                     this.setForwardReport(true);
                                     requestAntecedentsNotAlreadyWorkingOn(tempRequest, currentKnownInstance);
                                     return;
                                 }
+                            // if the report has sub then ask for the ant with the subs of the report
                             } else {
                                 if (!this.isForwardReport()) {
                                     this.setForwardReport(true);
@@ -449,24 +674,26 @@ public abstract class RuleNode extends PropositionNode {
 
                         }
                     }
-                    // applyRuleHandler(currentReport, this);
-                    // i removed the apply rule handler here because i call it only when the
-                    // antecedents report back replying to my request thus whenever its a backward
-                    // inference
-                    if (!this.isForwardReport()) {
-                        this.setForwardReport(true);
-                        super.processSingleRequests(tempRequest);
-                    }
+                    // change chain  to do is applyrulehandler (changed back relates to also the rule having to be proven )
+                    // if (!this.isForwardReport()) {
+                    //     this.setForwardReport(true);
+                        //  super.processSingleRequests(tempRequest);
+                       // applyRuleHandler(currentReport);
+                       if (this.supported(currentReportContextName, currentReportAttitudeID, 0)) {
+                            applyRuleHandler(currentReport);
+                       } else {
+                             super.processSingleRequests(tempRequest);
+                       }
+                   // }
                 }
-            } else {
-                /** Backward Inference */
-                applyRuleHandler(currentReport);
             }
-        }   else {
+        // report is not an antrule
+        } else {
             Substitutions switchSubs = new Substitutions();
 
             Channel tempChannel = new Channel(switchSubs, currentReportSubs, currentReportContextName,
                     currentReportAttitudeID, currentReport.getRequesterNode());
+            // it creates a temporary request using the report substitutions.
             Request tempRequest = new Request(tempChannel, null);
             /** Not AntecedentToRule Channel */
             if (forwardReportType) {
@@ -485,7 +712,10 @@ public abstract class RuleNode extends PropositionNode {
 
                 // backward inference during forward inference
                 // law ana 3andi consequents lazem acheck el antecedents el awel
-
+ 
+            // backward + not antrule 
+            // c(x) c(john)! and c(x) infers d(x)
+              
             } else {
                 Collection<Channel> outgoingMatchedChannels = getOutgoingMatchChannels();
                 Collection<Channel> outgoingAntRuleChannels = getOutgoingAntecedentRuleChannels();
