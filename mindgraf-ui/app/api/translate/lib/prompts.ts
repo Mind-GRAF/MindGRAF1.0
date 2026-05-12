@@ -6,6 +6,11 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // ROUTER PROMPT  (Phase 1–5: structural | knowledge | query | inference | system)
 // ─────────────────────────────────────────────────────────────────────────────
+const SNEPS_GRAMMAR_RULES = `
+CRITICAL GRAMMAR RULES: 
+1. Predicate names must be single alphanumeric strings. You MUST NOT use hyphens (-), spaces, or special characters. Use underscores (_) instead (e.g., use has_wand(x) NOT has-wand(x)).
+2. Universal Quantifiers: If you are generating a rule with variables (e.g., an if-then statement), you MUST wrap the entire rule in a forall() quantifier. Example: forall(x)({wizard(x?)} &=> {has_wand(x?)}). Never generate a rule with variables without the forall() wrapper.
+3. No Empty Predicates: A predicate MUST always contain at least one argument (entity or variable). You cannot use empty brackets (). If the user asks a general yes/no question, rephrase it to apply to a specific entity. Example: instead of moon_is_cheese(), use is_cheese(moon).`;
 export const ROUTER_PROMPT = `You are a command classifier for MindGRAF, a SNePS-based semantic network engine.
 
 Classify the user's natural language request into ONE of these categories:
@@ -448,7 +453,7 @@ Output: activate-node student(Dina)
 
 Input:  "Force activate the teaches relation for Ahmed and CS"
 Output: activate-node! teaches(Ahmed, CS)
-`;
+${SNEPS_GRAMMAR_RULES}`;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GROUP 3: QUERY & RETRIEVAL SPECIALIST
@@ -627,7 +632,7 @@ Output: describe-context c{hogwarts}
 
 Input:  "Give me details about the default context"
 Output: describe-context c{default}
-`;
+${SNEPS_GRAMMAR_RULES}`;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GROUP 4: INFERENCE & REASONING SPECIALIST
@@ -636,6 +641,7 @@ export const INFERENCE_SPECIALIST_PROMPT = `You are the Inference & Reasoning sp
 
 Your ONLY job: translate the user's natural language request into exactly ONE MindGRAF CLI command.
 Output ONLY the raw CLI command string — no markdown, no backticks, no quotes, no explanation.
+
 
 ═══════════════════════════════════════════════════════════════
 COMMAND REFERENCE — GROUP 4: INFERENCE & REASONING
@@ -799,7 +805,7 @@ Output: clear-infer
 
 Input:  "What can we derive about Dina?"
 Output: back-infer smart(Dina)
-`;
+${SNEPS_GRAMMAR_RULES}`;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GROUP 5: SYSTEM CONFIGURATION SPECIALIST

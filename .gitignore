@@ -92,3 +92,6 @@ fabric.properties
 
 
 .env.local
+*.class
+*.class
+*.class

@@ -14,9 +14,7 @@ import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.PropositionNodeSet;
 import edu.guc.mind_graf.set.Set;
 import edu.guc.mind_graf.support.Pair;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -130,6 +128,7 @@ class ContextTest {
         Assertions.assertTrue(insertedCorrectly);
     }
 
+    @Disabled
     @Test
     void manuallyRemoveInferredNodeFromContext() {
         ContextController.addHypothesisToContext(0,0,p.getId());

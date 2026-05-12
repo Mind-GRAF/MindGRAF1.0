@@ -408,18 +408,24 @@ public abstract class RuleNode extends PropositionNode {
             Request tempRequest = new Request(tempChannel, null);
             /** AntecedentToRule Channel */
             if (forwardReportType) {
+                // --- CONTEXT LEAKAGE FIX (defense-in-depth): If this rule is
+                // not asserted in the report's context, skip processing entirely.
+                // Without this guard, the else-branch would fall into backward
+                // inference and pull facts from the wrong context. ---
+                if (!assertedInContext) {
+                    System.out.println("[Context Guard] " + this.getName()
+                            + ": Ignoring forward report — rule not asserted in context '"
+                            + currentReportContextName + "'");
+                    return;
+                }
                 /** Forward Inference */
                 if (!this.isOpen()) {
                     /** Close Type Implementation */
-                    if (assertedInContext) {
-                        if (!this.isForwardReport()) {
-                            this.setForwardReport(true);
-                            requestAntecedentsNotAlreadyWorkingOn(tempRequest);
-                        }
-                        applyRuleHandler(currentReport);
-                    } else {
-                        super.processSingleRequests(tempRequest);
+                    if (!this.isForwardReport()) {
+                        this.setForwardReport(true);
+                        requestAntecedentsNotAlreadyWorkingOn(tempRequest);
                     }
+                    applyRuleHandler(currentReport);
                 } else {
                     Collection<KnownInstance> theKnownInstanceSet = knownInstances.mergeKInstancesBasedOnAtt(
                             currentReportAttitudeID);

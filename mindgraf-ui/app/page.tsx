@@ -34,17 +34,21 @@ export default function Home() {
   const [statusMsg, setStatusMsg]   = useState("Idle. Awaiting commands.");
   const [booted, setBooted]         = useState(false);
 
-  // ── Boot sequence  ─────────────────────────────────────────────────────────
+  // ── Boot sequence / Context Switch ─────────────────────────────────────────
   const initializeEnvironment = async () => {
-    setStatusMsg("Booting MindGRAF engine…");
     setLoading(true);
     try {
-      const bootRes = await fetch("http://localhost:8080/execute", {
-        method: "POST",
-        body: `boot-wizard ${attitude}`,
-      });
-      if (!bootRes.ok) throw new Error("Java rejected the Boot Wizard.");
+      if (!booted) {
+        setStatusMsg("Booting MindGRAF engine…");
+        const bootRes = await fetch("http://localhost:8080/execute", {
+          method: "POST",
+          body: `boot-wizard ${attitude}`,
+        });
+        if (!bootRes.ok) throw new Error("Java rejected the Boot Wizard.");
+        setBooted(true);
+      }
 
+      setStatusMsg(`Setting up context "${context}"…`);
       const ctxRes = await fetch("http://localhost:8080/execute", {
         method: "POST",
         body: `define-context ${context}`,
@@ -56,12 +60,24 @@ export default function Home() {
           throw new Error("Java rejected Context definition.");
       }
 
-      setBooted(true);
+      // Explicitly set the current context and attitude
+      const setCtxRes = await fetch("http://localhost:8080/execute", {
+        method: "POST",
+        body: `set-curr-context ${context}`,
+      });
+      if (!setCtxRes.ok) throw new Error("Java rejected Context switch.");
+
+      const setAttRes = await fetch("http://localhost:8080/execute", {
+        method: "POST",
+        body: `set-attitude ${attitude}`,
+      });
+      if (!setAttRes.ok) throw new Error("Java rejected Attitude switch.");
+
       setStatusMsg(
         `✅ Ready — context: "${context}", attitude: "${attitude}"`
       );
     } catch (err) {
-      setStatusMsg(`❌ Boot Error: ${err instanceof Error ? err.message : err}`);
+      setStatusMsg(`❌ Setup Error: ${err instanceof Error ? err.message : err}`);
     } finally {
       setLoading(false);
     }
@@ -126,11 +142,11 @@ export default function Home() {
             disabled={loading}
             className={`px-4 py-2 rounded font-bold transition-colors text-sm ${
               booted
-                ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 cursor-default"
+                ? "bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-900/40 dark:text-indigo-300"
                 : "bg-emerald-600 hover:bg-emerald-700 text-white"
             }`}
           >
-            {booted ? "✓ Initialized" : "Initialize Engine"}
+            {booted ? "Switch Context" : "Initialize Engine"}
           </button>
         </div>
 

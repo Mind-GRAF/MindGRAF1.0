@@ -2642,15 +2642,21 @@ void Ask() throws ParseException :
     boolean result = propNode.supported(resolvedContext, resolvedAttitudeID, levelsCount);
 
     if (!result) {
-        // Check forward asserted nodes (derived facts)
+        // Check forward asserted nodes (derived facts from forward-infer)
         java.util.Hashtable<edu.guc.mind_graf.mgip.reports.Report, PropositionNode> fAsserts = edu.guc.mind_graf.mgip.Scheduler.getForwardAssertedNodes();
         if (fAsserts != null) {
             for (java.util.Map.Entry<edu.guc.mind_graf.mgip.reports.Report, PropositionNode> entry : fAsserts.entrySet()) {
                 edu.guc.mind_graf.mgip.reports.Report report = entry.getKey();
-                PropositionNode originNode = entry.getValue();
-                if (report.getContextName().equals(resolvedContext) && report.getAttitude() == resolvedAttitudeID) {
+                PropositionNode storedNode = entry.getValue();
+                // storedNode is already the fully-substituted inferred node
+                if (storedNode.getId() == propNode.getId()) {
+                    result = true;
+                    break;
+                }
+                // Also try applying substitutions in case the stored node is an open pattern
+                if (report.getContextName() != null && report.getContextName().equals(resolvedContext) && report.getAttitude() == resolvedAttitudeID) {
                     try {
-                        Node inferredNode = originNode.applySubstitution(report.getSubstitutions());
+                        Node inferredNode = storedNode.applySubstitution(report.getSubstitutions());
                         if (inferredNode != null && inferredNode.getId() == propNode.getId()) {
                             result = true;
                             break;
@@ -2662,15 +2668,21 @@ void Ask() throws ParseException :
     }
 
     if (!result) {
-        // Check backward asserted reply nodes
+        // Check backward asserted reply nodes (derived via backward inference)
         java.util.Hashtable<edu.guc.mind_graf.mgip.reports.Report, PropositionNode> bAsserts = edu.guc.mind_graf.mgip.Scheduler.getBackwardAssertedReplyNodes();
         if (bAsserts != null) {
             for (java.util.Map.Entry<edu.guc.mind_graf.mgip.reports.Report, PropositionNode> entry : bAsserts.entrySet()) {
                 edu.guc.mind_graf.mgip.reports.Report report = entry.getKey();
-                PropositionNode originNode = entry.getValue();
-                if (report.getContextName().equals(resolvedContext) && report.getAttitude() == resolvedAttitudeID) {
+                PropositionNode storedNode = entry.getValue();
+                // storedNode is already the fully-substituted inferred node
+                if (storedNode.getId() == propNode.getId()) {
+                    result = true;
+                    break;
+                }
+                // Also try applying substitutions in case the stored node is an open pattern
+                if (report.getContextName() != null && report.getContextName().equals(resolvedContext) && report.getAttitude() == resolvedAttitudeID) {
                     try {
-                        Node inferredNode = originNode.applySubstitution(report.getSubstitutions());
+                        Node inferredNode = storedNode.applySubstitution(report.getSubstitutions());
                         if (inferredNode != null && inferredNode.getId() == propNode.getId()) {
                             result = true;
                             break;

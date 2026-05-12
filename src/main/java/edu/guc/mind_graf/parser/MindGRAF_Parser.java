@@ -336,6 +336,8 @@ public static void ResetGrading(){
         }
         CLI.print("");
         controller.addHypothesisToContext(CName, levelsCount, controller.getAttitudeNumber(attitude), propNode.getId());
+        // Trigger forward inference automatically
+        propNode.add(CName, controller.getAttitudeNumber(attitude));
         //CLI.print("Hypothesis Added to Context " + CName+" in Attitude " + attitude+" Successfully.");
                 CLI.print("");
         CLI.print(propNode.toString());
@@ -350,6 +352,8 @@ public static void ResetGrading(){
         }
         CLI.print("");
         controller.addHypothesisToContext(CName, levelsCount, defaultAttitude, propNode.getId());
+        // Trigger forward inference automatically
+        propNode.add(CName, defaultAttitude);
         CLI.print("");
         //CLI.print("Hypothesis Added to Context " + CName+" in Attitude " + controller.getAttitudeName(defaultAttitude)+" Successfully.");
         //CLI.print("");
@@ -366,6 +370,8 @@ public static void ResetGrading(){
           CLI.print("");
           controller.addHypothesisToContext(controller.getCurrContextName(), levelsCount,
               controller.getAttitudeNumber(attitude), propNode.getId());
+          // Trigger forward inference automatically
+          propNode.add(controller.getCurrContextName(), controller.getAttitudeNumber(attitude));
           CLI.print("");
         CLI.print(propNode.toString());
         return;
@@ -378,6 +384,8 @@ public static void ResetGrading(){
       try {
         CLI.print("");
         controller.addHypothesisToContext(controller.getCurrContextName(), levelsCount, defaultAttitude, propNode.getId());
+        // Trigger forward inference automatically
+        propNode.add(controller.getCurrContextName(), defaultAttitude);
         CLI.print("");
           //CLI.print("Hypothesis Added to Context " + controller.getCurrContextName()+" in Attitude " + controller.getAttitudeName(defaultAttitude)+" Successfully.");
                   CLI.print("");
@@ -2954,9 +2962,63 @@ CLI.print("");
 
     // Definitive context-aware check.
     // supported() walks both context.isHypothesis() and the node's assumptionSupport.
-    // After removeHypFromAssumptions() is called by removeHypothesisFromContext(),
-    // this will correctly return false for nodes removed from the context.
     boolean result = propNode.supported(resolvedContext, resolvedAttitudeID, levelsCount);
+
+    if (!result) {
+        // Check forward asserted nodes (derived facts from forward-infer or backward-triggered forward)
+        java.util.Hashtable<edu.guc.mind_graf.mgip.reports.Report, PropositionNode> fAsserts =
+                edu.guc.mind_graf.mgip.Scheduler.getForwardAssertedNodes();
+        if (fAsserts != null) {
+            for (java.util.Map.Entry<edu.guc.mind_graf.mgip.reports.Report, PropositionNode> entry : fAsserts.entrySet()) {
+                edu.guc.mind_graf.mgip.reports.Report report = entry.getKey();
+                PropositionNode storedNode = entry.getValue();
+                // storedNode is already the fully-substituted inferred node
+                if (storedNode.getId() == propNode.getId()) {
+                    result = true;
+                    break;
+                }
+                // Also try applying substitutions in case the stored node is an open pattern
+                if (report.getContextName() != null && report.getContextName().equals(resolvedContext)
+                        && report.getAttitude() == resolvedAttitudeID) {
+                    try {
+                        Node inferredNode = storedNode.applySubstitution(report.getSubstitutions());
+                        if (inferredNode != null && inferredNode.getId() == propNode.getId()) {
+                            result = true;
+                            break;
+                        }
+                    } catch (Exception ignored) {}
+                }
+            }
+        }
+    }
+
+    if (!result) {
+        // Check backward asserted reply nodes (derived via backward inference / deduce)
+        java.util.Hashtable<edu.guc.mind_graf.mgip.reports.Report, PropositionNode> bAsserts =
+                edu.guc.mind_graf.mgip.Scheduler.getBackwardAssertedReplyNodes();
+        if (bAsserts != null) {
+            for (java.util.Map.Entry<edu.guc.mind_graf.mgip.reports.Report, PropositionNode> entry : bAsserts.entrySet()) {
+                edu.guc.mind_graf.mgip.reports.Report report = entry.getKey();
+                PropositionNode storedNode = entry.getValue();
+                // storedNode is already the fully-substituted inferred node
+                if (storedNode.getId() == propNode.getId()) {
+                    result = true;
+                    break;
+                }
+                // Also try applying substitutions in case the stored node is an open pattern
+                if (report.getContextName() != null && report.getContextName().equals(resolvedContext)
+                        && report.getAttitude() == resolvedAttitudeID) {
+                    try {
+                        Node inferredNode = storedNode.applySubstitution(report.getSubstitutions());
+                        if (inferredNode != null && inferredNode.getId() == propNode.getId()) {
+                            result = true;
+                            break;
+                        }
+                    } catch (Exception ignored) {}
+                }
+            }
+        }
+    }
 
     CLI.print("");
     if (result) {

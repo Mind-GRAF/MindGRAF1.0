@@ -1,0 +1,8 @@
+boot-wizard belief
+define-context hogwarts
+set-curr-context hogwarts
+define-relation wizard propositionnode expand 2
+define-relation has_wand propositionnode expand 2
+add-to-context forall(x)({wizard(x?)} &=> {has_wand(x?)})
+add-to-context wizard(Harry)
+ask-if-true has_wand(Harry)

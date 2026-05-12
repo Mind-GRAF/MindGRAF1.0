@@ -762,6 +762,11 @@ public class PropositionNode extends Node {
                     break;
                 case AntRule:
                     NodeSet rulesNodes = getUpAntDomRuleNodeSet();
+                    // --- CONTEXT LEAKAGE FIX: Only send forward reports to rules
+                    // that are actually asserted in the current context. ---
+                    if (inferenceType == InferenceType.FORWARD) {
+                        rulesNodes = filterByContext(rulesNodes, currentContextName, currentAttitudeID);
+                    }
                     sendReportToNodeSet(rulesNodes, toBeSent);
                     if (this instanceof RuleNode) {
                         NodeSet argAntNodes = getDownAntArgNodeSet();
@@ -773,6 +778,10 @@ public class PropositionNode extends Node {
                     break;
                 case WhenRule:
                     NodeSet whenDoRuleNodes = getUpWhenDomRuleNodeSet(currentAttitudeID);
+                    // --- CONTEXT LEAKAGE FIX: Filter when-do rules by context. ---
+                    if (inferenceType == InferenceType.FORWARD && whenDoRuleNodes != null) {
+                        whenDoRuleNodes = filterByContext(whenDoRuleNodes, currentContextName, currentAttitudeID);
+                    }
                     if (whenDoRuleNodes != null) {
                         sendReportToWhenNodeSet(whenDoRuleNodes, toBeSent);
                     }
@@ -1262,9 +1271,8 @@ public class PropositionNode extends Node {
         boolean forwardReportType = currentReport.getInferenceType() == InferenceType.FORWARD;
 
         Report reportToBeBroadcasted = attemptAddingReportToKnownInstances(currentReport);
-        if (reportToBeBroadcasted != null) {// it didn't get handled before but if null won't be handled and saved again
-            // but will be broadcasted to the other nodes in the network as new suppors
-            // could be discovered
+        if (reportToBeBroadcasted != null) {
+            // This report is new (not seen before) — process and possibly broadcast it.
 
             if (reportToBeBroadcasted.getReportType() == ReportType.RuleCons) {
                 PropositionNode supportNode = (PropositionNode) applySubstitution(
@@ -1278,46 +1286,54 @@ public class PropositionNode extends Node {
                     reportToBeBroadcasted.setSupport(reportSupport);
                     if (reportToBeBroadcasted.getInferenceType() == InferenceType.FORWARD) {
                         System.out.println(
-                                "A New Fact has been succefully added to the set of forward asserted nodes");
-
+                                "A New Fact has been successfully added to the set of forward asserted nodes");
                         Scheduler.addNodeAssertionThroughFReport(reportToBeBroadcasted, supportNode);
-
                     } else if (reportToBeBroadcasted.getInferenceType() == InferenceType.BACKWARD
                             && Scheduler.getOriginOfBackInf() != null
                             && (this.equals(Scheduler.getOriginOfBackInf())
                                 || supportNode.getId() == Scheduler.getOriginOfBackInf().getId())) {
                         System.out.println(
-                                "A reply has been succefully added to the set of backward asserted reply nodes");
-
+                                "A reply has been successfully added to the set of backward asserted reply nodes");
                         Scheduler.addNodeAssertionThroughBReport(reportToBeBroadcasted, supportNode);
                     }
                 }
             }
+
+            // Propagate the report onwards (forward or backward chain)
+            if (forwardReportType && !forwardDone) {
+                forwardDone = true;
+                if (reportToBeBroadcasted.getReportType() != ReportType.Matched) {
+                    List<Match> matchesReturned = new ArrayList<>();
+                    matchesReturned = Matcher.match(this, ContextController.getContext(currentReport.getContextName()), currentReport.getAttitude());
+                    sendReportToMatches(matchesReturned, reportToBeBroadcasted);
+                }
+                NodeSet dominatingRules = getUpAntDomRuleNodeSet();
+                // --- CONTEXT LEAKAGE FIX: Only propagate forward reports to
+                // rules that are asserted in the report's context. ---
+                dominatingRules = filterByContext(dominatingRules,
+                        reportToBeBroadcasted.getContextName(),
+                        reportToBeBroadcasted.getAttitude());
+                sendReportToNodeSet(dominatingRules, reportToBeBroadcasted);
+
+                NodeSet dominatingWhenRules = getUpWhenDomRuleNodeSet(reportToBeBroadcasted.getAttitude());
+                if (dominatingWhenRules != null) {
+                    // --- CONTEXT LEAKAGE FIX: Filter when-do rules too. ---
+                    dominatingWhenRules = filterByContext(dominatingWhenRules,
+                            reportToBeBroadcasted.getContextName(),
+                            reportToBeBroadcasted.getAttitude());
+                    sendReportToWhenNodeSet(dominatingWhenRules, reportToBeBroadcasted);
+                }
+            } else if (forwardReportType && forwardDone) {
+                for (Channel channel : forwardChannels) {
+                    sendReport(reportToBeBroadcasted, channel);
+                }
+            } else {
+                broadcastReport(reportToBeBroadcasted);
+            }
+        } else {
+            // Report was already seen — skip processing to avoid duplicate propagation.
+            System.out.println(this.getName() + ": Report already seen, skipping re-broadcast.");
         }
-
-        // TODO: GRADED PROPOSITIONS HANDLING REPORTS
-        if (forwardReportType && !forwardDone) {
-            forwardDone = true;
-            if (reportToBeBroadcasted.getReportType() != ReportType.Matched) {
-                List<Match> matchesReturned = new ArrayList<Match>();
-                // list of matches with a node
-                matchesReturned = Matcher.match(this, ContextController.getContext(currentReport.getContextName()), currentReport.getAttitude());
-                sendReportToMatches(matchesReturned, reportToBeBroadcasted);
-            }
-            NodeSet dominatingRules = getUpAntDomRuleNodeSet();
-            sendReportToNodeSet(dominatingRules, reportToBeBroadcasted);
-
-            NodeSet dominatingWhenRules = getUpWhenDomRuleNodeSet(reportToBeBroadcasted.getAttitude());
-            if (dominatingWhenRules != null) {
-                sendReportToWhenNodeSet(dominatingWhenRules, reportToBeBroadcasted);
-            }
-
-        } else if (forwardReportType && forwardDone) {
-            for (Channel channel : forwardChannels) {
-                sendReport(reportToBeBroadcasted, channel);
-            }
-        } else
-            broadcastReport(reportToBeBroadcasted);
 
     }
 
@@ -1362,6 +1378,34 @@ public class PropositionNode extends Node {
 
     public void combineSupport(int attitude, Support support) {
         this.support.combine(attitude, support);
+    }
+
+    /***
+     * CONTEXT LEAKAGE FIX: Filters a NodeSet of rule nodes, keeping only those
+     * that are asserted (supported) in the given context and attitude.
+     * This prevents forward inference reports from leaking into rules
+     * that belong to a different context.
+     *
+     * @param rules       the set of candidate rule nodes
+     * @param contextName the context to filter by
+     * @param attitudeID  the attitude to filter by
+     * @return a new NodeSet containing only the context-local rules
+     */
+    protected NodeSet filterByContext(NodeSet rules, String contextName, int attitudeID) {
+        NodeSet filtered = new NodeSet();
+        for (Node ruleNode : rules) {
+            if (ruleNode instanceof PropositionNode) {
+                if (((PropositionNode) ruleNode).supported(contextName, attitudeID, 0)) {
+                    filtered.add(ruleNode);
+                } else {
+                    System.out.println("[Context Filter] Skipping rule " + ruleNode.getName()
+                            + " — not asserted in context '" + contextName + "'");
+                }
+            } else {
+                filtered.add(ruleNode);
+            }
+        }
+        return filtered;
     }
 
     public ChannelSet getOutgoingChannels() {

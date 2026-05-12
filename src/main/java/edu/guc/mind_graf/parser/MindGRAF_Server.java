@@ -155,6 +155,11 @@ public class MindGRAF_Server {
     // Boot Wizard — programmatic engine initialization
     // ===================================================================
     private static void handleBootWizard(String command) {
+        if (engineInitialized) {
+            System.out.println("[BRIDGE] Engine already initialized. Skipping redundant boot to preserve state.");
+            return;
+        }
+
         System.out.println("[BRIDGE] Programmatic Engine Init — bypassing interactive CLI wizard...");
         String attArg = command.replace("boot-wizard", "").trim();
 
