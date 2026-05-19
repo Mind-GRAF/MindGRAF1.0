@@ -1,6 +1,10 @@
 package edu.guc.mind_graf.nodes;
 
-import java.util.Random;
+/*
+ * MODIFIED for thesis integration (Author: Hatem Soliman, 2026-05-19)
+ * - Deterministic DoAll scheduling: iterate in insertion order and schedule
+ *   acts sequentially. This avoids randomization so plan traces are stable.
+ */
 
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.mgip.Scheduler;
@@ -17,18 +21,12 @@ public class DoAllNode extends ActNode {
 
     @Override
     public void runActuator() {
-        Random rand = new Random();
         NodeSet acts = this.getDownCableSet().get("obj").getNodeSet();
-        NodeSet actsCopy = new NodeSet();
-        acts.addAllTo(actsCopy);
-        while(!actsCopy.isEmpty()) {
-            System.out.println("tmam");
-            int nextActIndex = rand.nextInt(actsCopy.size());
-            ActNode nextAct = (ActNode) actsCopy.getNode(nextActIndex);
+        for (Node node : acts) {
+            ActNode nextAct = (ActNode) node;
             System.out.println(nextAct.getName());
             nextAct.restartAgenda();
             Scheduler.addToActQueue(nextAct);
-            actsCopy.remove(nextAct);
         }
     }
     

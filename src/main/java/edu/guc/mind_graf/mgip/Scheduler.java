@@ -1,6 +1,8 @@
 package edu.guc.mind_graf.mgip;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
 import java.util.Hashtable;
 import java.util.Queue;
 import java.util.Stack;
@@ -15,19 +17,65 @@ import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.PropositionNode;
 
 public class Scheduler {
+    /**
+     * MODIFIED for thesis integration (Author: Hatem Soliman, 2026-05-19)
+     * - Added `executionQueue` to separate finalized primitive execution from planning.
+     * - Added `planChoicePoints` to record sibling alternatives at choice points
+     *   so Marwa-style act decomposition can backtrack without losing alternatives.
+     *
+     * NOTES/TODO:
+     * - This is an intentionally lightweight Marwa-side backtracking helper.
+     * - Future work: extract choice-point/backtracking into the standalone
+     *   HTN package and replace these helpers with calls into `HTNPlanner`.
+     */
     private static Queue<Report> highQueue;
     private static Queue<Request> lowQueue;
     private static Stack<ActNode> actQueue;
     private static Stack<ActNode> highActQueue;
+    // NEW: final execution stage for primitive acts that already passed planning.
+    // TODO(HTN migration): move this boundary into the standalone HTN integration layer
+    // once Marwa's work is re-packaged around the dedicated HTN package.
+    private static Deque<ActNode> executionQueue;
+    // NEW: remember choice points so a failed branch can resume with the next sibling.
+    // TODO(HTN migration): replace this with the standalone HTN planner's recursive
+    // backtracking once Marwa-side acts are fully migrated.
+    private static Stack<PlanChoicePoint> planChoicePoints;
     private static PropositionNode originOfBackInf;
     private static Hashtable<Report, PropositionNode> forwardAssertedNodes;
     private static Hashtable<Report, PropositionNode> backwardAssertedReplyNodes;
+
+    private static final class PlanChoicePoint {
+        private final int actStackSize;
+        private final int executionQueueSize;
+        private final ArrayList<ActNode> remainingAlternatives;
+        private final String sourceActName;
+        private int nextAlternativeIndex;
+
+        private PlanChoicePoint(int actStackSize, int executionQueueSize, ArrayList<ActNode> remainingAlternatives,
+                String sourceActName) {
+            this.actStackSize = actStackSize;
+            this.executionQueueSize = executionQueueSize;
+            this.remainingAlternatives = remainingAlternatives;
+            this.sourceActName = sourceActName;
+            this.nextAlternativeIndex = 0;
+        }
+
+        private boolean hasNextAlternative() {
+            return nextAlternativeIndex < remainingAlternatives.size();
+        }
+
+        private ActNode nextAlternative() {
+            return remainingAlternatives.get(nextAlternativeIndex++);
+        }
+    }
 
     public static void initiate() {
         highQueue = new ArrayDeque<Report>();
         lowQueue = new ArrayDeque<Request>();
         actQueue = new Stack<ActNode>();
         highActQueue = new Stack<ActNode>();
+        executionQueue = new ArrayDeque<ActNode>();
+        planChoicePoints = new Stack<PlanChoicePoint>();
         
         forwardAssertedNodes = new Hashtable<Report, PropositionNode>();
         backwardAssertedReplyNodes = new Hashtable<Report, PropositionNode>();
@@ -90,7 +138,15 @@ public class Scheduler {
                 ActNode toRunNext = highActQueue.pop();
                 // System.out.println(toRunNext + " agenda: " + toRunNext.getAgenda());
                 System.out.println("\n\n");
-                toRunNext.processIntends(true);
+                try {
+                    toRunNext.processIntends(true);
+                } catch (NoPlansExistForTheActException e) {
+                    if (!backtrackToNextAlternative()) {
+                        throw e;
+                    }
+                    sequence += "BT ";
+                    continue main;
+                }
                 sequence += "HA ";
                 if (!highQueue.isEmpty() || !lowQueue.isEmpty()) {
                     continue main;
@@ -104,9 +160,30 @@ public class Scheduler {
                 ActNode toRunNext = actQueue.pop();
                 // System.out.println(toRunNext + " agenda: " + toRunNext.getAgenda());
                 System.out.println("\n\n");
-                toRunNext.processIntends(false);
+                try {
+                    toRunNext.processIntends(false);
+                } catch (NoPlansExistForTheActException e) {
+                    if (!backtrackToNextAlternative()) {
+                        throw e;
+                    }
+                    sequence += "BT ";
+                    continue main;
+                }
                 sequence += "A ";
                 if (!highQueue.isEmpty() || !lowQueue.isEmpty()|| !highActQueue.isEmpty()) {
+                    continue main;
+                }
+            }
+            while (!executionQueue.isEmpty()) {
+                System.out.println(
+                        "------------------------------------------------------------------------------------------------------------------------------------");
+
+                System.out.println("AT EXECUTION QUEUE");
+                ActNode toRunNext = executionQueue.poll();
+                System.out.println("\n\n");
+                toRunNext.runActuator();
+                sequence += "EXE ";
+                if (!highQueue.isEmpty() || !lowQueue.isEmpty() || !highActQueue.isEmpty() || !actQueue.isEmpty()) {
                     continue main;
                 }
             }
@@ -151,6 +228,66 @@ public class Scheduler {
      */
     public static void addToActQueue(ActNode actNode) {
         actQueue.add(actNode);
+    }
+
+    /**
+     * Adds a primitive act that already completed planning to the final execution stage.
+     */
+    public static void addToExecutionQueue(ActNode actNode) {
+        executionQueue.add(actNode);
+    }
+
+    public static void pushPlanChoicePoint(ActNode sourceAct, edu.guc.mind_graf.set.NodeSet alternatives,
+            int currentActStackSize) {
+        int currentExecutionQueueSize = executionQueue.size();
+        ArrayList<ActNode> remainingAlternatives = new ArrayList<ActNode>();
+        boolean first = true;
+        for (edu.guc.mind_graf.nodes.Node node : alternatives) {
+            ActNode actNode = (ActNode) node;
+            if (first) {
+                first = false;
+                continue;
+            }
+            remainingAlternatives.add(actNode);
+        }
+        if (!remainingAlternatives.isEmpty()) {
+            planChoicePoints.push(new PlanChoicePoint(currentActStackSize, currentExecutionQueueSize,
+                    remainingAlternatives, sourceAct.getName()));
+            System.out.println("Saved choice point for " + sourceAct.getName() + " with "
+                    + remainingAlternatives.size() + " remaining sibling(s)");
+        }
+    }
+
+    private static void trimActQueueTo(int targetSize) {
+        while (actQueue.size() > targetSize) {
+            ActNode removed = actQueue.pop();
+            System.out.println("Backtracking removes pending act " + removed.getName());
+        }
+    }
+
+    private static void trimExecutionQueueTo(int targetSize) {
+        while (executionQueue.size() > targetSize) {
+            ActNode removed = executionQueue.removeLast();
+            System.out.println("Backtracking removes pending primitive " + removed.getName());
+        }
+    }
+
+    private static boolean backtrackToNextAlternative() {
+        while (!planChoicePoints.isEmpty()) {
+            PlanChoicePoint choicePoint = planChoicePoints.peek();
+            if (choicePoint.hasNextAlternative()) {
+                trimActQueueTo(choicePoint.actStackSize);
+                trimExecutionQueueTo(choicePoint.executionQueueSize);
+                ActNode nextAlternative = choicePoint.nextAlternative();
+                nextAlternative.restartAgenda();
+                actQueue.push(nextAlternative);
+                System.out.println("Backtracking from " + choicePoint.sourceActName
+                        + " to sibling " + nextAlternative.getName());
+                return true;
+            }
+            planChoicePoints.pop();
+        }
+        return false;
     }
 
     /***
@@ -217,8 +354,16 @@ public class Scheduler {
         return highActQueue;
     }
 
+    public static Deque<ActNode> getExecutionQueue() {
+        return executionQueue;
+    }
+
     public static void setActQueue(Stack<ActNode> actQueue) {
         Scheduler.actQueue = actQueue;
+    }
+
+    public static void setExecutionQueue(Deque<ActNode> executionQueue) {
+        Scheduler.executionQueue = executionQueue;
     }
 
     public static PropositionNode getOriginOfBackInf() {

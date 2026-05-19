@@ -24,6 +24,13 @@ import edu.guc.mind_graf.exceptions.NoPlansExistForTheActException;
 import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 
 public class ActNode extends Node {
+    /**
+     * MODIFIED for thesis integration (Author: Hatem Soliman, 2026-05-19)
+     * - See inline comments below for the EXECUTE-case behavior change that
+     *   defers primitive execution to `Scheduler.executionQueue`.
+     * - These comments mark the Marwa-side boundary: later migration into the
+     *   standalone HTN planner should preserve the same semantics.
+     */
     protected ChannelSet outgoingChannels;
     private ActAgenda agenda;
     private ArrayList<Report> reports = new ArrayList<>();
@@ -92,7 +99,7 @@ public class ActNode extends Node {
         agenda = ActAgenda.START;
     }
 
-    protected void setAgenda(ActAgenda agenda){
+    public void setAgenda(ActAgenda agenda){
         this.agenda=agenda;
     }
 
@@ -375,12 +382,18 @@ public class ActNode extends Node {
             case EXECUTE:
                 System.out.println("In execute case");
                 if (!isPrimitive) {
+                    // NEW: keep decomposition and final execution separate.
+                    // TODO(HTN migration): this is the boundary that can later move into the
+                    // standalone HTN package without changing the marwa-side act model.
                     this.agenda = ActAgenda.FIND_PLANS;
                     Scheduler.addToActQueue(this);
                     sendRequest(false);
                 } else {
+                    // NEW: fully validated primitive acts do not execute immediately.
+                    // They are deferred to the dedicated execution queue so that planning
+                    // stays complete before any actuator side effects happen.
                     this.agenda = ActAgenda.DONE;
-                    this.runActuator();
+                    Scheduler.addToExecutionQueue(this);
                 }
 
                 break;

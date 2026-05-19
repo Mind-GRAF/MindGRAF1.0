@@ -1,0 +1,953 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------------< edu.guc.mind_graf:mindGRAF >---------------------
+[INFO] Building mindGRAF 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ mindGRAF ---
+[INFO] Copying 2 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ mindGRAF ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 118 source files with javac [debug target 21] to target/classes
+[WARNING] location of system modules is not set in conjunction with -source 21
+  not setting the location of system modules may lead to class files that cannot run on JDK 21
+    --release 21 is recommended instead of -source 21 -target 21 because it sets the location of system modules automatically
+[INFO] /Users/hatem/University/thesis/my-thesis/HTN Planning/MindGRAF1.0/src/main/java/edu/guc/mind_graf/components/MyClassCreator.java: /Users/hatem/University/thesis/my-thesis/HTN Planning/MindGRAF1.0/src/main/java/edu/guc/mind_graf/components/MyClassCreator.java uses or overrides a deprecated API.
+[INFO] /Users/hatem/University/thesis/my-thesis/HTN Planning/MindGRAF1.0/src/main/java/edu/guc/mind_graf/components/MyClassCreator.java: Recompile with -Xlint:deprecation for details.
+[INFO] /Users/hatem/University/thesis/my-thesis/HTN Planning/MindGRAF1.0/src/main/java/edu/guc/mind_graf/acting/rules/DoIfNode.java: Some input files use unchecked or unsafe operations.
+[INFO] /Users/hatem/University/thesis/my-thesis/HTN Planning/MindGRAF1.0/src/main/java/edu/guc/mind_graf/acting/rules/DoIfNode.java: Recompile with -Xlint:unchecked for details.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ mindGRAF ---
+[INFO] skip non existing resourceDirectory /Users/hatem/University/thesis/my-thesis/HTN Planning/MindGRAF1.0/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ mindGRAF ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 31 source files with javac [debug target 21] to target/test-classes
+[WARNING] location of system modules is not set in conjunction with -source 21
+  not setting the location of system modules may lead to class files that cannot run on JDK 21
+    --release 21 is recommended instead of -source 21 -target 21 because it sets the location of system modules automatically
+[INFO] 
+[INFO] --- surefire:3.2.5:test (default-test) @ mindGRAF ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running edu.guc.mind_graf.Context.ContextControllerTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.028 s -- in edu.guc.mind_graf.Context.ContextControllerTest
+[INFO] Running edu.guc.mind_graf.nodes.RuleNodeTest
+[]
+[]
+[]
+[]
+Sending Report (Context guc and Attitude 0 and substitutions {{A, VARIABLE}={Nemo, BASE}} to M1) through the channel (RuleCons of id 1)
+Testing report to be sent:
+It passed the filter test
+The report to M1 was just enqueued in the high priority queue to be processed
+the report was succefully sent over channel (RuleCons 1)
+Sending Report (Context guc and Attitude 0 and substitutions {{A, VARIABLE}={Nemo, BASE}} to M2) through the channel (RuleCons of id 2)
+Testing report to be sent:
+It passed the filter test
+The report to M2 was just enqueued in the high priority queue to be processed
+the report was succefully sent over channel (RuleCons 2)
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+Sending Report (Context guc and Attitude 0 and substitutions {{Co, VARIABLE}={england, BASE}, {G, VARIABLE}={henry, BASE}, {C, VARIABLE}={anne, BASE}} to M9) through the channel (RuleCons of id 3)
+Testing report to be sent:
+It passed the filter test
+The report to M9 was just enqueued in the high priority queue to be processed
+the report was succefully sent over channel (RuleCons 3)
+[]
+[]
+[]
+[]
+Sending Report (Context guc and Attitude 0 and substitutions {} to M13) through the channel (RuleCons of id 4)
+Testing report to be sent:
+It passed the filter test
+The report to M13 was just enqueued in the high priority queue to be processed
+the report was succefully sent over channel (RuleCons 4)
+[]
+[]
+[]
+[]
+Sending Report (Context guc and Attitude 0 and substitutions {} to M17) through the channel (RuleCons of id 5)
+Testing report to be sent:
+It passed the filter test
+The report to M17 was just enqueued in the high priority queue to be processed
+the report was succefully sent over channel (RuleCons 5)
+[]
+[]
+[]
+[]
+Sending Report (Context guc and Attitude 0 and substitutions {{X, VARIABLE}={Patroclus, BASE}} to M20) through the channel (RuleCons of id 6)
+Testing report to be sent:
+It passed the filter test
+The report to M20 was just enqueued in the high priority queue to be processed
+the report was succefully sent over channel (RuleCons 6)
+Sending Report (Context guc and Attitude 0 and substitutions {{X, VARIABLE}={Patroclus, BASE}} to M21) through the channel (RuleCons of id 7)
+Testing report to be sent:
+It passed the filter test
+The report to M21 was just enqueued in the high priority queue to be processed
+the report was succefully sent over channel (RuleCons 7)
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.054 s -- in edu.guc.mind_graf.nodes.RuleNodeTest
+[INFO] Running edu.guc.mind_graf.nodes.NodeTest
+Testing Nodes
+negation test 1
+[]
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in edu.guc.mind_graf.nodes.NodeTest
+[INFO] Running edu.guc.mind_graf.network.NetworkTest
+Testing Network
+Testing example 1: Who is Aquatic
+[]
+[]
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in edu.guc.mind_graf.network.NetworkTest
+[INFO] Running edu.guc.mind_graf.acting.ActNodeTest
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+perform() method initated.
+
+-------------------------
+Performing an act initiated in Context: guc
+------------------------------------------------------------------------------------------------------------------------------------
+AT ACT QUEUE
+
+
+
+In Start case
+M31 act is sending a request checking if it has any preconditions
+[]
+Node{M34, MOLECULAR, [downCable : {relation: act, NodeSet :[M31]}, downCable : {relation: precondition, NodeSet :[A0]}]}created
+Trying to establish a channel from M31 to M34
+Channel of type Act is successfully created and used for further operations
+------------------------------------------------------------------------------------------------------------------------------------
+
+∂ Runner: In LowQueue
+Processing request with Context: guc and Attitude: 0 of filter: {} and switch: {} requestedFrom M31 reportedBy M34.
+M34 Processing Requests as a Proposition node
+M34 is not supported
+remaiining Matches size:0
+------------------------------------------------------------------------------------------------------------------------------------
+AT ACT QUEUE
+
+
+
+In find_preconditions case
+M31 Processing Reports as act node 
+M31 act doesn't have preconditions
+------------------------------------------------------------------------------------------------------------------------------------
+AT ACT QUEUE
+
+
+
+In execute case
+------------------------------------------------------------------------------------------------------------------------------------
+AT EXECUTION QUEUE
+
+
+
+running M31 act's actuator
+------------------------------------------------------------------------------------------------------------------------------------
+The sequence of the scheduler is A L A A EXE 
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in edu.guc.mind_graf.acting.ActNodeTest
+[INFO] Running edu.guc.mind_graf.acting.rules.DoIfNodeTest
+[]
+[]
+[]
+[]
+[]
+deduce() method initated.
+-------------------------
+
+Backward Inference initiated in Context: home & Attitude: 0
+M35 doesn't have any positive known instances
+M35 doesn't have any negative known instances
+Sending to rule nodes during deduce()
+Trying to establish a channel from M35 to P39
+Channel of type RuleCons is successfully created and used for further operations
+Sending to matching nodes during deduce()
+java.lang.NullPointerException: Cannot invoke "edu.guc.mind_graf.relations.Relation.getAdjust()" because "relation" is null
+	at edu.guc.mind_graf.mgip.matching.Matcher.unifyMolecular(Matcher.java:305)
+	at edu.guc.mind_graf.mgip.matching.Matcher.unify(Matcher.java:161)
+	at edu.guc.mind_graf.mgip.matching.Matcher.match(Matcher.java:91)
+	at edu.guc.mind_graf.nodes.PropositionNode.getNodesToSendRequest(PropositionNode.java:806)
+	at edu.guc.mind_graf.nodes.PropositionNode.deduce(PropositionNode.java:1043)
+	at edu.guc.mind_graf.acting.rules.DoIfNodeTest.IfGetsAsserted(DoIfNodeTest.java:146)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:728)
+	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:156)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:147)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:86)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:103)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:93)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:92)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:86)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:218)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:214)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:139)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:151)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:198)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:169)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:93)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:58)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:141)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:57)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85)
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)
+	at org.apache.maven.surefire.junitplatform.LazyLauncher.execute(LazyLauncher.java:56)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:184)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:148)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:122)
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385)
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162)
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507)
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495)
+Sending to DoIf rule nodes during deduce()
+Trying to establish a channel from M35 to P37
+Channel of type IfRule is successfully created and used for further operations
+------------------------------------------------------------------------------------------------------------------------------------
+
+∂ Runner: In LowQueue
+Processing request with Context: home and Attitude: 0 of filter: {} and switch: {} requestedFrom M35 reportedBy P39.
+P39 Processing Requests as a Rule node
+P39 Processing Requests as a Proposition node
+P39 is supported
+Sending Report (Context home and Attitude 0 and substitutions {} to M35) through the channel (RuleCons of id 9)
+Testing report to be sent:
+It passed the filter test
+The report to M35 was just enqueued in the high priority queue to be processed
+the report was succefully sent over channel (RuleCons 9)
+------------------------------------------------------------------------------------------------------------------------------------
+
+∂ Runner: In HighQueue
+Processing report with Context home and Attitude 0 and substitutions {} to M35.
+M35 Processing Reports as a Proposition node
+------------------------------------------------------------------------------------------------------------------------------------
+
+∂ Runner: In LowQueue
+Processing request with Context: home and Attitude: 0 of filter: {} and switch: {} requestedFrom M35 reportedBy P37.
+P37 Processing Requests as a DoIf node
+Act {M36, MOLECULAR, [downCable : {relation: obj, NodeSet :[chair]}, downCable : {relation: action, NodeSet :[carry]}]} Scheduled Successfully on act stack
+------------------------------------------------------------------------------------------------------------------------------------
+AT ACT QUEUE
+
+
+
+P37 is still supported in context home in attitude id 0
+{M35, MOLECULAR, [downCable : {relation: obj, NodeSet :[chair]}, downCable : {relation: properety, NodeSet :[heavy]}]}
+M35 is still not supported in context home in attitude id 0
+doAct is:true
+In Start case
+M36 act is sending a request checking if it has any preconditions
+[]
+Node{M40, MOLECULAR, [downCable : {relation: act, NodeSet :[M36]}, downCable : {relation: precondition, NodeSet :[A1]}]}created
+Trying to establish a channel from M36 to M40
+Channel of type Act is successfully created and used for further operations
+------------------------------------------------------------------------------------------------------------------------------------
+
+∂ Runner: In LowQueue
+Processing request with Context: home and Attitude: 0 of filter: {} and switch: {} requestedFrom M36 reportedBy M40.
+M40 Processing Requests as a Proposition node
+M40 is not supported
+remaiining Matches size:0
+------------------------------------------------------------------------------------------------------------------------------------
+AT ACT QUEUE
+
+
+
+P37 is still supported in context home in attitude id 0
+{M35, MOLECULAR, [downCable : {relation: obj, NodeSet :[chair]}, downCable : {relation: properety, NodeSet :[heavy]}]}
+M35 is still not supported in context home in attitude id 0
+doAct is:true
+In find_preconditions case
+M36 Processing Reports as act node 
+M36 act doesn't have preconditions
+------------------------------------------------------------------------------------------------------------------------------------
+AT ACT QUEUE
+
+
+
+P37 is still supported in context home in attitude id 0
+{M35, MOLECULAR, [downCable : {relation: obj, NodeSet :[chair]}, downCable : {relation: properety, NodeSet :[heavy]}]}
+M35 is still not supported in context home in attitude id 0
+doAct is:true
+In execute case
+------------------------------------------------------------------------------------------------------------------------------------
+AT EXECUTION QUEUE
+
+
+
+running M36 act's actuator
+------------------------------------------------------------------------------------------------------------------------------------
+The sequence of the scheduler is L H L A L A A EXE 
+[]
+[]
+[]
+[]
+deduce() method initated.
+-------------------------
+
+Backward Inference initiated in Context: home & Attitude: 0
+M41 doesn't have any positive known instances
+M41 doesn't have any negative known instances
+Sending to rule nodes during deduce()
+Sending to matching nodes during deduce()
+Sending to DoIf rule nodes during deduce()
+Trying to establish a channel from M41 to P43
+Channel of type IfRule is successfully created and used for further operations
+------------------------------------------------------------------------------------------------------------------------------------
+
+∂ Runner: In LowQueue
+Processing request with Context: home and Attitude: 0 of filter: {} and switch: {} requestedFrom M41 reportedBy P43.
+P43 Processing Requests as a DoIf node
+Valid KnownInstance found with substitutions {{x, VARIABLE}={chair, BASE}} attitude 0
+[]
+Act {M44, MOLECULAR, [downCable : {relation: obj, NodeSet :[chair]}, downCable : {relation: action, NodeSet :[carrytemp]}]} Scheduled Successfully on act stack
+------------------------------------------------------------------------------------------------------------------------------------
+AT ACT QUEUE
+
+
+
+In Start case
+M44 act is sending a request checking if it has any preconditions
+[]
+Node{M45, MOLECULAR, [downCable : {relation: act, NodeSet :[M44]}, downCable : {relation: precondition, NodeSet :[A2]}]}created
+Trying to establish a channel from M44 to M45
+Channel of type Act is successfully created and used for further operations
+------------------------------------------------------------------------------------------------------------------------------------
+
+∂ Runner: In LowQueue
+Processing request with Context: home and Attitude: 0 of filter: {} and switch: {} requestedFrom M44 reportedBy M45.
+M45 Processing Requests as a Proposition node
+M45 is not supported
+remaiining Matches size:0
+------------------------------------------------------------------------------------------------------------------------------------
+AT ACT QUEUE
+
+
+
+In find_preconditions case
+M44 Processing Reports as act node 
+M44 act doesn't have preconditions
+------------------------------------------------------------------------------------------------------------------------------------
+AT ACT QUEUE
+
+
+
+In execute case
+------------------------------------------------------------------------------------------------------------------------------------
+AT EXECUTION QUEUE
+
+
+
+running M44 act's actuator
+------------------------------------------------------------------------------------------------------------------------------------
+The sequence of the scheduler is L A L A A EXE 
+[]
+[]
+[]
+[]
+deduce() method initated.
+-------------------------
+
+Backward Inference initiated in Context: home & Attitude: 0
+M46 doesn't have any positive known instances
+M46 doesn't have any negative known instances
+Sending to rule nodes during deduce()
+Sending to matching nodes during deduce()
+Sending to DoIf rule nodes during deduce()
+Trying to establish a channel from M46 to P48
+Channel of type IfRule is successfully created and used for further operations
+------------------------------------------------------------------------------------------------------------------------------------
+
+∂ Runner: In LowQueue
+Processing request with Context: home and Attitude: 0 of filter: {} and switch: {} requestedFrom M46 reportedBy P48.
+P48 Processing Requests as a DoIf node
+Act {M47, MOLECULAR, [downCable : {relation: obj, NodeSet :[chair]}, downCable : {relation: action, NodeSet :[carry]}]} Scheduled Successfully on act stack
+------------------------------------------------------------------------------------------------------------------------------------
+AT ACT QUEUE
+
+
+
+P48 is still supported in context home in attitude id 0
+{M46, MOLECULAR, [downCable : {relation: obj, NodeSet :[chair]}, downCable : {relation: properety, NodeSet :[heavy]}]}
+M46 is still not supported in context home in attitude id 0
+doAct is:true
+In Start case
+M47 act is sending a request checking if it has any preconditions
+[]
+Node{M49, MOLECULAR, [downCable : {relation: act, NodeSet :[M47]}, downCable : {relation: precondition, NodeSet :[A3]}]}created
+Trying to establish a channel from M47 to M49
+Channel of type Act is successfully created and used for further operations
+------------------------------------------------------------------------------------------------------------------------------------
+
+∂ Runner: In LowQueue
+Processing request with Context: home and Attitude: 0 of filter: {} and switch: {} requestedFrom M47 reportedBy M49.
+M49 Processing Requests as a Proposition node
+M49 is not supported
+remaiining Matches size:0
+------------------------------------------------------------------------------------------------------------------------------------
+AT ACT QUEUE
+
+
+
+P48 is still supported in context home in attitude id 0
+{M46, MOLECULAR, [downCable : {relation: obj, NodeSet :[chair]}, downCable : {relation: properety, NodeSet :[heavy]}]}
+M46 is still not supported in context home in attitude id 0
+doAct is:true
+In find_preconditions case
+M47 Processing Reports as act node 
+M47 act doesn't have preconditions
+------------------------------------------------------------------------------------------------------------------------------------
+AT ACT QUEUE
+
+
+
+P48 is still supported in context home in attitude id 0
+{M46, MOLECULAR, [downCable : {relation: obj, NodeSet :[chair]}, downCable : {relation: properety, NodeSet :[heavy]}]}
+M46 is still not supported in context home in attitude id 0
+doAct is:true
+In execute case
+------------------------------------------------------------------------------------------------------------------------------------
+AT EXECUTION QUEUE
+
+
+
+running M47 act's actuator
+------------------------------------------------------------------------------------------------------------------------------------
+The sequence of the scheduler is L A L A A EXE 
+[]
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.012 s -- in edu.guc.mind_graf.acting.rules.DoIfNodeTest
+[INFO] Running edu.guc.mind_graf.acting.rules.WhenDoNodeTest
+[]
+[]
+[]
+{0, BASE}
+{door, BASE}
+{opened, BASE}
+{close, BASE}
+{M50, MOLECULAR, [downCable : {relation: obj, NodeSet :[door]}, downCable : {relation: properety, NodeSet :[opened]}]}
+{M51, MOLECULAR, [downCable : {relation: obj, NodeSet :[door]}, downCable : {relation: action, NodeSet :[close]}]}
+{P52, MOLECULAR, [downCable : {relation: do, NodeSet :[M51]}, downCable : {relation: 0-when, NodeSet :[M50]}]}
+
+add() method initated.
+
+-------------------------
+Forward Inference initiated in Context: home & Attitude: 0
+Sending to rule nodes during add()
+Sending to matching nodes during add()
+Sending to WhenDo rule nodes during add()
+Sending Report (Context home and Attitude 0 and substitutions {} to null) through the channel (WhenRule of id 16)
+Testing report to be sent:
+It passed the filter test
+The report to P52 was just enqueued in the high priority queue to be processed
+the report was succefully sent over channel (WhenRule 16)
+------------------------------------------------------------------------------------------------------------------------------------
+
+∂ Runner: In HighQueue
+Processing report with Context home and Attitude 0 and substitutions {} to P52.
+P52 Processing Reports as a WhenDo node
+Act{M51, MOLECULAR, [downCable : {relation: obj, NodeSet :[door]}, downCable : {relation: action, NodeSet :[close]}]} scheduled successfully on the high act stack
+------------------------------------------------------------------------------------------------------------------------------------
+AT High ACT QUEUE
+
+
+
+M50 is still supported in context home in attitude id 0
+doAct is:true
+In Start case
+M51 act is sending a request checking if it has any preconditions
+[]
+Node{M53, MOLECULAR, [downCable : {relation: act, NodeSet :[M51]}, downCable : {relation: precondition, NodeSet :[A4]}]}created
+Trying to establish a channel from M51 to M53
+Channel of type Act is successfully created and used for further operations
+------------------------------------------------------------------------------------------------------------------------------------
+
+∂ Runner: In LowQueue
+Processing request with Context: home and Attitude: 0 of filter: {} and switch: {} requestedFrom M51 reportedBy M53.
+M53 Processing Requests as a Proposition node
+M53 is not supported
+remaiining Matches size:0
+------------------------------------------------------------------------------------------------------------------------------------
+AT High ACT QUEUE
+
+
+
+M50 is still supported in context home in attitude id 0
+doAct is:true
+In find_preconditions case
+M51 Processing Reports as act node 
+M51 act doesn't have preconditions
+------------------------------------------------------------------------------------------------------------------------------------
+AT High ACT QUEUE
+
+
+
+M50 is still supported in context home in attitude id 0
+doAct is:true
+In execute case
+------------------------------------------------------------------------------------------------------------------------------------
+AT EXECUTION QUEUE
+
+
+
+running M51 act's actuator
+------------------------------------------------------------------------------------------------------------------------------------
+The sequence of the scheduler is H HA L HA HA EXE 
+*New Knowledge inferred: []
+[]
+[]
+[]
+{0, BASE}
+{door, BASE}
+{opened, BASE}
+{close, BASE}
+{M54, MOLECULAR, [downCable : {relation: obj, NodeSet :[door]}, downCable : {relation: properety, NodeSet :[opened]}]}
+{M55, MOLECULAR, [downCable : {relation: obj, NodeSet :[door]}, downCable : {relation: action, NodeSet :[close]}]}
+{P56, MOLECULAR, [downCable : {relation: do, NodeSet :[M55]}, downCable : {relation: 0-when, NodeSet :[M54]}]}
+
+------------------------------------------------------------------------------------------------------------------------------------
+
+∂ Runner: In HighQueue
+Processing report with Context home and Attitude 0 and substitutions {} to P56.
+P56 Processing Reports as a WhenDo node
+Trying to establish a channel from P56 to M54
+Channel of type WhenRule is successfully created and used for further operations
+------------------------------------------------------------------------------------------------------------------------------------
+
+∂ Runner: In LowQueue
+Processing request with Context: home and Attitude: 0 of filter: {} and switch: {} requestedFrom P56 reportedBy M54.
+M54 Processing Requests as a Proposition node
+M54 is supported
+Sending Report (Context home and Attitude 0 and substitutions {} to P56) through the channel (WhenRule of id 20)
+Testing report to be sent:
+It passed the filter test
+The report to P56 was just enqueued in the high priority queue to be processed
+the report was succefully sent over channel (WhenRule 20)
+------------------------------------------------------------------------------------------------------------------------------------
+
+∂ Runner: In HighQueue
+Processing report with Context home and Attitude 0 and substitutions {} to P56.
+P56 Processing Reports as a WhenDo node
+Hey
+Act{M55, MOLECULAR, [downCable : {relation: obj, NodeSet :[door]}, downCable : {relation: action, NodeSet :[close]}]} scheduled successfully on the high act stack
+------------------------------------------------------------------------------------------------------------------------------------
+AT High ACT QUEUE
+
+
+
+M54 is still supported in context home in attitude id 0
+doAct is:true
+In Start case
+M55 act is sending a request checking if it has any preconditions
+[]
+Node{M57, MOLECULAR, [downCable : {relation: act, NodeSet :[M55]}, downCable : {relation: precondition, NodeSet :[A5]}]}created
+Trying to establish a channel from M55 to M57
+Channel of type Act is successfully created and used for further operations
+------------------------------------------------------------------------------------------------------------------------------------
+
+∂ Runner: In LowQueue
+Processing request with Context: home and Attitude: 0 of filter: {} and switch: {} requestedFrom M55 reportedBy M57.
+M57 Processing Requests as a Proposition node
+M57 is not supported
+remaiining Matches size:0
+------------------------------------------------------------------------------------------------------------------------------------
+AT High ACT QUEUE
+
+
+
+M54 is still supported in context home in attitude id 0
+doAct is:true
+In find_preconditions case
+M55 Processing Reports as act node 
+M55 act doesn't have preconditions
+------------------------------------------------------------------------------------------------------------------------------------
+AT High ACT QUEUE
+
+
+
+M54 is still supported in context home in attitude id 0
+doAct is:true
+In execute case
+------------------------------------------------------------------------------------------------------------------------------------
+AT EXECUTION QUEUE
+
+
+
+running M55 act's actuator
+------------------------------------------------------------------------------------------------------------------------------------
+[]
+[]
+[]
+[]
+[]
+{M58, MOLECULAR, [downCable : {relation: obj, NodeSet :[door]}, downCable : {relation: properety, NodeSet :[opened]}]}
+{M59, MOLECULAR, [downCable : {relation: obj, NodeSet :[door]}, downCable : {relation: action, NodeSet :[close]}]}
+{P60, MOLECULAR, [downCable : {relation: do, NodeSet :[M59]}, downCable : {relation: 0-when, NodeSet :[M58]}]}
+{M61, MOLECULAR, [downCable : {relation: obj, NodeSet :[room]}, downCable : {relation: properety, NodeSet :[ocuupied]}]}
+{P62, MOLECULAR, [downCable : {relation: ant, NodeSet :[M61]}, downCable : {relation: cq, NodeSet :[P60]}]}
+{0, BASE}
+{door, BASE}
+{opened, BASE}
+{close, BASE}
+{room, BASE}
+{ocuupied, BASE}
+
+add() method initated.
+
+-------------------------
+Forward Inference initiated in Context: home & Attitude: 0
+Sending to rule nodes during add()
+Sending to matching nodes during add()
+Sending to WhenDo rule nodes during add()
+Sending Report (Context home and Attitude 0 and substitutions {} to null) through the channel (WhenRule of id 23)
+Testing report to be sent:
+It passed the filter test
+The report to P60 was just enqueued in the high priority queue to be processed
+the report was succefully sent over channel (WhenRule 23)
+------------------------------------------------------------------------------------------------------------------------------------
+
+∂ Runner: In HighQueue
+Processing report with Context home and Attitude 0 and substitutions {} to P60.
+P60 Processing Reports as a WhenDo node
+P60 Processing Requests as a Rule node
+P60 Processing Requests as a Proposition node
+P60 is not supported
+Trying to establish a channel from P60 to P62
+Channel of type RuleCons is successfully created and used for further operations
+remaiining Matches size:0
+------------------------------------------------------------------------------------------------------------------------------------
+
+∂ Runner: In LowQueue
+Processing request with Context: home and Attitude: 0 of filter: {} and switch: {} requestedFrom P60 reportedBy P62.
+P62 Processing Requests as a Rule node
+P62 Processing Requests as a Proposition node
+P62 is supported
+Sending Report (Context home and Attitude 0 and substitutions {} to P60) through the channel (RuleCons of id 25)
+Testing report to be sent:
+It passed the filter test
+The report to P60 was just enqueued in the high priority queue to be processed
+the report was succefully sent over channel (RuleCons 25)
+------------------------------------------------------------------------------------------------------------------------------------
+
+∂ Runner: In HighQueue
+Processing report with Context home and Attitude 0 and substitutions {} to P60.
+P60 Processing Reports as a WhenDo node
+------------------------------------------------------------------------------------------------------------------------------------
+The sequence of the scheduler is H L H 
+*New Knowledge inferred: []
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in edu.guc.mind_graf.acting.rules.WhenDoNodeTest
+[INFO] Running edu.guc.mind_graf.set.FlagNodeSetTest
+[]
+[]
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in edu.guc.mind_graf.set.FlagNodeSetTest
+[INFO] Running edu.guc.mind_graf.set.RuleInfoSetTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in edu.guc.mind_graf.set.RuleInfoSetTest
+[INFO] Running edu.guc.mind_graf.mgip.matching.MatcherTest
+Testing Matcher...
+[]
+[]
+Testing Matcher...
+[]
+[]
+Testing Matcher...
+[]
+[]
+Testing Matcher...
+[]
+[]
+Testing Matcher...
+[]
+[]
+Testing Matcher...
+[]
+[]
+Testing Matcher...
+[]
+[]
+Testing Matcher...
+[]
+[]
+Testing Matcher...
+[]
+[]
+Testing Matcher...
+[]
+[]
+Testing Matcher...
+[]
+[]
+Testing Matcher...
+[]
+[]
+[]
+Testing Matcher...
+[]
+[]
+Testing Matcher...
+[]
+[]
+[]
+Testing Matcher...
+[]
+[]
+Testing Matcher...
+[]
+[]
+Testing Matcher...
+[]
+[]
+Testing Matcher...
+[]
+[]
+Testing Matcher...
+[]
+[]
+Testing Matcher...
+[]
+[]
+Testing Matcher...
+[]
+[]
+Testing Matcher...
+[]
+[]
+[INFO] Tests run: 22, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.023 s -- in edu.guc.mind_graf.mgip.matching.MatcherTest
+[INFO] Running edu.guc.mind_graf.mgip.rules.OrEntailmentTest
+[]
+[]
+[]
+[]
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in edu.guc.mind_graf.mgip.rules.OrEntailmentTest
+[INFO] Running edu.guc.mind_graf.mgip.rules.AndOrTest
+[]
+[]
+[]
+[]
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in edu.guc.mind_graf.mgip.rules.AndOrTest
+[INFO] Running edu.guc.mind_graf.mgip.rules.NumEntailmentTest
+[]
+[]
+[]
+[]
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in edu.guc.mind_graf.mgip.rules.NumEntailmentTest
+[INFO] Running edu.guc.mind_graf.mgip.rules.ThreshTest
+[]
+[]
+[]
+[]
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in edu.guc.mind_graf.mgip.rules.ThreshTest
+[INFO] Running edu.guc.mind_graf.mgip.rules.AndEntailmentTest
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in edu.guc.mind_graf.mgip.rules.AndEntailmentTest
+[INFO] Running edu.guc.mind_graf.mgip.rules.BridgeRuleTest
+[]
+[]
+[]
+[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.007 s <<< FAILURE! -- in edu.guc.mind_graf.mgip.rules.BridgeRuleTest
+[ERROR] edu.guc.mind_graf.mgip.rules.BridgeRuleTest.applyRuleHandler -- Time elapsed: 0.005 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <1> but was: <0>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:531)
+	at edu.guc.mind_graf.mgip.rules.BridgeRuleTest.applyRuleHandler(BridgeRuleTest.java:80)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+
+[INFO] Running edu.guc.mind_graf.mgip.ruleHandlers.SIndexTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in edu.guc.mind_graf.mgip.ruleHandlers.SIndexTest
+[INFO] Running edu.guc.mind_graf.mgip.ruleHandlers.PtreeTest
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in edu.guc.mind_graf.mgip.ruleHandlers.PtreeTest
+[INFO] Running edu.guc.mind_graf.mgip.ruleHandlers.RuleInfoTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in edu.guc.mind_graf.mgip.ruleHandlers.RuleInfoTest
+[INFO] Running edu.guc.mind_graf.mgip.ruleHandlers.PtreeNodeTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in edu.guc.mind_graf.mgip.ruleHandlers.PtreeNodeTest
+[INFO] Running edu.guc.mind_graf.mgip.ruleHandlers.OrEntailhandlerTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in edu.guc.mind_graf.mgip.ruleHandlers.OrEntailhandlerTest
+[INFO] Running edu.guc.mind_graf.mgip.ruleHandlers.SingletonTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in edu.guc.mind_graf.mgip.ruleHandlers.SingletonTest
+[INFO] Running edu.guc.mind_graf.mgip.ruleHandlers.LinearTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in edu.guc.mind_graf.mgip.ruleHandlers.LinearTest
+[INFO] Running edu.guc.mind_graf.mgip.ruleHandlers.RuleInfoHandlerTest
+[]
+[]
+[]
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in edu.guc.mind_graf.mgip.ruleHandlers.RuleInfoHandlerTest
+[INFO] Running edu.guc.mind_graf.control.AttitudeNodeTest
+Testing Attitude Node
+Testing example 1
+[]
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in edu.guc.mind_graf.control.AttitudeNodeTest
+[INFO] Running edu.guc.mind_graf.control.DoOneNodeTest
+Testing DoOne Node
+Testing example 1
+[]
+tmam
+dontdoit
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in edu.guc.mind_graf.control.DoOneNodeTest
+[INFO] Running edu.guc.mind_graf.control.SNSequenceNodeTest
+Testing SNSequence Node
+Testing example 1
+[]
+2
+3
+4
+pleasedontdoit
+dontdoit
+doit
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in edu.guc.mind_graf.control.SNSequenceNodeTest
+[INFO] Running edu.guc.mind_graf.control.SNIFNodeTest
+Testing SNIF Node
+Testing example 1
+[]
+[]
+Sending requests to guards
+Sending requests to guards
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in edu.guc.mind_graf.control.SNIFNodeTest
+[INFO] Running edu.guc.mind_graf.control.DoAllNodeTest
+Testing DoAll Node
+Testing example 1
+[]
+tmam
+dontdoit
+tmam
+doit
+tmam
+pleasedontdoit
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in edu.guc.mind_graf.control.DoAllNodeTest
+[INFO] Running edu.guc.mind_graf.control.AchieveNodeTest
+Testing Attitude Node
+Testing example 1
+[]
+[]
+{M155, MOLECULAR, [downCable : {relation: goal, NodeSet :[maro]}, downCable : {relation: plan, NodeSet :[A6]}]}
+Trying to establish a channel from M155 to M155
+Channel of type Act is successfully created and used for further operations
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in edu.guc.mind_graf.control.AchieveNodeTest
+[INFO] Running edu.guc.mind_graf.revision.RevisionTest
+Testing Revision
+[]
+manual contradiction handling test 1
+Testing Revision
+[]
+contradiction detection test 1
+checking contradictions
+found negation{M157, MOLECULAR, [downCable : {relation: min, NodeSet :[0]}, downCable : {relation: max, NodeSet :[0]}, downCable : {relation: arg, NodeSet :[p]}]}
+Found Contradictions: [{ node = p, contradicts = { node: { id: 570, name: M157}, in attitude: 0 }}]
+Testing Revision
+[]
+contradiction detection test 2
+checking contradictions
+found negation{M158, MOLECULAR, [downCable : {relation: min, NodeSet :[0]}, downCable : {relation: max, NodeSet :[0]}, downCable : {relation: arg, NodeSet :[p]}]}
+Found Contradictions: [{ node = p, contradicts = { node: { id: 573, name: M158}, in attitude: 2 }}, { node = p, contradicts = { node: { id: 573, name: M158}, in attitude: 2node: { id: 573, name: M158}, in attitude: 3 }}]
+Testing Revision
+[]
+contradiction detection test 3
+checking contradictions
+found negation{M159, MOLECULAR, [downCable : {relation: min, NodeSet :[0]}, downCable : {relation: max, NodeSet :[0]}, downCable : {relation: arg, NodeSet :[p]}]}
+Found Contradictions: []
+Testing Revision
+[]
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.009 s -- in edu.guc.mind_graf.revision.RevisionTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   BridgeRuleTest.applyRuleHandler:80 expected: <1> but was: <0>
+[INFO] 
+[ERROR] Tests run: 90, Failures: 1, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  3.433 s
+[INFO] Finished at: 2026-05-19T01:31:12+03:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.2.5:test (default-test) on project mindGRAF: There are test failures.
+[ERROR] 
+[ERROR] Please refer to /Users/hatem/University/thesis/my-thesis/HTN Planning/MindGRAF1.0/target/surefire-reports for the individual test results.
+[ERROR] Please refer to dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

@@ -4,14 +4,26 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import edu.guc.mind_graf.nodes.Node;
 
+/**
+ * MODIFIED for thesis integration (Author: Hatem Soliman, 2026-05-19)
+ * Change summary:
+ * - Internal storage uses `LinkedHashMap` to preserve insertion order so
+ *   plan selection is deterministic and stable across runs.
+ * - This change supports deterministic DoOne/DoAll scheduling and
+ *   predictable backtracking behavior.
+ *
+ * TODO: when migrating changes to the standalone HTN package, keep
+ * deterministic ordering guarantees or make ordering explicit in the API.
+ */
 public class NodeSet implements Iterable<Node> {
     private HashMap<String, Node> nodes;
     private boolean isFinal;
 
     public NodeSet() {
-        nodes = new HashMap<String, Node>();
+        nodes = new LinkedHashMap<String, Node>();
     }
 
     public NodeSet(HashMap<String, Node> nodes) {
@@ -19,7 +31,7 @@ public class NodeSet implements Iterable<Node> {
     }
 
     public NodeSet(Node... nodes) {
-        this.nodes = new HashMap<String, Node>();
+        this.nodes = new LinkedHashMap<String, Node>();
         for (Node n : nodes)
             this.nodes.put(n.getName(), n);
     }
