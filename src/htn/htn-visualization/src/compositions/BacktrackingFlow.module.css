@@ -1,0 +1,85 @@
+/* BacktrackingFlow.module.css */
+.container {
+  font-family: "Courier New", monospace;
+  background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%);
+  color: #e0e0ff;
+  padding: 40px;
+}
+
+.header {
+  font-size: 32px;
+  font-weight: bold;
+  margin-bottom: 40px;
+  background: linear-gradient(90deg, #ff6b9d, #4ecdc4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gridContainer {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 40px;
+}
+
+.section {
+  border-radius: 8px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+  border: 2px solid;
+}
+
+.sectionTitle {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.queueStack {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 8px;
+  min-height: 200px;
+}
+
+.queueItem {
+  padding: 10px;
+  border-radius: 4px;
+  text-align: center;
+  font-weight: bold;
+  transition: all 0.1s ease-out;
+}
+
+.eventLog {
+  margin-top: 40px;
+  padding: 20px;
+  border: 2px solid #95e1d3;
+  border-radius: 8px;
+  background-color: rgba(149, 225, 211, 0.05);
+}
+
+.eventItem {
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.warning {
+  color: #ff6b6b;
+}
+
+.success {
+  color: #95e1d3;
+}
+
+.accent1 {
+  color: #4ecdc4;
+}
+
+.accent2 {
+  color: #f38181;
+}
+
+.accent3 {
+  color: #ffe66d;
+}

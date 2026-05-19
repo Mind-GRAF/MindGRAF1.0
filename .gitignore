@@ -89,3 +89,13 @@ fabric.properties
 
 /target/
 /bin/
+
+# Node / Remotion visualization artifacts
+src/htn/htn-visualization/node_modules/
+src/htn/htn-visualization/.cache/
+src/htn/htn-visualization/.remotion/
+src/htn/htn-visualization/dist/
+src/htn/htn-visualization/backtracking-flow.mp4
+src/htn/htn-visualization/*.mp4
+src/htn/htn-visualization/*.webm
+src/htn/htn-visualization/*.mov

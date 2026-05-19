@@ -1,0 +1,21 @@
+{
+  "name": "htn-backtracking-visualization",
+  "version": "1.0.0",
+  "description": "Remotion video visualization of HTN deterministic backtracking with sibling preservation",
+  "scripts": {
+    "start": "remotion preview src/Root.tsx",
+    "build": "remotion render src/Root.tsx BacktrackingFlow --output-codec h264 --audio-codec aac -o backtracking-flow.mp4"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "remotion": "^4.0.100"
+  },
+  "devDependencies": {
+    "@remotion/cli": "^4.0.100",
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "typescript": "^5.0.0"
+  }
+}

@@ -1,0 +1,11 @@
+# Local Remotion / Node artifacts
+node_modules/
+.cache/
+.remotion/
+dist/
+
+# Generated renders
+*.mp4
+*.webm
+*.mov
+backtracking-flow.mp4
