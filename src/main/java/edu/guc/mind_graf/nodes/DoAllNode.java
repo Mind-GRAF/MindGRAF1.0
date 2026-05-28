@@ -41,6 +41,11 @@ public class DoAllNode extends ActNode {
     }
 
     @Override
+    public boolean isControlAct() {
+        return true;
+    }
+
+    @Override
     public void runActuator() {
         NodeSet acts = this.getDownCableSet().get("obj").getNodeSet();
         for (Node node : acts) {

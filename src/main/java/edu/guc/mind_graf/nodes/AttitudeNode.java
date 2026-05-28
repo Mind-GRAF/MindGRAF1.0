@@ -11,6 +11,11 @@ public class AttitudeNode extends ActNode {
         this.setPrimitive(true);
     }
 
+    @Override
+    public boolean isControlAct() {
+        return true;
+    }
+
     public void runActuator() {
         Context context = ContextController.getContext(ContextController.getCurrContextName());
         PropositionNode prop = (PropositionNode) this.getDownCableSet().get("obj").getNodeSet().getNode(0);

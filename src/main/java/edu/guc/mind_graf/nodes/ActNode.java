@@ -41,6 +41,17 @@ public class ActNode extends Node {
     private static int variableCount = 0;
     private ArrayList<Pair<HashMap<Integer, PropositionNodeSet>, HashMap<Integer, PropositionNodeSet>>> supports;
 
+    /**
+     * Determines if this primitive act is a "control" act (like DoAll, DoOne, 
+     * Sequence) whose semantics should be evaluated immediately during the 
+     * planning phase, rather than deferred to the real-world execution queue.
+     * 
+     * Returns false by default. Control nodes override this to return true.
+     */
+    public boolean isControlAct() {
+        return false;
+    }
+
     public void setPrimitive(boolean isPrimitive) {
         this.isPrimitive = isPrimitive;
     }
@@ -389,11 +400,18 @@ public class ActNode extends Node {
                     Scheduler.addToActQueue(this);
                     sendRequest(false);
                 } else {
-                    // NEW: fully validated primitive acts do not execute immediately.
-                    // They are deferred to the dedicated execution queue so that planning
-                    // stays complete before any actuator side effects happen.
-                    this.agenda = ActAgenda.DONE;
-                    Scheduler.addToExecutionQueue(this);
+                    if (this.isControlAct()) {
+                        // NEW: Control nodes run their planning semantics immediately.
+                        // This prevents them from hitting the execution queue and interleaving.
+                        this.agenda = ActAgenda.DONE;
+                        this.runActuator();
+                    } else {
+                        // NEW: fully validated real-world primitive acts (and IF nodes)
+                        // are deferred to the dedicated execution queue so that planning
+                        // stays complete before any actuator side effects happen.
+                        this.agenda = ActAgenda.DONE;
+                        Scheduler.addToExecutionQueue(this);
+                    }
                 }
 
                 break;

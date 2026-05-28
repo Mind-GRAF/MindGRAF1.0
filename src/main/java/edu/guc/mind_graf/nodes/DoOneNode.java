@@ -53,6 +53,11 @@ public class DoOneNode extends ActNode {
     }
 
     @Override
+    public boolean isControlAct() {
+        return true;
+    }
+
+    @Override
     public void runActuator() {
         NodeSet possibleActs = this.getDownCableSet().get("obj").getNodeSet();
         if (possibleActs.isEmpty()) {

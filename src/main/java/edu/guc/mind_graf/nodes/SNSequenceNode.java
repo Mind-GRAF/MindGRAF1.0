@@ -39,6 +39,11 @@ public class SNSequenceNode extends ActNode {
         this.setPrimitive(true);
     }
 
+    @Override
+    public boolean isControlAct() {
+        return true;
+    }
+
     //howa eshm3na fl SNSequence byb2a el node 3obara 3n object1 w object2 wl ba2y object bas
 
     @Override

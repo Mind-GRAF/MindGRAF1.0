@@ -20,6 +20,11 @@ public class AchieveNode extends ActNode {
     }
 
     @Override
+    public boolean isControlAct() {
+        return true;
+    }
+
+    @Override
     public void runActuator() throws NoSuchTypeException {
         switch(controlAgenda){
 			case START:
