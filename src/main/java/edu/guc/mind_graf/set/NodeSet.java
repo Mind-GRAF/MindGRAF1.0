@@ -4,26 +4,41 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
+
 import edu.guc.mind_graf.nodes.Node;
 
 /**
- * MODIFIED for thesis integration (Author: Hatem Soliman, 2026-05-19)
- * Change summary:
- * - Internal storage uses `LinkedHashMap` to preserve insertion order so
- *   plan selection is deterministic and stable across runs.
- * - This change supports deterministic DoOne/DoAll scheduling and
- *   predictable backtracking behavior.
+ * NodeSet — a named collection of Nodes, backed by HashMap.
  *
- * TODO: when migrating changes to the standalone HTN package, keep
- * deterministic ordering guarantees or make ordering explicit in the API.
+ * MODIFICATION HISTORY:
+ *
+ * [2026-05-19] (Author: Hatem Soliman) — Changed internal storage from
+ * HashMap to LinkedHashMap to preserve insertion order, aiming for
+ * deterministic plan selection in DoOne/DoAll scheduling and stable
+ * backtracking behavior.
+ *
+ * [2026-05-28] (Author: Hatem Soliman) — REVERTED back to HashMap per
+ * Dr.'s feedback. Rationale:
+ *   - Ordering in NodeSet is NOT required for correct backtracking.
+ *     Plan alternatives are independently stored in
+ *     Scheduler.PlanChoicePoint (as ArrayList<ActNode>), which preserves
+ *     its own insertion order. The already-chosen plan is popped, and any
+ *     remaining plan from the choice point can be tried regardless of
+ *     NodeSet iteration order.
+ *   - Keeping HashMap avoids risking breakage in other team members' code
+ *     that may depend on standard HashMap behavior/performance.
+ *
+ * TODO (future work): If deterministic ordering is ever needed at the
+ * NodeSet level (e.g., for reproducible traces independent of choice
+ * points), consider re-introducing LinkedHashMap defensively, ensuring
+ * all constructors consistently wrap in LinkedHashMap.
  */
 public class NodeSet implements Iterable<Node> {
     private HashMap<String, Node> nodes;
     private boolean isFinal;
 
     public NodeSet() {
-        nodes = new LinkedHashMap<String, Node>();
+        nodes = new HashMap<String, Node>();
     }
 
     public NodeSet(HashMap<String, Node> nodes) {
@@ -31,7 +46,7 @@ public class NodeSet implements Iterable<Node> {
     }
 
     public NodeSet(Node... nodes) {
-        this.nodes = new LinkedHashMap<String, Node>();
+        this.nodes = new HashMap<String, Node>();
         for (Node n : nodes)
             this.nodes.put(n.getName(), n);
     }

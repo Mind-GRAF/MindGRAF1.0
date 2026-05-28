@@ -1,7 +1,7 @@
 MARWA HTN Integration Changes
 
 Author: Hatem Soliman (marked edits)
-Date: 2026-05-19
+Date: 2026-05-19 (initial), 2026-05-28 (Dr.'s feedback revisions)
 
 This document summarizes the concrete changes made to Marwa-side code to implement deterministic planning, sibling-preserving backtracking, and a separate execution queue. For each affected file it shows a concise "Before" (original behavior) and "After" (current behavior) code fragment and a short English explanation and migration TODOs.
 
@@ -30,16 +30,17 @@ private static Deque<ActNode> executionQueue;  // NEW
 private static Stack<PlanChoicePoint> planChoicePoints;  // NEW
 
 private static final class PlanChoicePoint {
-    private final int actStackSize;
-    private final int executionQueueSize;
+    // RENAMED on 2026-05-28 (formerly: actStackSize, executionQueueSize)
+    private final int actQueueDepthAtSnapshot;
+    private final int executionQueueDepthAtSnapshot;
     private final ArrayList<ActNode> remainingAlternatives;
     private final String sourceActName;
     private int nextAlternativeIndex;
 
-    private PlanChoicePoint(int actStackSize, int executionQueueSize, ArrayList<ActNode> remainingAlternatives,
-            String sourceActName) {
-        this.actStackSize = actStackSize;
-        this.executionQueueSize = executionQueueSize;
+    private PlanChoicePoint(int actQueueDepthAtSnapshot, int executionQueueDepthAtSnapshot,
+            ArrayList<ActNode> remainingAlternatives, String sourceActName) {
+        this.actQueueDepthAtSnapshot = actQueueDepthAtSnapshot;
+        this.executionQueueDepthAtSnapshot = executionQueueDepthAtSnapshot;
         this.remainingAlternatives = remainingAlternatives;
         this.sourceActName = sourceActName;
         this.nextAlternativeIndex = 0;
@@ -65,8 +66,8 @@ private static boolean backtrackToNextAlternative() {
     while (!planChoicePoints.isEmpty()) {
         PlanChoicePoint choicePoint = planChoicePoints.peek();
         if (choicePoint.hasNextAlternative()) {
-            trimActQueueTo(choicePoint.actStackSize);
-            trimExecutionQueueTo(choicePoint.executionQueueSize);
+            trimActQueueTo(choicePoint.actQueueDepthAtSnapshot);
+            trimExecutionQueueTo(choicePoint.executionQueueDepthAtSnapshot);
             ActNode nextAlternative = choicePoint.nextAlternative();
             nextAlternative.restartAgenda();
             actQueue.push(nextAlternative);
@@ -146,24 +147,25 @@ public class NodeSet implements Iterable<Node> {
     }
 ```
 
-**After (current - key behavior):**
+**After (2026-05-19 → REVERTED on 2026-05-28):**
 ```java
 /**
- * MODIFIED for thesis integration (Author: Hatem Soliman, 2026-05-19)
- * Change summary:
- * - Internal storage uses `LinkedHashMap` to preserve insertion order so
- *   plan selection is deterministic and stable across runs.
+ * [2026-05-19] Changed HashMap → LinkedHashMap for deterministic ordering.
+ * [2026-05-28] REVERTED back to HashMap per Dr.'s feedback:
+ *   - Ordering not needed: PlanChoicePoint stores alternatives independently.
+ *   - Avoids breaking other team members' code.
+ *   - TODO (future): re-introduce LinkedHashMap defensively if needed.
  */
 public class NodeSet implements Iterable<Node> {
-    private HashMap<String, Node> nodes;  // Interface type kept for compatibility
+    private HashMap<String, Node> nodes;  // Back to HashMap
 
     public NodeSet() {
-        nodes = new LinkedHashMap<String, Node>();  // AFTER: LinkedHashMap for order preservation
+        nodes = new HashMap<String, Node>();  // REVERTED to HashMap
     }
 
     public Node getNode(int index) {
         int i = 0;
-        for (Node node : this.nodes.values()) {  // Now iterates in insertion order
+        for (Node node : this.nodes.values()) {
             if (i == index) {
                 return node;
             }
@@ -173,12 +175,12 @@ public class NodeSet implements Iterable<Node> {
     }
 ```
 
-**Why:**
-- Deterministic plan ordering is required for predictable DoOne/DoAll scheduling and repeatable backtracking.
-- `getNode(0)` now always returns the first alternative in insertion order, not randomly.
+**Why reverted:**
+- The Dr. confirmed that ordering in NodeSet is not required for correct backtracking. Plan alternatives are independently stored in `Scheduler.PlanChoicePoint` (as `ArrayList<ActNode>`), which preserves its own insertion order. The already-chosen plan is popped, and any remaining plan from the choice point can be tried regardless of NodeSet iteration order.
+- Keeping HashMap avoids risking breakage in other team members' code.
 
 **TODO / Migration:**
-- If planner semantics require a canonical ordering independent of insertion, replace with a sorted collection and document ordering criteria.
+- Future work: if deterministic ordering is ever needed at the NodeSet level (e.g., for reproducible traces independent of choice points), consider re-introducing LinkedHashMap defensively, ensuring all constructors consistently wrap in LinkedHashMap.
 
 ---
 
@@ -318,16 +320,28 @@ mvn test
 
 ---
 
-## Summary
+## Changes on 2026-05-28 (Dr.'s feedback session)
 
-IS THE INTEGRATION FULLY DONE?
-YES ✅ — For Whiteboard Semantics
-Your core requirement—deterministic planning with sibling-preserving backtracking—is 100% implemented and working:
+The following additional changes were made based on Dr.'s review feedback:
 
-✅ Choice-point stack saves sibling alternatives
-✅ Backtracking trims both act AND execution queues
-✅ Deterministic selection (first sibling first, always)
-✅ Planning-only semantics (no execution until planning completes)
-✅ All 5 files modified, commented, and documented
-✅ Focused tests pass (DoOneNodeTest, DoAllNodeTest)
-✅ Visualization demonstrates the flow
+### 1. NodeSet reverted from LinkedHashMap → HashMap
+- **Reason**: Ordering not needed; PlanChoicePoint stores alternatives independently.
+- **Files**: `NodeSet.java`
+
+### 2. PlanChoicePoint fields renamed for clarity
+- `actStackSize` → `actQueueDepthAtSnapshot`
+- `executionQueueSize` → `executionQueueDepthAtSnapshot`
+- **Reason**: Original names were ambiguous. New names clarify they are queue-depth snapshots taken at choice-point creation time, used to trim queues during backtracking.
+- **Files**: `Scheduler.java`
+
+### 3. Execution semantics documented for control nodes
+- Added extensive comments to `DoAllNode.java`, `DoOneNode.java`, `SNSequenceNode.java` explaining:
+  - Control nodes add to `actQueue` (planning), NOT `executionQueue` (real-world)
+  - Only leaf primitives reach the executionQueue
+  - Why: control nodes' outcomes are known during planning; leaf primitives need real-world execution
+- **Files**: `DoAllNode.java`, `DoOneNode.java`, `SNSequenceNode.java`
+
+### 4. Per-node-type semantics documented as design alternative
+- Added DESIGN NOTE to `DoOneNode.java` documenting the Dr.'s suggestion that each node type could manage its own agenda cycle (TRYING → RETRYING → DONE) instead of relying on the Scheduler's global backtrackToNextAlternative().
+- Left as future work.
+- **Files**: `DoOneNode.java`

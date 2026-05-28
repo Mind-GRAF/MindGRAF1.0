@@ -23,6 +23,13 @@ public class Scheduler {
      * - Added `planChoicePoints` to record sibling alternatives at choice points
      *   so Marwa-style act decomposition can backtrack without losing alternatives.
      *
+     * [2026-05-28] (Author: Hatem Soliman) — Renamed PlanChoicePoint fields:
+     *   actStackSize         → actQueueDepthAtSnapshot
+     *   executionQueueSize   → executionQueueDepthAtSnapshot
+     * These names better describe what they are: snapshots of queue depths at
+     * the moment a choice point is created. See PlanChoicePoint Javadoc for
+     * a detailed example of how backtracking uses these snapshots.
+     *
      * NOTES/TODO:
      * - This is an intentionally lightweight Marwa-side backtracking helper.
      * - Future work: extract choice-point/backtracking into the standalone
@@ -44,17 +51,68 @@ public class Scheduler {
     private static Hashtable<Report, PropositionNode> forwardAssertedNodes;
     private static Hashtable<Report, PropositionNode> backwardAssertedReplyNodes;
 
+    /**
+     * PlanChoicePoint — a snapshot of the scheduler state at the moment a
+     * DoOneNode chooses one alternative from a set of sibling plans.
+     *
+     * PURPOSE:
+     * When DoOneNode picks one alternative and schedules it, we save a
+     * choice point with the remaining siblings. If the chosen branch fails
+     * (throws NoPlansExistForTheActException), the Scheduler can backtrack
+     * by restoring the queue depths from this snapshot and trying the next
+     * sibling.
+     *
+     * FIELD EXPLANATIONS:
+     *
+     * - actQueueDepthAtSnapshot (formerly: actStackSize)
+     *     The number of ActNodes on the actQueue at the moment this choice
+     *     point was created. On backtracking, actQueue is trimmed to this
+     *     depth, removing all acts that were added during the failed branch
+     *     (sub-decompositions, precondition checks, etc.).
+     *
+     * - executionQueueDepthAtSnapshot (formerly: executionQueueSize)
+     *     The number of ActNodes on the executionQueue at the moment this
+     *     choice point was created. On backtracking, executionQueue is
+     *     trimmed to this depth, removing any leaf primitives that were
+     *     queued for real-world execution during the failed branch. This
+     *     prevents executing actions from an abandoned plan.
+     *
+     * WORKED EXAMPLE:
+     *
+     *   Suppose we have: actQueue = [A, B], executionQueue = [X].
+     *   DoOneNode faces alternatives {Plan1, Plan2, Plan3}.
+     *
+     *   1. Choice point created:
+     *        actQueueDepthAtSnapshot = 2  (A, B are on actQueue)
+     *        executionQueueDepthAtSnapshot = 1  (X is on executionQueue)
+     *        remainingAlternatives = [Plan2, Plan3]
+     *
+     *   2. Plan1 is scheduled → actQueue becomes [A, B, Plan1].
+     *      Plan1 decomposes → actQueue becomes [A, B, Plan1, Sub1, Sub2].
+     *      Sub1 is primitive → executionQueue becomes [X, Sub1].
+     *
+     *   3. Sub2 fails → NoPlansExistForTheActException thrown.
+     *
+     *   4. backtrackToNextAlternative():
+     *        trimActQueueTo(2)   → removes Sub2, Sub1, Plan1 → actQueue = [A, B]
+     *        trimExecutionQueueTo(1) → removes Sub1 → executionQueue = [X]
+     *        Schedules Plan2 → actQueue = [A, B, Plan2]
+     *
+     *   Everything added during the failed Plan1 branch is undone.
+     */
     private static final class PlanChoicePoint {
-        private final int actStackSize;
-        private final int executionQueueSize;
+        /** See class Javadoc — snapshot of actQueue.size() at creation. */
+        private final int actQueueDepthAtSnapshot;
+        /** See class Javadoc — snapshot of executionQueue.size() at creation. */
+        private final int executionQueueDepthAtSnapshot;
         private final ArrayList<ActNode> remainingAlternatives;
         private final String sourceActName;
         private int nextAlternativeIndex;
 
-        private PlanChoicePoint(int actStackSize, int executionQueueSize, ArrayList<ActNode> remainingAlternatives,
-                String sourceActName) {
-            this.actStackSize = actStackSize;
-            this.executionQueueSize = executionQueueSize;
+        private PlanChoicePoint(int actQueueDepthAtSnapshot, int executionQueueDepthAtSnapshot,
+                ArrayList<ActNode> remainingAlternatives, String sourceActName) {
+            this.actQueueDepthAtSnapshot = actQueueDepthAtSnapshot;
+            this.executionQueueDepthAtSnapshot = executionQueueDepthAtSnapshot;
             this.remainingAlternatives = remainingAlternatives;
             this.sourceActName = sourceActName;
             this.nextAlternativeIndex = 0;
@@ -237,9 +295,22 @@ public class Scheduler {
         executionQueue.add(actNode);
     }
 
+    /**
+     * Saves a choice point for a DoOneNode that is picking one alternative
+     * from a set of sibling plans.
+     *
+     * Records the current depths of actQueue and executionQueue so that
+     * backtracking can trim both queues to these depths, undoing everything
+     * that was added during the failed branch.
+     *
+     * @param sourceAct           the DoOneNode creating this choice point
+     * @param alternatives        the full set of sibling plans (first is already being tried)
+     * @param currentActStackSize the current actQueue.size() (renamed param from
+     *                            the call site; stored as actQueueDepthAtSnapshot)
+     */
     public static void pushPlanChoicePoint(ActNode sourceAct, edu.guc.mind_graf.set.NodeSet alternatives,
             int currentActStackSize) {
-        int currentExecutionQueueSize = executionQueue.size();
+        int currentExecutionQueueDepth = executionQueue.size();
         ArrayList<ActNode> remainingAlternatives = new ArrayList<ActNode>();
         boolean first = true;
         for (edu.guc.mind_graf.nodes.Node node : alternatives) {
@@ -251,7 +322,7 @@ public class Scheduler {
             remainingAlternatives.add(actNode);
         }
         if (!remainingAlternatives.isEmpty()) {
-            planChoicePoints.push(new PlanChoicePoint(currentActStackSize, currentExecutionQueueSize,
+            planChoicePoints.push(new PlanChoicePoint(currentActStackSize, currentExecutionQueueDepth,
                     remainingAlternatives, sourceAct.getName()));
             System.out.println("Saved choice point for " + sourceAct.getName() + " with "
                     + remainingAlternatives.size() + " remaining sibling(s)");
@@ -276,8 +347,8 @@ public class Scheduler {
         while (!planChoicePoints.isEmpty()) {
             PlanChoicePoint choicePoint = planChoicePoints.peek();
             if (choicePoint.hasNextAlternative()) {
-                trimActQueueTo(choicePoint.actStackSize);
-                trimExecutionQueueTo(choicePoint.executionQueueSize);
+                trimActQueueTo(choicePoint.actQueueDepthAtSnapshot);
+                trimExecutionQueueTo(choicePoint.executionQueueDepthAtSnapshot);
                 ActNode nextAlternative = choicePoint.nextAlternative();
                 nextAlternative.restartAgenda();
                 actQueue.push(nextAlternative);
