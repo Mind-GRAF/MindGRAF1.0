@@ -9,6 +9,7 @@ import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.mgip.ruleHandlers.FlagNode;
 import edu.guc.mind_graf.nodes.Node;
+import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.nodes.RuleNode;
 import edu.guc.mind_graf.set.FlagNodeSet;
 import edu.guc.mind_graf.set.NodeSet;
@@ -38,7 +39,7 @@ class AndOrTest {
         Node M0 = Network.createNode("propositionnode", new DownCableSet(fMember, fClass));
         Node M1 = Network.createNode("propositionnode", new DownCableSet(cMember, cClass));
         Node M2 = Network.createNode("propositionnode", new DownCableSet(dMember, dClass));
-        Node P0 = Network.createNode("AndOr", new DownCableSet(new DownCable(Network.getRelations().get("min"), new NodeSet(one)),
+        PropositionNode P0 = (PropositionNode) Network.createNode("AndOr", new DownCableSet(new DownCable(Network.getRelations().get("min"), new NodeSet(one)),
                 new DownCable(Network.getRelations().get("max"), new NodeSet(one)),
                 new DownCable(Network.getRelations().get("arg"), new NodeSet(M0, M1, M2))));
 

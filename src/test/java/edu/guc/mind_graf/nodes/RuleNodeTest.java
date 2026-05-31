@@ -18,6 +18,7 @@ import edu.guc.mind_graf.network.NetworkController;
 import edu.guc.mind_graf.relations.Relation;
 import edu.guc.mind_graf.set.FlagNodeSet;
 import edu.guc.mind_graf.set.NodeSet;
+import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.set.Set;
 import edu.guc.mind_graf.support.Support;
 import org.junit.jupiter.api.BeforeEach;
@@ -98,7 +99,7 @@ class RuleNodeTest {
         DownCable brainwashedC = new DownCable(brainwashed, new NodeSet(C));
         Node M5 = Network.createNode("propositionnode", new DownCableSet(brainwashG, brainwashedC));
 
-        Node P0 = Network.createNode("andentailment", new DownCableSet(new DownCable(Network.getRelations().get("ant"), new NodeSet(M0, M1, M2, M3, M4)),
+        PropositionNode P0 = (PropositionNode) Network.createNode("andentailment", new DownCableSet(new DownCable(Network.getRelations().get("ant"), new NodeSet(M0, M1, M2, M3, M4)),
                 new DownCable(Network.getRelations().get("cq"), new NodeSet(M5))));
 
         Substitutions govVSubs = new Substitutions();
@@ -231,7 +232,7 @@ class RuleNodeTest {
         DownCable aClass = new DownCable(Network.getRelations().get("class"), new NodeSet(Alive));
         Node M2 = Network.createNode("propositionnode", new DownCableSet(aMember, aClass));
 
-        Node P0 = Network.createNode("orentailment", new DownCableSet(new DownCable(Network.getRelations().get("ant"), new NodeSet(M0, M1)), new DownCable(Network.getRelations().get("cq"), new NodeSet(M2))));
+        PropositionNode P0 = (PropositionNode) Network.createNode("orentailment", new DownCableSet(new DownCable(Network.getRelations().get("ant"), new NodeSet(M0, M1)), new DownCable(Network.getRelations().get("cq"), new NodeSet(M2))));
         Report report0 = new Report(new Substitutions(), new Support(-1), 0, true, InferenceType.BACKWARD, P0, M0);
         report0.setReportType(ChannelType.AntRule);
         report0.setContextName("Mythology");
@@ -282,7 +283,7 @@ class RuleNodeTest {
         DownCable aClass = new DownCable(Network.getRelations().get("class"), new NodeSet(Alive));
         Node M2 = Network.createNode("propositionnode", new DownCableSet(aMember, aClass));
 
-        Node P0 = Network.createNode("numentailment", new DownCableSet(new DownCable(Network.getRelations().get("i"), new NodeSet(one)),
+        PropositionNode P0 = (PropositionNode) Network.createNode("numentailment", new DownCableSet(new DownCable(Network.getRelations().get("i"), new NodeSet(one)),
                 new DownCable(Network.getRelations().get("ant"), new NodeSet(M0, M1)),
                 new DownCable(Network.getRelations().get("cq"), new NodeSet(M2))));
         Report testReport = new Report(new Substitutions(), new Support(-1), 0, true, InferenceType.BACKWARD, P0, M0);
@@ -324,7 +325,7 @@ class RuleNodeTest {
         DownCable magClass = new DownCable(Network.getRelations().get("class"), new NodeSet(magician));
         Node M4 = Network.createNode("propositionnode", new DownCableSet(magMember, magClass));
 
-        Node P0 = Network.createNode("numentailment", new DownCableSet(new DownCable(Network.getRelations().get("i"), new NodeSet(three)),
+        PropositionNode P0 = (PropositionNode) Network.createNode("numentailment", new DownCableSet(new DownCable(Network.getRelations().get("i"), new NodeSet(three)),
                 new DownCable(Network.getRelations().get("ant"), new NodeSet(M0, M1, M2, M3)),
                 new DownCable(Network.getRelations().get("cq"), new NodeSet(M4))));
 
@@ -389,7 +390,7 @@ class RuleNodeTest {
         Node M0 = Network.createNode("propositionnode", new DownCableSet(fMember, fClass));
         Node M1 = Network.createNode("propositionnode", new DownCableSet(cMember, cClass));
         Node M2 = Network.createNode("propositionnode", new DownCableSet(dMember, dClass));
-        Node P0 = Network.createNode("AndOr", new DownCableSet(new DownCable(Network.getRelations().get("min"), new NodeSet(one)),
+        PropositionNode P0 = (PropositionNode) Network.createNode("AndOr", new DownCableSet(new DownCable(Network.getRelations().get("min"), new NodeSet(one)),
                 new DownCable(Network.getRelations().get("max"), new NodeSet(one)),
                 new DownCable(Network.getRelations().get("arg"), new NodeSet(M0, M1, M2))));
 
@@ -436,7 +437,7 @@ class RuleNodeTest {
         Node M1 = Network.createNode("propositionnode", new DownCableSet(mMember, mClass));
         Node M2 = Network.createNode("propositionnode", new DownCableSet(bMember, bClass));
 
-        Node P0 = Network.createNode("thresh", new DownCableSet(new DownCable(Network.getRelations().get("thresh"), new NodeSet(one)),
+        PropositionNode P0 = (PropositionNode) Network.createNode("thresh", new DownCableSet(new DownCable(Network.getRelations().get("thresh"), new NodeSet(one)),
                 new DownCable(Network.getRelations().get("threshmax"), new NodeSet(two)),
                 new DownCable(Network.getRelations().get("arg"), new NodeSet(M0, M1, M2))));
 
@@ -483,7 +484,7 @@ class RuleNodeTest {
         Node M1 = Network.createNode("propositionnode", new DownCableSet(mMember, mClass));
         Node M2 = Network.createNode("propositionnode", new DownCableSet(bMember, bClass));
 
-        Node P0 = Network.createNode("thresh", new DownCableSet(new DownCable(Network.getRelations().get("thresh"), new NodeSet(one)),
+        PropositionNode P0 = (PropositionNode) Network.createNode("thresh", new DownCableSet(new DownCable(Network.getRelations().get("thresh"), new NodeSet(one)),
                 new DownCable(Network.getRelations().get("threshmax"), new NodeSet(two)),
                 new DownCable(Network.getRelations().get("arg"), new NodeSet(M0, M1, M2))));
         Substitutions rSubs = new Substitutions();

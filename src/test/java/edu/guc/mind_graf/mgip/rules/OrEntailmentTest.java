@@ -10,6 +10,7 @@ import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.mgip.ruleHandlers.FlagNode;
 import edu.guc.mind_graf.nodes.Node;
+import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.nodes.RuleNode;
 import edu.guc.mind_graf.set.FlagNodeSet;
 import edu.guc.mind_graf.set.NodeSet;
@@ -42,7 +43,7 @@ class OrEntailmentTest {
         DownCable aClass = new DownCable(Network.getRelations().get("class"), new NodeSet(Alive));
         Node M2 = Network.createNode("propositionnode", new DownCableSet(aMember, aClass));
 
-        Node P0 = Network.createNode("orentailment", new DownCableSet(new DownCable(Network.getRelations().get("ant"), new NodeSet(M0, M1)), new DownCable(Network.getRelations().get("cq"), new NodeSet(M2))));
+        PropositionNode P0 = (PropositionNode) Network.createNode("orentailment", new DownCableSet(new DownCable(Network.getRelations().get("ant"), new NodeSet(M0, M1)), new DownCable(Network.getRelations().get("cq"), new NodeSet(M2))));
 
         FlagNodeSet flags = new FlagNodeSet(new FlagNode(M0, true, new Support(-1)));
         RuleInfoSet inserted = ((RuleNode)P0).getRuleInfoHandler().insertRI(new RuleInfo("", 0, 1, 0, new Substitutions(), flags, new Support(-1)));

@@ -10,6 +10,7 @@ import edu.guc.mind_graf.mgip.ruleHandlers.RuleInfo;
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.mgip.ruleHandlers.FlagNode;
 import edu.guc.mind_graf.nodes.Node;
+import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.nodes.RuleNode;
 import edu.guc.mind_graf.set.FlagNodeSet;
 import edu.guc.mind_graf.set.NodeSet;
@@ -41,7 +42,7 @@ class ThreshTest {
         Node M1 = Network.createNode("propositionnode", new DownCableSet(mMember, mClass));
         Node M2 = Network.createNode("propositionnode", new DownCableSet(bMember, bClass));
 
-        Node P0 = Network.createNode("thresh", new DownCableSet(new DownCable(Network.getRelations().get("thresh"), new NodeSet(one)),
+        PropositionNode P0 = (PropositionNode) Network.createNode("thresh", new DownCableSet(new DownCable(Network.getRelations().get("thresh"), new NodeSet(one)),
                 new DownCable(Network.getRelations().get("threshmax"), new NodeSet(two)),
                 new DownCable(Network.getRelations().get("arg"), new NodeSet(M0, M1, M2))));
 

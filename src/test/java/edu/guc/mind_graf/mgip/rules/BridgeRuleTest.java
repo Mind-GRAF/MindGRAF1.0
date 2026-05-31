@@ -13,6 +13,7 @@ import edu.guc.mind_graf.mgip.requests.ChannelType;
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.network.NetworkController;
 import edu.guc.mind_graf.nodes.Node;
+import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.nodes.RuleNode;
 import edu.guc.mind_graf.relations.Relation;
 import edu.guc.mind_graf.set.NodeSet;
@@ -68,7 +69,7 @@ class BridgeRuleTest {
         DownCable belief = new DownCable(Network.createRelation("0-ant", "", Adjustability.EXPAND, 2), new NodeSet(M0));
         DownCable capability = new DownCable(Network.createRelation("1-ant", "", Adjustability.EXPAND, 2), new NodeSet(M1));
         DownCable obligation = new DownCable(Network.createRelation("2-cq", "", Adjustability.EXPAND, 2), new NodeSet(M2));
-        Node P0 = Network.createNode("bridgerule", new DownCableSet(belief, capability, obligation));
+        PropositionNode P0 = (PropositionNode) Network.createNode("bridgerule", new DownCableSet(belief, capability, obligation));
 
         Node paris = Network.createNode("paris", "propositionnode");
         Substitutions subs1 = new Substitutions();
