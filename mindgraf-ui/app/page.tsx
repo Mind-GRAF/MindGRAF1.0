@@ -1,5 +1,89 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
+
+// ─── SVG Icons ─────────────────────────────────────────────────────────────
+const BrainIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 4.5a2.5 2.5 0 0 0-4.96-.46 2.5 2.5 0 0 0-1.98 3 2.5 2.5 0 0 0-1.32 4.24 3 3 0 0 0 .34 5.58 2.5 2.5 0 0 0 2.96 3.08 2.5 2.5 0 0 0 4.91.05L12 20V4.5Z" />
+    <path d="M12 4.5a2.5 2.5 0 0 1 4.96-.46 2.5 2.5 0 0 1 1.98 3 2.5 2.5 0 0 1 1.32 4.24 3 3 0 0 1-.34 5.58 2.5 2.5 0 0 1-2.96 3.08 2.5 2.5 0 0 1-4.91.05L12 20V4.5Z" />
+  </svg>
+);
+
+const UserIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
+  </svg>
+);
+
+const TerminalIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="4 17 10 11 4 5" />
+    <line x1="12" y1="19" x2="20" y2="19" />
+  </svg>
+);
+
+const NetworkIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z" />
+  </svg>
+);
+
+const GlobeIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+    <path d="M2 12h20" />
+  </svg>
+);
+
+const SearchIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="11" cy="11" r="8" />
+    <path d="m21 21-4.3-4.3" />
+  </svg>
+);
+
+const ZapIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+  </svg>
+);
+
+const SendIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="12" y1="19" x2="12" y2="5" />
+    <polyline points="5 12 12 5 19 12" />
+  </svg>
+);
+
+const SettingsIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="3" />
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+  </svg>
+);
+
+const PlayIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polygon points="5 3 19 12 5 21 5 3" />
+  </svg>
+);
+
+const AlertIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="8" x2="12" y2="12" />
+    <line x1="12" y1="16" x2="12.01" y2="16" />
+  </svg>
+);
+
+const CheckIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+    <polyline points="22 4 12 14.01 9 11.01" />
+  </svg>
+);
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 interface TranslateResponse {
@@ -12,258 +96,478 @@ interface TranslateResponse {
   error?: string;
 }
 
-// ─── Status badge colours ────────────────────────────────────────────────────
-function categoryColor(cat: string) {
-  const map: Record<string, string> = {
-    structural: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300",
-    knowledge:  "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
-    query:      "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300",
-    inference:  "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
-    system:     "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
-    other:      "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400",
-  };
-  return map[cat] ?? map.other;
+interface ChatMessage {
+  id: string;
+  type: "user" | "ai" | "system" | "error";
+  text: string;
+  response?: TranslateResponse;
+  timestamp: Date;
 }
 
-export default function Home() {
-  const [input, setInput]       = useState("");
-  const [context, setContext]   = useState("hogwarts");
-  const [attitude, setAttitude] = useState("belief");
-  const [loading, setLoading]   = useState(false);
-  const [lastResult, setLastResult] = useState<TranslateResponse | null>(null);
-  const [statusMsg, setStatusMsg]   = useState("Idle. Awaiting commands.");
-  const [booted, setBooted]         = useState(false);
+// ─── Formatter ─────────────────────────────────────────────────────────────
+const formatTime = (date: Date) => {
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+};
 
-  // ── Boot sequence / Context Switch ─────────────────────────────────────────
+// ─── Example prompts ────────────────────────────────────────────────────────
+const PROMPTS = [
+  { icon: <NetworkIcon />, text: "Define a relation called mother" },
+  { icon: <GlobeIcon />, text: "Create a context named hogwarts" },
+  { icon: <SearchIcon />, text: "Who is Harry Potter's mother?" },
+  { icon: <ZapIcon />, text: "Add a node for Hermione Granger" },
+];
+
+export default function Home() {
+  // ── State ───────────────────────────────────────────────────────────────────
+  const [input, setInput] = useState("");
+  const [context, setContext] = useState("hogwarts");
+  const [attitude, setAttitude] = useState("belief");
+  const [loading, setLoading] = useState(false);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [statusType, setStatusType] = useState<"idle" | "ready" | "error" | "loading">("idle");
+  const [booted, setBooted] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+  const chatEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // ── Auto-scroll ─────────────────────────────────────────────────────────────
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, loading]);
+
+  // ── Auto-resize textarea ───────────────────────────────────────────────────
+  const autoResize = useCallback(() => {
+    const ta = textareaRef.current;
+    if (!ta) return;
+    ta.style.height = "24px";
+    ta.style.height = Math.min(ta.scrollHeight, 120) + "px";
+  }, []);
+
+  useEffect(() => {
+    autoResize();
+  }, [input, autoResize]);
+
+  // ── Boot / Context Switch ──────────────────────────────────────────────────
   const initializeEnvironment = async () => {
     setLoading(true);
+    setStatusType("loading");
+    setSettingsOpen(false);
+
+    // Add a system message to chat to show we are doing setup
+    const initMsgId = crypto.randomUUID();
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: initMsgId,
+        type: "system",
+        text: `Starting initialization for Context: "${context}" & Attitude: "${attitude}"...`,
+        timestamp: new Date(),
+      },
+    ]);
+
     try {
       if (!booted) {
-        setStatusMsg("Booting MindGRAF engine…");
         const bootRes = await fetch("http://localhost:8080/execute", {
           method: "POST",
           body: `boot-wizard ${attitude}`,
         });
-        if (!bootRes.ok) throw new Error("Java rejected the Boot Wizard.");
+        if (!bootRes.ok) throw new Error("Java engine rejected the Boot Wizard initialization.");
         setBooted(true);
       }
 
-      setStatusMsg(`Setting up context "${context}"…`);
       const ctxRes = await fetch("http://localhost:8080/execute", {
         method: "POST",
         body: `define-context ${context}`,
       });
-      // "Already exists" is fine — idempotent
       if (!ctxRes.ok) {
         const t = await ctxRes.text();
-        if (!t.toLowerCase().includes("already exist"))
-          throw new Error("Java rejected Context definition.");
+        if (!t.toLowerCase().includes("already exist")) {
+          throw new Error(`Java rejected Context definition for "${context}".`);
+        }
       }
 
-      // Explicitly set the current context and attitude
       const setCtxRes = await fetch("http://localhost:8080/execute", {
         method: "POST",
         body: `set-curr-context ${context}`,
       });
-      if (!setCtxRes.ok) throw new Error("Java rejected Context switch.");
+      if (!setCtxRes.ok) throw new Error("Java rejected Context switch command.");
 
       const setAttRes = await fetch("http://localhost:8080/execute", {
         method: "POST",
         body: `set-attitude ${attitude}`,
       });
-      if (!setAttRes.ok) throw new Error("Java rejected Attitude switch.");
+      if (!setAttRes.ok) throw new Error("Java rejected Attitude switch command.");
 
-      setStatusMsg(
-        `✅ Ready — context: "${context}", attitude: "${attitude}"`
-      );
+      // Success
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          type: "system",
+          text: "Initialization successful. MindGRAF engine is ready.",
+          timestamp: new Date(),
+        },
+      ]);
+      setStatusType("ready");
+
     } catch (err) {
-      setStatusMsg(`❌ Setup Error: ${err instanceof Error ? err.message : err}`);
+      const msg = err instanceof Error ? err.message : String(err);
+      // Log error directly in chat
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          type: "error",
+          text: `Initialization Error: ${msg}`,
+          timestamp: new Date(),
+        },
+      ]);
+      setStatusType("error");
     } finally {
       setLoading(false);
     }
   };
 
-  // ── Main pipeline ──────────────────────────────────────────────────────────
-  const processNaturalLanguage = async () => {
-    if (!input.trim()) return;
+  // ── Process natural language ──────────────────────────────────────────────
+  const processNaturalLanguage = async (overrideInput?: string) => {
+    const text = (overrideInput ?? input).trim();
+    if (!text) return;
+
+    const userMsg: ChatMessage = {
+      id: crypto.randomUUID(),
+      type: "user",
+      text,
+      timestamp: new Date(),
+    };
+    setMessages((prev) => [...prev, userMsg]);
+    setInput("");
     setLoading(true);
-    setStatusMsg("Running LangGraph pipeline…");
-    setLastResult(null);
+    setStatusType("loading");
 
     try {
       const res = await fetch("/api/translate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          englishText: input,
+          englishText: text,
           contextName: context,
           attitudeName: attitude,
         }),
       });
 
       const data: TranslateResponse = await res.json();
-      setLastResult(data);
 
       if (!res.ok || data.error) {
-        setStatusMsg(`❌ Pipeline error: ${data.error ?? "unknown"}`);
-      } else if (data.success) {
-        setStatusMsg(`✅ Success${data.retryCount ? ` (${data.retryCount} retr${data.retryCount === 1 ? "y" : "ies"})` : ""}`);
-        setInput("");
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: crypto.randomUUID(),
+            type: "error",
+            text: `Pipeline Error: ${data.error ?? "Unknown issue occurred"}`,
+            timestamp: new Date(),
+          },
+        ]);
+        setStatusType("error");
       } else {
-        setStatusMsg(
-          `⚠️ Max retries reached — command may not have been accepted.`
-        );
+        const aiMsg: ChatMessage = {
+          id: crypto.randomUUID(),
+          type: "ai",
+          text: data.success ? "Command Executed Successfully" : "Command processed with warnings",
+          response: data,
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, aiMsg]);
+        setStatusType(data.success ? "ready" : "error");
+        
+        if (!data.success) {
+           setMessages((prev) => [
+            ...prev,
+            {
+              id: crypto.randomUUID(),
+              type: "error",
+              text: `Max retries reached — command may not have been accepted.`,
+              timestamp: new Date(),
+            },
+          ]);
+        }
       }
     } catch (err) {
-      setStatusMsg(`❌ Network error: ${err instanceof Error ? err.message : err}`);
+      const msg = err instanceof Error ? err.message : String(err);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          type: "error",
+          text: `Network Error: ${msg}`,
+          timestamp: new Date(),
+        },
+      ]);
+      setStatusType("error");
     } finally {
       setLoading(false);
     }
   };
 
-  // ── Render ─────────────────────────────────────────────────────────────────
+  const hasInput = input.trim().length > 0;
+
+  // Header status string based on type
+  const getHeaderStatusText = () => {
+    switch (statusType) {
+      case "loading": return "Processing...";
+      case "ready": return "Connected";
+      case "error": return "Error State";
+      default: return "Idle";
+    }
+  };
+
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-zinc-50 dark:bg-black p-8 font-sans">
-      <main className="w-full max-w-2xl flex flex-col gap-6 bg-white dark:bg-zinc-900 p-8 rounded-xl shadow-lg border border-zinc-200 dark:border-zinc-800">
+    <>
+      {/* Ambient background orbs */}
+      <div className="ambient-bg" aria-hidden="true">
+        <div className="ambient-orb ambient-orb-1" />
+        <div className="ambient-orb ambient-orb-2" />
+        <div className="ambient-orb ambient-orb-3" />
+      </div>
 
-        {/* Header */}
-        <div className="flex justify-between items-center border-b border-zinc-200 dark:border-zinc-800 pb-4">
-          <div>
-            <h1 className="text-3xl font-semibold tracking-tight text-black dark:text-zinc-50">
-              MindGRAF NLI
-            </h1>
-            <p className="text-xs text-zinc-400 mt-0.5">
-              LangGraph · Self-Healing Pipeline · Phase 1
-            </p>
+      <div className="app-shell">
+        {/* ── Header ──────────────────────────────────────────────────────── */}
+        <header className="app-header">
+          <div className="header-left">
+            <span className="logo-icon" aria-hidden="true"><BrainIcon /></span>
+            <span className="app-title">MindGRAF</span>
+            <span className="app-subtitle">NLI</span>
           </div>
-          <button
-            id="btn-init"
-            onClick={initializeEnvironment}
-            disabled={loading}
-            className={`px-4 py-2 rounded font-bold transition-colors text-sm ${
-              booted
-                ? "bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-900/40 dark:text-indigo-300"
-                : "bg-emerald-600 hover:bg-emerald-700 text-white"
-            }`}
-          >
-            {booted ? "Switch Context" : "Initialize Engine"}
-          </button>
+
+          <div className="header-right">
+            <div className={`status-dot ${statusType}`} />
+            <span className="status-text">{getHeaderStatusText()}</span>
+
+            <button
+              id="btn-settings"
+              className={`header-btn ${settingsOpen ? "active" : ""}`}
+              onClick={() => setSettingsOpen((o) => !o)}
+              title="Settings"
+            >
+              <SettingsIcon />
+              <span>Settings</span>
+            </button>
+
+            <button
+              id="btn-init"
+              className="header-btn primary"
+              onClick={initializeEnvironment}
+              disabled={loading}
+            >
+              <PlayIcon />
+              <span>{booted ? "Switch Context" : "Initialize"}</span>
+            </button>
+          </div>
+        </header>
+
+        {/* ── Settings Panel ──────────────────────────────────────────────── */}
+        <div className={`settings-panel ${settingsOpen ? "open" : ""}`}>
+          <div className="settings-grid">
+            <div className="settings-field">
+              <label htmlFor="input-context" className="settings-label">
+                Context
+              </label>
+              <input
+                id="input-context"
+                className="settings-input"
+                value={context}
+                onChange={(e) => setContext(e.target.value)}
+              />
+            </div>
+            <div className="settings-field">
+              <label htmlFor="input-attitude" className="settings-label">
+                Attitude
+              </label>
+              <input
+                id="input-attitude"
+                className="settings-input"
+                value={attitude}
+                onChange={(e) => setAttitude(e.target.value)}
+              />
+            </div>
+          </div>
         </div>
 
-        {/* Context / Attitude */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="text-xs font-bold text-zinc-500 mb-1 block uppercase tracking-wider">
-              Context
-            </label>
-            <input
-              id="input-context"
-              className="w-full p-3 border rounded-lg bg-zinc-50 dark:bg-zinc-800 dark:border-zinc-700 text-black dark:text-white outline-none focus:ring-2 focus:ring-indigo-400"
-              value={context}
-              onChange={(e) => setContext(e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="text-xs font-bold text-zinc-500 mb-1 block uppercase tracking-wider">
-              Attitude
-            </label>
-            <input
-              id="input-attitude"
-              className="w-full p-3 border rounded-lg bg-zinc-50 dark:bg-zinc-800 dark:border-zinc-700 text-black dark:text-white outline-none focus:ring-2 focus:ring-indigo-400"
-              value={attitude}
-              onChange={(e) => setAttitude(e.target.value)}
-            />
-          </div>
+        {/* ── Chat Area ───────────────────────────────────────────────────── */}
+        <div className="chat-area">
+          {messages.length === 0 && !loading ? (
+            /* Empty state */
+            <div className="empty-state">
+              <div className="empty-logo"><BrainIcon /></div>
+              <h1 className="empty-title">What would you like to explore?</h1>
+              <p className="empty-subtitle">
+                Ask anything in natural language — I&apos;ll translate it into MindGRAF
+                commands and execute them for you.
+              </p>
+              <div className="prompt-cards">
+                {PROMPTS.map((p, i) => (
+                  <button
+                    key={i}
+                    className="prompt-card"
+                    onClick={() => processNaturalLanguage(p.text)}
+                  >
+                    <div className="prompt-card-icon">{p.icon}</div>
+                    <div className="prompt-card-text">{p.text}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            /* Messages */
+            <>
+              {messages.map((msg) => (
+                <div key={msg.id} className={`message ${msg.type}`}>
+                  
+                  {/* System & Error messages don't have avatars, they are full width banners */}
+                  {msg.type === "system" || msg.type === "error" ? (
+                    <div className={`system-banner ${msg.type}`}>
+                      {msg.type === "system" ? <CheckIcon /> : <AlertIcon />}
+                      <span className="system-text">{msg.text}</span>
+                      <span className="system-time">{formatTime(msg.timestamp)}</span>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Avatar for User / AI */}
+                      <div className={`avatar ${msg.type}`}>
+                        {msg.type === "user" ? <UserIcon /> : <TerminalIcon />}
+                      </div>
+
+                      <div className="msg-content">
+                        {/* Header */}
+                        <div className="msg-header">
+                          <span className={`msg-name ${msg.type}`}>
+                            {msg.type === "user" ? "You" : "MindGRAF"}
+                          </span>
+                          <span className="msg-time">{formatTime(msg.timestamp)}</span>
+                        </div>
+
+                        {/* Content */}
+                        {msg.type === "user" ? (
+                          <div className="msg-text">{msg.text}</div>
+                        ) : (
+                          <div className="response-card">
+                            {msg.response ? (
+                              <>
+                                {/* Category Label */}
+                                {msg.response.category && (
+                                  <div className="card-category">
+                                    <span className="cat-dot" />
+                                    {msg.response.category}
+                                  </div>
+                                )}
+
+                                {/* Command Block */}
+                                {msg.response.command && (
+                                  <div className="card-section">
+                                    <span className="section-label">Generated Command</span>
+                                    <div className="command-block">
+                                      {msg.response.command}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Response Block */}
+                                {msg.response.javaResponse && (
+                                  <div className="card-section">
+                                    <span className="section-label">Response</span>
+                                    <div className="response-text">
+                                      {msg.response.javaResponse}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Errors Details */}
+                                {msg.response.errors && msg.response.errors.length > 0 && (
+                                  <div className="card-section">
+                                    <details>
+                                      <summary className="error-toggle">
+                                        {msg.response.errors.length} error(s) in retry history
+                                      </summary>
+                                      <ul className="error-list">
+                                        {msg.response.errors.map((e, i) => (
+                                          <li key={i} className="error-item">{e}</li>
+                                        ))}
+                                      </ul>
+                                    </details>
+                                  </div>
+                                )}
+                              </>
+                            ) : (
+                              <div className="response-text">{msg.text}</div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+
+              {/* Loading indicator */}
+              {loading && (
+                <div className="message ai">
+                  <div className="avatar ai">
+                    <TerminalIcon />
+                  </div>
+                  <div className="msg-content">
+                    <div className="msg-header">
+                      <span className="msg-name ai">MindGRAF</span>
+                    </div>
+                    <div className="loading-dots">
+                      <span />
+                      <span />
+                      <span />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+          <div ref={chatEndRef} />
         </div>
 
-        {/* Input */}
-        <div className="flex flex-col gap-3">
-          <textarea
-            id="input-nl"
-            rows={2}
-            className="w-full p-4 border rounded-lg bg-zinc-50 dark:bg-zinc-800 dark:border-zinc-700 text-black dark:text-white outline-none focus:ring-2 focus:ring-indigo-500 transition-all resize-none"
-            placeholder='e.g. "Define a relation for mother" or "Create a context named hogwarts"'
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                processNaturalLanguage();
-              }
-            }}
-          />
-          <button
-            id="btn-process"
-            onClick={processNaturalLanguage}
-            disabled={loading || !input.trim()}
-            className="w-full bg-indigo-600 disabled:bg-indigo-300 text-white h-12 rounded-lg font-bold transition-colors hover:bg-indigo-700"
-          >
-            {loading ? "Processing…" : "Process Intent"}
-          </button>
-        </div>
-
-        {/* Status bar */}
-        <div className="p-3 rounded-lg bg-zinc-100 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-sm">
-          <span className="font-semibold text-zinc-700 dark:text-zinc-300">Status: </span>
-          <span className="text-zinc-600 dark:text-zinc-400">{statusMsg}</span>
-        </div>
-
-        {/* Pipeline result card */}
-        {lastResult && !lastResult.error && (
-          <div className="flex flex-col gap-3 p-4 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/50 text-sm">
-            {/* Category badge */}
-            {lastResult.category && (
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-zinc-400 uppercase tracking-wider w-24">Category</span>
-                <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${categoryColor(lastResult.category)}`}>
-                  {lastResult.category}
-                </span>
-              </div>
-            )}
-            {/* Generated command */}
-            {lastResult.command && (
-              <div className="flex items-start gap-2">
-                <span className="text-xs text-zinc-400 uppercase tracking-wider w-24 pt-0.5">Command</span>
-                <code className="flex-1 font-mono text-xs bg-zinc-900 text-emerald-400 px-3 py-2 rounded break-all">
-                  {lastResult.command}
-                </code>
-              </div>
-            )}
-            {/* Java response */}
-            {lastResult.javaResponse && (
-              <div className="flex items-start gap-2">
-                <span className="text-xs text-zinc-400 uppercase tracking-wider w-24 pt-0.5">Java</span>
-                <span className="flex-1 text-zinc-600 dark:text-zinc-400 break-all">
-                  {lastResult.javaResponse}
-                </span>
-              </div>
-            )}
-            {/* Retries */}
-            {(lastResult.retryCount ?? 0) > 0 && (
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-zinc-400 uppercase tracking-wider w-24">Retries</span>
-                <span className="text-amber-600 dark:text-amber-400 font-semibold">
-                  {lastResult.retryCount}
-                </span>
-              </div>
-            )}
-            {/* Error history */}
-            {lastResult.errors && lastResult.errors.length > 0 && (
-              <details className="mt-1">
-                <summary className="text-xs text-zinc-400 cursor-pointer hover:text-zinc-600">
-                  {lastResult.errors.length} error(s) in retry history
-                </summary>
-                <ul className="mt-2 space-y-1 pl-2 border-l-2 border-red-300">
-                  {lastResult.errors.map((e, i) => (
-                    <li key={i} className="text-xs text-red-500 dark:text-red-400">{e}</li>
-                  ))}
-                </ul>
-              </details>
-            )}
+        {/* ── Footer / Input ──────────────────────────────────────────────── */}
+        <footer className="app-footer">
+          <div className="input-container">
+            <div className="input-wrapper">
+              <textarea
+                ref={textareaRef}
+                id="input-nl"
+                className="chat-input"
+                rows={1}
+                placeholder="Describe what you want to do in natural language..."
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    processNaturalLanguage();
+                  }
+                }}
+              />
+              <button
+                id="btn-process"
+                className={`send-btn ${hasInput ? "active" : ""}`}
+                onClick={() => processNaturalLanguage()}
+                disabled={loading || !hasInput}
+                aria-label="Send message"
+              >
+                <SendIcon />
+              </button>
+            </div>
+            <div className="keyboard-hint">
+              <span><kbd>Enter</kbd> to send</span>
+              <span><kbd>Shift</kbd> + <kbd>Enter</kbd> for new line</span>
+            </div>
           </div>
-        )}
-
-      </main>
-    </div>
+        </footer>
+      </div>
+    </>
   );
 }
