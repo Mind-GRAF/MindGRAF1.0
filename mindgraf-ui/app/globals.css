@@ -319,7 +319,7 @@ button, input, textarea, select {
 }
 
 .settings-panel.open {
-  max-height: 120px;
+  max-height: 260px;
   opacity: 1;
   padding: 16px 24px;
   border-bottom-color: var(--border-subtle);
@@ -360,6 +360,109 @@ button, input, textarea, select {
 .settings-input:focus {
   border-color: var(--accent-1);
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+/* ─── Attitude Chips ────────────────────────────────────────────────────────── */
+.attitude-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.attitude-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  letter-spacing: 0.01em;
+  line-height: 1.4;
+}
+
+.attitude-chip:hover:not(.locked) {
+  border-color: var(--border-active);
+  color: var(--text-primary);
+  background: var(--bg-glass-hover);
+}
+
+.attitude-chip.selected {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.45);
+  color: var(--accent-3);
+}
+
+.attitude-chip.selected:hover:not(.locked) {
+  background: rgba(59, 130, 246, 0.22);
+  border-color: rgba(59, 130, 246, 0.65);
+}
+
+.attitude-chip.locked {
+  cursor: default;
+  opacity: 0.85;
+}
+
+.chip-lock {
+  font-size: 10px;
+  line-height: 1;
+}
+
+.chip-remove {
+  font-size: 10px;
+  opacity: 0.6;
+  margin-left: 2px;
+  line-height: 1;
+  transition: opacity var(--transition-fast);
+}
+
+.attitude-chip:hover .chip-remove {
+  opacity: 1;
+}
+
+/* ─── Custom Attitude Input Row ─────────────────────────────────────────────── */
+.custom-att-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.custom-att-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.add-att-btn {
+  padding: 8px 14px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border-active);
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--accent-3);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.add-att-btn:hover:not(:disabled) {
+  background: rgba(59, 130, 246, 0.2);
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.2);
+}
+
+.add-att-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.custom-att-chips {
+  margin-top: 6px;
 }
 
 /* ─── Chat Area ────────────────────────────────────────────────────────────── */

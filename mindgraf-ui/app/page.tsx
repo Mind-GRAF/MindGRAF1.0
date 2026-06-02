@@ -121,12 +121,17 @@ export default function Home() {
   // ── State ───────────────────────────────────────────────────────────────────
   const [input, setInput] = useState("");
   const [context, setContext] = useState("hogwarts");
-  const [attitude, setAttitude] = useState("belief");
+  // Multiple attitudes — belief is always index 0 and cannot be deselected
+  const [attitudes, setAttitudes] = useState<string[]>(["belief"]);
+  const [customAttInput, setCustomAttInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [statusType, setStatusType] = useState<"idle" | "ready" | "error" | "loading">("idle");
   const [booted, setBooted] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+
+  // Well-known attitude presets shown as chips
+  const KNOWN_ATTITUDES = ["belief", "love", "fear", "desire", "regret", "intention"];
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -144,15 +149,33 @@ export default function Home() {
     ta.style.height = Math.min(ta.scrollHeight, 120) + "px";
   }, []);
 
+  // ── Toggle an attitude chip ────────────────────────────────────────────────
+  const toggleAttitude = (att: string) => {
+    if (att === "belief") return; // belief is always required
+    setAttitudes((prev) =>
+      prev.includes(att) ? prev.filter((a) => a !== att) : [...prev, att]
+    );
+  };
+
+  // ── Add a custom attitude ─────────────────────────────────────────────────
+  const addCustomAttitude = () => {
+    const name = customAttInput.trim().toLowerCase();
+    if (!name || attitudes.includes(name)) { setCustomAttInput(""); return; }
+    setAttitudes((prev) => [...prev, name]);
+    setCustomAttInput("");
+  };
+
   useEffect(() => {
     autoResize();
   }, [input, autoResize]);
 
   // ── Boot / Context Switch ──────────────────────────────────────────────────
   const initializeEnvironment = async () => {
+
     setLoading(true);
     setStatusType("loading");
     setSettingsOpen(false);
+    const attitudeStr = attitudes.join(",");
 
     // Add a system message to chat to show we are doing setup
     const initMsgId = crypto.randomUUID();
@@ -161,7 +184,7 @@ export default function Home() {
       {
         id: initMsgId,
         type: "system",
-        text: `Starting initialization for Context: "${context}" & Attitude: "${attitude}"...`,
+        text: `Starting initialization for Context: "${context}" & Attitudes: [${attitudeStr}]...`,
         timestamp: new Date(),
       },
     ]);
@@ -170,7 +193,7 @@ export default function Home() {
       if (!booted) {
         const bootRes = await fetch("http://localhost:8080/execute", {
           method: "POST",
-          body: `boot-wizard ${attitude}`,
+          body: `boot-wizard ${attitudeStr}`,
         });
         if (!bootRes.ok) throw new Error("Java engine rejected the Boot Wizard initialization.");
         setBooted(true);
@@ -193,11 +216,14 @@ export default function Home() {
       });
       if (!setCtxRes.ok) throw new Error("Java rejected Context switch command.");
 
-      const setAttRes = await fetch("http://localhost:8080/execute", {
-        method: "POST",
-        body: `set-attitude ${attitude}`,
-      });
-      if (!setAttRes.ok) throw new Error("Java rejected Attitude switch command.");
+      // Set each attitude individually (set-attitude takes one at a time)
+      for (const att of attitudes) {
+        const setAttRes = await fetch("http://localhost:8080/execute", {
+          method: "POST",
+          body: `set-attitude ${att}`,
+        });
+        if (!setAttRes.ok) throw new Error(`Java rejected Attitude switch command for "${att}".`);
+      }
 
       // Success
       setMessages((prev) => [
@@ -252,7 +278,7 @@ export default function Home() {
         body: JSON.stringify({
           englishText: text,
           contextName: context,
-          attitudeName: attitude,
+          attitudeName: attitudes[0], // primary attitude (belief) drives inference
         }),
       });
 
@@ -279,9 +305,9 @@ export default function Home() {
         };
         setMessages((prev) => [...prev, aiMsg]);
         setStatusType(data.success ? "ready" : "error");
-        
+
         if (!data.success) {
-           setMessages((prev) => [
+          setMessages((prev) => [
             ...prev,
             {
               id: crypto.randomUUID(),
@@ -315,7 +341,7 @@ export default function Home() {
   const getHeaderStatusText = () => {
     switch (statusType) {
       case "loading": return "Processing...";
-      case "ready": return "Connected";
+      case "ready": return `Connected · ${attitudes.join(" + ")}`;
       case "error": return "Error State";
       default: return "Idle";
     }
@@ -381,15 +407,59 @@ export default function Home() {
               />
             </div>
             <div className="settings-field">
-              <label htmlFor="input-attitude" className="settings-label">
-                Attitude
-              </label>
-              <input
-                id="input-attitude"
-                className="settings-input"
-                value={attitude}
-                onChange={(e) => setAttitude(e.target.value)}
-              />
+              <label className="settings-label">Attitudes</label>
+              {/* Chip toggles for known attitudes */}
+              <div className="attitude-chips">
+                {KNOWN_ATTITUDES.map((att) => (
+                  <button
+                    key={att}
+                    id={`att-chip-${att}`}
+                    className={`attitude-chip ${attitudes.includes(att) ? "selected" : ""} ${att === "belief" ? "locked" : ""}`}
+                    onClick={() => toggleAttitude(att)}
+                    title={att === "belief" ? "belief is always active" : `Toggle ${att}`}
+                  >
+                    {att === "belief" && <span className="chip-lock">🔒</span>}
+                    {att}
+                    {attitudes.includes(att) && att !== "belief" && (
+                      <span className="chip-remove">✕</span>
+                    )}
+                  </button>
+                ))}
+              </div>
+              {/* Custom attitude input */}
+              <div className="custom-att-row">
+                <input
+                  id="input-custom-attitude"
+                  className="settings-input custom-att-input"
+                  placeholder="Add custom attitude…"
+                  value={customAttInput}
+                  onChange={(e) => setCustomAttInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") addCustomAttitude(); }}
+                />
+                <button
+                  id="btn-add-attitude"
+                  className="add-att-btn"
+                  onClick={addCustomAttitude}
+                  disabled={!customAttInput.trim()}
+                >
+                  + Add
+                </button>
+              </div>
+              {/* Show custom (non-known) attitudes as removable chips */}
+              {attitudes.filter(a => !KNOWN_ATTITUDES.includes(a)).length > 0 && (
+                <div className="attitude-chips custom-att-chips">
+                  {attitudes.filter(a => !KNOWN_ATTITUDES.includes(a)).map((att) => (
+                    <button
+                      key={att}
+                      id={`att-chip-custom-${att}`}
+                      className="attitude-chip selected"
+                      onClick={() => toggleAttitude(att)}
+                    >
+                      {att}<span className="chip-remove">✕</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -423,7 +493,7 @@ export default function Home() {
             <>
               {messages.map((msg) => (
                 <div key={msg.id} className={`message ${msg.type}`}>
-                  
+
                   {/* System & Error messages don't have avatars, they are full width banners */}
                   {msg.type === "system" || msg.type === "error" ? (
                     <div className={`system-banner ${msg.type}`}>

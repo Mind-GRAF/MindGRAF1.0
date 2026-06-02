@@ -10,7 +10,19 @@ const SNEPS_GRAMMAR_RULES = `
 CRITICAL GRAMMAR RULES: 
 1. Predicate names must be single alphanumeric strings. You MUST NOT use hyphens (-), spaces, or special characters. Use underscores (_) instead (e.g., use has_wand(x) NOT has-wand(x)).
 2. Universal Quantifiers: If you are generating a rule with variables (e.g., an if-then statement), you MUST wrap the entire rule in a forall() quantifier. Example: forall(x)({wizard(x?)} &=> {has_wand(x?)}). Never generate a rule with variables without the forall() wrapper.
-3. No Empty Predicates: A predicate MUST always contain at least one argument (entity or variable). You cannot use empty brackets (). If the user asks a general yes/no question, rephrase it to apply to a specific entity. Example: instead of moon_is_cheese(), use is_cheese(moon).`;
+3. No Empty Predicates: A predicate MUST always contain at least one argument (entity or variable). You cannot use empty brackets (). If the user asks a general yes/no question, rephrase it to apply to a specific entity. Example: instead of moon_is_cheese(), use is_cheese(moon).
+4. You are a direct, literal translator for a formal logic engine. You MUST extract and use the exact, literal relation name provided by the user. DO NOT use synonyms. DO NOT map words to broader categories.
+The subject of the sentence MUST go first in the parentheses, and the object goes second. Format: relation(Subject, Object).
+Examples:
+User: "mary is the mother of dina"
+Output: add-to-context mother(Mary, Dina)
+
+User: "john is the boss of mark"
+Output: add-to-context boss(John, Mark)
+
+User: "the car is red"
+Output: add-to-context red(car)`;
+
 export const ROUTER_PROMPT = `You are a command classifier for MindGRAF, a SNePS-based semantic network engine.
 
 Classify the user's natural language request into ONE of these categories:
