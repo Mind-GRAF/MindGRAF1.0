@@ -104,4 +104,12 @@ public class ChannelSet implements Iterable<Channel> {
         }
     }
 
+    /**
+     * Clears all AntRule channels so that stale entity-bound filters from a
+     * previous add() cycle do not block subsequent entity reports.
+     */
+    public void clearAntRuleChannels() {
+        channels.get(ChannelType.AntRule).clear();
+    }
+
 }

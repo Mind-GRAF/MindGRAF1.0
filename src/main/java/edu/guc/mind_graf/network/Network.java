@@ -25,6 +25,7 @@ import edu.guc.mind_graf.nodes.IndividualNode;
 import edu.guc.mind_graf.nodes.MolecularType;
 import edu.guc.mind_graf.nodes.Node;
 import edu.guc.mind_graf.nodes.PropositionNode;
+import edu.guc.mind_graf.nodes.RuleNode;
 import edu.guc.mind_graf.nodes.MGIfNode;
 import edu.guc.mind_graf.nodes.MGIterateNode;
 import edu.guc.mind_graf.nodes.MGSequenceNode;
@@ -535,6 +536,36 @@ public class Network {
 			result += node.toString() + "\n";
 		}
 		System.out.println(result);
+	}
+
+	/**
+	 * Resets the per-cycle forward inference state so that each call to
+	 * PropositionNode.add() processes every new entity independently.
+	 *
+	 * Specifically:
+	 * 1. Resets the forwardReport latch on every RuleNode so subsequent
+	 *    entity assertions are not silently dropped.
+	 * 2. Resets the forwardDone latch on every PropositionNode so the fresh
+	 *    sendReportToNodeSet path is taken (not the stale forwardChannels replay).
+	 * 3. Clears AntRule channels from both outgoingChannels and forwardChannels
+	 *    on every PropositionNode so stale entity-bound filter substitutions
+	 *    from a prior add() cycle do not block new entities.
+	 */
+	public static void resetForwardInferenceState() {
+		for (Node node : nodes.values()) {
+			if (node instanceof RuleNode) {
+				((RuleNode) node).setForwardReport(false);
+			}
+			if (node instanceof PropositionNode) {
+				PropositionNode pn = (PropositionNode) node;
+				// Reset the forwardDone latch so the fresh sendReportToNodeSet
+				// path is taken instead of replaying stale forwardChannels.
+				pn.setForwardDone(false);
+				// Clear entity-bound AntRule channels from both channel sets.
+				pn.getOutgoingChannels().clearAntRuleChannels();
+				pn.getForwardChannels().clearAntRuleChannels();
+			}
+		}
 	}
 
 	public static void main(String[] args) throws Exception {

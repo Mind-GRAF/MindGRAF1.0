@@ -1086,6 +1086,10 @@ public class PropositionNode extends Node {
         System.out.println("-------------------------");
         /* END - Helpful Prints */
         Scheduler.initiate();
+        // Reset per-cycle forward inference state: clears the isForwardReport latch on
+        // all rule nodes and purges stale entity-bound AntRule channels so that each
+        // new base-fact assertion is processed independently by universal rules.
+        Network.resetForwardInferenceState();
         //String currentContextName = ContextController.getCurrContextName();
 
         // Scanner scanner = new Scanner(System.in);

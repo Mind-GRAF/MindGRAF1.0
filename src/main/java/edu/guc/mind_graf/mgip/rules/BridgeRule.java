@@ -273,20 +273,16 @@ public class BridgeRule extends RuleNode {
                                 currentReportContextName,
                                 currentReportAttitudeID);
                         if (compatibilityCheck && supportCheck) {
-                            if (notBound) {
-                                if (!this.isForwardReport()) {
-                                    this.setForwardReport(true);
+                            // Guard only wraps the one-time antecedent-request setup;
+                            // subsequent entities must also trigger their antecedents.
+                            if (!this.isForwardReport()) {
+                                this.setForwardReport(true);
+                                if (notBound) {
                                     requestAntecedentsNotAlreadyWorkingOn(tempRequest, currentKnownInstance);
-                                }
-
-                            } else {
-                                if (!this.isForwardReport()) {
-                                    this.setForwardReport(true);
+                                } else {
                                     requestAntecedentsNotAlreadyWorkingOn(tempRequest);
                                 }
-
                             }
-
                         }
                     }
                     if (!this.isForwardReport()) {

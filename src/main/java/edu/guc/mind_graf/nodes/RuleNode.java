@@ -439,24 +439,19 @@ public abstract class RuleNode extends PropositionNode {
                                 currentReportContextName,
                                 currentReportAttitudeID);
                         if (compatibilityCheck && supportCheck) {
-
-                            if (notBound) {
-                                if (!this.isForwardReport()) {
-                                    this.setForwardReport(true);
+                            // Guard only wraps the one-time antecedent-request setup;
+                            // applyRuleHandler must fire for every entity (removed early return).
+                            if (!this.isForwardReport()) {
+                                this.setForwardReport(true);
+                                if (notBound) {
                                     requestAntecedentsNotAlreadyWorkingOn(tempRequest, currentKnownInstance);
-                                    return;
-                                }
-                            } else {
-                                if (!this.isForwardReport()) {
-                                    this.setForwardReport(true);
+                                } else {
                                     requestAntecedentsNotAlreadyWorkingOn(tempRequest);
-                                    return;
-
                                 }
                             }
-
                         }
                     }
+                    // Always apply the rule handler so every arriving entity triggers inference.
                     applyRuleHandler(currentReport);
                     if (!this.isForwardReport()) {
                         this.setForwardReport(true);
