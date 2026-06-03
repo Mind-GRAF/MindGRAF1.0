@@ -136,6 +136,50 @@ export default function Home() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
+  // ── Server restart detection ────────────────────────────────────────────────
+  // Polls the silent /initialized endpoint (not /execute) every 5 seconds.
+  // If the Java server restarts, engineInitialized resets to false on the Java
+  // side. This detects it and resets the UI so the user is prompted to re-init.
+  useEffect(() => {
+    if (!booted) return; // Only watch when we think we're connected
+
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch("http://localhost:8080/initialized");
+        const text = await res.text();
+        if (text.trim() === "false") {
+          // Server restarted — reset UI state
+          setBooted(false);
+          setStatusType("idle");
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: crypto.randomUUID(),
+              type: "error",
+              text: "⚠️ Java engine restarted and is no longer initialized. Please click \"Initialize Engine\" again.",
+              timestamp: new Date(),
+            },
+          ]);
+        }
+      } catch {
+        // Server is unreachable — also reset
+        setBooted(false);
+        setStatusType("idle");
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: crypto.randomUUID(),
+            type: "error",
+            text: "⚠️ Cannot reach the Java engine. Please make sure it is running, then click \"Initialize Engine\".",
+            timestamp: new Date(),
+          },
+        ]);
+      }
+    }, 5000); // Check every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [booted]);
+
   // ── Auto-resize textarea ───────────────────────────────────────────────────
   const autoResize = useCallback(() => {
     const ta = textareaRef.current;

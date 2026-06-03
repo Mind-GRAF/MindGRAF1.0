@@ -40,13 +40,18 @@ Classify the user's natural language request into ONE of these categories:
                in the semantic network. This includes stating propositions, negations,
                asserting that something is true, removing beliefs, activating nodes,
                OR STATING RULES/IMPLICATIONS (if...then, all X are Y, every X implies Y).
-               Keywords: is, are, has, add, remove, assert, believe, not, activate, fact,
-               if, then, implies, every, all, whenever, rule.
+               NEGATIVE ASSERTIONS like "X doesn't/don't/isn't/aren't Y" are ALWAYS knowledge, UNLESS the sentence starts with a question word (does, do, did, is, are, can).
+               Keywords: is, are, add, remove, assert, believe, not, activate, fact,
+               if, then, implies, every, all, whenever, rule,
+               doesn't, don't, didn't, isn't, aren't.
 
 "query"      — The user wants to ASK A QUESTION, CHECK a truth value, get an explanation,
                list or describe contexts/attitudes, or retrieve supported hypotheses.
-               Keywords: is...?, why, why not, check, true, false, list, show, describe,
-               contexts, attitudes, supported, hypotheses, current.
+               A sentence is a QUERY if it starts with any question word or auxiliary verb:
+               does, do, did, is, are, was, were, can, could, has, have, had, will, would,
+               should, what, why, which, who, when, where, list, show, describe, check, tell.
+               Keywords: ?, does, do, did, is...?, are...?, can, why, why not, check,
+               list, show, describe, contexts, attitudes, supported, hypotheses, current.
 
 "inference"  — The user wants to RUN INFERENCE, REASON, DERIVE new knowledge,
                propagate beliefs forward or backward, execute an act, or clear/reset
@@ -65,6 +70,19 @@ Classify the user's natural language request into ONE of these categories:
 
 "other"      — Everything else.
 
+CRITICAL DISAMBIGUATION RULE (apply in this PRIORITY ORDER):
+1. HIGHEST PRIORITY — If the sentence's FIRST WORD is: does, do, did, is, are, was, were, can, could, will, would, should, what, why, which, who, when, where → it is ALWAYS "query". No exceptions.
+2. SECOND — If the sentence contains: doesn't, don't, didn't, isn't, aren't AND does NOT start with a question word → it is "knowledge" (negative assertion).
+3. DEFAULT — If the sentence is a plain statement (subject + verb + object), it is "knowledge".
+
+Examples to illustrate priority:
+- "Does Harry have a wand?" → first word is "does" → PRIORITY 1 → query
+- "Does harry have a wnad" → first word is "does" → PRIORITY 1 → query  
+- "Harry doesn't have a wand" → first word is "harry" (not a question word), contains "doesn't" → PRIORITY 2 → knowledge
+- "Kareem doenst have a gf" → first word is "kareem" → PRIORITY 3 → knowledge
+- "Is Dina a student?" → first word is "is" → PRIORITY 1 → query
+- "Dina is not a student" → first word is "dina" → PRIORITY 3 → knowledge
+
 Output ONLY the category word: structural  OR  knowledge  OR  query  OR  inference  OR  system  OR  other
 No punctuation, no explanation, no extra text.
 
@@ -74,7 +92,13 @@ Examples:
 "Set the mode to 3" → structural
 "Define a path for ancestor using transitive closure" → structural
 "Dina is a student" → knowledge
+"Nour likes Jimmy" → knowledge
 "Mary is not a teacher" → knowledge
+"Kareem doesn't have a girlfriend" → knowledge
+"Kareem doenst have a gf" → knowledge
+"Nour doesn't like Jimmy" → knowledge
+"Ahmed has no car" → knowledge
+"Sara never studies" → knowledge
 "Remove the fact that Dina is smart" → knowledge
 "Add the fact that Ahmed teaches CS" → knowledge
 "Activate the node student(Dina)" → knowledge
@@ -83,6 +107,13 @@ Examples:
 "Every dog is an animal" → knowledge
 "If x is a parent of y then x is older than y" → knowledge
 "Is Dina a student?" → query
+"Does Nour like Jimmy?" → query
+"Does Nour like Jimmy" → query
+"Does Harry have a wand?" → query
+"Does harry have a wnad" → query
+"Do students learn?" → query
+"Did Ahmed teach CS?" → query
+"Can we say Dina is smart?" → query
 "Why is Mary a teacher?" → query
 "Why isn't Dina smart?" → query
 "List all contexts" → query
@@ -91,6 +122,7 @@ Examples:
 "What is the current context?" → query
 "What attitudes are available?" → query
 "Show me the supported hypotheses" → query
+"Is it true that Mary is a teacher?" → query
 "Propagate what we know about Dina being a student" → inference
 "What follows from student(Dina)?" → inference
 "Deduce whether Dina is smart" → inference
@@ -109,6 +141,7 @@ Examples:
 "Define attitudes belief, intention, and obligation" → system
 "Set consistent attitudes belief and intention" → system
 `;
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GROUP 1: STRUCTURAL DEFINITION SPECIALIST

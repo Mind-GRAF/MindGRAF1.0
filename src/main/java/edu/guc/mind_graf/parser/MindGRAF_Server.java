@@ -149,6 +149,11 @@ public class MindGRAF_Server {
 
         // Simple health check to see if the server is up
         app.get("/health", ctx -> ctx.result("Mind is active."));
+
+        // Silent initialization status check — used by the UI to detect server restarts.
+        // Returns "true" if the engine has been booted, "false" otherwise.
+        // Does NOT route through the command parser and prints nothing to the console.
+        app.get("/initialized", ctx -> ctx.result(engineInitialized ? "true" : "false"));
     }
 
     // ===================================================================
