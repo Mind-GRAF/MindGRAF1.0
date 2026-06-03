@@ -145,7 +145,8 @@ export async function structuralSpecialistNode(
     .replace(/```$/gm, "")          
     .split("\n")
     .map((l) => l.trim())
-    .filter((l) => l.length > 0)[0] ?? raw; // Take first real line
+    .filter((l) => l.length > 0)
+    .join("\n") || raw; // Take all lines
 
   return { generatedCommand: command };
 }
@@ -178,7 +179,8 @@ export async function knowledgeSpecialistNode(
     .replace(/```$/gm, "")          
     .split("\n")
     .map((l) => l.trim())
-    .filter((l) => l.length > 0)[0] ?? raw; // Take first real line
+    .filter((l) => l.length > 0)
+    .join("\n") || raw; // Take all lines
 
   return { generatedCommand: command };
 }
@@ -211,7 +213,8 @@ export async function querySpecialistNode(
     .replace(/```$/gm, "")          
     .split("\n")
     .map((l) => l.trim())
-    .filter((l) => l.length > 0)[0] ?? raw; // Take first real line
+    .filter((l) => l.length > 0)
+    .join("\n") || raw; // Take all lines
 
   return { generatedCommand: command };
 }
@@ -244,7 +247,8 @@ export async function inferenceSpecialistNode(
     .replace(/```$/gm, "")          
     .split("\n")
     .map((l) => l.trim())
-    .filter((l) => l.length > 0)[0] ?? raw; // Take first real line
+    .filter((l) => l.length > 0)
+    .join("\n") || raw; // Take all lines
 
   return { generatedCommand: command };
 }
@@ -277,7 +281,8 @@ export async function systemSpecialistNode(
     .replace(/```$/gm, "")          
     .split("\n")
     .map((l) => l.trim())
-    .filter((l) => l.length > 0)[0] ?? raw; // Take first real line
+    .filter((l) => l.length > 0)
+    .join("\n") || raw; // Take all lines
 
   return { generatedCommand: command };
 }
@@ -288,37 +293,39 @@ export async function systemSpecialistNode(
 export async function validatorNode(
   state: GraphStateType
 ): Promise<Partial<GraphStateType>> {
-  const cmd = state.generatedCommand.trim();
+  const commands = state.generatedCommand.split("\n").map(c => c.trim()).filter(c => c);
   const errors: string[] = [];
 
-  // 1. Known prefix check
-  const knownPrefix = ALL_KNOWN_COMMANDS.find((kw) => cmd === kw || cmd.startsWith(kw + " "));
-  if (!knownPrefix) {
-    const first = cmd.split(/\s/)[0];
-    errors.push(`"${first}" is not a recognized command. Valid commands: ${ALL_KNOWN_COMMANDS.join(", ")}`);
-  }
+  for (const cmd of commands) {
+    // 1. Known prefix check
+    const knownPrefix = ALL_KNOWN_COMMANDS.find((kw) => cmd === kw || cmd.startsWith(kw + " "));
+    if (!knownPrefix) {
+      const first = cmd.split(/\s/)[0];
+      errors.push(`"${first}" is not a recognized command. Valid commands: ${ALL_KNOWN_COMMANDS.join(", ")}`);
+    }
 
-  // 2. Bracket balance
-  let parens = 0, braces = 0;
-  for (let i = 0; i < cmd.length; i++) {
-    if (cmd[i] === "(") parens++;
-    else if (cmd[i] === ")") parens--;
-    else if (cmd[i] === "{") braces++;
-    else if (cmd[i] === "}") braces--;
-    if (parens < 0) { errors.push(`Unexpected ')' at pos ${i}`); parens = 0; }
-    if (braces < 0) { errors.push(`Unexpected '}' at pos ${i}`); braces = 0; }
-  }
-  if (parens > 0) errors.push(`${parens} unclosed parenthesis(es)`);
-  if (braces > 0) errors.push(`${braces} unclosed brace(s)`);
+    // 2. Bracket balance
+    let parens = 0, braces = 0;
+    for (let i = 0; i < cmd.length; i++) {
+      if (cmd[i] === "(") parens++;
+      else if (cmd[i] === ")") parens--;
+      else if (cmd[i] === "{") braces++;
+      else if (cmd[i] === "}") braces--;
+      if (parens < 0) { errors.push(`Unexpected ')' at pos ${i}`); parens = 0; }
+      if (braces < 0) { errors.push(`Unexpected '}' at pos ${i}`); braces = 0; }
+    }
+    if (parens > 0) errors.push(`${parens} unclosed parenthesis(es)`);
+    if (braces > 0) errors.push(`${braces} unclosed brace(s)`);
 
-  // 3. Common JavaCC pitfalls
-  if (/rel\s+\{/.test(cmd)) errors.push('Found "rel {" — must be "rel{" with no space before the brace.');
-  if (/["']/.test(cmd)) errors.push("MindGRAF CLI does not use quotes. Remove them.");
-  if (/\?[A-Za-z]/.test(cmd)) errors.push('Found "?Name" variable syntax — must be "Name?"');
-  if (/define-relation\s+rel\(/.test(cmd)) errors.push('define-relation uses curly braces: rel{...}');
-  if (/implies\s*\(/.test(cmd)) errors.push('"implies()" is not a valid command. Use entailment syntax: add-to-context {antecedent} &=> {consequent}');
-  if (/forall\s+\(/.test(cmd)) errors.push('Found "forall (" — must be "forall(" with no space before the parenthesis.');
-  if (/[^&vV\d]=>/.test(cmd) && !/[&v]\s*=>/.test(cmd)) errors.push('Bare "=>" is invalid. Use &=> (and-entailment), v=> (or-entailment), or N=> (numeric).');
+    // 3. Common JavaCC pitfalls
+    if (/rel\s+\{/.test(cmd)) errors.push('Found "rel {" — must be "rel{" with no space before the brace.');
+    if (/["']/.test(cmd)) errors.push("MindGRAF CLI does not use quotes. Remove them.");
+    if (/\?[A-Za-z]/.test(cmd)) errors.push('Found "?Name" variable syntax — must be "Name?"');
+    if (/define-relation\s+rel\(/.test(cmd)) errors.push('define-relation uses curly braces: rel{...}');
+    if (/implies\s*\(/.test(cmd)) errors.push('"implies()" is not a valid command. Use entailment syntax: add-to-context {antecedent} &=> {consequent}');
+    if (/forall\s+\(/.test(cmd)) errors.push('Found "forall (" — must be "forall(" with no space before the parenthesis.');
+    if (/[^&vV\d]=>/.test(cmd) && !/[&v]\s*=>/.test(cmd)) errors.push('Bare "=>" is invalid. Use &=> (and-entailment), v=> (or-entailment), or N=> (numeric).');
+  }
 
   if (errors.length > 0) {
     return { errorHistory: [`Validator: ${errors.join(" | ")}`] };
@@ -335,36 +342,42 @@ export async function executorNode(
 ): Promise<Partial<GraphStateType>> {
   try {
     // STATELESS SYNC: Prep the Java environment before executing the command!
-   // Inside executorNode:
-if (state.contextName && state.contextName.trim() !== "") {
-  await fetch(JAVA_URL, { method: "POST", body: `set-curr-context ${state.contextName.trim()}` }).catch(()=>null);
-}
-if (state.attitudeName && state.attitudeName.trim() !== "") {
-  await fetch(JAVA_URL, { method: "POST", body: `set-attitude ${state.attitudeName.trim()}` }).catch(()=>null);
-}
-
-    // Execute the actual AI command
-    const res = await fetch(JAVA_URL, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain" },
-      body: state.generatedCommand,
-    });
-
-    const responseText = await res.text();
-    const lower = responseText.toLowerCase();
-
-    // Soft Success Checks
-    if (res.ok || lower.includes("already exist") || lower.includes("duplicate") || lower.includes("is created")) {
-      return { javaResponse: responseText, success: true };
+    if (state.contextName && state.contextName.trim() !== "") {
+      await fetch(JAVA_URL, { method: "POST", body: `set-curr-context ${state.contextName.trim()}` }).catch(()=>null);
+    }
+    if (state.attitudeName && state.attitudeName.trim() !== "") {
+      await fetch(JAVA_URL, { method: "POST", body: `set-attitude ${state.attitudeName.trim()}` }).catch(()=>null);
     }
 
-    // Real parser error -> Feed back into retry loop
-    return {
-      javaResponse: responseText,
-      success: false,
-      retryCount: state.retryCount + 1,
-      errorHistory: [`Java: ${responseText}`],
-    };
+    const commands = state.generatedCommand.split("\n").map(c => c.trim()).filter(c => c);
+    const responses: string[] = [];
+
+    for (const c of commands) {
+      // Execute the actual AI command
+      const res = await fetch(JAVA_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: c,
+      });
+
+      const responseText = await res.text();
+      const lower = responseText.toLowerCase();
+
+      // Soft Success Checks
+      if (res.ok || lower.includes("already exist") || lower.includes("duplicate") || lower.includes("is created")) {
+        responses.push(responseText);
+      } else {
+        // Real parser error -> Feed back into retry loop
+        return {
+          javaResponse: responseText,
+          success: false,
+          retryCount: state.retryCount + 1,
+          errorHistory: [`Java: ${responseText} (on command: ${c})`],
+        };
+      }
+    }
+
+    return { javaResponse: responses.join("\n"), success: true };
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     return {
@@ -374,7 +387,6 @@ if (state.attitudeName && state.attitudeName.trim() !== "") {
       errorHistory: [`Network Error: ${msg}`],
     };
   }
-  
 }
 // ─────────────────────────────────────────────────────────────────────────────
 // ROUTING FUNCTIONS  (read by conditional edges in graph.ts)

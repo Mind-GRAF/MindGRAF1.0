@@ -290,6 +290,43 @@ button, input, textarea, select {
   border-color: transparent;
   color: white;
   font-weight: 600;
+  view-transition-name: init-btn;
+}
+
+.hero-init-btn {
+  view-transition-name: init-btn;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 32px;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 30px;
+  background: linear-gradient(135deg, #1d4ed8, #2563eb);
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 10px rgba(37, 99, 235, 0.2);
+  animation: hero-pulse 3s infinite ease-in-out;
+  margin-top: 32px;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+}
+
+.hero-init-btn svg {
+  width: 20px;
+  height: 20px;
+  opacity: 0.9;
+}
+
+.hero-init-btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4), 0 0 15px rgba(37, 99, 235, 0.3);
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+}
+
+@keyframes hero-pulse {
+  0%, 100% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 10px rgba(37, 99, 235, 0.2); }
+  50% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 20px rgba(37, 99, 235, 0.4); }
 }
 
 .header-btn.primary:hover {
@@ -487,9 +524,14 @@ button, input, textarea, select {
 }
 
 .empty-logo {
-  color: var(--text-tertiary);
-  opacity: 0.3;
+  color: var(--accent-1);
+  opacity: 1;
   animation: float-icon 6s ease-in-out infinite;
+}
+
+.empty-logo svg {
+  width: 64px;
+  height: 64px;
 }
 
 @keyframes float-icon {
@@ -852,6 +894,11 @@ button, input, textarea, select {
 
 .chat-input::placeholder {
   color: var(--text-tertiary);
+}
+
+.chat-input:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .send-btn {

@@ -1,5 +1,6 @@
 "use client";
 import { useState, useRef, useEffect, useCallback } from "react";
+import { flushSync } from "react-dom";
 
 // ─── SVG Icons ─────────────────────────────────────────────────────────────
 const BrainIcon = () => (
@@ -109,13 +110,7 @@ const formatTime = (date: Date) => {
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 };
 
-// ─── Example prompts ────────────────────────────────────────────────────────
-const PROMPTS = [
-  { icon: <NetworkIcon />, text: "Define a relation called mother" },
-  { icon: <GlobeIcon />, text: "Create a context named hogwarts" },
-  { icon: <SearchIcon />, text: "Who is Harry Potter's mother?" },
-  { icon: <ZapIcon />, text: "Add a node for Hermione Granger" },
-];
+
 
 export default function Home() {
   // ── State ───────────────────────────────────────────────────────────────────
@@ -170,11 +165,27 @@ export default function Home() {
   }, [input, autoResize]);
 
   // ── Boot / Context Switch ──────────────────────────────────────────────────
-  const initializeEnvironment = async () => {
+  const initializeEnvironment = () => {
+    const startState = () => {
+      setLoading(true);
+      setStatusType("loading");
+      setSettingsOpen(false);
+    };
 
-    setLoading(true);
-    setStatusType("loading");
-    setSettingsOpen(false);
+    if (!booted && typeof document !== "undefined" && document.startViewTransition) {
+      document.startViewTransition(() => {
+        flushSync(() => {
+          startState();
+        });
+      });
+      executeInit();
+    } else {
+      startState();
+      executeInit();
+    }
+  };
+
+  const executeInit = async () => {
     const attitudeStr = attitudes.join(",");
 
     // Add a system message to chat to show we are doing setup
@@ -380,15 +391,17 @@ export default function Home() {
               <span>Settings</span>
             </button>
 
-            <button
-              id="btn-init"
-              className="header-btn primary"
-              onClick={initializeEnvironment}
-              disabled={loading}
-            >
-              <PlayIcon />
-              <span>{booted ? "Switch Context" : "Initialize"}</span>
-            </button>
+            { (booted || loading) && (
+              <button
+                id="btn-init"
+                className="header-btn primary"
+                onClick={initializeEnvironment}
+                disabled={loading}
+              >
+                <PlayIcon />
+                <span>Switch Context</span>
+              </button>
+            )}
           </div>
         </header>
 
@@ -472,21 +485,20 @@ export default function Home() {
               <div className="empty-logo"><BrainIcon /></div>
               <h1 className="empty-title">What would you like to explore?</h1>
               <p className="empty-subtitle">
-                Ask anything in natural language — I&apos;ll translate it into MindGRAF
-                commands and execute them for you.
+                Ask anything in natural language
+                <br />
+                I&apos;ll translate it into MindGRAF commands and execute them for you.
               </p>
-              <div className="prompt-cards">
-                {PROMPTS.map((p, i) => (
-                  <button
-                    key={i}
-                    className="prompt-card"
-                    onClick={() => processNaturalLanguage(p.text)}
-                  >
-                    <div className="prompt-card-icon">{p.icon}</div>
-                    <div className="prompt-card-text">{p.text}</div>
-                  </button>
-                ))}
-              </div>
+
+              {!booted && !loading && (
+                <button
+                  className="hero-init-btn"
+                  onClick={initializeEnvironment}
+                >
+                  <PlayIcon />
+                  <span>Initialize Engine</span>
+                </button>
+              )}
             </div>
           ) : (
             /* Messages */
@@ -611,9 +623,10 @@ export default function Home() {
                 id="input-nl"
                 className="chat-input"
                 rows={1}
-                placeholder="Describe what you want to do in natural language..."
+                placeholder={booted ? "Describe what you want to do in natural language..." : "Click Initialize to start exploring..."}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
+                disabled={!booted || loading}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
@@ -625,7 +638,7 @@ export default function Home() {
                 id="btn-process"
                 className={`send-btn ${hasInput ? "active" : ""}`}
                 onClick={() => processNaturalLanguage()}
-                disabled={loading || !hasInput}
+                disabled={!booted || loading || !hasInput}
                 aria-label="Send message"
               >
                 <SendIcon />
