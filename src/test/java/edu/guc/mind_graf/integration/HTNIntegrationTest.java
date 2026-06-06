@@ -1,5 +1,7 @@
 package edu.guc.mind_graf.integration;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -73,6 +75,51 @@ public class HTNIntegrationTest {
         return fail;
     }
 
+    /**
+     * Runs the Scheduler to completion while capturing everything printed to
+     * System.out, and returns the captured text.
+     *
+     * WHY capture stdout instead of inspecting executionQueue afterwards?
+     * Scheduler.schedule() DRAINS the executionQueue as its final phase: it calls
+     * runActuator() on each deferred primitive and removes it from the queue. So by
+     * the time schedule() returns, the executionQueue is ALWAYS empty. To verify
+     * which primitives actually executed (and in what order) we observe the actuator
+     * side effect: ActNode.runActuator() prints "running <name> act's actuator".
+     */
+    private String runSchedulerCapturingOutput() throws Exception {
+        PrintStream realOut = System.out;
+        ByteArrayOutputStream captured = new ByteArrayOutputStream();
+        try {
+            System.setOut(new PrintStream(captured));
+            Scheduler.schedule();
+        } finally {
+            System.setOut(realOut);
+        }
+        return captured.toString();
+    }
+
+    /** The exact line ActNode.runActuator() prints when a leaf primitive executes. */
+    private static String ran(String actName) {
+        return "running " + actName + " act's actuator";
+    }
+
+    /**
+     * Forces a distinct name onto a node via reflection.
+     *
+     * WHY: the molecular constructor Node(DownCableSet) sets name = "M" +
+     * Network.MolecularCount WITHOUT incrementing the counter (only the
+     * Network.createNode factory increments it). So two nodes built with raw
+     * "new" constructors share the SAME default name. When several such nodes are
+     * placed in one NodeSet (which is keyed by name), they collapse into a single
+     * entry and children are silently lost. Real code avoids this by going through
+     * Network.createNode; these tests build nodes directly, so we name them here.
+     */
+    private static void forceName(Node node, String name) throws Exception {
+        Field f = Node.class.getDeclaredField("name");
+        f.setAccessible(true);
+        f.set(node, name);
+    }
+
     @Test
     void testBacktrackingRecoveryAndTrimming() throws Exception {
         System.out.println("--- testBacktrackingRecoveryAndTrimming ---");
@@ -91,7 +138,10 @@ public class HTNIntegrationTest {
         ));
 
         // 3. Create Sequence 2: [primB]
-        Relation obj1_b = Network.createRelation("obj1_b", "", Adjustability.NONE, 2);
+        // NOTE: SNSequenceNode.runActuator() reads numbered relations "obj1","obj2",...
+        // so the child MUST be attached via "obj1" (not a custom name), otherwise the
+        // sequence finds no children and schedules nothing.
+        Relation obj1_b = Network.createRelation("obj1", "", Adjustability.NONE, 2);
         SNSequenceNode seq2 = new SNSequenceNode(new DownCableSet(
             new DownCable(obj1_b, new NodeSet(primB))
         ));
@@ -116,18 +166,20 @@ public class HTNIntegrationTest {
         seq1.restartAgenda();
         Scheduler.addToActQueue(seq1);
 
-        // 6. Run Scheduler
-        // seq1 will decompose into primA, then failAct.
-        // primA goes to executionQueue.
-        // failAct throws NoPlansExistForTheActException.
-        // Scheduler catches it, trims executionQueue (removing primA), and schedules seq2.
-        // seq2 decomposes into primB.
-        // primB goes to executionQueue.
-        Scheduler.schedule();
+        // 6. Run Scheduler (capturing actuator output).
+        // seq1 decomposes into primA then failAct. primA is deferred to the
+        // executionQueue (queued, not yet executed). failAct is compound with no
+        // plans -> throws NoPlansExistForTheActException. The Scheduler backtracks:
+        // it trims the executionQueue (removing the not-yet-executed primA) and
+        // schedules seq2, which decomposes into primB. Only primB should run.
+        String out = runSchedulerCapturingOutput();
 
-        // 7. Assertions
-        assertEquals(1, Scheduler.getExecutionQueue().size(), "Execution queue should have exactly 1 element");
-        assertEquals("primB", Scheduler.getExecutionQueue().peek().getName(), "primA should be trimmed and replaced by primB");
+        // 7. Assertions: the failed branch's queued primitive (primA) was trimmed
+        // BEFORE it could execute; the surviving alternative (primB) did execute.
+        assertFalse(out.contains(ran("primA")),
+            "primA belonged to the failed branch and must be trimmed, NOT executed");
+        assertTrue(out.contains(ran("primB")),
+            "primB (the surviving sibling) must execute after backtracking");
     }
 
     @Test
@@ -153,7 +205,13 @@ public class HTNIntegrationTest {
         ));
 
         // DoAll: [seq, doOne]
-        Relation doAllObj = Network.createRelation("obj_doall", "", Adjustability.NONE, 2);
+        // NOTE: DoAllNode.runActuator() reads relation "obj" (not a custom name),
+        // so the children MUST be attached via "obj" or get("obj") returns null (NPE).
+        Relation doAllObj = Network.createRelation("obj", "", Adjustability.NONE, 2);
+        // Give the two children distinct names so the name-keyed NodeSet keeps both
+        // (see forceName() — raw-constructed molecular nodes otherwise share a name).
+        forceName(seq, "seqNode");
+        forceName(doOne, "doOneNode");
         NodeSet doAllChildren = new NodeSet();
         doAllChildren.add(seq);
         doAllChildren.add(doOne);
@@ -163,23 +221,20 @@ public class HTNIntegrationTest {
 
         doAll.restartAgenda();
         Scheduler.addToActQueue(doAll);
-        
-        Scheduler.schedule();
 
-        // Assertions: The Execution Queue should contain prim1, prim2, prim3
-        // Order might be different depending on DoAll iteration order, but all 3 must be there
-        // AND control nodes MUST NOT be in the execution queue.
-        assertEquals(3, Scheduler.getExecutionQueue().size(), "Execution queue must contain exactly 3 leaf primitives");
-        
-        List<String> executedNames = new ArrayList<>();
-        while (!Scheduler.getExecutionQueue().isEmpty()) {
-            executedNames.add(Scheduler.getExecutionQueue().poll().getName());
-        }
-        
-        assertTrue(executedNames.contains("prim1"));
-        assertTrue(executedNames.contains("prim2"));
-        assertTrue(executedNames.contains("prim3"));
-        assertFalse(executedNames.contains("doall"));
+        // Run to completion, capturing actuator output.
+        // doAll (control) decomposes into seq and doOne (both control acts,
+        // evaluated during planning); seq -> prim1, prim2; doOne -> prim3. Only the
+        // three leaf primitives reach the executionQueue and actually execute.
+        String out = runSchedulerCapturingOutput();
+
+        // All three leaf primitives must have executed...
+        assertTrue(out.contains(ran("prim1")), "prim1 (leaf) must execute");
+        assertTrue(out.contains(ran("prim2")), "prim2 (leaf) must execute");
+        assertTrue(out.contains(ran("prim3")), "prim3 (leaf) must execute");
+        // ...and the sequence order must be preserved: prim1 before prim2.
+        assertTrue(out.indexOf(ran("prim1")) < out.indexOf(ran("prim2")),
+            "sequence order must be preserved: prim1 executes before prim2");
     }
     
     @Test
