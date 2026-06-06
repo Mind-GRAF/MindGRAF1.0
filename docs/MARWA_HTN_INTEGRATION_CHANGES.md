@@ -229,15 +229,167 @@ The single failure is the pre-existing, unrelated `BridgeRuleTest.applyRuleHandl
 
 ---
 
-## Verification
+## Running the Test Suite
+
+This section gives exact, copy-pasteable commands for running every part of the project's tests at every level of granularity --- the full project, the pre-existing tests, and the tests added by this work --- along with the expected results so the genuine pre-existing failure is not mistaken for a regression.
+
+### 0. Prerequisites
+
+| Tool | Required | This repo was built/verified against |
+|---|---|---|
+| JDK | Java **21** (the value of `<maven.compiler.target>` in `pom.xml`) | a newer JDK works as long as 21 is the language target |
+| Maven | **3.9.x** (Surefire is bundled) | 3.9.9 |
+| Working directory | the repo root: the folder containing `pom.xml` | `MindGRAF1.0/` |
+
+Quick sanity check before running anything:
+```bash
+mvn -version              # confirms Maven is installed and which JDK it sees
+javac -version            # confirms a JDK 21+ is on PATH
+ls pom.xml                # confirms you are at the repo root
+```
+
+If `mvn` reports a JDK older than 21, set `JAVA_HOME` to a JDK 21 install before running tests.
+
+### 1. Build only (no tests)
 
 ```bash
-# Targeted: just the per-node and sample-run suites
-mvn -Dtest='DoOneNodeTest,DoAllNodeTest,SNSequenceNodeTest,AchieveNodeTest,AttitudeNodeTest,HTNIntegrationTest,HTNSampleRunsTest' test
+mvn -q clean compile test-compile
+```
+This produces compiled classes under `target/classes` and `target/test-classes`. Useful as a fast first check that nothing is broken before running the suite.
 
-# Full suite (expect: 100 tests, 1 pre-existing BridgeRule failure)
+### 2. Run the **full** project test suite (every test)
+
+```bash
 mvn test
 ```
+
+**Expected result:**
+```
+Tests run: 100, Failures: 1, Errors: 0, Skipped: 0
+[ERROR]   BridgeRuleTest.applyRuleHandler  -- expected: <1> but was: <0>
+```
+The single failure (`BridgeRuleTest.applyRuleHandler`, in the bridge-inference layer) is **pre-existing and unrelated** to this work --- it predates the HTN integration and lives in code that this work does not touch. Mark it as a known failure and ignore it for the purposes of this integration. Every other test passes.
+
+Quieter form (suppresses Maven progress, keeps the test summary):
+```bash
+mvn -q test
+```
+
+Per-test detailed XML/text reports are written by Surefire to:
+```
+target/surefire-reports/
+    ├── TEST-<class>.xml      <- structured per-class results
+    └── <class>.txt           <- captured stdout/stderr per class
+```
+
+### 3. Run **only this work's added tests**
+
+These are the two test classes added or fixed by this integration:
+
+```bash
+mvn -Dtest='HTNIntegrationTest,HTNSampleRunsTest' test
+```
+
+**Expected result:** `Tests run: 10, Failures: 0, Errors: 0`
+  - `HTNIntegrationTest`: 3 tests (backtracking + trimming, deep nested decomposition, SNIF deferral)
+  - `HTNSampleRunsTest`: 7 tests (the universal sample run + 6 focused scenarios)
+
+### 4. Run **only the universal sample run** (the one documented in Chapter 4)
+
+```bash
+mvn -Dtest='HTNSampleRunsTest#universalSampleRun' test
+```
+
+**Expected result:** `Tests run: 1, Failures: 0, Errors: 0`
+Covers in one test: `DoAll`, `DoOne` (with two alternatives), `SNSequence`, `Achieve`, `Attitude`, leaf primitives, `SNIF` and `SNITERATE` (deferral + guard evaluation), backtracking with queue trimming, exhaustion, and the empty-`DoOne` edge case.
+
+### 5. Run a **single focused scenario** from the sample-run suite
+
+The seven test method names in `HTNSampleRunsTest`:
+
+| Method | Demonstrates |
+|---|---|
+| `universalSampleRun`           | every node type + every edge case (the comprehensive run) |
+| `scenario1_orderedSequence`    | a `Sequence` runs its children in order |
+| `scenario2_nestedDecomposition`| `DoAll[Sequence, DoOne]` flattens to its three leaves |
+| `scenario3_backtrackToSibling` | a failed plan's queued primitive is trimmed before it runs |
+| `scenario4_multiLevelBacktracking` | inner `DoOne` exhausts; unwinds to an outer choice point |
+| `scenario5_allAlternativesFail` | clean `NoPlansExistForTheActException` on exhaustion |
+| `scenario6_emptyDoOne`         | a `DoOne` with no alternatives does not crash |
+
+Run any one with `ClassName#methodName`:
+```bash
+mvn -Dtest='HTNSampleRunsTest#scenario3_backtrackToSibling' test
+```
+
+Multiple methods at once (comma-separated, no spaces):
+```bash
+mvn -Dtest='HTNSampleRunsTest#scenario3_backtrackToSibling+scenario4_multiLevelBacktracking' test
+```
+
+### 6. Run the **pre-existing per-node control tests** (Marwa's tests)
+
+These are the legacy control-node tests that existed before this work. They still pass:
+
+```bash
+mvn -Dtest='DoOneNodeTest,DoAllNodeTest,SNSequenceNodeTest,AchieveNodeTest,AttitudeNodeTest,SNIFNodeTest' test
+```
+
+Other pre-existing test groups (acting rules, inference, matching, revision, context, network/nodes):
+```bash
+# Acting rules (DoIf, WhenDo) and the ActNode lifecycle
+mvn -Dtest='ActNodeTest,DoIfNodeTest,WhenDoNodeTest' test
+
+# Inference rules (where the known pre-existing BridgeRule failure lives)
+mvn -Dtest='AndEntailmentTest,AndOrTest,BridgeRuleTest,NumEntailmentTest,OrEntailmentTest,ThreshTest' test
+
+# Rule-handler internals (Ptree, SIndex, etc.)
+mvn -Dtest='LinearTest,OrentailhandlerTest,PtreeNodeTest,PtreeTest,RuleInfoHandlerTest,SIndexTest,SingletonTest,ruleInfoTest' test
+
+# Matcher, revision, context, network, nodes
+mvn -Dtest='MatcherTest,RevisionTest,ContextControllerTest,NetworkTest,NodeTest,RuleNodeTest,FlagNodeSetTest,RuleInfoSetTest' test
+```
+
+### 7. The standalone SHOP planner's own tests
+
+The standalone `htn` package's `HTNPlannerTest` lives under `src/main/java/edu/guc/mind_graf/htn/HTNPlannerTest.java`, exercising the textbook planner in isolation:
+```bash
+mvn -Dtest='HTNPlannerTest' test
+```
+
+### 8. Running tests with full console output
+
+By default Maven Surefire prints only the summary. To see each test's `System.out` (useful when debugging a trace or watching the scheduler's decisions):
+```bash
+mvn -Dtest='HTNSampleRunsTest#universalSampleRun' test -Dsurefire.useFile=false
+```
+
+For the full suite with all output, the same flag applies, but expect a lot of text:
+```bash
+mvn test -Dsurefire.useFile=false
+```
+
+### 9. Cleaning up
+
+```bash
+mvn clean         # removes target/, including all compiled classes and Surefire reports
+```
+
+### 10. Troubleshooting
+
+**Symptom:** `BUILD FAILURE` with `Tests run: 100, Failures: 1`, only `BridgeRuleTest.applyRuleHandler` failing.
+**Diagnosis:** Expected --- this is the pre-existing unrelated failure. The integration tests are green.
+
+**Symptom:** `BUILD FAILURE` with failures in `HTNSampleRunsTest` or `HTNIntegrationTest`.
+**Diagnosis:** A regression. Inspect the detailed report at
+`target/surefire-reports/edu.guc.mind_graf.integration.<TestClass>.txt`
+and rerun the failing method with `-Dsurefire.useFile=false` to see the live trace.
+
+**Symptom:** `Source option 21 is no longer supported. Use 23 or later.` (or similar).
+**Diagnosis:** The JDK reading `pom.xml` is older than the project's target. Use a JDK 21+ (point `JAVA_HOME` at one).
+
+**Symptom:** `mvn: command not found`.
+**Diagnosis:** Maven is not on PATH. Install it (`brew install maven` on macOS), or use the repo's wrapper if one is added later (`./mvnw test`).
 
 ---
 
