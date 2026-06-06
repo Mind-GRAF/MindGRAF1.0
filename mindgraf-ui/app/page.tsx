@@ -208,6 +208,13 @@ export default function Home() {
     autoResize();
   }, [input, autoResize]);
 
+  // Auto-focus the input textbox when the engine is booted and loading finishes
+  useEffect(() => {
+    if (booted && !loading) {
+      textareaRef.current?.focus();
+    }
+  }, [booted, loading]);
+
   // ── Boot / Context Switch ──────────────────────────────────────────────────
   const initializeEnvironment = () => {
     const startState = () => {
