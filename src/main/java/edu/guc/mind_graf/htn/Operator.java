@@ -9,7 +9,7 @@ import java.util.Set;
  * ==========================================================================
  * MAPPING FROM MARWA'S ACTING SYSTEM:
  * ==========================================================================
- * In Marwa's system, a primitive ActNode represents an action that can be
+ * In Ibrahim's system, a primitive ActNode represents an action that can be
  * executed directly. The ActNode has implicit preconditions (checked via
  * channels and inference) and implicit effects (state changes after execution).
  * 
@@ -26,7 +26,7 @@ import java.util.Set;
  * ==========================================================================
  * WHAT THIS ADDS:
  * ==========================================================================
- * Unlike Marwa's ActNode where effects are handled implicitly through the
+ * Unlike Ibrahim's ActNode where effects are handled implicitly through the
  * channel/report system, the Operator provides a clean, declarative way to
  * specify how the world changes. This enables the planner to SIMULATE
  * execution without actually running anything — which is the key to planning.
@@ -58,7 +58,7 @@ public class Operator {
      * Preconditions: propositions that MUST all be present in the WorldState
      * for this operator to be applicable.
      * 
-     * In Marwa's terms: these are the conditions checked by the inference
+     * In Ibrahim's terms: these are the conditions checked by the inference
      * engine before an ActNode can fire.
      */
     private Set<String> preconditions;
@@ -66,7 +66,7 @@ public class Operator {
     /**
      * Add-list (STRIPS): propositions that become true after execution.
      * 
-     * In Marwa's terms: these are the positive effects of executing an act.
+     * In Ibrahim's terms: these are the positive effects of executing an act.
      * E.g., after "rideTaxi", the agent is now at the destination.
      */
     private Set<String> addList;
@@ -74,7 +74,7 @@ public class Operator {
     /**
      * Delete-list (STRIPS): propositions that become false after execution.
      * 
-     * In Marwa's terms: these are things that are no longer true after the
+     * In Ibrahim's terms: these are things that are no longer true after the
      * act. E.g., after "rideTaxi", the agent is no longer at the origin.
      */
     private Set<String> deleteList;
@@ -113,7 +113,7 @@ public class Operator {
      * if an operator is NOT applicable, the planner returns FAIL and
      * tries the next alternative.
      * 
-     * In Marwa's system, this is analogous to the precondition check
+     * In Ibrahim's system, this is analogous to the precondition check
      * performed via channels before an ActNode can execute.
      *
      * @param state the current world state

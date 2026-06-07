@@ -28,7 +28,7 @@ public class ActNode extends Node {
      * MODIFIED for thesis integration (Author: Hatem Soliman, 2026-05-19)
      * - See inline comments below for the EXECUTE-case behavior change that
      *   defers primitive execution to `Scheduler.executionQueue`.
-     * - These comments mark the Marwa-side boundary: later migration into the
+     * - These comments mark the Ibrahim-side boundary: later migration into the
      *   standalone HTN planner should preserve the same semantics.
      */
     protected ChannelSet outgoingChannels;

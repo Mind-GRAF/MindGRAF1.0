@@ -21,7 +21,7 @@ public class Scheduler {
      * MODIFIED for thesis integration (Author: Hatem Soliman, 2026-05-19)
      * - Added `executionQueue` to separate finalized primitive execution from planning.
      * - Added `planChoicePoints` to record sibling alternatives at choice points
-     *   so Marwa-style act decomposition can backtrack without losing alternatives.
+     *   so Ibrahim-style act decomposition can backtrack without losing alternatives.
      *
      * [2026-05-28] (Author: Hatem Soliman) — Renamed PlanChoicePoint fields:
      *   actStackSize         → actQueueDepthAtSnapshot
@@ -31,7 +31,7 @@ public class Scheduler {
      * a detailed example of how backtracking uses these snapshots.
      *
      * NOTES/TODO:
-     * - This is an intentionally lightweight Marwa-side backtracking helper.
+     * - This is an intentionally lightweight Ibrahim-side backtracking helper.
      * - Future work: extract choice-point/backtracking into the standalone
      *   HTN package and replace these helpers with calls into `HTNPlanner`.
      */
@@ -41,11 +41,11 @@ public class Scheduler {
     private static Stack<ActNode> highActQueue;
     // NEW: final execution stage for primitive acts that already passed planning.
     // TODO(HTN migration): move this boundary into the standalone HTN integration layer
-    // once Marwa's work is re-packaged around the dedicated HTN package.
+    // once Ibrahim's work is re-packaged around the dedicated HTN package.
     private static Deque<ActNode> executionQueue;
     // NEW: remember choice points so a failed branch can resume with the next sibling.
     // TODO(HTN migration): replace this with the standalone HTN planner's recursive
-    // backtracking once Marwa-side acts are fully migrated.
+    // backtracking once Ibrahim-side acts are fully migrated.
     private static Stack<PlanChoicePoint> planChoicePoints;
     private static PropositionNode originOfBackInf;
     private static Hashtable<Report, PropositionNode> forwardAssertedNodes;

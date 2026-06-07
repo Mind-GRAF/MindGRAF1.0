@@ -4,7 +4,7 @@
 
 ## 1. System Overview
 
-This project integrates a **SHOP-style HTN planner** into Marwa's MindGRAF acting system. The result is a **Plan-then-Execute** architecture that replaces blind reactive execution with deliberative search.
+This project integrates a **SHOP-style HTN planner** into Ibrahim's MindGRAF acting system. The result is a **Plan-then-Execute** architecture that replaces blind reactive execution with deliberative search.
 
 ```
 ┌──────────────┐      ┌─────────────────────────┐
@@ -38,11 +38,11 @@ This project integrates a **SHOP-style HTN planner** into Marwa's MindGRAF actin
 
 ---
 
-## 2. Architecture: BEFORE (Marwa Only)
+## 2. Architecture: BEFORE (Ibrahim Only)
 
-### 2.1 How Marwa's System Works
+### 2.1 How Ibrahim's System Works
 
-Marwa's system is **reactive**. Every `ActNode` goes through a state machine called the **agenda**, managed by the `Scheduler`. The act is pushed onto the act stack and re-processed at each stage until `DONE`.
+Ibrahim's system is **reactive**. Every `ActNode` goes through a state machine called the **agenda**, managed by the `Scheduler`. The act is pushed onto the act stack and re-processed at each stage until `DONE`.
 
 ### 2.2 The Agenda Lifecycle
 
@@ -117,7 +117,7 @@ The `Scheduler` (`mgip/Scheduler.java`) runs a priority loop over three data str
 - `actQueue` = `Stack<ActNode>` — acts processed LIFO (last in, first out)
 - The `main:` label with `continue main` ensures reports always preempt requests and acts
 
-**Why a Stack for acts?** From Marwa's thesis: "Scheduling acts on a stack leading that last act scheduled is the first act to be performed." This means sub-plans (pushed later) execute before their parent.
+**Why a Stack for acts?** From Ibrahim's thesis: "Scheduling acts on a stack leading that last act scheduled is the first act to be performed." This means sub-plans (pushed later) execute before their parent.
 
 ### 2.4 The Problem
 
@@ -129,7 +129,7 @@ travel(A,B) is pushed onto act stack
   → STUCK. No mechanism to go back and try bus.
 ```
 
-> **Marwa's system has NO search and NO backtracking.** It picks ONE plan via DoOneNode. If that plan fails mid-execution, the system is stuck.
+> **Ibrahim's system has NO search and NO backtracking.** It picks ONE plan via DoOneNode. If that plan fails mid-execution, the system is stuck.
 
 ### 2.5 Before Flowchart — Transportation Domain
 
@@ -262,7 +262,7 @@ The HTN planner sits **between goal identification and execution**. Instead of d
                                     └────────┬─────────────┘
                                              │
 =============================================│
- Marwa's Execution Phase (Real)              │
+ Ibrahim's Execution Phase (Real)              │
 =============================================│
                                              │
                                              ▼
@@ -365,7 +365,7 @@ The backtracking mechanism in `HTNPlanner.java` lines 332-374:
 
 ## 4. Data Structures
 
-### 4.1 Scheduler Queues (Marwa's System)
+### 4.1 Scheduler Queues (Ibrahim's System)
 
 | Queue | Type | Priority | Purpose |
 |-------|------|----------|---------|
@@ -387,7 +387,7 @@ The supervisor suggested adding a 4th queue for HTN-planned actions. We chose **
 
 ### 4.3 HTN Data Structures
 
-| Class | Purpose | Maps To (Marwa) |
+| Class | Purpose | Maps To (Ibrahim) |
 |-------|---------|-----------------|
 | `Task` | Unit of work (primitive/compound) | ActNode concept |
 | `Operator` | STRIPS action (preconditions + add/delete lists) | Primitive ActNode |
@@ -413,12 +413,12 @@ We could have added STRIPS preconditions, add-lists, and delete-lists directly t
 
 ### 5.2 Why Not Modify Scheduler?
 
-Same principle. The Scheduler's 3-queue loop is Marwa's core contribution. Modifying it risks breaking the inference engine. Instead, `HTNBridge` feeds INTO the existing Scheduler.
+Same principle. The Scheduler's 3-queue loop is Ibrahim's core contribution. Modifying it risks breaking the inference engine. Instead, `HTNBridge` feeds INTO the existing Scheduler.
 
 ### 5.3 Why a Separate `htn` Package?
 
-1. **Zero risk to existing code** — the `htn` package can be deleted and the system reverts to Marwa's original
-2. **Clear thesis narrative** — "Before" (Marwa) vs "After" (Marwa + HTN) with concrete code snapshots
+1. **Zero risk to existing code** — the `htn` package can be deleted and the system reverts to Ibrahim's original
+2. **Clear thesis narrative** — "Before" (Ibrahim) vs "After" (Ibrahim + HTN) with concrete code snapshots
 3. **Testable in isolation** — `HTNPlannerTest` validates the planner without starting the full MindGRAF system
 4. **Single integration point** — only `HTNBridge` imports from `nodes` and `mgip`
 
@@ -451,7 +451,7 @@ Same principle. The Scheduler's 3-queue loop is Marwa's core contribution. Modif
                           │ (imports)
                           ▼
 ┌───────────────────────────────────────────────┐
-│ Marwa's System — EXISTING                     │
+│ Ibrahim's System — EXISTING                     │
 │                                               │
 │    ┌──────────────┐     ┌───────────────┐     │
 │    │ ActNode.java │◄────┤Scheduler.java │     │
@@ -672,7 +672,7 @@ java -cp bin htn.HTNPlannerTest
 
 ## 10. Summary Table
 
-| Aspect | Before (Marwa) | After (Marwa + HTN) |
+| Aspect | Before (Ibrahim) | After (Ibrahim + HTN) |
 |--------|---------------|-------------------|
 | **Planning** | None — pick first plan found | DFS search over all decompositions |
 | **Failure handling** | Stuck | Backtracking to alternatives |

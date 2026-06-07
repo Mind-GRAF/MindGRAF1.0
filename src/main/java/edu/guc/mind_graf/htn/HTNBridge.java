@@ -5,13 +5,13 @@ import edu.guc.mind_graf.nodes.ActAgenda;
 import edu.guc.mind_graf.mgip.Scheduler;
 
 /**
- * HTNBridge — Connects the HTN Planner to Marwa's Acting System.
+ * HTNBridge — Connects the HTN Planner to Ibrahim's Acting System.
  * 
  * This is the INTEGRATION POINT between the two systems.
  * 
  * It provides:
  *   1. A way to plan for a compound ActNode before executing it
- *   2. A way to push planned operators onto Marwa's Scheduler act stack
+ *   2. A way to push planned operators onto Ibrahim's Scheduler act stack
  *   3. A static entry point callable from ActNode.processIntends()
  * 
  * Usage from ActNode:
@@ -56,9 +56,9 @@ public class HTNBridge {
      * Plans for a compound ActNode by converting it to an HTN Task,
      * running the SHOP planner, and returning the result.
      * 
-     * This is the bridge between Marwa's ActNode and the HTN planner.
+     * This is the bridge between Ibrahim's ActNode and the HTN planner.
      * 
-     * In Marwa's agenda lifecycle, this replaces the FIND_PLANS stage:
+     * In Ibrahim's agenda lifecycle, this replaces the FIND_PLANS stage:
      *   BEFORE: backward chaining via Plan-Act transformer → DoOneNode
      *   AFTER:  HTNPlanner.seekPlan() → PlanResult with backtracking
      * 
@@ -87,14 +87,14 @@ public class HTNBridge {
     // =========================================================================
 
     /**
-     * Pushes a successful plan's operators onto Marwa's Scheduler act stack.
+     * Pushes a successful plan's operators onto Ibrahim's Scheduler act stack.
      * 
      * Each Operator in the plan is wrapped in an ActNode and pushed
      * onto the act queue in reverse order (since it's a stack — LIFO),
      * so they execute in the correct sequence.
      * 
      * This is where the HTN planner's output feeds back into
-     * Marwa's three-queue Scheduler:
+     * Ibrahim's three-queue Scheduler:
      *   plan operators → ActNode wrappers → Scheduler.addToActQueue()
      * 
      * @param result a successful PlanResult
@@ -121,7 +121,7 @@ public class HTNBridge {
             actNode.setPrimitive(true);
             actNode.setAgenda(ActAgenda.EXECUTE);
 
-            // Push onto Marwa's act stack
+            // Push onto Ibrahim's act stack
             Scheduler.addToActQueue(actNode);
 
             System.out.println("  → Pushed: " + op.getName() + " [primitive, agenda=EXECUTE]");

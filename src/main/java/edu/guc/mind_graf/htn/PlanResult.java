@@ -10,7 +10,7 @@ import java.util.List;
  * ==========================================================================
  * MAPPING FROM MARWA'S ACTING SYSTEM:
  * ==========================================================================
- * In Marwa's system, there is no "plan" object. An ActNode either executes
+ * In Ibrahim's system, there is no "plan" object. An ActNode either executes
  * successfully or doesn't — the system doesn't produce a sequence of
  * actions to execute later.
  * 
@@ -30,7 +30,7 @@ import java.util.List;
  *   2. If successful, the plan is handed to the Scheduler for execution
  *   3. If failed, the system can try alternative reasoning
  * 
- * This is the fundamental transformation of Marwa's system:
+ * This is the fundamental transformation of Ibrahim's system:
  *   BEFORE: Act → Execute immediately
  *   AFTER:  Goal → Plan → PlanResult → Execute sequence
  * 
@@ -55,7 +55,7 @@ public class PlanResult {
      * If success is true, this is a non-empty list of operators
      * in the order they should be executed.
      * 
-     * This list is what gets handed to Marwa's Scheduler for execution.
+     * This list is what gets handed to Ibrahim's Scheduler for execution.
      */
     private List<Operator> plan;
 

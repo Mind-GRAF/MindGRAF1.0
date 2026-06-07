@@ -11,7 +11,7 @@ import java.util.Map;
  * ==========================================================================
  * MAPPING FROM MARWA'S ACTING SYSTEM:
  * ==========================================================================
- * In Marwa's system, the agent's capabilities are distributed across the
+ * In Ibrahim's system, the agent's capabilities are distributed across the
  * semantic network — ActNodes, RuleNodes, and their channel connections
  * collectively define what the agent can perceive and do. There is no
  * single "domain" object.

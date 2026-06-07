@@ -95,7 +95,7 @@ public class HTNPlannerTest {
         // STEP 1: Build the HTN Domain
         // =====================================================================
         // This is analogous to defining the ActNodes and their relationships
-        // in Marwa's semantic network. Here we define operators (primitive
+        // in Ibrahim's semantic network. Here we define operators (primitive
         // acts) and methods (decomposition rules) explicitly.
 
         System.out.println("━━━ STEP 1: Building HTN Domain ━━━\n");
@@ -105,7 +105,7 @@ public class HTNPlannerTest {
         // =====================================================================
         // STEP 2: Define the Initial World State
         // =====================================================================
-        // In Marwa's system, this corresponds to the agent's beliefs
+        // In Ibrahim's system, this corresponds to the agent's beliefs
         // (BELIEVE(hasCash(5)), BELIEVE(at(A)), etc.)
 
         System.out.println("\n━━━ STEP 2: Defining Initial World State ━━━\n");
@@ -115,7 +115,7 @@ public class HTNPlannerTest {
         // =====================================================================
         // STEP 3: Define the Goal Task
         // =====================================================================
-        // In Marwa's system, this is the goal identified by the inference
+        // In Ibrahim's system, this is the goal identified by the inference
         // engine. The planner takes this goal and searches for a valid
         // sequence of primitive actions to achieve it.
 
@@ -126,7 +126,7 @@ public class HTNPlannerTest {
         // =====================================================================
         // STEP 4: Run the SHOP Planner
         // =====================================================================
-        // This is THE key addition to Marwa's system. Instead of directly
+        // This is THE key addition to Ibrahim's system. Instead of directly
         // executing the travel ActNode, we first PLAN a valid sequence.
 
         System.out.println("\n━━━ STEP 4: Running SHOP Planner ━━━\n");
@@ -136,7 +136,7 @@ public class HTNPlannerTest {
         // =====================================================================
         // STEP 5: Interpret the Result
         // =====================================================================
-        // If the plan is successful, in Marwa's system this would be
+        // If the plan is successful, in Ibrahim's system this would be
         // handed to the Scheduler for execution via:
         //   for (Operator op : result.getPlan()) {
         //       Scheduler.addToActQueue(op.toActNode());
@@ -147,7 +147,7 @@ public class HTNPlannerTest {
 
         if (result.isSuccess()) {
             System.out.println("\n✅ INTEGRATION SUCCESS");
-            System.out.println("Plan would be handed to Marwa's Scheduler for execution:");
+            System.out.println("Plan would be handed to Ibrahim's Scheduler for execution:");
             List<Operator> plan = result.getPlan();
             for (int i = 0; i < plan.size(); i++) {
                 System.out.println("  " + (i + 1) + ". Execute: " + plan.get(i).getName());
@@ -185,7 +185,7 @@ public class HTNPlannerTest {
         // -----------------------------------------------------------------
         // OPERATORS (Primitive Actions)
         // -----------------------------------------------------------------
-        // These map to Marwa's primitive ActNodes — directly executable
+        // These map to Ibrahim's primitive ActNodes — directly executable
         // actions with explicit preconditions and effects.
 
         // callTaxi: requires taxi to be available, results in taxi being called

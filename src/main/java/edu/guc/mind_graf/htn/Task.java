@@ -6,7 +6,7 @@ package edu.guc.mind_graf.htn;
  * ==========================================================================
  * MAPPING FROM MARWA'S ACTING SYSTEM:
  * ==========================================================================
- * In Marwa's system, an ActNode represents an action to be performed.
+ * In Ibrahim's system, an ActNode represents an action to be performed.
  * Acts can be either primitive (directly executable) or complex (needing
  * further breakdown). However, this distinction is implicit — there is
  * no formal "task" abstraction.
@@ -43,7 +43,7 @@ public class Task {
      * Whether this task is primitive (directly executable as an Operator)
      * or compound (must be decomposed via a Method).
      * 
-     * In Marwa's terms:
+     * In Ibrahim's terms:
      *   - primitive = ActNode that can be executed directly
      *   - compound  = ActNode that needs to be broken down into sub-acts
      */

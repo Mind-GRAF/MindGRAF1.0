@@ -9,7 +9,7 @@ import java.util.Set;
  * ==========================================================================
  * MAPPING FROM MARWA'S ACTING SYSTEM:
  * ==========================================================================
- * In Marwa's system, the agent's knowledge of the world is stored as
+ * In Ibrahim's system, the agent's knowledge of the world is stored as
  * "mental attitudes" — specifically beliefs represented through the semantic
  * network (PropositionNode, KnownInstanceSet). For example:
  *   BELIEVE(hasCash(5))
@@ -57,7 +57,7 @@ public class WorldState {
      * Each proposition is a simple string (ground atom) like:
      *   "at(A)", "hasCash(5)", "taxiAvailable", "busTicket"
      * 
-     * In Marwa's system, these would be beliefs stored in the semantic
+     * In Ibrahim's system, these would be beliefs stored in the semantic
      * network. Here, we use a flat set for efficient planner operations.
      */
     private Set<String> propositions;

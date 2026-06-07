@@ -12,7 +12,7 @@ import edu.guc.mind_graf.mgip.Scheduler;
 
 /**
  * HTNIntegrationTest — Demonstrates the FULL pipeline:
- *   HTN Planner → HTNBridge → Marwa's Scheduler
+ *   HTN Planner → HTNBridge → Ibrahim's Scheduler
  * 
  * This test proves that the HTN planner is CONNECTED to the existing
  * acting system. The planned operators are pushed onto Scheduler.actQueue.
@@ -28,9 +28,9 @@ public class HTNIntegrationTest {
         System.out.println("╚══════════════════════════════════════════════════════════╝\n");
 
         // =====================================================================
-        // STEP 1: Initialize Marwa's Scheduler (the existing system)
+        // STEP 1: Initialize Ibrahim's Scheduler (the existing system)
         // =====================================================================
-        System.out.println("━━━ STEP 1: Initializing Marwa's Scheduler ━━━\n");
+        System.out.println("━━━ STEP 1: Initializing Ibrahim's Scheduler ━━━\n");
         Scheduler.initiate();
         System.out.println("Scheduler initialized with empty queues.");
         System.out.println("Act stack size before planning: " + Scheduler.getActQueue().size());
@@ -76,7 +76,7 @@ public class HTNIntegrationTest {
             for (int i = stack.size() - 1; i >= 0; i--) {
                 System.out.println("  " + (stack.size() - i) + ". " + stack.get(i).getName());
             }
-            System.out.println("\n✅ INTEGRATION VERIFIED: HTN planner output is now in Marwa's Scheduler.");
+            System.out.println("\n✅ INTEGRATION VERIFIED: HTN planner output is now in Ibrahim's Scheduler.");
         } else {
             System.out.println("❌ Planning failed.");
         }

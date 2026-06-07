@@ -1,9 +1,9 @@
-# Marwa-side HTN Integration: Changes
+# Ibrahim-side HTN Integration: Changes
 
 **Author:** Hatem Soliman
 **Dates:** 2026-05-19 (initial), 2026-05-28 (Dr.'s feedback revisions), 2026-06-06 (this refresh)
 
-This document is the dev-facing summary of every concrete change made to the Marwa-side acting code to add **plan-first execution**, **sibling-preserving backtracking**, and a **dedicated execution stage** to Mind GRAF. For each affected file it shows the relevant "Before" and "After" code shape, why the change exists, and what the next migration step would be.
+This document is the dev-facing summary of every concrete change made to the Ibrahim-side acting code to add **plan-first execution**, **sibling-preserving backtracking**, and a **dedicated execution stage** to Mind GRAF. For each affected file it shows the relevant "Before" and "After" code shape, why the change exists, and what the next migration step would be.
 
 The big picture: **plan in simulation first, defer real actions until the whole plan is built, and keep failed branches from ever touching the world.** The single switch that makes this work is the new `ActNode.isControlAct()` method (point 1 below); the dedicated `executionQueue` and `planChoicePoints` stack in `Scheduler` are the storage for it (points 2 and 3); `NodeSet` was briefly changed and then reverted (point 4); the five control-act nodes and the integration-test fixes round it out (points 5–7).
 
@@ -327,7 +327,7 @@ Multiple methods at once (comma-separated, no spaces):
 mvn -Dtest='HTNSampleRunsTest#scenario3_backtrackToSibling+scenario4_multiLevelBacktracking' test
 ```
 
-### 6. Run the **pre-existing per-node control tests** (Marwa's tests)
+### 6. Run the **pre-existing per-node control tests** (Ibrahim's tests)
 
 These are the legacy control-node tests that existed before this work. They still pass:
 

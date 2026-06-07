@@ -11,7 +11,7 @@ import java.util.Set;
  * ==========================================================================
  * MAPPING FROM MARWA'S ACTING SYSTEM:
  * ==========================================================================
- * In Marwa's system, complex ActNodes can "trigger" or "chain" to other
+ * In Ibrahim's system, complex ActNodes can "trigger" or "chain" to other
  * acts, but this relationship is implicit — there is no formal decomposition
  * mechanism. The system does not distinguish between "this act breaks down
  * into sub-acts" and "this act leads to another act."
@@ -32,7 +32,7 @@ import java.util.Set;
  * ==========================================================================
  * WHAT THIS ADDS:
  * ==========================================================================
- * Methods are the KEY addition that transforms Marwa's acting system from
+ * Methods are the KEY addition that transforms Ibrahim's acting system from
  * a reactive executor into a deliberative planner. They provide:
  *   - Hierarchical decomposition (tasks within tasks)
  *   - Alternative strategies (multiple methods per task)

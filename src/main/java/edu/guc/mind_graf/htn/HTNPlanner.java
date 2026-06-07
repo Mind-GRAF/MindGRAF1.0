@@ -9,7 +9,7 @@ import java.util.List;
  * ==========================================================================
  * MAPPING FROM MARWA'S ACTING SYSTEM:
  * ==========================================================================
- * Marwa's system operates reactively:
+ * Ibrahim's system operates reactively:
  *   1. Inference engine identifies a goal (ActNode)
  *   2. The ActNode checks its conditions
  *   3. If conditions hold → execute immediately
@@ -55,7 +55,7 @@ import java.util.List;
  * INTEGRATION WITH MINDGRAF:
  * ==========================================================================
  * 
- * BEFORE (Marwa only):
+ * BEFORE (Ibrahim only):
  *   execute(actNode);
  * 
  * AFTER (with HTN planner):
@@ -228,7 +228,7 @@ public class HTNPlanner {
     /**
      * Handles a primitive task by finding its operator and applying it.
      * 
-     * In Marwa's system, this is analogous to:
+     * In Ibrahim's system, this is analogous to:
      *   ActNode.processIntends() → check conditions → execute
      * 
      * Except here we SIMULATE the execution (update WorldState) rather

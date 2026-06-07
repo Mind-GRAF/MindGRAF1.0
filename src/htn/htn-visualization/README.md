@@ -1,6 +1,6 @@
 # HTN Deterministic Backtracking Visualization
 
-A Remotion-based video visualization of the deterministic planning and sibling-preserving backtracking behavior implemented in the Marwa-side HTN integration.
+A Remotion-based video visualization of the deterministic planning and sibling-preserving backtracking behavior implemented in the Ibrahim-side HTN integration.
 
 ## Overview
 

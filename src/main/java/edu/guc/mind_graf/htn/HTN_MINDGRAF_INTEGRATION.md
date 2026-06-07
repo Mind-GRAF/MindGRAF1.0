@@ -407,5 +407,5 @@ Initially: payDriver → taxi method queued
 ## References
 
 - **SHOP Paper** (`src/main/java/edu/guc/mind_graf/htn/SHOP.pdf`): Total-order forward search with HTN
-- **Marwa's Acting System** (`README.md`): Agenda-driven execution with perception-action cycle
+- **Ibrahim's Acting System** (`README.md`): Agenda-driven execution with perception-action cycle
 - **Dual-Mode Task Semantics**: Primitiveness is contextual (domain vs. capability)

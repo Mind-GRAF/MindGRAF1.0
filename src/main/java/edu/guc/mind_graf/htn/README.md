@@ -10,7 +10,7 @@
 
 ## Integration with MindGRAF Acting System
 
-This package extends the MindGRAF acting system with SHOP-style HTN (Hierarchical Task Network) planning. It is **connected** to Marwa's existing system via `HTNBridge`, which pushes planned operators onto the `Scheduler`'s act stack.
+This package extends the MindGRAF acting system with SHOP-style HTN (Hierarchical Task Network) planning. It is **connected** to Ibrahim's existing system via `HTNBridge`, which pushes planned operators onto the `Scheduler`'s act stack.
 
 ### Connection Points
 
@@ -19,9 +19,9 @@ HTNPlanner (this package)
      ↓ produces PlanResult
 HTNBridge (this package)
      ↓ calls Scheduler.addToActQueue()
-Scheduler (mgip package — Marwa's code)
+Scheduler (mgip package — Ibrahim's code)
      ↓ pops ActNode from act stack
-ActNode.processIntends() (nodes package — Marwa's code)
+ActNode.processIntends() (nodes package — Ibrahim's code)
 ```
 
 ### Files
@@ -58,11 +58,11 @@ java -cp bin htn.HTNPlannerTest
 
 ---
 
-## PART 1 — Marwa's Acting System (Before HTN)
+## PART 1 — Ibrahim's Acting System (Before HTN)
 
 ### The Core Idea
 
-Marwa's system is **reactive**. An act goes through a **state machine** (called the "agenda") before it can execute. The act is repeatedly pushed onto the act stack and processed one stage at a time.
+Ibrahim's system is **reactive**. An act goes through a **state machine** (called the "agenda") before it can execute. The act is repeatedly pushed onto the act stack and processed one stage at a time.
 
 ### The Agenda Lifecycle
 
@@ -125,7 +125,7 @@ Reports flow first (high), then requests (low), then acts are processed one stag
 
 ### The Problem
 
-> Marwa's system has **no search**. It picks ONE plan (via DoOneNode). If that plan fails, the system is stuck.
+> Ibrahim's system has **no search**. It picks ONE plan (via DoOneNode). If that plan fails, the system is stuck.
 
 ---
 
@@ -154,7 +154,7 @@ If fail    → report failure
 
 ### What the Planner Does Differently
 
-| Marwa's System | HTN Planner |
+| Ibrahim's System | HTN Planner |
 |---|---|
 | Discovers preconditions **one at a time** via requests/reports | Checks ALL preconditions **instantly** via WorldState |
 | Discovers plans **one at a time** via Plan-Act transformer | Has ALL methods registered in HTNDomain upfront |
@@ -174,7 +174,7 @@ If fail    → report failure
 - Has a bus ticket
 - Taxi is available
 
-### Marwa's System (Before)
+### Ibrahim's System (Before)
 
 ```
 1. ActNode "travel(A,B)" is pushed onto act stack
@@ -293,4 +293,4 @@ FINAL PLAN: [walkToStop, takeBus, walkToDestination]
 
 ## The Key Difference in One Sentence
 
-> **Marwa's system commits to one plan and discovers failure during execution. The HTN planner explores all alternatives in simulation first, and only commits when it finds one that works.**
+> **Ibrahim's system commits to one plan and discovers failure during execution. The HTN planner explores all alternatives in simulation first, and only commits when it finds one that works.**

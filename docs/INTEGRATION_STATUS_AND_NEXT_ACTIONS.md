@@ -10,7 +10,7 @@
 
 ### ✅ **FULLY IMPLEMENTED** — Whiteboard Semantics Achieved
 
-Your thesis requirement—deterministic planning with sibling-preserving backtracking—is **fully implemented** in Marwa-side code. Here's what is in place:
+Your thesis requirement—deterministic planning with sibling-preserving backtracking—is **fully implemented** in Ibrahim-side code. Here's what is in place:
 
 #### Core Changes (5 files):
 1. **`Scheduler.java`**
@@ -21,7 +21,7 @@ Your thesis requirement—deterministic planning with sibling-preserving backtra
 
 2. **`ActNode.java`**
    - ✅ EXECUTE case: primitives deferred to `executionQueue` (planning-only semantics)
-   - ✅ Comments: marked as Marwa-side boundary, TODOs for migration to HTN package
+   - ✅ Comments: marked as Ibrahim-side boundary, TODOs for migration to HTN package
 
 3. **`NodeSet.java`**
    - ✅ Switched from `HashMap` to `LinkedHashMap` for deterministic iteration order
@@ -93,7 +93,7 @@ Location: BridgeRuleTest.java:80
 ```
 
 **What it means:**  
-Some rule-application logic in the bridge between Marwa and HTN is returning 0 matches instead of the expected 1. This is unrelated to:
+Some rule-application logic in the bridge between Ibrahim and HTN is returning 0 matches instead of the expected 1. This is unrelated to:
 - Choice-point stack
 - Deterministic scheduling
 - Backtracking
