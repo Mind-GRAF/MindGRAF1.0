@@ -1,5 +1,13 @@
 # HTN Planning Package — `src/htn/`
 
+> ⚠️ **STATUS — read this first.** This package is the verified **standalone** SHOP
+> planner. It is **not currently wired into the MindGRAF runtime**; the runtime uses
+> its own native decomposition (`isControlAct()` routing, a single `executionQueue`,
+> and a choice-point stack with a per-node `DoOne` retry agenda). The "integration"
+> described below is how the planner *could* be wired in (future work). For the
+> changes actually made to the acting system, see
+> `docs/MARWA_HTN_INTEGRATION_CHANGES.md`.
+
 ## Integration with MindGRAF Acting System
 
 This package extends the MindGRAF acting system with SHOP-style HTN (Hierarchical Task Network) planning. It is **connected** to Marwa's existing system via `HTNBridge`, which pushes planned operators onto the `Scheduler`'s act stack.

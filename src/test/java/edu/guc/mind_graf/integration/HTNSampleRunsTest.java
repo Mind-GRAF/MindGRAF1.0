@@ -468,4 +468,28 @@ public class HTNSampleRunsTest {
         Scheduler.addToActQueue(empty);
         assertDoesNotThrow(() -> Scheduler.schedule(), "P4: an empty DoOne must not crash");
     }
+
+    // ---------------------------------------------------------------------
+    // Scenario 9 — DoOne's OWN retry agenda: a real DoOne picks its first
+    // alternative, and on failure advances (through its own RETRYING agenda) to
+    // the next one. This exercises the node-owned choice-point path, not a
+    // scheduler-seeded one.
+    // ---------------------------------------------------------------------
+    @Test
+    @Timeout(value = 15, unit = TimeUnit.SECONDS)
+    void scenario9_doOneOwnRetryAgenda() throws Exception {
+        freshNetwork();
+        SNSequenceNode failPlan = sequence(primitive("p9prep"), failingAct("p9dead"));
+        SNSequenceNode okPlan = sequence(primitive("p9ok"));
+        DoOneNode pick = doOne(); // empty obj; alternatives supplied (ordered) below
+        pick.primeAlternatives(failPlan, okPlan);
+        pick.restartAgenda();
+        Scheduler.addToActQueue(pick);
+        String out = run();
+        assertFalse(out.contains(ran("p9prep")),
+                "the failed alternative's queued leaf must be trimmed, not executed");
+        assertTrue(out.contains(ran("p9ok")),
+                "DoOne's own retry agenda must reach and run the second alternative");
+        assertTrue(out.contains("Backtracking"), "a backtrack must have occurred");
+    }
 }

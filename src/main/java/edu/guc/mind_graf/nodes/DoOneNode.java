@@ -1,43 +1,31 @@
 package edu.guc.mind_graf.nodes;
 
 /*
- * DoOneNode — a control act node that picks ONE child act from alternatives.
- * This is a non-leaf node whose outcome is determined during planning
- * (decomposition), not during real-world execution.
+ * DoOneNode — a control act node that picks ONE child act from alternatives and
+ * manages its OWN retry agenda (the Dr.'s per-node-type design, now implemented).
  *
  * EXECUTION SEMANTICS:
- * - runActuator() picks one child act and adds it to Scheduler.actQueue
- *   (the PLANNING queue), NOT to Scheduler.executionQueue (real-world).
- * - ALL remaining siblings are saved in a PlanChoicePoint for backtracking.
- * - The picked act goes through the full processIntends() lifecycle.
- * - If the picked act fails (NoPlansExistForTheActException), the Scheduler
- *   backtracks to the next sibling via backtrackToNextAlternative().
+ * - runActuator() gathers this node's alternatives, sets its own controlAgenda
+ *   to RETRYING, schedules the first alternative on Scheduler.actQueue (the
+ *   PLANNING queue, not the real-world executionQueue), and registers a choice
+ *   point that points back at THIS node.
+ * - This node OWNS its alternatives and the index of the one currently being
+ *   tried. When a chosen branch fails (NoPlansExistForTheActException), the
+ *   Scheduler trims the queues and asks THIS node for its next alternative via
+ *   advanceToNextAlternative(); the node advances its own index and agenda.
+ * - When the alternatives are exhausted the node's agenda becomes DONE and the
+ *   Scheduler unwinds to an outer choice point (or reports overall failure).
  *
- * WHY actQueue and not executionQueue?
- * - DoOneNode is a control/decomposition node — we know its semantics during
- *   planning ("pick one from these alternatives"). We don't need the real
- *   world to resolve it.
- * - Leaf primitives go to executionQueue because their outcome depends on
- *   real-world execution (actuator side effects).
- *
- * MODIFIED for thesis integration (Author: Hatem Soliman, 2026-05-19)
- * - Sibling-preserving DoOne: saves remaining alternatives as a choice point
- *   instead of discarding them (pre-thesis behavior).
- *
- * DESIGN NOTE (Dr.'s feedback, 2026-05-28):
- * An alternative to Scheduler-driven backtracking is per-node-type semantics:
- * DoOneNode could manage its own agenda cycle internally:
- *   1. Pick one act from alternatives → schedule it
- *   2. If it fails → retry with next alternative (new agenda state)
- *   3. Done when one succeeds or all exhausted
- * This would require DoOneNode to have its own agenda states (e.g., TRYING,
- * RETRYING) and new agenda entries, but would produce cleaner per-type
- * semantics instead of relying on the Scheduler's global
- * backtrackToNextAlternative() mechanism. Each node type would define its
- * own retry/failure semantics, similar to how each already defines its own
- * runActuator(). This is left as future work — the Scheduler approach works
- * correctly for now.
+ * This realises the per-node retry agenda: each control node defines its own
+ * retry/failure semantics (here, "try the next alternative on failure"), the
+ * same way each defines its own runActuator(). The Scheduler still catches the
+ * deep failure and performs the queue trimming, but the decision of WHICH
+ * alternative to try next now lives in the node, driven by its controlAgenda
+ * (START -> RETRYING -> DONE).
  */
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.mgip.Scheduler;
@@ -46,6 +34,13 @@ import edu.guc.mind_graf.set.NodeSet;
 public class DoOneNode extends ActNode {
 
     static int doOneCount;
+
+    /** The alternatives this DoOne chooses among, in the order it will try them. */
+    private ArrayList<ActNode> alternatives;
+    /** Index of the alternative currently being tried. */
+    private int altIndex;
+    /** This node's own agenda: START -> RETRYING (alternatives remain) -> DONE. */
+    private ActAgenda controlAgenda = ActAgenda.START;
 
     public DoOneNode(DownCableSet downCables) {
         super(downCables);
@@ -57,22 +52,62 @@ public class DoOneNode extends ActNode {
         return true;
     }
 
+    /**
+     * Fixes the alternatives (and their order) explicitly, instead of reading
+     * them from the node's "obj" cable. Useful for deterministic ordering (the
+     * "obj" NodeSet is HashMap-backed, so its iteration order is unspecified).
+     */
+    public void primeAlternatives(ActNode... alts) {
+        this.alternatives = new ArrayList<ActNode>(Arrays.asList(alts));
+    }
+
     @Override
     public void runActuator() {
-        NodeSet possibleActs = this.getDownCableSet().get("obj").getNodeSet();
-        if (possibleActs.isEmpty()) {
+        // First entry: gather the alternatives (unless primed) and start this
+        // node's own retry agenda.
+        if (alternatives == null) {
+            alternatives = new ArrayList<ActNode>();
+            NodeSet possibleActs = this.getDownCableSet().get("obj").getNodeSet();
+            for (Node n : possibleActs) {
+                alternatives.add((ActNode) n);
+            }
+        }
+        if (alternatives.isEmpty()) {
+            controlAgenda = ActAgenda.DONE;
             return;
         }
+        altIndex = 0;
+        controlAgenda = ActAgenda.RETRYING;
+        // Register a choice point that delegates the "next alternative" decision
+        // back to THIS node and snapshots the queue depths for trimming.
+        Scheduler.pushPlanChoicePoint(this, Scheduler.getActQueue().size());
+        scheduleCurrentAlternative();
+    }
 
-        // NEW: keep every sibling alternative available for later backtracking.
-        // The scheduler stores the remaining siblings as a choice point and we take
-        // the first branch in deterministic order.
-        Scheduler.pushPlanChoicePoint(this, possibleActs, Scheduler.getActQueue().size());
-
-        ActNode act = (ActNode) possibleActs.getNode(0);
+    private void scheduleCurrentAlternative() {
+        ActNode act = alternatives.get(altIndex);
         System.out.println(act.getName());
         act.restartAgenda();
         Scheduler.addToActQueue(act);
     }
 
+    /** True if there is at least one more alternative to try after the current one. */
+    public boolean hasNextAlternative() {
+        return alternatives != null && altIndex + 1 < alternatives.size();
+    }
+
+    /**
+     * Advances this node's own agenda to the next alternative and returns it, or
+     * null when the alternatives are exhausted (agenda -> DONE). Called by the
+     * Scheduler during backtracking.
+     */
+    public ActNode advanceToNextAlternative() {
+        altIndex++;
+        if (alternatives != null && altIndex < alternatives.size()) {
+            controlAgenda = ActAgenda.RETRYING;
+            return alternatives.get(altIndex);
+        }
+        controlAgenda = ActAgenda.DONE;
+        return null;
+    }
 }

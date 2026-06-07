@@ -1,8 +1,17 @@
-# Deep HTN-MindGRAF Integration Architecture
+# Deep HTN-MindGRAF Integration Architecture (PROPOSED — NOT ADOPTED)
 
-**Status**: Structural foundation complete; planning logic implementation pending  
-**Last Updated**: May 7, 2026  
-**Architect Notes**: Resolves dual-primitiveness mismatch and backtracking context issues
+> ⚠️ **STATUS — read this first.** This document describes a *proposed* integration
+> design — dual-primitiveness (`htnPrimitive`/`mindgrafPrimitive`), three HTN queues
+> (`htnPlanningQueue`/`htnBacktrackingQueue`/`htnExecutionQueue`), and the methods
+> `performHTNPlanning()`/`executeHTNOperator()`/`performHTNBacktracking()`. **This
+> design was NOT adopted; none of it is in the code.** The runtime instead uses a
+> native mechanism: `isControlAct()` routing at the `EXECUTE` stage, a single
+> `executionQueue` (drained last), and a choice-point stack with a per-node `DoOne`
+> retry agenda. The `edu.guc.mind_graf.htn` package is a verified **standalone** SHOP
+> planner that is **not wired into the runtime** (wiring it in is future work). For
+> the changes actually made to the acting system, see
+> `docs/MARWA_HTN_INTEGRATION_CHANGES.md`. The text below is kept only as a record of
+> the originally-proposed approach.
 
 ---
 

@@ -105,25 +105,46 @@ public class Scheduler {
         private final int actQueueDepthAtSnapshot;
         /** See class Javadoc — snapshot of executionQueue.size() at creation. */
         private final int executionQueueDepthAtSnapshot;
+        /**
+         * NODE-OWNED path (the runtime): a real DoOneNode owns its alternatives
+         * and its own RETRYING agenda; the choice point delegates the
+         * "next alternative" decision to it.
+         */
+        private final edu.guc.mind_graf.nodes.DoOneNode sourceNode;
+        /** LIST path (kept so tests can seed a choice point directly). */
         private final ArrayList<ActNode> remainingAlternatives;
         private final String sourceActName;
         private int nextAlternativeIndex;
 
+        /** Node-owned constructor used by {@link #pushPlanChoicePoint}. */
+        private PlanChoicePoint(int actQueueDepthAtSnapshot, int executionQueueDepthAtSnapshot,
+                edu.guc.mind_graf.nodes.DoOneNode sourceNode) {
+            this.actQueueDepthAtSnapshot = actQueueDepthAtSnapshot;
+            this.executionQueueDepthAtSnapshot = executionQueueDepthAtSnapshot;
+            this.sourceNode = sourceNode;
+            this.remainingAlternatives = null;
+            this.sourceActName = sourceNode.getName();
+        }
+
+        /** List constructor — retained for tests that seed a choice point directly. */
         private PlanChoicePoint(int actQueueDepthAtSnapshot, int executionQueueDepthAtSnapshot,
                 ArrayList<ActNode> remainingAlternatives, String sourceActName) {
             this.actQueueDepthAtSnapshot = actQueueDepthAtSnapshot;
             this.executionQueueDepthAtSnapshot = executionQueueDepthAtSnapshot;
             this.remainingAlternatives = remainingAlternatives;
             this.sourceActName = sourceActName;
+            this.sourceNode = null;
             this.nextAlternativeIndex = 0;
         }
 
         private boolean hasNextAlternative() {
-            return nextAlternativeIndex < remainingAlternatives.size();
+            return sourceNode != null ? sourceNode.hasNextAlternative()
+                    : nextAlternativeIndex < remainingAlternatives.size();
         }
 
         private ActNode nextAlternative() {
-            return remainingAlternatives.get(nextAlternativeIndex++);
+            return sourceNode != null ? sourceNode.advanceToNextAlternative()
+                    : remainingAlternatives.get(nextAlternativeIndex++);
         }
     }
 
@@ -308,24 +329,14 @@ public class Scheduler {
      * @param currentActStackSize the current actQueue.size() (renamed param from
      *                            the call site; stored as actQueueDepthAtSnapshot)
      */
-    public static void pushPlanChoicePoint(ActNode sourceAct, edu.guc.mind_graf.set.NodeSet alternatives,
+    public static void pushPlanChoicePoint(edu.guc.mind_graf.nodes.DoOneNode sourceNode,
             int currentActStackSize) {
-        int currentExecutionQueueDepth = executionQueue.size();
-        ArrayList<ActNode> remainingAlternatives = new ArrayList<ActNode>();
-        boolean first = true;
-        for (edu.guc.mind_graf.nodes.Node node : alternatives) {
-            ActNode actNode = (ActNode) node;
-            if (first) {
-                first = false;
-                continue;
-            }
-            remainingAlternatives.add(actNode);
-        }
-        if (!remainingAlternatives.isEmpty()) {
-            planChoicePoints.push(new PlanChoicePoint(currentActStackSize, currentExecutionQueueDepth,
-                    remainingAlternatives, sourceAct.getName()));
-            System.out.println("Saved choice point for " + sourceAct.getName() + " with "
-                    + remainingAlternatives.size() + " remaining sibling(s)");
+        // Only worth a choice point if the node has more than the one it is about
+        // to try; the node itself owns its remaining alternatives and index.
+        if (sourceNode.hasNextAlternative()) {
+            planChoicePoints.push(new PlanChoicePoint(currentActStackSize, executionQueue.size(), sourceNode));
+            System.out.println("Saved choice point for " + sourceNode.getName()
+                    + " with remaining alternative(s)");
         }
     }
 
