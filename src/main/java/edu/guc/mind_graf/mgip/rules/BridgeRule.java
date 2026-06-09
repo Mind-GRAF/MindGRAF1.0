@@ -104,12 +104,14 @@ public class BridgeRule extends RuleNode {
             }
             justSupport.put(att, new Pair(supportPropSet, new PropositionNodeSet()));
         }
+        //change 14 
         PropositionNodeSet bridgeSet = new PropositionNodeSet();
-        if(this.isOpen()){
-            bridgeSet.add(this.applySubstitution(report.getSubstitutions()));
-        } else {
-            bridgeSet.add(this);
-        }
+        // if(this.isOpen()){
+        //     bridgeSet.add(this.applySubstitution(report.getSubstitutions()));
+        // } else {
+        //     bridgeSet.add(this);
+        // }
+        bridgeSet.add(this);
         Support reportSup = new Support(-1, report.getAttitude(), Network.currentLevel, justSupport, bridgeSet);
         return reportSup;
     }
@@ -233,7 +235,6 @@ public class BridgeRule extends RuleNode {
         }
 
     }
-
     protected void processSingleReports(Report currentReport) throws NoSuchTypeException, DirectCycleException {
         String currentReportContextName = currentReport.getContextName();
         int currentReportAttitudeID = currentReport.getAttitude();
@@ -249,6 +250,13 @@ public class BridgeRule extends RuleNode {
             Request tempRequest = new Request(tempChannel, null);
             /** AntecedentToRule Channel */
             if (forwardReportType) {
+              /*
+                * A forward AntRule report is already evidence from one
+                * bridge antecedent. BridgeRule.applyRuleHandler() itself
+                * checks whether the report attitude and reporter node match
+                * one of the bridge antecedents.
+                */
+                applyRuleHandler(currentReport);
                 /** Forward Inference */
                 if (!this.isOpen()) {
                     /** Close Type Implementation */

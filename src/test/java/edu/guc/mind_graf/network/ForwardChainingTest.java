@@ -2,11 +2,8 @@ package edu.guc.mind_graf.mgip.rules;
 
 import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
-import edu.guc.mind_graf.components.Substitutions;
 import edu.guc.mind_graf.context.ContextController;
-import edu.guc.mind_graf.exceptions.NoSuchTypeException;
 import edu.guc.mind_graf.mgip.Scheduler;
-import edu.guc.mind_graf.mgip.reports.Report;
 import edu.guc.mind_graf.network.Network;
 import edu.guc.mind_graf.network.NetworkController;
 import edu.guc.mind_graf.nodes.Node;
@@ -14,7 +11,9 @@ import edu.guc.mind_graf.nodes.PropositionNode;
 import edu.guc.mind_graf.nodes.RuleNode;
 import edu.guc.mind_graf.set.NodeSet;
 import edu.guc.mind_graf.set.Set;
-import edu.guc.mind_graf.support.Support;
+import edu.guc.mind_graf.components.Substitutions;
+import edu.guc.mind_graf.mgip.matching.Matcher;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -30,81 +29,123 @@ class ForwardChainingTest {
     @BeforeEach
     void setUp() {
         Scheduler.initiate();
+
         Set<String, Integer> attitudeNames = new Set<>();
         attitudeNames.add("beliefs", 0);
+
         ArrayList<ArrayList<Integer>> consistentAttitudes = new ArrayList<>();
         consistentAttitudes.add(new ArrayList<>(List.of(0)));
+
         NetworkController.setUp(attitudeNames, consistentAttitudes, false, false, false, 1);
+
         ContextController.createNewContext(CONTEXT);
         ContextController.setCurrContext(CONTEXT);
     }
 
     @Test
-    void automaticChain_AimpliesB_BimpliesC() throws Exception {
+    void forwardInference_assertFact_Ajohn_infers_Cjohn() throws Exception {
 
         // ── nodes ──────────────────────────────────────────────
-        Node X    = Network.createVariableNode("X", "propositionnode");
+        Node X = Network.createVariableNode("X", "individualnode");
         Node john = Network.createNode("john", "individualnode");
-        Node A    = Network.createNode("A", "propositionnode");
-        Node B    = Network.createNode("B", "propositionnode");
-        Node C    = Network.createNode("C", "propositionnode");
 
-        // Pattern: X is-a A
-        PropositionNode AX = (PropositionNode) Network.createNode("propositionnode",
-            new DownCableSet(
-                new DownCable(Network.getRelations().get("member"), new NodeSet(X)),
-                new DownCable(Network.getRelations().get("class"),  new NodeSet(A))));
+        Node A = Network.createNode("A", "propositionnode");
+        Node B = Network.createNode("B", "propositionnode");
+        Node C = Network.createNode("C", "propositionnode");
 
-        // Pattern: X is-a B
-        PropositionNode BX = (PropositionNode) Network.createNode("propositionnode",
-            new DownCableSet(
-                new DownCable(Network.getRelations().get("member"), new NodeSet(X)),
-                new DownCable(Network.getRelations().get("class"),  new NodeSet(B))));
+        // Pattern: A(X)
+        PropositionNode AX = (PropositionNode) Network.createNode(
+                "propositionnode",
+                new DownCableSet(
+                        new DownCable(Network.getRelations().get("member"), new NodeSet(X)),
+                        new DownCable(Network.getRelations().get("class"), new NodeSet(A))
+                )
+        );
 
-        // Pattern: X is-a C
-        PropositionNode CX = (PropositionNode) Network.createNode("propositionnode",
-            new DownCableSet(
-                new DownCable(Network.getRelations().get("member"), new NodeSet(X)),
-                new DownCable(Network.getRelations().get("class"),  new NodeSet(C))));
+        // Pattern: B(X)
+        PropositionNode BX = (PropositionNode) Network.createNode(
+                "propositionnode",
+                new DownCableSet(
+                        new DownCable(Network.getRelations().get("member"), new NodeSet(X)),
+                        new DownCable(Network.getRelations().get("class"), new NodeSet(B))
+                )
+        );
 
-        // Ground fact: john is-a A
-        PropositionNode johnIsA = (PropositionNode) Network.createNode("propositionnode",
-            new DownCableSet(
-                new DownCable(Network.getRelations().get("member"), new NodeSet(john)),
-                new DownCable(Network.getRelations().get("class"),  new NodeSet(A))));
+        // Pattern: C(X)
+        PropositionNode CX = (PropositionNode) Network.createNode(
+                "propositionnode",
+                new DownCableSet(
+                        new DownCable(Network.getRelations().get("member"), new NodeSet(X)),
+                        new DownCable(Network.getRelations().get("class"), new NodeSet(C))
+                )
+        );
+
+        // Ground fact: A(john)
+        PropositionNode johnIsA = (PropositionNode) Network.createNode(
+                "propositionnode",
+                new DownCableSet(
+                        new DownCable(Network.getRelations().get("member"), new NodeSet(john)),
+                        new DownCable(Network.getRelations().get("class"), new NodeSet(A))
+                )
+        );
 
         // Rule 1: A(X) → B(X)
-        RuleNode R1 = (RuleNode) Network.createNode("andentailment",
-            new DownCableSet(
-                new DownCable(Network.getRelations().get("ant"), new NodeSet(AX)),
-                new DownCable(Network.getRelations().get("cq"),  new NodeSet(BX))));
+        RuleNode R1 = (RuleNode) Network.createNode(
+                "andentailment",
+                new DownCableSet(
+                        new DownCable(Network.getRelations().get("ant"), new NodeSet(AX)),
+                        new DownCable(Network.getRelations().get("cq"), new NodeSet(BX))
+                )
+        );
 
         // Rule 2: B(X) → C(X)
-        RuleNode R2 = (RuleNode) Network.createNode("andentailment",
-            new DownCableSet(
-                new DownCable(Network.getRelations().get("ant"), new NodeSet(BX)),
-                new DownCable(Network.getRelations().get("cq"),  new NodeSet(CX))));
+        RuleNode R2 = (RuleNode) Network.createNode(
+                "andentailment",
+                new DownCableSet(
+                        new DownCable(Network.getRelations().get("ant"), new NodeSet(BX)),
+                        new DownCable(Network.getRelations().get("cq"), new NodeSet(CX))
+                )
+        );
 
-        // ── trigger ────────────────────────────────────────────
-        // Assert "john is-a A" and let the scheduler do everything
+        // Add the rules as hypotheses in the current context and attitude
+        R1.setHyp(CONTEXT, 0);
+        R2.setHyp(CONTEXT, 0);
+
+        // ── real forward inference trigger ─────────────────────
+        // This is the important change:
+        // We assert the closed fact A(john).
+        // The system should automatically publish it, match it with A(X),
+        // fire R1, infer B(john), forward B(john) to R2,
+        // and finally infer C(john).
+
+        johnIsA.setHyp(CONTEXT, 0);
+
+        System.out.println("\n=== MATCH DIRECTION CHECK ===");
+        System.out.println("johnIsA -> matches: " + Matcher.match(johnIsA, ContextController.getContext(CONTEXT), 0).size());
+        System.out.println("AX -> matches: " + Matcher.match(AX, ContextController.getContext(CONTEXT), 0).size());
         johnIsA.add(CONTEXT, 0);
 
+
+
+        //Scheduler.schedule();
+
         // ── verify ─────────────────────────────────────────────
-        // After add() + schedule(), C(john) should be a known instance of CX
+        // After true forward propagation, C(X) should have known instance X=john.
         var cKnown = CX.getKnownInstances().getPositiveCollectionbyAttribute(0);
 
         assertNotNull(cKnown, "CX should have known instances — chain did not reach C");
         assertFalse(cKnown.isEmpty(), "CX should have at least one known instance");
 
-        // Check that X=john substitution made it all the way through
         boolean johnBound = cKnown.stream().anyMatch(ki -> {
-            Substitutions subs = ki.getSubstitutions();
-            return subs.contains(X) && subs.get(X).equals(john);
+            Substitutions resultSubs = ki.getSubstitutions();
+            return resultSubs.contains(X) && resultSubs.get(X).equals(john);
         });
 
-        assertTrue(johnBound,
-            "C(john) was never inferred — chain A(john)→B(john)→C(john) is broken");
+        assertTrue(
+                johnBound,
+                "C(john) was never inferred — true forward inference A(john) → B(john) → C(john) is broken"
+        );
 
-        System.out.println("✓ Chain A(john) → B(john) → C(john) worked automatically");
+        System.out.println("✓ True forward inference worked: assert A(john) → infer B(john) → infer C(john)");
     }
 }

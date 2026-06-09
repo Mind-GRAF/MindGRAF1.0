@@ -5,7 +5,7 @@ import edu.guc.mind_graf.cables.DownCable;
 import edu.guc.mind_graf.cables.DownCableSet;
 import edu.guc.mind_graf.cables.UpCable;
 import edu.guc.mind_graf.components.Substitutions;
-import edu.guc.mind_graf.context.Context;
+import edu.guc.mind_graf.context.Context; 
 import edu.guc.mind_graf.context.ContextController;
 import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.exceptions.NoPlansExistForTheActException;
@@ -144,6 +144,17 @@ public class PropositionNode extends Node {
         assumptionSupportDependents.add(nodeID);
     }
 
+    //change13 a done 
+    private static boolean isBridgeConsequentRelation(String relationName) {
+        return relationName != null && relationName.matches("\\d+-cq");
+    }
+    
+    //change13 d done
+    private static boolean isBridgeAntecedentRelation(String relationName) {
+        return relationName != null && relationName.matches("\\d+-ant");
+    }
+
+
     /***
      * Method getting the NodeSet that this current node is considered a consequent
      * or argument
@@ -161,6 +172,25 @@ public class PropositionNode extends Node {
         if (consequentCable != null) {
             consequentCable.getNodeSet().addAllTo(ret);
         }
+       /*
+     * BridgeRule support:
+     * Bridge consequents use attitude-specific relations such as
+     * 0-cq, 1-cq, and 2-cq.
+     *
+     * UpCableSet is not directly iterable, so we loop over the
+     * network relation names and check whether this node has an
+     * up-cable for any bridge consequent relation.
+     */
+        for (String relationName : Network.getRelations().keySet()) {
+            if (isBridgeConsequentRelation(relationName)) {
+                UpCable bridgeConsequentCable = this.getUpCableSet().get(relationName);
+
+                if (bridgeConsequentCable != null) {
+                    bridgeConsequentCable.getNodeSet().addAllTo(ret);
+                }
+            }
+        }
+        
         return ret;
     }
 
@@ -181,6 +211,17 @@ public class PropositionNode extends Node {
         if (antCable != null) {
             antCable.getNodeSet().addAllTo(ret);
         }
+
+         for (String relationName : Network.getRelations().keySet()) {
+        if (isBridgeAntecedentRelation(relationName)) {
+            UpCable bridgeAntecedentCable =
+                    this.getUpCableSet().get(relationName);
+
+            if (bridgeAntecedentCable != null) {
+                bridgeAntecedentCable.getNodeSet().addAllTo(ret);
+            }
+        }
+    }
 
         return ret;
     }
@@ -468,7 +509,7 @@ public class PropositionNode extends Node {
         // original output:
         // System.out.println("Sending Report (" + report.stringifyReport() + ") through the channel ("
         //         + currentChannel.getChannelType() + " of id " + currentChannel.getIdCount() + ")");
-        System.out.println(
+        System.out.println( 
             "\n[SEND REPORT]"
             + "\n  from/current: " + this.getName()
             + "\n  to/requester: " + currentChannel.getRequesterNode().getName()
@@ -517,8 +558,17 @@ public class PropositionNode extends Node {
     // }
 
     public void broadcastReport(Report report) {
+        //change1 done
+        // what happened before change is that when a(x) asks for matches and finds a(john) 
+        // so a(john) sends report back to a(x) so the report now is by M3 which is a(john) 
+        // then when a(x) recieves and forwards the report it forwarded the report that is with the reporter being M3 
+        // however its supp to be a(x) sending report to its rule so the ptree expected M0(a(x)) but it was getting M3(a(john))
+        //  so the match was failing because of the reporter being different 
+        // so made it create a new forward report 
     for (Channel outChannel : outgoingChannels) {
 
+        // and the reporter being "this" node 
+        // and RI insertion doesnt fail 
         Report forwardedReport = new Report(
                 report.getSubstitutions(),
                 report.getSupport(),
@@ -666,6 +716,7 @@ public class PropositionNode extends Node {
 
 
     // chain
+    //change
     protected void sendReportToNodeSet(NodeSet nodeset, Report toBeSent) {
         for (Node sentTo : nodeset) {
             Substitutions reportSubs = toBeSent.getSubstitutions();
@@ -682,7 +733,8 @@ public class PropositionNode extends Node {
                 forwardChannels.addChannel(newChannel);
 
             }
-            sendReport(toBeSent, newChannel);
+            // forward chain change from toBeSent to newReport 
+            sendReport(newReport, newChannel);
         }
     }
 
@@ -702,7 +754,7 @@ public class PropositionNode extends Node {
                 forwardChannels.addChannel(newChannel);
 
             }
-            sendReport(toBeSent, newChannel);
+            sendReport(newReport, newChannel);
         }
     }
 
@@ -804,16 +856,35 @@ public class PropositionNode extends Node {
             //pass support to establish channel
 
             // adding for sub change 
+            // A(x) matched with A(john) but the sub was getting lost in the channel establishment, so we need to make sure to pass it in case of matching
+            // peserves it inside the matched channel 
+            //change 2 done 
             Substitutions matchSwitchSubs = currentMatch.getSwitchSubs() == null
                 ? new Substitutions()
                 : currentMatch.getSwitchSubs();
 
-        Substitutions matchFilterSubs = currentMatch.getFilterSubs() == null
+            Substitutions matchFilterSubs = currentMatch.getFilterSubs() == null
                 ? new Substitutions()
                 : currentMatch.getFilterSubs();
 
+            Substitutions callerSwitchSubs = switchSubs == null
+                    ? new Substitutions()
+                    : switchSubs;
+
+            Substitutions callerFilterSubs = filterSubs == null
+                    ? new Substitutions()
+                    : filterSubs;
+
+            Substitutions combinedSwitchSubs =
+                    Substitutions.union(callerSwitchSubs, matchSwitchSubs);
+
+            Substitutions combinedFilterSubs =
+                    Substitutions.union(callerFilterSubs, matchFilterSubs);
+
+            // so the channel is created using the sub taken from the match 
+            // instead of using old generic subs that was passed by the method 
             Request newRequest = establishChannel(channelType, matchedNode,
-                    matchSwitchSubs, matchFilterSubs, contextId,
+                    combinedSwitchSubs, combinedFilterSubs, contextId,
                     attitudeId, matchType, requesterNode, (Support) currentMatch.getSupport());
             Scheduler.addToLowQueue(newRequest);
         }
@@ -847,7 +918,20 @@ public class PropositionNode extends Node {
                 case Matched:
                     List<Match> matchesReturned = new ArrayList<>();
                     matchesReturned = Matcher.match(this, ContextController.getContext(currentContextName), currentAttitudeID);
+                    System.out.println(
+                        "\n[FORWARD MATCH SEARCH]"
+                        + "\n  sourceNode: " + this.getName()
+                        + "\n  matchesReturned: " + (matchesReturned == null ? "null" : matchesReturned.size())
+                    );
+                    
                     if (matchesReturned != null)
+                        for (Match m : matchesReturned) {
+                            System.out.println(
+                                "  matchedNode: " + m.getNode().getName()
+                                + " filterSubs: " + m.getFilterSubs()
+                                + " switchSubs: " + m.getSwitchSubs()
+                            );
+                        }
                         sendReportToMatches(matchesReturned, toBeSent);
                     break;
                 case AntRule:
@@ -867,6 +951,8 @@ public class PropositionNode extends Node {
                         sendReportToWhenNodeSet(whenDoRuleNodes, toBeSent);
                     }
 
+                    // forward chain change from rulenode to whendonode 
+                    // from WhenDoNode to RuleNode 
                     if (this instanceof RuleNode) {
                         NodeSet whenNodes = getDownWhenNodeSet(currentAttitudeID);
                         if (whenNodes != null) {
@@ -1047,6 +1133,8 @@ public class PropositionNode extends Node {
      * @throws DirectCycleException
      */
 
+    // this method does should this incoming report be saved as a known instance of this node?
+    // so its useful for open nodes lke a(x) 
     private Report attemptAddingReportToKnownInstances(Report report) throws DirectCycleException {
         if (this.isOpen()) {
             boolean flag;
@@ -1174,6 +1262,10 @@ public class PropositionNode extends Node {
     public void add(String contextName, int attitudeID) throws NoSuchTypeException, NoPlansExistForTheActException, DirectCycleException {
         /* BEGIN - Helpful Prints */
         System.out.println("add() method initated.\n");
+        //change11 done 
+        if (!this.supported(contextName, attitudeID, 0)) {
+        this.setHyp(contextName, attitudeID);
+        }
         System.out.println("-------------------------");
         /* END - Helpful Prints */
         Scheduler.initiate();
@@ -1252,8 +1344,14 @@ public class PropositionNode extends Node {
         String currentContext = currentChannel.getContextName();
         int currentAttitude = currentChannel.getAttitudeID();
         Node requesterNode = currentChannel.getRequesterNode();
-        Substitutions reportSubstitutions = new Substitutions();
+        //Substitutions reportSubstitutions = new Substitutions();
 
+        // change12 done
+        Substitutions reportSubstitutions =
+        currentChannel.getFilterSubstitutions() == null
+                ? new Substitutions()
+                : currentChannel.getFilterSubstitutions();
+        
         // if this node is already supported C(john)
         if (this.supported(currentContext, currentAttitude, 0)) {
             System.out.println(this.getName() + " is supported");
@@ -1416,11 +1514,86 @@ public class PropositionNode extends Node {
         // checks if the report came from forward inference
         // means this report came because of a new fact asserted
         // if false then this report is answering a query (backward)
-        boolean forwardReportType = currentReport.getInferenceType() == InferenceType.FORWARD;
-
-        
+        boolean forwardReportType = currentReport.getInferenceType() == InferenceType.FORWARD; 
         Report reportToBeBroadcasted = attemptAddingReportToKnownInstances(currentReport);
-       
+
+        //
+        // change 2 forward inference change because 
+        // if (reportToBeBroadcasted == null) {
+        //     reportToBeBroadcasted = currentReport;
+        // }
+
+        // change9a 
+        if (reportToBeBroadcasted == null &&
+        (currentReport.getReportType() == ReportType.RuleCons
+        || (forwardReportType && currentReport.getReportType() == ReportType.Matched))) {
+                
+              reportToBeBroadcasted = currentReport;
+        }
+
+        //change 9c 
+        if (reportToBeBroadcasted == null
+        && !forwardReportType
+        && currentReport.getReportType() == ReportType.Matched
+        && !this.isOpen()
+        && currentReport.isSign()) {
+
+            this.addJustificationBasedSupport(currentReport.getSupport());
+
+            if (this.equals(Scheduler.getOriginOfBackInf())) {
+                Scheduler.addNodeAssertionThroughBReport(currentReport, this);
+            }
+
+            System.out.println(
+                    "\n[BACKWARD MATCHED ANSWER]"
+                    + "\n  closedQueryNode: " + this.getName()
+                    + "\n  reporter: " + currentReport.getReporterNode().getName()
+                    + "\n  substitutions: " + currentReport.getSubstitutions()
+                    + "\n  supportedAfter: "
+                    + this.supported(
+                            currentReport.getContextName(),
+                            currentReport.getAttitude(),
+                            0
+                    )
+            );
+
+        return;
+        }
+
+        // change 9b 
+        if (reportToBeBroadcasted != null 
+            && forwardReportType
+            && reportToBeBroadcasted.getReportType() == ReportType.Matched
+            && !this.isOpen()
+            && reportToBeBroadcasted.isSign()) {
+
+            this.addJustificationBasedSupport(reportToBeBroadcasted.getSupport());
+
+            Scheduler.addNodeAssertionThroughFReport(reportToBeBroadcasted, this);
+           
+            
+            if (reportToBeBroadcasted == null) {
+                return;
+            }
+
+        }
+
+        // this.addJustificationBasedSupport(reportToBeBroadcasted.getSupport());
+
+        // Scheduler.addNodeAssertionThroughFReport(reportToBeBroadcasted, this);
+
+        System.out.println(
+                "\n[CLOSED MATCHED SUPPORT RESULT]"
+                + "\n  closedNode: " + this.getName()
+                + "\n  supportedAfter: "
+                + this.supported(
+                        reportToBeBroadcasted.getContextName(),
+                        reportToBeBroadcasted.getAttitude(),
+                        0
+                )
+        );
+        
+
         // if not equal null then it was added successfully to the known instances and needs to be broadcasted to the other nodes in the network as new supports could be discovered
         if (reportToBeBroadcasted != null) {// it didn't get handled before but if null won't be handled and saved again
             // but will be broadcasted to the other nodes in the network as new suppors
@@ -1432,19 +1605,48 @@ public class PropositionNode extends Node {
                 // from c(x) to c(john)
                 PropositionNode supportNode = (PropositionNode) applySubstitution(
                         reportToBeBroadcasted.getSubstitutions());
+                
+                // forward change because  
+                // before 
+                // after 
+                //change 8.1 done
+                if (!this.isOpen() || reportToBeBroadcasted.getSubstitutions() == null
+                        || reportToBeBroadcasted.getSubstitutions().isEmpty()) {
+                    supportNode = this;
+                } else {
+                    supportNode = (PropositionNode) applySubstitution(
+                            reportToBeBroadcasted.getSubstitutions());
+                }
               
                 // if created successfully
                  if (supportNode != null) {
-                    // adds the support a(x) b(x) and rule 
-                    supportNode.addJustificationBasedSupport(reportToBeBroadcasted.getSupport());
-                   //not used?
-                    PropositionNodeSet reportSupportPropSet = new PropositionNodeSet();
-                    reportSupportPropSet.add(supportNode);
+                //    // adds the support a(x) b(x) and rule 
+                //     supportNode.addJustificationBasedSupport(reportToBeBroadcasted.getSupport());
+                //    //not used?
+                //     PropositionNodeSet reportSupportPropSet = new PropositionNodeSet();
+                //     reportSupportPropSet.add(supportNode);
                     
-                    Support reportSupport = new Support(-1);
-                    reportSupport.addNode(reportToBeBroadcasted.getAttitude(), supportNode);
-                    reportToBeBroadcasted.setSupport(reportSupport);
-                    
+                //     Support reportSupport = new Support(-1);
+                //     reportSupport.addNode(reportToBeBroadcasted.getAttitude(), supportNode);
+                //     reportToBeBroadcasted.setSupport(reportSupport);
+                    /*
+                * Keep the original rule justification.
+                *
+                * The report support coming from the rule contains the actual reason
+                * for the inference. It should not be replaced by support that only
+                * points to the generated grounded node.
+                */
+                 // change8.2 done
+                    Support originalRuleSupport = reportToBeBroadcasted.getSupport();
+
+                    supportNode.addJustificationBasedSupport(originalRuleSupport);
+
+                /*
+                * Do NOT overwrite reportToBeBroadcasted support here.
+                * The same original support must continue to matched closed nodes.
+                */
+                
+
                     // if forward inference C(john) was newly inferred from forward chaining.
                     if (reportToBeBroadcasted.getInferenceType() == InferenceType.FORWARD) {
                         // original output:
@@ -1490,16 +1692,31 @@ public class PropositionNode extends Node {
             forwardDone = true;
 
             // c(x) c(john), you dont wanna keep looping 
-            if (reportToBeBroadcasted.getReportType() != ReportType.Matched) {
+            //change16
+            // if (reportToBeBroadcasted.getReportType() != ReportType.Matched) {
                
-                // list of matches with a node, search the network for node that matches this node 
-                // if "this" is c(x) returns c(john) c(mary) c(susan)
-                // if "this" is c(john) returns c(x) 
-                List<Match> matchesReturned = new ArrayList<Match>();
-                matchesReturned = Matcher.match(this, ContextController.getContext(currentReport.getContextName()), currentReport.getAttitude());
+            //     // list of matches with a node, search the network for node that matches this node 
+            //     // if "this" is c(x) returns c(john) c(mary) c(susan)
+            //     // if "this" is c(john) returns c(x) 
+            //     List<Match> matchesReturned = new ArrayList<Match>();
+            //     matchesReturned = Matcher.match(this, ContextController.getContext(currentReport.getContextName()), currentReport.getAttitude());
+            //     sendReportToMatches(matchesReturned, reportToBeBroadcasted);
+            // }
+
+            //change 10 done 
+            if (reportToBeBroadcasted.getReportType() != ReportType.Matched
+            && !(this.isOpen()
+            && reportToBeBroadcasted.getReportType() == ReportType.RuleCons)) {
+
+                List<Match> matchesReturned = new ArrayList<>();
+                matchesReturned = Matcher.match(
+                        this,
+                        ContextController.getContext(currentReport.getContextName()),
+                        currentReport.getAttitude()
+                );
+
                 sendReportToMatches(matchesReturned, reportToBeBroadcasted);
             }
-
             //finds rules where the cons becomes an antecedant and sends the report to them 
             NodeSet dominatingRules = getUpAntDomRuleNodeSet();
             sendReportToNodeSet(dominatingRules, reportToBeBroadcasted);

@@ -3,6 +3,7 @@ package edu.guc.mind_graf.nodes;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map; 
 
 import edu.guc.mind_graf.exceptions.DirectCycleException;
 import edu.guc.mind_graf.exceptions.InvalidRuleInfoException;
@@ -42,6 +43,8 @@ public abstract class RuleNode extends PropositionNode {
 
     // chain might
     private boolean forwardReport;
+    // change6.1 done
+    private InferenceType currentInferenceType;
     protected RuleInfoHandler ruleInfoHandler;
     protected RuleInfoSet rootRuleInfos;
 
@@ -57,6 +60,10 @@ public abstract class RuleNode extends PropositionNode {
     // 3. If handler says "enough antecedents reported" → call mayInfer()
 
     public void applyRuleHandler(Report report) throws NoSuchTypeException {
+        
+        // change6.2 done
+        this.currentInferenceType = report.getInferenceType();
+        
         // original output:
         //System.out.println("applyRuleHandler called on the report: " + report.stringifyReport());
         // changed to:
@@ -126,11 +133,10 @@ public abstract class RuleNode extends PropositionNode {
     public abstract RuleInfoSet[] mayInfer();
 
 
-    // on the mayinfer says fire 
-    // Builds a Report object with the conclusion
-    // Calls createSupport() to record WHY we concluded this
-    //Passes it to sendInferenceReports() to actually deliver it
+
      
+    // called after the rule has enough evidence to fire 
+    // creates the report that goes from the rule to cons 
     public void createInferenceReports(RuleInfoSet[] inferrable) throws DirectCycleException, NoSuchTypeException {
         HashMap<RuleInfo, Report> reports = new HashMap<>();
         for (int i = 0; i < inferrable.length; i++) {
@@ -138,7 +144,11 @@ public abstract class RuleNode extends PropositionNode {
                 rootRuleInfos.removeRuleInfo(ri);
                 ri.removeNullSubs();
                 // new add change 
-                InferenceType producedInference = forwardReport ? InferenceType.FORWARD : InferenceType.BACKWARD;
+                // change6.3 done
+                InferenceType producedInference =
+        currentInferenceType == null ? InferenceType.BACKWARD : currentInferenceType;
+                //InferenceType producedInference = ri.getInferenceType();
+                //forwardReport ? InferenceType.FORWARD : InferenceType.BACKWARD;
 
                 System.out.println(
                     "\n[RULE FIRE] " + this.getName()
@@ -162,55 +172,204 @@ public abstract class RuleNode extends PropositionNode {
 
 
     // adding the support and ifs for if the rule is closed or if the rule is open
-    public Support createSupport(RuleInfo ri) throws NoSuchTypeException, DirectCycleException {
-        // original output:
-        // System.out.println("Creating the inference support");
-        // changed to:
-        System.out.println(
-            "\n[SUPPORT] " + this.getName()
-            + "\n  meaning: build justification for inferred conclusion"
-            + "\n  riSubs: " + ri.getSubs()
-            + "\n  satisfiedAntecedents: " + ri.getFns()
-            + "\n  context: " + ri.getContext()
-            + "\n  attitude: " + ri.getAttitude()
-        );
+    // public Support createSupport(RuleInfo ri) throws NoSuchTypeException, DirectCycleException {
+    //     // original output:
+    //     // System.out.println("Creating the inference support");
+    //     // changed to:
+    //     System.out.println(
+    //         "\n[SUPPORT] " + this.getName()
+    //         + "\n  meaning: build justification for inferred conclusion"
+    //         + "\n  riSubs: " + ri.getSubs()
+    //         + "\n  satisfiedAntecedents: " + ri.getFns()
+    //         + "\n  context: " + ri.getContext()
+    //         + "\n  attitude: " + ri.getAttitude()
+    //     );
 
-        PropositionNodeSet supportPropSet = new PropositionNodeSet();
-        for(FlagNode fn : ri.getFns()){
-            Node n = fn.getNode();
-            //a(x)
-            if(n.isOpen()){
-                // chain change (runs without it)
-                // supportPropSet.add(n.applySubstitution(n.onlyRelevantSubs(ri.getSubs())));
-                // to 
-                Substitutions relevant = n.onlyRelevantSubs(ri.getSubs());
-               // No substitution exists, so just add A(x)
-                if(relevant == null || relevant.isEmpty())
-                      supportPropSet.add(n);
-                 else
-                     supportPropSet.add(n.applySubstitution(relevant));
-            //a(john)
+    //     PropositionNodeSet supportPropSet = new PropositionNodeSet();
+    //     for(FlagNode fn : ri.getFns()){
+    //         Node n = fn.getNode();
+    //         //a(x)
+    //         if(n.isOpen()){
+    //             // chain change 
+    //             // supportPropSet.add(n.applySubstitution(n.onlyRelevantSubs(ri.getSubs())));
+    //             // to 
+    //             Substitutions relevant = n.onlyRelevantSubs(ri.getSubs());
+    //            // if i have a sub apply it if i dont keep the original node 
+    //            // like when sending the supports if it came from a(x) and x=john then support is A(john) but if it came from A(john) then support is A(john) without applying any sub
+    //             if(relevant == null || relevant.isEmpty())
+    //                   supportPropSet.add(n);
+    //              else
+    //                  supportPropSet.add(n.applySubstitution(relevant));
+    //         //a(john)
+    //         } else {
+    //             // change chain (changed back because otherwise it only adds the rule as the support)
+    //             supportPropSet.add(n);
+    //             //to 
+    //             //  if(ri.getSubs() == null || ri.getSubs().isEmpty())
+    //             //     supportPropSet.add(this);
+    //             //  else
+    //             //     supportPropSet.add(this.applySubstitution(ri.getSubs()));
+    //         }
+    //     }
+    //     if(!this.isOpen()){
+    //         supportPropSet.add(this);
+    //     } else {
+    //         supportPropSet.add(this.applySubstitution(ri.getSubs()));
+    //     }
+    //     HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> justSupport = new HashMap<>();
+    //     justSupport.put(ri.getAttitude(), new Pair(supportPropSet, new PropositionNodeSet()));
+    //     Support reportSup = new Support(-1, ri.getAttitude(), Network.currentLevel, justSupport, new PropositionNodeSet());
+    //     return reportSup;
+    // }
+    public Support createSupport(RuleInfo ri) throws NoSuchTypeException, DirectCycleException {
+    System.out.println(
+        "\n[SUPPORT] " + this.getName()
+        + "\n  meaning: build justification for inferred conclusion"
+        + "\n  riSubs: " + ri.getSubs()
+        + "\n  satisfiedAntecedents: " + ri.getFns()
+        + "\n  context: " + ri.getContext()
+        + "\n  attitude: " + ri.getAttitude()
+    );
+
+    PropositionNodeSet supportPropSet = new PropositionNodeSet();
+
+    /*
+     * Add the actual rule node.
+     *
+     * Before, the code used this.applySubstitution(ri.getSubs()) for open rules.
+     * That created a temporary substituted rule node such as P8, which was not
+     * supported in the context. The support must point to the real asserted rule.
+     */
+    supportPropSet.add(this);
+
+    /*
+     * Add the actual supported antecedent facts.
+     *
+     * For an open antecedent such as Vehicle(X), the RuleInfo only stores the
+     * pattern node M0 and the substitution X = Car1. If we call applySubstitution()
+     * on M0, MindGRAF may create a temporary node such as Vehicletemp(Car1).
+     *
+     * Instead, we look inside M0's known instances. The known instance was created
+     * when the real fact Vehicle(Car1) matched Vehicle(X). Its support already
+     * points to the real supported node Vehicle(Car1).
+     */
+    for (FlagNode fn : ri.getFns()) {
+        Node n = fn.getNode();
+
+        if (n instanceof PropositionNode) {
+            PropositionNode antecedentNode = (PropositionNode) n;
+
+            if (antecedentNode.isOpen()) {
+                Substitutions relevantSubs =
+                        antecedentNode.onlyRelevantSubs(ri.getSubs());
+
+                Collection<KnownInstance> knownInstances =
+                        antecedentNode.getKnownInstances()
+                                .getPositiveCollectionbyAttribute(ri.getAttitude());
+
+                boolean foundRealSupport = false;
+
+                if (knownInstances != null) {
+                    for (KnownInstance ki : knownInstances) {
+                        Substitutions kiSubs = ki.getSubstitutions();
+
+                        boolean compatible =
+                                relevantSubs == null
+                                        || relevantSubs.isEmpty()
+                                        || relevantSubs.compatible(kiSubs);
+
+                        boolean supportedInContext =
+                                ki.anySupportSupportedInAttitudeContext(
+                                        ri.getContext(),
+                                        ri.getAttitude()
+                                );
+
+                        if (compatible && supportedInContext) {
+                            addOriginNodesFromSupport(
+                                    supportPropSet,
+                                    ki.getSupports(),
+                                    Network.currentLevel,
+                                    ri.getAttitude()
+                            );
+
+                            foundRealSupport = true;
+                        }
+                    }
+                }
+
+                /*
+                 * Fallback only.
+                 * This should rarely be used. It keeps old behavior available
+                 * for cases where no known instance support can be found.
+                 */
+                if (!foundRealSupport) {
+                    if (relevantSubs == null || relevantSubs.isEmpty()) {
+                        supportPropSet.add(antecedentNode);
+                    } else {
+                        supportPropSet.add(antecedentNode.applySubstitution(relevantSubs));
+                    }
+                }
+
             } else {
-                // change chain (changed back because otherwise it only adds the rule as the support)
-                supportPropSet.add(n);
-                //to 
-                //  if(ri.getSubs() == null || ri.getSubs().isEmpty())
-                //     supportPropSet.add(this);
-                //  else
-                //     supportPropSet.add(this.applySubstitution(ri.getSubs()));
+                /*
+                 * Closed antecedents are already real nodes, so they can be
+                 * added directly.
+                 */
+                supportPropSet.add(antecedentNode);
             }
         }
-        if(!this.isOpen()){
-            supportPropSet.add(this);
-        } else {
-            supportPropSet.add(this.applySubstitution(ri.getSubs()));
-        }
-        HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> justSupport = new HashMap<>();
-        justSupport.put(ri.getAttitude(), new Pair(supportPropSet, new PropositionNodeSet()));
-        Support reportSup = new Support(-1, ri.getAttitude(), Network.currentLevel, justSupport, new PropositionNodeSet());
-        return reportSup;
     }
 
+    HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> justSupport =
+            new HashMap<>();
+
+    justSupport.put(
+            ri.getAttitude(),
+            new Pair<>(supportPropSet, new PropositionNodeSet())
+    );
+
+    Support reportSup = new Support(
+            -1,
+            ri.getAttitude(),
+            Network.currentLevel,
+            justSupport,
+            new PropositionNodeSet()
+    );
+
+    return reportSup;
+}
+
+    private void addOriginNodesFromSupport(
+        PropositionNodeSet target,
+        Support support,
+        int level,
+        int attitude
+) {
+    if (support == null) {
+        return;
+    }
+
+    if (!support.getAssumptionSupport().containsKey(level)) {
+        return;
+    }
+
+    if (!support.getAssumptionSupport().get(level).containsKey(attitude)) {
+        return;
+    }
+
+    for (Pair<HashMap<Integer, Pair<PropositionNodeSet, PropositionNodeSet>>, PropositionNodeSet> supportEntry
+            : support.getAssumptionSupport().get(level).get(attitude)) {
+
+        for (Map.Entry<Integer, Pair<PropositionNodeSet, PropositionNodeSet>> attitudeSupport
+                : supportEntry.getFirst().entrySet()) {
+
+            PropositionNodeSet originNodes =
+                    attitudeSupport.getValue().getFirst();
+
+            target.putAll(originNodes.getValues());
+        }
+    }
+}
 
     public void sendResponseToArgs(HashMap<RuleInfo, Report> reports, NodeSet arg) throws NoSuchTypeException {
         for (RuleInfo ri : reports.keySet()) {
@@ -453,8 +612,9 @@ public abstract class RuleNode extends PropositionNode {
         // IfToRuleChannel: the if is reporting, so dont act as an inference rule just yet
         // so removed the current instance of channel because then the if will always be true
         // and will always act as a normal prop node 
+        //change3 done
         if (currentChannel instanceof AntecedentToRuleChannel || currentChannel instanceof MatchChannel
-         || currentChannel instanceof IfToRuleChannel ) // || currentChannel instanceof Channel)
+         || currentChannel instanceof IfToRuleChannel) //|| currentChannel instanceof Channel)
             super.processSingleRequests(currentRequest);
 
 
@@ -469,7 +629,7 @@ public abstract class RuleNode extends PropositionNode {
             if (!this.isOpen()) {
                 // supported 
                 if (this.supported(currentContext, currentAttitude, 0)) {
-                    System.out.println("I am supported");
+                    // System.out.println("I am supported");
                         // thresh and andor different in the asking the ant 
                         boolean ruleType = this instanceof Thresh || this instanceof AndOr;
                         // returs a(x), b(x)
@@ -532,10 +692,11 @@ public abstract class RuleNode extends PropositionNode {
                         }
 
                     }
-                    //chain change 
+                    //chain change
                     // "I checked all known instances of the rule, but none of them was both compatible and supported."
                    // super.processSingleRequests(currentRequest);
                     //requestAntecedentsNotAlreadyWorkingOn(currentRequest);
+                    //change4 done 
                    if (this.supported(currentContext, currentAttitude, 0)) {
                         requestAntecedentsNotAlreadyWorkingOn(currentRequest);
                    } else {
@@ -608,10 +769,37 @@ public abstract class RuleNode extends PropositionNode {
             if (forwardReportType) {
                 // Forward chaining: rule has received a forward report from antecedent
                 // Check if rule can now fire with available support
-               //applyRuleHandler(currentReport);
+                // before it wasnt doing anything 
+                //if (this.supported(currentReportContextName, currentReportAttitudeID, 0)) {
+                //     this.setForwardReport(true);
+                //     applyRuleHandler(currentReport);
+                // } else {
+                //     super.processSingleReports(currentReport);
+                // }
             
-            // if the report from ant to rule is backward 
-            // ant is answering back 
+                // if the report from ant to rule is backward 
+                // ant is answering back 
+                System.out.println( 
+                    "\n[FORWARD ANT REPORT]"
+                    + "\n  rule: " + this.getName()
+                    + "\n  ruleSupported: " + assertedInContext
+                    + "\n  reporterAntecedent: " + currentReport.getReporterNode().getName()
+                    + "\n  substitutions: " + currentReport.getSubstitutions()
+                );
+
+                // change5 done 
+                if (assertedInContext) {
+                    this.setForwardReport(true);
+                    applyRuleHandler(currentReport);
+                } else {
+                    System.out.println(
+                        "\n[FORWARD ANT REPORT SKIPPED]"
+                        + "\n  reason: rule is not supported in this context/attitude"
+                    );
+
+                    super.processSingleReports(currentReport);
+                }
+
             } else {
                 // Backward inference: rule received backward request from consequent
                 // Original backward-request logic preserved below
@@ -623,18 +811,21 @@ public abstract class RuleNode extends PropositionNode {
                     if (assertedInContext) {
                         // A(john) answered. Now ask B(john), if B(john) was not already asked.
                         if (!this.isForwardReport()) {
-                            this.setForwardReport(true);
+                            this.setForwardReport(true); 
                             requestAntecedentsNotAlreadyWorkingOn(tempRequest);
                         }
+
+                        // change5b done 
+                        applyRuleHandler(currentReport);
                     } else {
-                        //chain change (changed back because supported the rule in the test)
-                        //super.processSingleRequests(tempRequest);
-                        //applyRuleHandler(currentReport);
-                        if (this.supported(currentReportContextName, currentReportAttitudeID, 0)) {
-                               applyRuleHandler(currentReport);
-                        } else {
-                                super.processSingleRequests(tempRequest);
-                        }
+                        //chain change 
+                        super.processSingleRequests(tempRequest);
+                        // if (this.supported(currentReportContextName, currentReportAttitudeID, 0)) {
+                        //        applyRuleHandler(currentReport);
+                        // } else {
+                        //         super.processSingleRequests(tempRequest);
+                        
+                        // }
                     }
                 // if the rule is open A(x) ∧ B(x) → C(x)
                 } else {
@@ -674,11 +865,11 @@ public abstract class RuleNode extends PropositionNode {
 
                         }
                     }
-                    // change chain  to do is applyrulehandler (changed back relates to also the rule having to be proven )
+                    // change chain  to do is applyrulehandler 
                     // if (!this.isForwardReport()) {
                     //     this.setForwardReport(true);
                         //  super.processSingleRequests(tempRequest);
-                       // applyRuleHandler(currentReport);
+                        //change5b2 done 
                        if (this.supported(currentReportContextName, currentReportAttitudeID, 0)) {
                             applyRuleHandler(currentReport);
                        } else {
