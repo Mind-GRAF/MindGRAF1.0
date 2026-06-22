@@ -71,17 +71,31 @@ Classify the user's natural language request into ONE of these categories:
 "other"      — Everything else.
 
 CRITICAL DISAMBIGUATION RULE (apply in this PRIORITY ORDER):
-1. HIGHEST PRIORITY — If the sentence's FIRST WORD is: does, do, did, is, are, was, were, can, could, will, would, should, what, why, which, who, when, where → it is ALWAYS "query". No exceptions.
-2. SECOND — If the sentence contains: doesn't, don't, didn't, isn't, aren't AND does NOT start with a question word → it is "knowledge" (negative assertion).
+1. HIGHEST PRIORITY — If the sentence's FIRST WORD is a question/auxiliary word:
+   does, do, did, IS, ARE, was, were, can, could, will, would, should,
+   what, why, which, who, when, where
+   → it is ALWAYS "query". NO EXCEPTIONS WHATSOEVER.
+   THIS OVERRIDES EVERYTHING ELSE. "is X Y?" is ALWAYS query.
+   "are X Y?" is ALWAYS query. Never classify these as knowledge.
+2. SECOND — If the sentence contains: doesn't, don't, didn't, isn't, aren't
+   AND does NOT start with a question word → it is "knowledge" (negative assertion).
 3. DEFAULT — If the sentence is a plain statement (subject + verb + object), it is "knowledge".
 
 Examples to illustrate priority:
 - "Does Harry have a wand?" → first word is "does" → PRIORITY 1 → query
-- "Does harry have a wnad" → first word is "does" → PRIORITY 1 → query  
+- "Does harry have a wnad" → first word is "does" → PRIORITY 1 → query
+- "Is moataz smart?" → first word is "is" → PRIORITY 1 → query
+- "Is moataz smart" → first word is "is" → PRIORITY 1 → query
+- "Is Dina a student?" → first word is "is" → PRIORITY 1 → query
+- "Is Ahmed a teacher" → first word is "is" → PRIORITY 1 → query
+- "Are students smart?" → first word is "are" → PRIORITY 1 → query
 - "Harry doesn't have a wand" → first word is "harry" (not a question word), contains "doesn't" → PRIORITY 2 → knowledge
 - "Kareem doenst have a gf" → first word is "kareem" → PRIORITY 3 → knowledge
-- "Is Dina a student?" → first word is "is" → PRIORITY 1 → query
 - "Dina is not a student" → first word is "dina" → PRIORITY 3 → knowledge
+
+ANTI-HALLUCINATION GUARD:
+"is X smart?", "is X a Y?", "are X Y?" etc. are QUESTIONS → query.
+NEVER classify a sentence starting with "is" or "are" as "knowledge".
 
 Output ONLY the category word: structural  OR  knowledge  OR  query  OR  inference  OR  system  OR  other
 No punctuation, no explanation, no extra text.
@@ -107,6 +121,11 @@ Examples:
 "Every dog is an animal" → knowledge
 "If x is a parent of y then x is older than y" → knowledge
 "Is Dina a student?" → query
+"Is moataz smart?" → query
+"Is moataz smart" → query
+"Is Ahmed a teacher?" → query
+"Is Ahmed a teacher" → query
+"Are students smart?" → query
 "Does Nour like Jimmy?" → query
 "Does Nour like Jimmy" → query
 "Does Harry have a wand?" → query
@@ -718,14 +737,23 @@ CRITICAL RULES:
   • "c{" and "a{" tags go BETWEEN the command and the expression.
   • c{...} and a{...} are OPTIONAL — only add them if the user
     explicitly mentions a specific context or attitude.
+  • The expression MUST ALWAYS be a predicate call of the form
+    predName(arg1, arg2, ...). A bare name WITHOUT parentheses is
+    NEVER valid — the grammar will crash.
+  • If the user gives only a name (e.g. "moataz"), you MUST infer
+    what predicate applies from context (e.g. student(moataz)).
 
 ✅ CORRECT:  forward-infer student(Dina)
 ✅ CORRECT:  forward-infer c{hogwarts} student(Dina)
 ✅ CORRECT:  forward-infer c{hogwarts} a{belief} student(Dina)
 ✅ CORRECT:  forward-infer a{belief} student(Dina)
+✅ CORRECT:  forward-infer student(moataz)        ← name wrapped in its predicate
 ❌ WRONG:    forward-infer student (Dina)         ← space before (
 ❌ WRONG:    forward-infer c {hogwarts} student(Dina)  ← space before {
 ❌ WRONG:    forward infer student(Dina)           ← hyphens are required
+❌ WRONG:    forward-infer moataz                 ← bare name, NOT a valid expression
+❌ WRONG:    forward-infer Dina                   ← bare name, NOT a valid expression
+❌ WRONG:    forward-infer Ahmed                  ← bare name, must be predicate(name)
 
 ──────────────────────────────────────────────────────────────
 2. back-infer  [c{context}] [a{attitude}]  <expression>
@@ -750,6 +778,7 @@ Syntax: back-infer <expression>
 ✅ CORRECT:  back-infer c{hogwarts} a{belief} smart(Dina)
 ❌ WRONG:    back-infer smart (Dina)              ← space before (
 ❌ WRONG:    back infer smart(Dina)                ← hyphens are required
+❌ WRONG:    back-infer moataz                    ← bare name, must be predicate(name)
 
 ──────────────────────────────────────────────────────────────
 3. perform-act  <act-expression>

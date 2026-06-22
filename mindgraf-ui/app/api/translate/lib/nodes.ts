@@ -296,6 +296,48 @@ export async function validatorNode(
   const commands = state.generatedCommand.split("\n").map(c => c.trim()).filter(c => c);
   const errors: string[] = [];
 
+  // ── Category mismatch guard ───────────────────────────────────────────────
+  // If the router classified the request into one category but the specialist
+  // produced a command from a completely different category, that is a
+  // hallucination — reject it immediately.
+  const CATEGORY_PREFIX_MAP: Record<string, readonly string[]> = {
+    structural: STRUCTURAL_COMMANDS,
+    knowledge:  KNOWLEDGE_COMMANDS,
+    query:      QUERY_COMMANDS,
+    inference:  INFERENCE_COMMANDS,
+    system:     SYSTEM_COMMANDS,
+  };
+
+  for (const cmd of commands) {
+    const routedCategory = state.category;
+    if (routedCategory && CATEGORY_PREFIX_MAP[routedCategory]) {
+      const allowedPrefixes = CATEGORY_PREFIX_MAP[routedCategory];
+      const fitsAllowed = allowedPrefixes.some(
+        (kw) => cmd === kw || cmd.startsWith(kw + " ")
+      );
+      if (!fitsAllowed) {
+        // Find which category the generated command actually belongs to
+        let detectedCategory = "unknown";
+        for (const [cat, prefixes] of Object.entries(CATEGORY_PREFIX_MAP)) {
+          if (prefixes.some((kw) => cmd === kw || cmd.startsWith(kw + " "))) {
+            detectedCategory = cat;
+            break;
+          }
+        }
+        errors.push(
+          `Validator: Category mismatch — router classified this as "${routedCategory}" ` +
+          `but you generated a "${detectedCategory}" command ("${cmd.split(" ")[0]}"). ` +
+          `You MUST output a command from the "${routedCategory}" category. ` +
+          `Valid "${routedCategory}" commands: ${allowedPrefixes.join(", ")}.`
+        );
+      }
+    }
+  }
+
+  if (errors.length > 0) {
+    return { errorHistory: [errors[0]] };
+  }
+
   for (const cmd of commands) {
     // 1. Known prefix check
     const knownPrefix = ALL_KNOWN_COMMANDS.find((kw) => cmd === kw || cmd.startsWith(kw + " "));
