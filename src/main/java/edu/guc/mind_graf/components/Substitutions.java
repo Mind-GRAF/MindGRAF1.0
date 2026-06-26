@@ -52,7 +52,7 @@ public class Substitutions {
     }
 
     public boolean compatible(Substitutions substitutions) {
-        if (isSubsetOf(substitutions))
+        if (isSubsetOf(substitutions) && substitutions.isSubsetOf(this))
             return true;
         return false;
 

@@ -786,7 +786,7 @@ public class PropositionNode extends Node {
                         sendReportToWhenNodeSet(whenDoRuleNodes, toBeSent);
                     }
 
-                    if (this instanceof RuleNode) {
+                    if (this instanceof WhenDoNode) {
                         NodeSet whenNodes = getDownWhenNodeSet(currentAttitudeID);
                         if (whenNodes != null) {
                             ((WhenDoNode) this).setForwardReport(true);
